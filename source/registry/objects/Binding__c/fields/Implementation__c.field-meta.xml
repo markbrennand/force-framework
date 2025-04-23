@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Implementation__c</fullName>
+    <description>The name of the class to bind to the type or if action is set, the type and action to bind.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>This field must name a non abstract class that has a no-op constructor.</inlineHelpText>
+    <label>Implementation</label>
+    <length>255</length>
+    <required>true</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Action__c</fullName>
+    <description>Optional action for the given type.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>If this value is set, it will be used in combination with the type to find a matching entry in the binding registry. The combination of this field and the type must be unique.</inlineHelpText>
+    <label>Action</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>
