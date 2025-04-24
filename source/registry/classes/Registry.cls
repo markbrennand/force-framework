@@ -50,6 +50,13 @@ global with sharing virtual class Registry {
      */
     global interface Prototype {}
 
+    /**
+     * @description
+     * Class that creates instances of the implementation class for the binding.
+     *
+     * By defailt, a singleton instance is created on the first call to the new instance method. If the class
+     * implements the Prototype interface then a new instance is created for each wiring of the binding.
+     */
     private with sharing class Factory {
         private final Type type;
         private Object instance;
@@ -58,6 +65,12 @@ global with sharing virtual class Registry {
             this.type = type;
         }
 
+        /**
+         * @description
+         * Constructs an instance of the implementation class for the bindiong.
+         *
+         * @return Either the singleton instance or a new instance if the class being constructed implements Prototype.
+         */
         public Object newInstance() {
             if (instance instanceof Prototype) {
                 return type.newInstance();
@@ -70,6 +83,12 @@ global with sharing virtual class Registry {
         }
     }
 
+    /**
+     * @description
+     * Allow extension but not construction.
+     *
+     * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
+     */
     protected Registry() {}
 
     /**
@@ -82,7 +101,7 @@ global with sharing virtual class Registry {
      *
      * @return The implementation of the given type.
      */
-    protected Object wireType(final Type forType) {
+    protected virtual Object wireType(final Type forType) {
         addCustomBindings();
 
         final Key key = new Key(forType);
@@ -126,10 +145,10 @@ global with sharing virtual class Registry {
      *
      * @return The implementation of the given type.
      */
-    protected Object wireType(final Type forType, final String action) {
+    protected virtual Object wireType(final Type forType, final String action) {
         addCustomBindings();
 
-        final Key key = new Key(forType, action);
+        final Key key = new ActionKey(forType, action);
         if (!REGISTRY.containsKey(key)) {
             throw new APIException(
                     'Binding for "'
@@ -170,7 +189,7 @@ global with sharing virtual class Registry {
      *
      * @return True if binding exists, false if not.
      */
-    public Boolean isBound(final Type forType) {
+    protected virtual Boolean isBound(final Type forType) {
         addCustomBindings();
         return REGISTRY.containsKey(new Key(forType));
     }
@@ -200,9 +219,9 @@ global with sharing virtual class Registry {
      *
      * @return True if binding exists, false if not.
      */
-    public Boolean isBound(final Type forType, final String action) {
+    protected virtual Boolean isBound(final Type forType, final String action) {
         addCustomBindings();
-        return REGISTRY.containsKey(new Key(forType, action));
+        return REGISTRY.containsKey(new ActionKey(forType, action));
     }
 
     /**
@@ -222,24 +241,74 @@ global with sharing virtual class Registry {
         return INSTANCE.isBound(forType, action);
     }
 
+    /**
+     * @description
+     * Adds a binding to the registry.
+     *
+     * @param forType The type to be bound. Must be either an interface or abstract class.
+     * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
+     */
     protected virtual void bind(final Type forType, final Type withImpl) {
         validateTypes(forType, withImpl);
         REGISTRY.put(new Key(forType), new Factory(withImpl));
     }
 
+    /**
+    * @description
+    * Adds a binding to the registry.
+    *
+    * This method can be called when creating a default registry for an application.
+    *
+    * @param forType The type to be bound. Must be either an interface or abstract class.
+    * @param withImpl The implementation for the type. Must be a concrete class with a no-op constructor.
+    *
+    * @example
+    * // Add a binding to MyImplementation from interface MyInterface.
+    * Registgry.add(MyInterface,class, MyImplementation.class);
+    */
     global static void add(final Type forType, final Type withImpl) {
         INSTANCE.bind(forType, withImpl);
     }
 
-    private void bind(final Type forType, final String action, final Type withImpl) {
+    /**
+     * @description
+     * Adds a binding to the registry.
+     *
+     * @param forType The type to be bound. Must be either an interface or abstract class.
+     * @param action The action used in combination with the type to uniquely identify the binding.
+     * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
+     */
+    protected virtual void bind(final Type forType, final String action, final Type withImpl) {
         validateTypes(forType, withImpl);
-        REGISTRY.put(new Key(forType, action), new Factory(withImpl));
+        REGISTRY.put(new ActionKey(forType, action), new Factory(withImpl));
     }
 
+    /**
+     * @description
+     * Adds a binding to the registry.
+     *
+     * This method can be called when creating a default registry for an application.
+     *
+     * @param forType The type to be bound. Must be either an interface or abstract class.
+     * @param action The action used in combination with the type to uniquely identify the binding.
+     * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
+     *
+     * @example
+     * // Add a binding to MyImplementation from interface MyInterface for action Test.
+     * Registgry.add(MyInterface,class, 'Test', MyImplementation.class);
+     */
     global static void add(final Type forType, final String action, final Type withImpl) {
         INSTANCE.bind(forType, action, withImpl);
     }
 
+    /**
+     * @description
+     * Checks the custom bindings to see if there are any duplicates.
+     *
+     * A duplicate is;
+     * - A type without an action that is bound to more than one implementation.
+     * - A type with an action that is bound to more than one implementation.
+     */
     public static void checkForDuplicates() {
         final List<Binding__c> bindings = [SELECT Type__c, Action__c FROM Binding__c WITH USER_MODE];
         final Set<String> keys = new Set<String>();
@@ -270,6 +339,12 @@ global with sharing virtual class Registry {
         }
     }
 
+    /**
+     * @description
+     * Adds the given custom bindings to the registry.
+     *
+     * @param bindings The custom bindings to add to the registry.
+     */
     public static void build(List<Binding__c> bindings) {
         for (Binding__c binding : bindings) {
             final Type abstractType = Type.forName(binding.Type__c);
@@ -298,32 +373,17 @@ global with sharing virtual class Registry {
         }
     }
 
-    private with sharing class Key {
-        private final Type type;
-        private String action;
-
-        public Key(final Type type) {
-            this(type, null);
-        }
-
-        public Key(final Type type, final String action) {
-            this.type = type;
-            this.action = action;
-        }
-
-        public override Integer hashCode() {
-            return (action == null)
-                    ? type.hashCode()
-                    : (type.hashCode() * 13) + action.hashCode();
-        }
-
-        public Boolean equals(final Object other) {
-            return (other instanceof Key)
-                    && (action == ((Key) other).action)
-                    && (type == ((Key) other).type);
-        }
-    }
-
+    /**
+     * @description
+     * Performs basic checks on the type and implementation being bound.
+     *
+     * The type must be an interface or abstract class. The check is that it cannot be instantiated.
+     *
+     * The implementation must be a concrete class with a no-op constructor. The check is that it can be instantiated.
+     *
+     * @param forType The type to be validated.
+     * @param withImpl The implementation to be validated.
+     */
     private void validateTypes(final Type forType, final Type withImpl) {
         Boolean instantiable = false;
         try {
@@ -351,10 +411,59 @@ global with sharing virtual class Registry {
         }
     }
 
+    /**
+     * @description
+     * Selects all the custom bindings and adds them to the registry.
+     *
+     * This method need only be called on the first call to wire a binding.
+     */
     private void addCustomBindings() {
         if (!customBindingsAdded) {
             build([SELECT Type__c, Action__c, Implementation__c FROM Binding__c WITH USER_MODE]);
             customBindingsAdded = true;
+        }
+    }
+
+    /**
+     * @description
+     * Class used as the basic key to the registry map.
+     */
+    private with sharing virtual class Key {
+        protected final Type type;
+
+        public Key(final Type type) {
+            this.type = type;
+        }
+
+        public Integer hashCode() {
+            return type.hashCode();
+        }
+
+        // As ActionKey extends Key, when comparing keys ensure an ActionKey cannot be compared to a Key.
+        public virtual Boolean equals(final Object other) {
+            return (other instanceof Key) && (! (other instanceof ActionKey)) && (type == ((Key) other).type);
+        }
+    }
+
+    /**
+     * @description
+     * Class used as the basic key to the registry map.
+     *
+     * To ensure a balanced Map, the action is not included in the hash code. This may need to be re-considered
+     * if many actions are keyed for the same type.
+     */
+    private with sharing class ActionKey extends Key {
+        private String action;
+
+        public ActionKey(final Type type, final String action) {
+            super(type);
+            this.action = action;
+        }
+
+        public override Boolean equals(final Object other) {
+            return (other instanceof ActionKey)
+                    && (action == ((ActionKey) other).action)
+                    && (type == ((ActionKey) other).type);
         }
     }
 }
