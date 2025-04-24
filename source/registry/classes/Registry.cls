@@ -14,9 +14,29 @@ global with sharing virtual class Registry {
 
     /**
      * @description
-     * Registry containing bindings from interfaces and abstract classes to implementations.
+     * Interface to be implemented to check a binding in the registry.
+     *
+     * Each checker must be defined in a record in the Binding Check custom metadata.
      */
-    private final Map<Key, Factory> REGISTRY = new Map<Key, Factory>();
+    global interface BindingCheck {
+        ValidationResult validate(Type forType, Type withImpl);
+    }
+
+    /**
+     * @description
+     * Class representing result of a binding validation check.
+     */
+    global with sharing class ValidationResult {
+        global final Boolean isValid { public get; private set; }
+        global final String errorMessage { public get; private set; }
+
+        global ValidationResult(final Boolean isValid, final String errorMessage) {
+            Assert.isNotNull(isValid, 'isValid may not be null');
+            Assert.isTrue(isValid || errorMessage != null, 'Error must be set');
+            this.isValid = isValid;
+            this.errorMessage = errorMessage;
+        }
+    }
 
     /**
      * @description
@@ -34,6 +54,28 @@ global with sharing virtual class Registry {
         }
         private set;
     }
+
+
+    /**
+     * @description
+     * Mapping from a binding Type to the Binding Check class to validate it.
+     */
+    private static final Map<Type, List<BindingCheck>> CHECKS {
+        private get {
+            if (CHECKS == null) {
+                CHECKS = loadBindingChecks();
+            }
+
+            return CHECKS;
+        }
+        private set;
+    }
+
+    /**
+     * @description
+     * Registry containing bindings from interfaces and abstract classes to implementations.
+     */
+    private final Map<Key, Factory> REGISTRY = new Map<Key, Factory>();
 
     private Boolean customBindingsAdded = false;
 
@@ -73,11 +115,11 @@ global with sharing virtual class Registry {
          */
         public Object newInstance() {
             if (instance instanceof Prototype) {
-                return type.newInstance();
+                return TypeHelper.newInstance(type);
             } else if (instance != null) {
                 return instance;
             } else {
-                instance = type.newInstance();
+                instance = TypeHelper.newInstance(type);
                 return instance;
             }
         }
@@ -316,7 +358,7 @@ global with sharing virtual class Registry {
         for (Binding__c binding : bindings) {
             if (binding.Action__c == null) {
                 if (keys.contains(binding.Type__c)) {
-                    throw new Registry.APIException(
+                    throw new APIException(
                             'Binding for "'
                             + binding.Type__c
                             + '" already exists'
@@ -326,7 +368,7 @@ global with sharing virtual class Registry {
             } else {
                 final String key = binding.Type__c + ':' + binding.Action__c;
                 if (keys.contains(key)) {
-                    throw new Registry.APIException(
+                    throw new APIException(
                             'Binding for "'
                             + binding.Type__c
                             + '" for action "'
@@ -346,30 +388,19 @@ global with sharing virtual class Registry {
      * @param bindings The custom bindings to add to the registry.
      */
     public static void build(List<Binding__c> bindings) {
-        for (Binding__c binding : bindings) {
-            final Type abstractType = Type.forName(binding.Type__c);
-            if (abstractType == null) {
-                throw new Registry.APIException(
-                        'Type "'
-                        + binding.Type__c
-                        + '" does not exist'
-                );
-            }
+        try {
+            for (Binding__c binding : bindings) {
+                final Type type = TypeHelper.loadType(binding.Type__c);
+                final Type implementation = TypeHelper.loadType(binding.Implementation__c);
 
-            final Type implementation = Type.forName(binding.Implementation__c);
-            if (implementation == null) {
-                throw new Registry.APIException(
-                        'Implementation "'
-                        + binding.Implementation__c
-                        + '" does not exist'
-                );
+                if (binding.Action__c == null) {
+                    add(type, implementation);
+                } else {
+                    add(type, binding.Action__c, implementation);
+                }
             }
-
-            if (binding.Action__c == null) {
-                add(abstractType, implementation);
-            } else {
-                add(abstractType, binding.Action__c, implementation);
-            }
+        } catch(Exception e) {
+            throw new APIException(e.getMessage(), e);
         }
     }
 
@@ -387,13 +418,13 @@ global with sharing virtual class Registry {
     private void validateTypes(final Type forType, final Type withImpl) {
         Boolean instantiable = false;
         try {
-            forType.newInstance();
+            TypeHelper.newInstance(forType);
             instantiable = true;
         } catch(Exception e) {
         }
 
         if (instantiable) {
-            throw new Registry.APIException(
+            throw new APIException(
                     'Type "'
                     + forType.getName()
                     + '" must not be instantiable'
@@ -401,13 +432,23 @@ global with sharing virtual class Registry {
         }
 
         try {
-            withImpl.newInstance();
+            TypeHelper.newInstance(withImpl);
         } catch(Exception e) {
-            throw new Registry.APIException(
+            throw new APIException(
                     'Implementation "'
                     + withImpl.getName()
-                    + '" must be instantiable'
+                    + '" must be instantiable',
+                    e
             );
+        }
+
+        if (CHECKS.containsKey(forType)) {
+            for (BindingCheck check : CHECKS.get(forType)) {
+                ValidationResult result = check.validate(forType, withImpl);
+                if (!result.isValid) {
+                    throw new APIException(result.errorMessage);
+                }
+            }
         }
     }
 
@@ -422,6 +463,37 @@ global with sharing virtual class Registry {
             build([SELECT Type__c, Action__c, Implementation__c FROM Binding__c WITH USER_MODE]);
             customBindingsAdded = true;
         }
+    }
+
+    /**
+     * @description
+     * Builds a Map from the Type set in a binding to a Binding Check that can be called to validat its
+     * assignment.
+     *
+     * @return  The Map of Types to Bind Check.
+     */
+    private static Map<Type, List<BindingCheck>> loadBindingChecks() {
+        final Boolean isTest = Test.isRunningTest();
+        final Map<Type, List<BindingCheck>> checks = new Map<Type, List<BindingCheck>>();
+
+        for (BindingCheck__mdt check : BindingCheck__mdt.getAll().values()) {
+            if (check.IsUnitTest__c == isTest) {
+                final Type forType = TypeHelper.loadType(check.Type__c);
+                final Object checker = TypeHelper.newInstance(TypeHelper.loadType(check.Checker__c));
+
+                if (! (checker instanceof BindingCheck)) {
+                    throw new APIException('Class "' + check.Checker__c + '" does not implement BindingCheck');
+                }
+
+                if (!checks.containsKey(forType)) {
+                    checks.put(forType, new List<BindingCheck> { (BindingCheck) checker });
+                } else {
+                    checks.get(forType).add((BindingCheck) checker);
+                }
+            }
+        }
+
+        return checks;
     }
 
     /**

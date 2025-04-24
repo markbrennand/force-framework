@@ -111,4 +111,38 @@ public with sharing class TestData {
             return value;
         }
     }
+
+    public with sharing class AbstractTestChecker implements Registry.BindingCheck {
+        public Registry.ValidationResult validate(Type forType, Type withImpl) {
+            Object instance = TypeHelper.newInstance(withImpl);
+            SINGLETON_INSTANCE =
+            PROTOTYPE_INSTANCE = 0;
+
+            if (instance instanceof AbstractTest) {
+                return new Registry.ValidationResult(true, null);
+            } else {
+                return new Registry.ValidationResult(
+                        false,
+                        'Type "' + withImpl.getName() + '" does not extend "AbstractTest"'
+                );
+            }
+        }
+    }
+
+    public with sharing class TestInterfaceChecker implements Registry.BindingCheck {
+        public Registry.ValidationResult validate(Type forType, Type withImpl) {
+            Object instance = TypeHelper.newInstance(withImpl);
+            SINGLETON_INSTANCE =
+            PROTOTYPE_INSTANCE = 0;
+
+            if (instance instanceof TestInterface) {
+                return new Registry.ValidationResult(true, null);
+            } else {
+                return new Registry.ValidationResult(
+                        false,
+                        'Type "' + withImpl.getName() + '" does not implement "TestInterface"'
+                );
+            }
+        }
+    }
 }

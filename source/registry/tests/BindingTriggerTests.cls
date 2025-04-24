@@ -99,6 +99,50 @@ public with sharing class BindingTriggerTests {
         } catch(DmlException de) {
             Assert.isTrue(de.getMessage().contains('Binding for "TestData.AbstractTest" for action "Test" already exists'));
         }
+
+        try {
+            insert new Binding__c(
+                    Type__c = TestData.TestInterface.class.getName(),
+                    Action__c = 'ValidationTest',
+                    Implementation__c = User.class.getName()
+            );
+            Assert.fail();
+        } catch(DmlException de) {
+            Assert.isTrue(de.getMessage().contains('Type "User" does not implement "TestInterface"'));
+        }
+
+        try {
+            insert new Binding__c(
+                    Type__c = TestData.AbstractTest.class.getName(),
+                    Action__c = 'ValidationTest',
+                    Implementation__c = User.class.getName()
+            );
+            Assert.fail();
+        } catch(DmlException de) {
+            Assert.isTrue(de.getMessage().contains('Type "User" does not extend "AbstractTest"'));
+        }
+
+        try {
+            insert new Binding__c(
+                    Type__c = User.class.getName(),
+                    Action__c = 'ValidationTest',
+                    Implementation__c = User.class.getName()
+            );
+            Assert.fail();
+        } catch(DmlException de) {
+            Assert.isTrue(de.getMessage().contains('Type "User" must not be instantiable'));
+        }
+
+        try {
+            insert new Binding__c(
+                    Type__c = TestData.TestInterface.class.getName(),
+                    Action__c = 'ValidationTest',
+                    Implementation__c = TestData.AbstractTest.class.getName()
+            );
+            Assert.fail();
+        } catch(DmlException de) {
+            Assert.isTrue(de.getMessage().contains('Implementation "TestData.AbstractTest" must be instantiable'));
+        }
     }
 
     @IsTest

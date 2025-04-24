@@ -78,10 +78,10 @@ public with sharing class BasicBindingTests {
         // The first wire() call adds the 2 custom bindings, which will instantiate the implementation. Hence use
         // CUSTOM3 and CUSTOM4.
         System.runAs(TestData.getUser()) {
-            Assert.areEqual('CUSTOM3', ((TestData.TestInterface) Registry.wire(TestData.TestInterface.class)).getValue());
-            Assert.areEqual('CUSTOM3', ((TestData.TestInterface) Registry.wire(TestData.TestInterface.class)).getValue());
-            Assert.areEqual('CUSTOM4', ((TestData.TestInterface) Registry.wire(TestData.AbstractTest.class)).getValue());
-            Assert.areEqual('CUSTOM4', ((TestData.TestInterface) Registry.wire(TestData.AbstractTest.class)).getValue());
+            Assert.areEqual('CUSTOM1', ((TestData.TestInterface) Registry.wire(TestData.TestInterface.class)).getValue());
+            Assert.areEqual('CUSTOM1', ((TestData.TestInterface) Registry.wire(TestData.TestInterface.class)).getValue());
+            Assert.areEqual('CUSTOM2', ((TestData.TestInterface) Registry.wire(TestData.AbstractTest.class)).getValue());
+            Assert.areEqual('CUSTOM2', ((TestData.TestInterface) Registry.wire(TestData.AbstractTest.class)).getValue());
         }
     }
 
@@ -100,16 +100,11 @@ public with sharing class BasicBindingTests {
             );
         }
 
-        TestData.SINGLETON_INSTANCE =
-        TestData.PROTOTYPE_INSTANCE = 0;
-
-        // The first wire() call adds the 2 custom bindings, which will instantiate the implementation. Hence use
-        // CUSTOM3 onwards.
         System.runAs(TestData.getUser()) {
-            Assert.areEqual('CUSTOM3', ((TestData.TestInterface) Registry.wire(TestData.TestInterface.class)).getValue());
-            Assert.areEqual('CUSTOM4', ((TestData.TestInterface) Registry.wire(TestData.TestInterface.class)).getValue());
-            Assert.areEqual('CUSTOM5', ((TestData.TestInterface) Registry.wire(TestData.AbstractTest.class)).getValue());
-            Assert.areEqual('CUSTOM6', ((TestData.TestInterface) Registry.wire(TestData.AbstractTest.class)).getValue());
+            Assert.areEqual('CUSTOM1', ((TestData.TestInterface) Registry.wire(TestData.TestInterface.class)).getValue());
+            Assert.areEqual('CUSTOM2', ((TestData.TestInterface) Registry.wire(TestData.TestInterface.class)).getValue());
+            Assert.areEqual('CUSTOM3', ((TestData.TestInterface) Registry.wire(TestData.AbstractTest.class)).getValue());
+            Assert.areEqual('CUSTOM4', ((TestData.TestInterface) Registry.wire(TestData.AbstractTest.class)).getValue());
         }
     }
 
