@@ -54,13 +54,14 @@ The registry may be initialised either programmatically or through the ```Bindin
 The ```Registry.add``` methods can be called to add a registry entry. If an application requires a default registry
 to be setup, the setup method must call these methods to configure the default registry.
 
-The example below shows the setup of a default registry which uses ```USER_MODE``` for the wiring of the
-```Query``` interface with no action and ```SYSTEM_MODE``` when the interface is wired with an action of SYSTEM.
+The following snippet taken from ```example/classes/RegisstryInitalisation.cls``` shows the initialisation of a
+default registry.
 ```
-public void createDefaultRegistry() {
-    Registry.add(Query.class, UserModeQueryImpl.class);
-    Reistgry.add(Query.class, 'SYSTEM', SystemModeQueryImpl.class);
-}
+public static void programmatic() {
+
+        // Add the bindings to the registry.
+        Registry.add(Query.class, UserModeQueryImpl.class);
+        Registry.add(Query.class, 'SYSTEM', SystemModeQueryImpl.class);
 ```
 #### Custom Object Initialisation
 The registry can be configured using the ```Binding__c``` custom object. The values in the custom object records will
@@ -69,7 +70,50 @@ override the values currently in the registry.
 The three fields in the custom object are;
 * Type__c -- The class name of the interface or abstract class to be bound.
 * Action__c -- Optional field giving an action to be used in combination with the Type__c field to identity the binding.
-* Implemention__c -- The class name of the class that implements the interface.
+* Implementation__c -- The class name of the concrete class that implements the interface.
+
+The following snippet taken from ```example/classes/RegisstryInitalisation.cls``` shows the initialisation of a custom
+registry.
+```
+public static void custom() {
+        clean();
+
+        // Add the custom objects to create the bindings in the registry.
+        insert new Binding__c(Type__c = 'Query', Implementation__c = 'UserModeQueryImpl');
+        insert new Binding__c(Type__c = 'Query', Action__c = 'SYSTEM', Implementation__c = 'SystemModeQueryImpl');
+```
+## Binding Validation
+Validation of the implementations bound to an interface or abstract class can be performed by writing a class that
+implements the ```BindingCheck``` interface.
+
+The ```BindingCheck__mdt``` custome metadata object holds a mapping from the interface or abstract class to its
+```BindingCheck``` validator.
+
+In the example code, a ```BindingCheck``` is added to the custom metadata which validates the implementation assigned
+the ```Query``` interface.
+
+The ```BindingCheck.check``` method must return a ```Registry.ValidationResult``` object which notifies the caller
+of the result of the validation. If a failure notification is returned, a ```Registry.APIException``` is thrown
+with the message set to the value recorded in the ```ValidationResult.errorMessage``` field.
+
+The following snippet taken from ```example/classes/RegisstryInitalisation.cls``` shows the ```BindingCheck```
+implementation used to validate that the ```Query``` interface has been assigned to a concrete class that
+implements it.
+```
+public class QueryValidator implements Registry.BindingCheck {
+        public Registry.ValidationResult validate(Type forType, Type withImpl) {
+            if (TypeHelper.newInstance(withImpl) instanceof Query) {
+                return new Registry.ValidationResult(true, null);
+            } else {
+                return new Registry.ValidationResult(
+                        false,
+                        'Class "' + withImpl.getName() + '" does not implement "Query"'
+                );
+            }
+        }
+    }
+```
+
 ## Wiring
 Wiring is the action of using a binding in an application.
 

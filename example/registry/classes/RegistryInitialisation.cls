@@ -17,6 +17,9 @@ public with sharing class RegistryInitialisation {
         Registry.add(Query.class, UserModeQueryImpl.class);
         Registry.add(Query.class, 'SYSTEM', SystemModeQueryImpl.class);
 
+        Assert.isTrue(Registry.wire(Query.class) instanceof UserModeQueryImpl);
+        Assert.isTrue(Registry.wire(Query.class, 'SYSTEM') instanceof SystemModeQueryImpl);
+
         // When this method is run, debug will record;
         // DEBUG|Querying in USER_MODE
         // DEBUG|Querying in SYSTEM_MODE
@@ -36,11 +39,14 @@ public with sharing class RegistryInitialisation {
      * Example of initialisation of the registry from the Binding__c custom object.
      */
     public static void custom() {
-        delete [SELECT Id FROM Binding__c WHERE Type__c = 'Query'];
+        clean();
 
         // Add the custom objects to create the bindings in the registry.
         insert new Binding__c(Type__c = 'Query', Implementation__c = 'UserModeQueryImpl');
         insert new Binding__c(Type__c = 'Query', Action__c = 'SYSTEM', Implementation__c = 'SystemModeQueryImpl');
+
+        Assert.isTrue(Registry.wire(Query.class) instanceof UserModeQueryImpl);
+        Assert.isTrue(Registry.wire(Query.class, 'SYSTEM') instanceof SystemModeQueryImpl);
 
         // When this method is run, debug will record;
         // DEBUG|Querying in USER_MODE
@@ -55,7 +61,7 @@ public with sharing class RegistryInitialisation {
                 new Map<String, Object> { 'ignoreName' => 'Fred Bloggs' }
         );
 
-        delete [SELECT Id FROM Binding__c WHERE Type__c = 'Query'];
+        clean();
     }
 
     /**
@@ -67,13 +73,14 @@ public with sharing class RegistryInitialisation {
         // User class does not implement the Query interface. The QueryValidator class will detect this.
         Registry.add(Query.class, 'SYSTEM', User.class);
     }
+
     /**
      * @description
      * Example of the biding check logic used to detect an incorrect registry assignment when registry
      * initialised from custom object.
      */
     public static void customValidationFailure() {
-        delete [SELECT Id FROM Binding__c WHERE Type__c = 'Query'];
+        clean();
 
         // User class does not implement the Query interface. The QueryValidator class will detect this.
         insert new Binding__c(Type__c = 'Query', Action__c = 'SYSTEM', Implementation__c = 'User');
@@ -96,5 +103,13 @@ public with sharing class RegistryInitialisation {
                 );
             }
         }
+    }
+
+    /**
+     * @description
+     * Resets the registry.
+     */
+    private static void clean() {
+        delete [SELECT Id FROM Binding__c WHERE Type__c = 'Query'];
     }
 }
