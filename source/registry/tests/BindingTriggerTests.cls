@@ -86,7 +86,7 @@ public with sharing class BindingTriggerTests {
             );
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for "TestData.TestInterface" for action "Test" already exists'));
+            Assert.isTrue(de.getMessage().contains('Binding for "TestData.TestInterface" with action "Test" already exists'));
         }
 
         try {
@@ -97,7 +97,7 @@ public with sharing class BindingTriggerTests {
             );
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for "TestData.AbstractTest" for action "Test" already exists'));
+            Assert.isTrue(de.getMessage().contains('Binding for "TestData.AbstractTest" with action "Test" already exists'));
         }
 
         try {
@@ -174,7 +174,7 @@ public with sharing class BindingTriggerTests {
             upsert binding1;
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for "TestData.AbstractTest" for action "Test" already exists'));
+            Assert.isTrue(de.getMessage().contains('Binding for "TestData.AbstractTest" with action "Test" already exists'));
         }
     }
 }

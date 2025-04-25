@@ -55,7 +55,6 @@ global with sharing virtual class Registry {
         private set;
     }
 
-
     /**
      * @description
      * Mapping from a binding Type to the Binding Check class to validate it.
@@ -148,11 +147,7 @@ global with sharing virtual class Registry {
 
         final Key key = new Key(forType);
         if (!REGISTRY.containsKey(key)) {
-            throw new APIException(
-                    'Binding for "'
-                    + forType.getName()
-                    +'" not found in registry'
-            );
+            throw createException('Binding for', forType.getName(), 'not found in registry');
         }
 
         return REGISTRY.get(key).newInstance();
@@ -192,13 +187,7 @@ global with sharing virtual class Registry {
 
         final Key key = new ActionKey(forType, action);
         if (!REGISTRY.containsKey(key)) {
-            throw new APIException(
-                    'Binding for "'
-                    + forType.getName()
-                    + '" for action "'
-                    + action
-                    + '" not found in registry'
-            );
+            throw createException('Binding for', forType.getName(), action, 'not found in registry');
         }
 
         return REGISTRY.get(key).newInstance();
@@ -358,23 +347,13 @@ global with sharing virtual class Registry {
         for (Binding__c binding : bindings) {
             if (binding.Action__c == null) {
                 if (keys.contains(binding.Type__c)) {
-                    throw new APIException(
-                            'Binding for "'
-                            + binding.Type__c
-                            + '" already exists'
-                    );
+                    throw createException('Binding for', binding.Type__c, 'already exists');
                 }
                 keys.add(binding.Type__c);
             } else {
                 final String key = binding.Type__c + ':' + binding.Action__c;
                 if (keys.contains(key)) {
-                    throw new APIException(
-                            'Binding for "'
-                            + binding.Type__c
-                            + '" for action "'
-                            + binding.Action__c
-                            + '" already exists'
-                    );
+                    throw createException('Binding for', binding.Type__c, binding.Action__c, 'already exists');
                 }
                 keys.add(key);
             }
@@ -424,22 +403,13 @@ global with sharing virtual class Registry {
         }
 
         if (instantiable) {
-            throw new APIException(
-                    'Type "'
-                    + forType.getName()
-                    + '" must not be instantiable'
-            );
+            throw createException('Type', forType.getName(), 'must not be instantiable');
         }
 
         try {
             TypeHelper.newInstance(withImpl);
         } catch(Exception e) {
-            throw new APIException(
-                    'Implementation "'
-                    + withImpl.getName()
-                    + '" must be instantiable',
-                    e
-            );
+            throw createException('Implementation', withImpl.getName(), 'must be instantiable');
         }
 
         if (CHECKS.containsKey(forType)) {
@@ -482,7 +452,7 @@ global with sharing virtual class Registry {
                 final Object checker = TypeHelper.newInstance(TypeHelper.loadType(check.Checker__c));
 
                 if (! (checker instanceof BindingCheck)) {
-                    throw new APIException('Class "' + check.Checker__c + '" does not implement BindingCheck');
+                    throw createException('Class', check.Checker__c, 'does not implement BindingCheck');
                 }
 
                 if (!checks.containsKey(forType)) {
@@ -537,5 +507,55 @@ global with sharing virtual class Registry {
                     && (action == ((ActionKey) other).action)
                     && (type == ((ActionKey) other).type);
         }
+    }
+
+    /**
+     * @description
+     * Builds an APIException with a common format.
+     *
+     * @param prefix Prefix from exception message.
+     * @param typeName The name of the type the exception is for.
+     * @param postfix Postfix for exception mesgsage.
+     *
+     * @return A new APIException with a formatted mesgsage.
+     */
+    private static APIException createException(String prefix, String typeName, String postfix) {
+        return new APIException(String.join(
+                new List<String>{
+                        prefix,
+                        ' "',
+                        typeName,
+                        '" ',
+                        postfix
+                },
+                ''
+        ));
+    }
+
+    /**
+     * @description
+     * Builds an APIException with a common format.
+     *
+     * @param prefix Prefix from exception message.
+     * @param typeName The name of the type the exception is for.
+     * @param action The action the exception is for.
+     * @param postfix Postfix for exception mesgsage.
+     *
+     * @return A new APIException with a formatted mesgsage.
+     */
+    private static APIException createException(String prefix, String typeName, String action, String postfix) {
+        return new APIException(String.join(
+                new List<String>{
+                        prefix,
+                        ' "',
+                        typeName,
+                        '"',
+                        ' with action "',
+                        action,
+                        '" ',
+                        postfix
+                },
+                ''
+        ));
     }
 }

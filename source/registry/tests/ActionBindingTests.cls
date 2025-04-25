@@ -20,7 +20,7 @@ public with sharing class ActionBindingTests {
                 Registry.wire(TestData.TestInterface.class, 'NotTest');
                 Assert.fail();
             } catch (Registry.APIException ae) {
-                Assert.areEqual('Binding for "TestData.TestInterface" for action "NotTest" not found in registry', ae.getMessage());
+                Assert.areEqual('Binding for "TestData.TestInterface" with action "NotTest" not found in registry', ae.getMessage());
             }
         }
     }
