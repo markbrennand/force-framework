@@ -42,12 +42,12 @@ public with sharing class TestData {
 
         PermissionSetAssignment managerAssignment = new PermissionSetAssignment(
                 AssigneeId = manager.Id,
-                PermissionSetId = [SELECT Id FROM PermissionSet WHERE Name = 'RegistryManager' LIMIT 1].Id
+                PermissionSetId = [SELECT Id FROM PermissionSet WHERE Name = 'InjectionManager' LIMIT 1].Id
         );
 
         PermissionSetAssignment userAssignment = new PermissionSetAssignment(
                 AssigneeId = user.Id,
-                PermissionSetId = [SELECT Id FROM PermissionSet WHERE Name = 'RegistryUser' LIMIT 1].Id
+                PermissionSetId = [SELECT Id FROM PermissionSet WHERE Name = 'InjectionUser' LIMIT 1].Id
         );
 
         insert new List<PermissionSetAssignment> { managerAssignment, userAssignment };
@@ -78,7 +78,7 @@ public with sharing class TestData {
         }
     }
 
-    public with sharing class PrototypeTest extends AbstractTest implements Registry.Prototype {
+    public with sharing class PrototypeTest extends AbstractTest implements Injection.Prototype {
         private String value;
 
         public PrototypeTest() {
@@ -101,7 +101,7 @@ public with sharing class TestData {
         }
     }
 
-    public with sharing class PrototypeCustomTest extends AbstractTest implements Registry.Prototype {
+    public with sharing class PrototypeCustomTest extends AbstractTest implements Injection.Prototype {
         private String value;
 
         public PrototypeCustomTest() {
@@ -112,16 +112,16 @@ public with sharing class TestData {
         }
     }
 
-    public with sharing class AbstractTestChecker implements Registry.BindingCheck {
-        public Registry.ValidationResult validate(Type forType, Type withImpl) {
+    public with sharing class AbstractTestChecker implements Injection.BindingCheck {
+        public Injection.ValidationResult validate(Type forType, Type withImpl) {
             Object instance = TypeHelper.newInstance(withImpl);
             SINGLETON_INSTANCE =
             PROTOTYPE_INSTANCE = 0;
 
             if (instance instanceof AbstractTest) {
-                return new Registry.ValidationResult(true, null);
+                return new Injection.ValidationResult(true, null);
             } else {
-                return new Registry.ValidationResult(
+                return new Injection.ValidationResult(
                         false,
                         'Type "' + withImpl.getName() + '" does not extend "AbstractTest"'
                 );
@@ -129,16 +129,16 @@ public with sharing class TestData {
         }
     }
 
-    public with sharing class TestInterfaceChecker implements Registry.BindingCheck {
-        public Registry.ValidationResult validate(Type forType, Type withImpl) {
+    public with sharing class TestInterfaceChecker implements Injection.BindingCheck {
+        public Injection.ValidationResult validate(Type forType, Type withImpl) {
             Object instance = TypeHelper.newInstance(withImpl);
             SINGLETON_INSTANCE =
             PROTOTYPE_INSTANCE = 0;
 
             if (instance instanceof TestInterface) {
-                return new Registry.ValidationResult(true, null);
+                return new Injection.ValidationResult(true, null);
             } else {
-                return new Registry.ValidationResult(
+                return new Injection.ValidationResult(
                         false,
                         'Type "' + withImpl.getName() + '" does not implement "TestInterface"'
                 );

@@ -5,6 +5,6 @@
  * @author Mark Brennand
  */
 trigger Binding on Binding__c (after insert, after update) {
-    Registry.checkForDuplicates();
-    Registry.build((List<Binding__c>) Trigger.new);
+    Injection.checkForDuplicates();
+    Injection.build((List<Binding__c>) Trigger.new);
 }

@@ -1,11 +1,11 @@
 /**
  * @description
- * Examples of registry initialisation.
+ * Examples of bindings initialisation.
  *
  * @author Mark Brennand
  */
 
-public with sharing class RegistryInitialisation {
+public with sharing class BindingInitialisation {
 
     /**
      * @description
@@ -14,21 +14,21 @@ public with sharing class RegistryInitialisation {
     public static void programmatic() {
 
         // Add the bindings to the registry.
-        Registry.add(Query.class, UserModeQueryImpl.class);
-        Registry.add(Query.class, 'SYSTEM', SystemModeQueryImpl.class);
+        Injection.add(Query.class, UserModeQueryImpl.class);
+        Injection.add(Query.class, 'SYSTEM', SystemModeQueryImpl.class);
 
-        Assert.isTrue(Registry.wire(Query.class) instanceof UserModeQueryImpl);
-        Assert.isTrue(Registry.wire(Query.class, 'SYSTEM') instanceof SystemModeQueryImpl);
+        Assert.isTrue(Injection.wire(Query.class) instanceof UserModeQueryImpl);
+        Assert.isTrue(Injection.wire(Query.class, 'SYSTEM') instanceof SystemModeQueryImpl);
 
         // When this method is run, debug will record;
         // DEBUG|Querying in USER_MODE
         // DEBUG|Querying in SYSTEM_MODE
-        List<SObject> userModeRecords = ((Query) Registry.wire(Query.class)).query(
+        List<SObject> userModeRecords = ((Query) Injection.wire(Query.class)).query(
                 'SELECT Id FROM Account WHERE Name != :ignoreName',
                 new Map<String, Object> { 'ignoreName' => 'Fred Bloggs' }
         );
 
-        List<SObject> systemModeRecords = ((Query) Registry.wire(Query.class, 'SYSTEM')).query(
+        List<SObject> systemModeRecords = ((Query) Injection.wire(Query.class, 'SYSTEM')).query(
                 'SELECT Id FROM Account WHERE Name != :ignoreName',
                 new Map<String, Object> { 'ignoreName' => 'Fred Bloggs' }
         );
@@ -36,7 +36,7 @@ public with sharing class RegistryInitialisation {
 
     /**
      * @description
-     * Example of initialisation of the registry from the Binding__c custom object.
+     * Example of initialisation of the bindings from the Binding__c custom object.
      */
     public static void custom() {
         clean();
@@ -45,18 +45,18 @@ public with sharing class RegistryInitialisation {
         insert new Binding__c(Type__c = 'Query', Implementation__c = 'UserModeQueryImpl');
         insert new Binding__c(Type__c = 'Query', Action__c = 'SYSTEM', Implementation__c = 'SystemModeQueryImpl');
 
-        Assert.isTrue(Registry.wire(Query.class) instanceof UserModeQueryImpl);
-        Assert.isTrue(Registry.wire(Query.class, 'SYSTEM') instanceof SystemModeQueryImpl);
+        Assert.isTrue(Injection.wire(Query.class) instanceof UserModeQueryImpl);
+        Assert.isTrue(Injection.wire(Query.class, 'SYSTEM') instanceof SystemModeQueryImpl);
 
         // When this method is run, debug will record;
         // DEBUG|Querying in USER_MODE
         // DEBUG|Querying in SYSTEM_MODE
-        List<SObject> userModeRecords = ((Query) Registry.wire(Query.class)).query(
+        List<SObject> userModeRecords = ((Query) Injection.wire(Query.class)).query(
                 'SELECT Id FROM Account WHERE Name != :ignoreName',
                 new Map<String, Object> { 'ignoreName' => 'Fred Bloggs' }
         );
 
-        List<SObject> systemModeRecords = ((Query) Registry.wire(Query.class, 'SYSTEM')).query(
+        List<SObject> systemModeRecords = ((Query) Injection.wire(Query.class, 'SYSTEM')).query(
                 'SELECT Id FROM Account WHERE Name != :ignoreName',
                 new Map<String, Object> { 'ignoreName' => 'Fred Bloggs' }
         );
@@ -66,23 +66,23 @@ public with sharing class RegistryInitialisation {
 
     /**
      * @description
-     * Example of the biding check logic used to detect an incorrect registry assignment when registry
+     * Example of the biding check logic used to detect an incorrect binding assignment when bindings
      * initialised programmatically.
      */
     public static void programmaticValidationFailure() {
-        // User class does not implement the Query interface. The QueryValidator class will detect this.
-        Registry.add(Query.class, 'SYSTEM', User.class);
+        // User class does not implement the Query interface. The QueryValidator class will identify this.
+        Injection.add(Query.class, 'SYSTEM', User.class);
     }
 
     /**
      * @description
-     * Example of the biding check logic used to detect an incorrect registry assignment when registry
+     * Example of the biding check logic used to detect an incorrect binding assignment when bindings
      * initialised from custom object.
      */
     public static void customValidationFailure() {
         clean();
 
-        // User class does not implement the Query interface. The QueryValidator class will detect this.
+        // User class does not implement the Query interface. The QueryValidator class will identify this.
         insert new Binding__c(Type__c = 'Query', Action__c = 'SYSTEM', Implementation__c = 'User');
     }
 
@@ -92,12 +92,12 @@ public with sharing class RegistryInitialisation {
      *
      * A custom metadata record for the BindingCheck__mdt type is used to register the validator.
      */
-    public class QueryValidator implements Registry.BindingCheck {
-        public Registry.ValidationResult validate(Type forType, Type withImpl) {
+    public class QueryValidator implements Injection.BindingCheck {
+        public Injection.ValidationResult validate(Type forType, Type withImpl) {
             if (TypeHelper.newInstance(withImpl) instanceof Query) {
-                return new Registry.ValidationResult(true, null);
+                return new Injection.ValidationResult(true, null);
             } else {
-                return new Registry.ValidationResult(
+                return new Injection.ValidationResult(
                         false,
                         'Class "' + withImpl.getName() + '" does not implement "Query"'
                 );
@@ -107,7 +107,7 @@ public with sharing class RegistryInitialisation {
 
     /**
      * @description
-     * Resets the registry.
+     * Resets the custom bindings.
      */
     private static void clean() {
         delete [SELECT Id FROM Binding__c WHERE Type__c = 'Query'];

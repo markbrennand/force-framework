@@ -1,16 +1,18 @@
 /**
  * @description
- * A registry supporting the binding of an implementation of an interface or abstract class for use in an application.
+ * Class providing dependency injection.
+ *
+ * Dependencies can be wired into an application by their interface or abstract class.
  *
  * An optional action argument is supported to allow for the binding of the same interface or class with different
  * implementations.
  *
- * By default, the implementation created when bound will be a singleton. If the binding is required to create
+ * By default, the implementation created when injected will be a singleton. If the binding is required to create
  * a new implementation for each use an application, the implementing class should implement the Prototype interface.
  *
  * @author Mark Brennand
  */
-global with sharing virtual class Registry {
+global with sharing virtual class Injection {
 
     /**
      * @description
@@ -19,6 +21,22 @@ global with sharing virtual class Registry {
      * Each checker must be defined in a record in the Binding Check custom metadata.
      */
     global interface BindingCheck {
+        /**
+         * @description
+         * Given an interface or abstract type, a class implementing this method checks that the given
+         * implementation class can be bound to it.
+         *
+         * If the for type is an interface then an implementation of this method must check that the implementation
+         * class implements the interface.
+         *
+         * If the for type is an abstract class then an implementation of this method must check that the implementation
+         * class extends the abstract class.
+         *
+         * @param forType The interface or abstract class being validated.
+         * @param withImpl The implementation to assign to the interface or abstract class.
+         *
+         * @return The result of the validation.
+         */
         ValidationResult validate(Type forType, Type withImpl);
     }
 
@@ -45,10 +63,10 @@ global with sharing virtual class Registry {
      * The instance is test visible so it can be mocked.
      */
     @TestVisible
-    private static Registry INSTANCE {
+    private static Injection INSTANCE {
         private get {
             if (INSTANCE == null) {
-                INSTANCE = new Registry();
+                INSTANCE = new Injection();
             }
             return INSTANCE;
         }
@@ -130,7 +148,7 @@ global with sharing virtual class Registry {
      *
      * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
      */
-    protected Registry() {}
+    protected Injection() {}
 
     /**
      * @description

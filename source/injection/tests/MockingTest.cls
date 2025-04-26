@@ -9,31 +9,31 @@ public with sharing class MockingTest {
 
     @IsTest
     static void testMockedRegistry() {
-        Registry.INSTANCE = (Registry) Test.createStub(Registry.class, new MockRegistry());
-        Assert.isTrue(Registry.has(TestData.TestInterface.class));
-        Assert.isFalse(Registry.has(TestData.AbstractTest.class));
-        Assert.isTrue(Registry.has(TestData.AbstractTest.class, 'Test'));
-        Assert.isFalse(Registry.has(TestData.AbstractTest.class, 'NotTest'));
-        Assert.isFalse(Registry.has(TestData.TestInterface.class, 'Test'));
-        Assert.isTrue(Registry.wire(TestData.TestInterface.class) instanceof TestData.SingletonTest);
+        Injection.INSTANCE = (Injection) Test.createStub(Injection.class, new MockRegistry());
+        Assert.isTrue(Injection.has(TestData.TestInterface.class));
+        Assert.isFalse(Injection.has(TestData.AbstractTest.class));
+        Assert.isTrue(Injection.has(TestData.AbstractTest.class, 'Test'));
+        Assert.isFalse(Injection.has(TestData.AbstractTest.class, 'NotTest'));
+        Assert.isFalse(Injection.has(TestData.TestInterface.class, 'Test'));
+        Assert.isTrue(Injection.wire(TestData.TestInterface.class) instanceof TestData.SingletonTest);
 
         try {
-            Assert.isTrue(Registry.wire(TestData.AbstractTest.class) instanceof TestData.SingletonTest);
-        } catch(Registry.APIException ae) {
+            Assert.isTrue(Injection.wire(TestData.AbstractTest.class) instanceof TestData.SingletonTest);
+        } catch(Injection.APIException ae) {
             Assert.areEqual('Binding for "TestData.AbstractTest" is not defined', ae.getMessage());
         }
 
-        Assert.isTrue(Registry.wire(TestData.AbstractTest.class, 'Test') instanceof TestData.PrototypeTest);
+        Assert.isTrue(Injection.wire(TestData.AbstractTest.class, 'Test') instanceof TestData.PrototypeTest);
 
         try {
-            Assert.isTrue(Registry.wire(TestData.AbstractTest.class, 'NotTest') instanceof TestData.PrototypeTest);
-        } catch(Registry.APIException ae) {
+            Assert.isTrue(Injection.wire(TestData.AbstractTest.class, 'NotTest') instanceof TestData.PrototypeTest);
+        } catch(Injection.APIException ae) {
             Assert.areEqual('Binding for "TestData.AbstractTest" for action "NotTest" is not defined', ae.getMessage());
         }
 
         try {
-            Assert.isTrue(Registry.wire(TestData.TestInterface.class, 'Test') instanceof TestData.PrototypeTest);
-        } catch(Registry.APIException ae) {
+            Assert.isTrue(Injection.wire(TestData.TestInterface.class, 'Test') instanceof TestData.PrototypeTest);
+        } catch(Injection.APIException ae) {
             Assert.areEqual('Binding for "TestData.TestInterface" for action "Test" is not defined', ae.getMessage());
         }
     }
@@ -46,7 +46,7 @@ public with sharing class MockingTest {
                 return handleWire(args);
             }
 
-            throw new Registry.APIException('Unexpected method "' + stubbedMethodName + '" called');
+            throw new Injection.APIException('Unexpected method "' + stubbedMethodName + '" called');
         }
 
         private Boolean handleBound(List<Object> args) {
@@ -62,21 +62,21 @@ public with sharing class MockingTest {
                 if (args[0] == TestData.TestInterface.class) {
                     return new TestData.SingletonTest();
                 } else {
-                    throw new Registry.APIException(
+                    throw new Injection.APIException(
                             'Binding for "'
-                            + args[0]
-                            + '" is not defined'
+                                    + args[0]
+                                    + '" is not defined'
                     );
                 }
 
             } else if (args[1] == 'Test') {
                 return new TestData.PrototypeTest();
             } else {
-                throw new Registry.APIException(
+                throw new Injection.APIException(
                         'Binding for "' + args[0]
-                        + '" for action "'
-                        + args[1]
-                        + '" is not defined'
+                                + '" for action "'
+                                + args[1]
+                                + '" is not defined'
                 );
             }
         }
