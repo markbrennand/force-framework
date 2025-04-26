@@ -21,6 +21,7 @@ global with sharing virtual class Injection {
      * Each checker must be defined in a record in the Binding Check custom metadata.
      */
     global interface BindingCheck {
+
         /**
          * @description
          * Given an interface or abstract type, a class implementing this method checks that the given

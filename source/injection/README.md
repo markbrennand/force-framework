@@ -1,3 +1,4 @@
+[back](../../README.md)
 # Injection
 Dependency Injection (DI) is a software design pattern where an object receives its dependencies from an external source
 rather than creating them internally. This promotes loose coupling, making code more modular, testable, and easier to
@@ -7,9 +8,10 @@ properties (setter injection), or through an interface (interface injection).
 The term "abstract entity" used in this document shall refer to either an interface or abstract class.
 
 Thg ```Injection``` class allows an abstract entity to be bound to a concrete implementation. An application can use
-one of the ```wire``` methods to perform interface injection. This allows the same implementation class to be used
-in many places in the code base. It allows for the implementation to be changed application wide easily. A custom
-object is used to configure the binding from the abstract entity to concrete class.
+one of the ```wire``` methods to perform abstract entity injection. This allows the same implementation class to be used
+in many places in the code base. It allows for the implementation to be changed application wide easily.
+
+A custom object may be used to configure the binding from the abstract entity to concrete class.
 
 By default, the class wired into an application will be a singleton. For this reason, the implementation class must
 not have state that may change in use.
@@ -30,31 +32,9 @@ For the first type, the abstract entity can only have one binding in the registr
 The second type can have multiple bindings of the abstract entity in the registry. Each must have a unique action.
 
 ## Example Code
-The following information will be used in the examples in the remainder of this document.
+Please review the example code in the ```example/injection``` directory.
 
-An application has an interface for querying and two implemenations.
-```
-public interace Query {
-    List<SObject> query(String query, Map<String, Object> bindVariables
-}
-
-public class UserModeQueryImpl implements Query {
-    public List<SObject> query(String query, Map<String, Object> bindVars) {
-        System.debug('Querying in USER_MODE');
-        return Database.queryWithBinds(query, bindVars, AccessLevel.USER_MODE);
-    }
-}
-
-public class SystemModeQueryImpl implements Query {
-    public List<SObject> query(String query, Map<String, Object> bindVars) {
-        System.debug('Querying in SYSTEM_MODE');
-        return Database.queryWithBinds(query, bindVars, AccessLevel.SYSTEM_MODE);
-    }
-}
-```
-
-The source code for all the examples can be found in the example/injection directory.
-
+The classes and interfaces in the ```QueryClasses``` class will be used in the examples in this document.
 ## Initialisation
 The registry may be initialised either programmatically or through the ```Binding__c``` custom object.
 #### Programmatic Initialisation
@@ -67,8 +47,10 @@ a default registry.
  public static void programmatic() {
 
         // Add the bindings to the registry.
-        Injection.add(Query.class, UserModeQueryImpl.class);
-        Injection.add(Query.class, 'SYSTEM', SystemModeQueryImpl.class);
+        Injection.add(QueryClasses.QueryInterface.class, QueryClasses.UserQueryInterfaceImpl.class);
+        Injection.add(QueryClasses.AbstractQuery.class, QueryClasses.UserAbstractQueryImpl.class);
+        Injection.add(QueryClasses.QueryInterface.class, 'SYSTEM', QueryClasses.SystemQueryInterfaceImpl.class);
+        Injection.add(QueryClasses.AbstractQuery.class, 'SYSTEM', QueryClasses.SystemAbstractQueryImpl.class);
 ```
 #### Custom Object Initialisation
 The bindings can be configured using the ```Binding__c``` custom object. The values in the custom object records will
@@ -76,11 +58,11 @@ override the values currently in the bindings.
 
 The fields of the custom object are;
 
-| Field             | Type      | Description                                                                           |
-|-------------------|-----------|---------------------------------------------------------------------------------------|
-| Type__c           | Mandatory | The class name of the abstract entity to be bound.                                    |
-| Implementation__c | Mandatory | The class name of the concrete class that implements the abstract entity.             |
-| Action__c         | Optional  | T he action to be used in combination with the Type__c field to identity the binding. |
+| Field             | Type      | Description                                                                          |
+|-------------------|-----------|--------------------------------------------------------------------------------------|
+| Type__c           | Mandatory | The class name of the abstract entity to be bound.                                   |
+| Implementation__c | Mandatory | The class name of the concrete class that implements the abstract entity.            |
+| Action__c         | Optional  | The action to be used in combination with the Type__c field to identity the binding. |
 
 The following snippet taken from ```example/injection/classes/BindingInitalisation.cls``` shows the initialisation of a
 custom registry.
@@ -89,8 +71,10 @@ public static void custom() {
         clean();
 
         // Add the custom objects to create the bindings in the registry.
-        insert new Binding__c(Type__c = 'Query', Implementation__c = 'UserModeQueryImpl');
-        insert new Binding__c(Type__c = 'Query', Action__c = 'SYSTEM', Implementation__c = 'SystemModeQueryImpl');
+        insert new Binding__c(Type__c = 'QueryClasses.QueryInterface', Implementation__c = 'QueryClasses.UserQueryInterfaceImpl');
+        insert new Binding__c(Type__c = 'QueryClasses.AbstractQuery', Implementation__c = 'QueryClasses.UserAbstractQueryImpl');
+        insert new Binding__c(Type__c = 'QueryClasses.QueryInterface', Action__c = 'SYSTEM', Implementation__c = 'QueryClasses.SystemQueryInterfaceImpl');
+        insert new Binding__c(Type__c = 'QueryClasses.AbstractQuery', Action__c = 'SYSTEM', Implementation__c = 'QueryClasses.SystemAbstractQueryImpl');
 ```
 ## Binding Validation
 Validation of the implementation bound to an interface or abstract class can be performed by adding a class that
@@ -123,13 +107,13 @@ validator.
 
 The fields of the metadata object are;
 
-| Field |Type | Description                                                                                             |
-|-------|-----|---------------------------------------------------------------------------------------------------------|
-| Type__c | Mandatory | The class name of the abstract entity to be validated. !                                                
+| Field |Type | Description |
+|-------|-----|-------------|
+| Type__c | Mandatory | The class name of the abstract entity to be validated. |                                               
 | Checker__c | Mandatory | The class name of the ```BindingCheck``` implementation to validate the binding of the abstract entity. |
 | IsUnitTest__c | Mandatory | If true, the ```BindingCheck``` is for unit test use only. |
 
-The ```BindingCheck.check``` method must return a ```Registry.ValidationResult``` object which notifies the caller
+The ```BindingCheck.validate``` method must return a ```Injection.ValidationResult``` object which notifies the caller
 of the result of the validation. If a failure notification is returned, an ```Injection.APIException``` is thrown
 with the message set to the value recorded in the ```ValidationResult.errorMessage``` field.
 
@@ -150,7 +134,7 @@ public class QueryValidator implements Injection.BindingCheck {
         }
     }
 ```
-
+**As an exercise, see if you can add a validator for the ```QueryClasses.AbstractQuery``` class.**
 ## Wiring
 Wiring is the action of using a binding in an application.
 
