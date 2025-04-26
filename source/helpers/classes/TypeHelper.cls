@@ -4,7 +4,26 @@
  *
  * @author Mark Brennand
  */
-public with sharing class TypeHelper {
+global with sharing class TypeHelper {
+
+    /**
+     * @description
+     * Supports use of a factory when instantiating a class.
+     *
+     * If an instantiated class implements this interface then the newInstance method will create the actual instance.
+     */
+    global interface Factory {
+
+        /**
+         * @description
+         * Builds a new instance of the class the factory is acting for.
+         *
+         * This would allow a Factory implementation to return a class which does not have a public constructor.
+         *
+         * @return The object instance.
+         */
+        Object newInstance();
+    }
 
     /**
      * @description
@@ -38,7 +57,12 @@ public with sharing class TypeHelper {
      */
     public static Object newInstance(final Type type) {
         try {
-            return type.newInstance();
+            Object instance =  type.newInstance();
+            if (instance instanceof Factory) {
+                return ((Factory) instance).newInstance();
+            } else {
+                return instance;
+            }
         } catch(Exception e) {
             throw new TypeException('Type "' + type.getName() + '" could not be constructed' ,e);
         }

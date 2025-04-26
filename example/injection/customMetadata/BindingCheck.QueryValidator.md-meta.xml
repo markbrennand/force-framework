@@ -12,6 +12,6 @@
     </values>
     <values>
         <field>Type__c</field>
-        <value xsi:type="xsd:string">Query</value>
+        <value xsi:type="xsd:string">QueryClasses.QueryInterface</value>
     </values>
 </CustomMetadata>

@@ -131,7 +131,7 @@ public with sharing class BindingInitialisation {
             } else {
                 return new Injection.ValidationResult(
                         false,
-                        'Class "' + withImpl.getName() + '" does not implement "Query"'
+                        'Class "' + withImpl.getName() + '" does not implement "' + forType.getName() + '"'
                 );
             }
         }

@@ -52,9 +52,21 @@ public with sharing class TypeHelperTests {
         }
     }
 
+    @IsTest
+    static void testFactory() {
+        Assert.isTrue(TypeHelper.newInstance(TestFactory.class) instanceof TestClass);
+    }
+
     public interface TestInterface {}
 
     public with sharing class TestClass {}
 
     public with sharing abstract class AbstractTestClass {}
+
+    public with sharing class TestFactory implements TypeHelper.Factory {
+
+        public Object newInstance() {
+            return new TestClass();
+        }
+    }
 }
