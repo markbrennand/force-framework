@@ -1,11 +1,11 @@
 /**
  * @description
- * Examples of use of Registry wiring.
+ * Examples of use of wiring.
  *
  * @author Mark Brennand
  */
 
-public with sharing class Wiring {
+public with sharing class AbstractEntityWiring {
 
     public static void example() {
         clean();

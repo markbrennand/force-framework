@@ -19,6 +19,13 @@ public with sharing class BindingInitialisation {
         Injection.add(QueryClasses.QueryInterface.class, 'SYSTEM', QueryClasses.SystemQueryInterfaceImpl.class);
         Injection.add(QueryClasses.AbstractQuery.class, 'SYSTEM', QueryClasses.SystemAbstractQueryImpl.class);
 
+        // Check the bindings have been added.
+        Assert.isTrue(Injection.has(QueryClasses.QueryInterface.class));
+        Assert.isTrue(Injection.has(QueryClasses.AbstractQuery.class));
+        Assert.isTrue(Injection.has(QueryClasses.QueryInterface.class, 'SYSTEM'));
+        Assert.isTrue(Injection.has(QueryClasses.AbstractQuery.class, 'SYSTEM'));
+
+        // Check the bindings have been bound correctly.
         Assert.isTrue(Injection.wire(QueryClasses.QueryInterface.class) instanceof QueryClasses.UserQueryInterfaceImpl);
         Assert.isTrue(Injection.wire(QueryClasses.AbstractQuery.class) instanceof QueryClasses.UserAbstractQueryImpl);
         Assert.isTrue(Injection.wire(QueryClasses.QueryInterface.class, 'SYSTEM') instanceof QueryClasses.SystemQueryInterfaceImpl);
@@ -63,6 +70,13 @@ public with sharing class BindingInitialisation {
         insert new Binding__c(Type__c = 'QueryClasses.QueryInterface', Action__c = 'SYSTEM', Implementation__c = 'QueryClasses.SystemQueryInterfaceImpl');
         insert new Binding__c(Type__c = 'QueryClasses.AbstractQuery', Action__c = 'SYSTEM', Implementation__c = 'QueryClasses.SystemAbstractQueryImpl');
 
+        // Check the bindings have been added.
+        Assert.isTrue(Injection.has(QueryClasses.QueryInterface.class));
+        Assert.isTrue(Injection.has(QueryClasses.AbstractQuery.class));
+        Assert.isTrue(Injection.has(QueryClasses.QueryInterface.class, 'SYSTEM'));
+        Assert.isTrue(Injection.has(QueryClasses.AbstractQuery.class, 'SYSTEM'));
+
+        // Check the bindings have been bound correctly.
         Assert.isTrue(Injection.wire(QueryClasses.QueryInterface.class) instanceof QueryClasses.UserQueryInterfaceImpl);
         Assert.isTrue(Injection.wire(QueryClasses.AbstractQuery.class) instanceof QueryClasses.UserAbstractQueryImpl);
         Assert.isTrue(Injection.wire(QueryClasses.QueryInterface.class, 'SYSTEM') instanceof QueryClasses.SystemQueryInterfaceImpl);
@@ -98,11 +112,11 @@ public with sharing class BindingInitialisation {
 
     /**
      * @description
-     * Example of the biding check logic used to detect an incorrect binding assignment when bindings
+     * Example of the binding check logic used to detect an incorrect binding assignment when bindings are
      * initialised programmatically.
      */
     public static void programmaticValidationFailure() {
-        // User class does not implement the Query interface. The QueryValidator class will identify this.
+        // User class does not implement the QueryInterface interface. The QueryValidator class will identify this.
         Injection.add(QueryClasses.QueryInterface.class, 'SYSTEM', User.class);
     }
 
@@ -114,27 +128,8 @@ public with sharing class BindingInitialisation {
     public static void customValidationFailure() {
         clean();
 
-        // User class does not implement the Query interface. The QueryValidator class will identify this.
+        // User class does not implement the QueryInterface interface. The QueryValidator class will identify this.
         insert new Binding__c(Type__c = 'QueryClasses.QueryInterface', Action__c = 'SYSTEM', Implementation__c = 'User');
-    }
-
-    /**
-     * @description
-     * Class providing validation of any bindings made to QueryInterface.
-     *
-     * A custom metadata record for the BindingCheck__mdt type is used to register the validator.
-     */
-    public class QueryInterfaceValidator implements Injection.BindingCheck {
-        public Injection.ValidationResult validate(Type forType, Type withImpl) {
-            if (TypeHelper.newInstance(withImpl) instanceof QueryClasses.QueryInterface) {
-                return new Injection.ValidationResult(true, null);
-            } else {
-                return new Injection.ValidationResult(
-                        false,
-                        'Class "' + withImpl.getName() + '" does not implement "' + forType.getName() + '"'
-                );
-            }
-        }
     }
 
     /**

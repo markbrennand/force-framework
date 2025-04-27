@@ -57,7 +57,10 @@ global interface Factory {
 ```
 The _**newInstance**_ method must return a new instance of the class to be bound to the property or abstract entity.
 ## Example Code
-Please review the example code in the _**example/injection**_ directory.
+Please deploy the example code in the _**example/injection**_ directory to your org.
+
+You must also assign the _**BindingManager**_ permission set to the user you will run the example code as in
+Anonymous APEX.
 
 The classes and interfaces in the _**QueryClasses**_ class will be used in the examples in this document.
 ## Initialisation
@@ -166,6 +169,53 @@ class that implements it.
 ```
 _As an exercise, see if you can add a validator for the ```QueryClasses.AbstractQuery``` class._
 ## Wiring
-Wiring is the action of using a binding in an application.
+Wiring is the action of injecting a binding into an application.
 
-For example, 
+##### Property Binding
+Values can be wired into an application as assignments to variables, including member variables.
+
+The _**PropertyWiring**_ class in the examples directory shows how to wire a member variable into a class.
+```
+// The member variable 'properties' value is wired into the class on construction.
+public final Map<String, Integer> properties =
+        (Map<String, Integer>) Injection.wire(Map<String, Integer>.class, 'animals');
+```
+The default registry entry for the 'animals' _**Map**_ has 100 sheep, 50 cows and 2000 hens. If you execute
+_**PropertyWiring.run()**_ in Anonymous APEX, you will see the following debug output.
+```
+DEBUG|The farm has 100 sheep
+DEBUG|The farm has 50 cows
+DEBUG|The farm has 2000 hens
+```
+You will see there is an inner class named _**NewConfiguration**_ in the _**PropertyWiring**_ class. This can be
+used to override the base registry binding for the _**Map**_ setup in the test.
+
+From an Anonymous APEX window, execute the following DML.
+```
+insert new Binding__c(Type__c = (Map<String, Integer>.class).getName(), Action__c = 'animals', Implementation__c = PropertyWiring.NewConfiguration.class.getName());```
+```
+The new registry entry for the 'animals' _**Map**_ has 1 sheep, 2 cows and 3 hens. If you execute
+_**PropertyWiring.run()**_ in Anonymous APEX, you will see the following debug output.
+```
+DEBUG|The farm has 1 sheep
+DEBUG|The farm has 2 cows
+DEBUG|The farm has 3 hens
+```
+The new values have been successfully wired into the application.
+
+Log on to your org. From the _**App Launcher**_ select Bindings. If you choose All, you will see the binding that was
+added to bind the class with the new configuration to the 'animals' _**Map**_.
+
+Delete the binding. Then run _**PropertyWiring.run()**_ in Anonymous APEX, you will see that the values displayed
+are now the default values.
+
+In the Bindings page, create a new record. Assign it the following values;
+* Type : Map<String,Integer>
+* Action: animals
+* Implementation: PropertyWiring.NewConfiguration
+
+Run _**PropertyWiring.run()**_ in Anonymous APEX, you will see that the new configuration values are displayed.
+
+If this was production, you've just re-configured your application without having to create custom metadata, a custom
+object or a custom setting to manage the configuration. To change the configuration, you just need to write a
+new APEX class and add a binding to the registry.
