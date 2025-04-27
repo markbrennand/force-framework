@@ -13,6 +13,37 @@ public with sharing class BasicBindingTests {
     }
 
     @IsTest
+    static void testInstantiation() {
+        System.runAs(TestData.getManager()) {
+            TestData.testBindingFailure(TestData.SingletonTest.class, null, TestData.SingletonTest.class, 'Type "TestData.SingletonTest" must not be instantiable');
+            TestData.testBindingFailure(TestData.TestInterface.class, null, TestData.AbstractTest.class, 'Implementation "TestData.AbstractTest" must be instantiable');
+            Injection.add(TestData.TestInterface.class, TestData.SingletonTest.class);
+            Injection.add(TestData.AbstractTest.class, TestData.SingletonTest.class);
+            insert new Binding__c(Type__c = TestData.TestInterface.class.getName(), Implementation__c = TestData.SingletonTest.class.getName());
+            insert new Binding__c(Type__c = TestData.AbstractTest.class.getName(), Implementation__c = TestData.SingletonTest.class.getName());
+        }
+    }
+
+    @IsTest
+    static void testValidation() {
+        System.runAs(TestData.getManager()) {
+            TestData.testBindingFailure(TestData.TestInterface.class, null, User.class, 'Type "User" does not implement "TestInterface"');
+            TestData.testBindingFailure(TestData.AbstractTest.class, null, User.class, 'Type "User" does not extend "AbstractTest"');
+            Injection.add(TestData.TestInterface.class, TestData.SingletonTest.class);
+            Injection.add(TestData.AbstractTest.class, TestData.SingletonTest.class);
+            insert new Binding__c(Type__c = TestData.TestInterface.class.getName(), Implementation__c = TestData.SingletonTest.class.getName());
+            insert new Binding__c(Type__c = TestData.AbstractTest.class.getName(), Implementation__c = TestData.SingletonTest.class.getName());
+        }
+    }
+
+    @IsTest
+    static void testPropertyBinding() {
+        System.runAs(TestData.getManager()) {
+            TestData.testBindingFailure(Map<String, Integer>.class, null, TestData.MapFactory.class, 'Type "Map<String,Integer>" must not be instantiable');
+        }
+    }
+
+    @IsTest
     static void testNonExistentBinding() {
         System.runAs(TestData.getUser()) {
             try {
@@ -109,15 +140,17 @@ public with sharing class BasicBindingTests {
     }
 
     private static void setup(Boolean singleton) {
-        if (singleton) {
-            Injection.add(TestData.TestInterface.class, TestData.SingletonTest.class);
-            Injection.add(TestData.AbstractTest.class, TestData.SingletonTest.class);
-        } else {
-            Injection.add(TestData.TestInterface.class, TestData.PrototypeTest.class);
-            Injection.add(TestData.AbstractTest.class, TestData.PrototypeTest.class);
-        }
+        System.runAs(TestData.getManager()) {
+            if (singleton) {
+                Injection.add(TestData.TestInterface.class, TestData.SingletonTest.class);
+                Injection.add(TestData.AbstractTest.class, TestData.SingletonTest.class);
+            } else {
+                Injection.add(TestData.TestInterface.class, TestData.PrototypeTest.class);
+                Injection.add(TestData.AbstractTest.class, TestData.PrototypeTest.class);
+            }
 
-        TestData.SINGLETON_INSTANCE =
-        TestData.PROTOTYPE_INSTANCE = 0;
+            TestData.SINGLETON_INSTANCE =
+                    TestData.PROTOTYPE_INSTANCE = 0;
+        }
     }
 }

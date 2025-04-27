@@ -130,7 +130,7 @@ public with sharing class BindingTriggerTests {
             );
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Type "User" must not be instantiable'));
+            Assert.isTrue(de.getMessage().contains('Type "User" has no registered bind checker'));
         }
 
         try {

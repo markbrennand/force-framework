@@ -24,8 +24,8 @@ global with sharing virtual class Injection {
 
         /**
          * @description
-         * Given an interface or abstract type, a class implementing this method checks that the given
-         * implementation class can be bound to it.
+         * Given a type to be bound, a class implementing this method must check that the given implementation class
+         * can be bound to it.
          *
          * If the for type is an interface then an implementation of this method must check that the implementation
          * class implements the interface.
@@ -33,8 +33,11 @@ global with sharing virtual class Injection {
          * If the for type is an abstract class then an implementation of this method must check that the implementation
          * class extends the abstract class.
          *
-         * @param forType The interface or abstract class being validated.
-         * @param withImpl The implementation to assign to the interface or abstract class.
+         * If the for type is a class then an implementation of this method must check that the implementation
+         * class is of the same class or a super class of it.
+         *
+         * @param forType The type to be bound.
+         * @param withImpl The implementation to bind to the type.
          *
          * @return The result of the validation.
          */
@@ -114,7 +117,7 @@ global with sharing virtual class Injection {
      * @description
      * Class that creates instances of the implementation class for the binding.
      *
-     * By defailt, a singleton instance is created on the first call to the new instance method. If the class
+     * By default, a singleton instance is created on the first call to the new instance method. If the class
      * implements the Prototype interface then a new instance is created for each wiring of the binding.
      */
     private with sharing class Factory {
@@ -299,7 +302,7 @@ global with sharing virtual class Injection {
      * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
      */
     protected virtual void bind(final Type forType, final Type withImpl) {
-        validateTypes(forType, withImpl);
+        validateTypes(forType, null, withImpl);
         REGISTRY.put(new Key(forType), new Factory(withImpl));
     }
 
@@ -329,7 +332,7 @@ global with sharing virtual class Injection {
      * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
      */
     protected virtual void bind(final Type forType, final String action, final Type withImpl) {
-        validateTypes(forType, withImpl);
+        validateTypes(forType, action, withImpl);
         REGISTRY.put(new ActionKey(forType, action), new Factory(withImpl));
     }
 
@@ -411,18 +414,22 @@ global with sharing virtual class Injection {
      * The implementation must be a concrete class with a no-op constructor. The check is that it can be instantiated.
      *
      * @param forType The type to be validated.
+     * @param action The action or null if none.
      * @param withImpl The implementation to be validated.
      */
-    private void validateTypes(final Type forType, final Type withImpl) {
-        Boolean instantiable = false;
-        try {
-            TypeHelper.newInstance(forType);
-            instantiable = true;
-        } catch(Exception e) {
-        }
+    private void validateTypes(final Type forType, final String action, final Type withImpl) {
+        if (action == null) {
+            Boolean instantiable = false;
+            try {
+                System.debug(forType);
+                TypeHelper.newInstance(forType);
+                instantiable = true;
+            } catch (Exception e) {
+            }
 
-        if (instantiable) {
-            throw createException('Type', forType.getName(), 'must not be instantiable');
+            if (instantiable) {
+                throw createException('Type', forType.getName(), 'must not be instantiable');
+            }
         }
 
         try {
@@ -438,6 +445,8 @@ global with sharing virtual class Injection {
                     throw new APIException(result.errorMessage);
                 }
             }
+        } else {
+            throw createException('Type', forType.getName(), 'has no registered bind checker');
         }
     }
 

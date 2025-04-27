@@ -1,17 +1,19 @@
 [back](../../README.md)
 # Injection
+The term "abstract entity" used in this document shall refer to either an interface or abstract class.
+
 Dependency Injection (DI) is a software design pattern where an object receives its dependencies from an external source
 rather than creating them internally. This promotes loose coupling, making code more modular, testable, and easier to
 maintain. Instead of a class creating its own dependencies, it receives them as arguments (constructor injection),
-properties (setter injection), or through an interface (interface injection).
+properties (setter injection), or through an interface (abstract entity injection).
 
-The term "abstract entity" used in this document shall refer to either an interface or abstract class.
+Thg _**Injection**_ class allows an abstract entity to be bound to a concrete implementation. It supports setter
+and abstract entity injection. An application can use  one of the _**wire**_ methods to perform injection. This allows
+the same implementation class to be used in many places in the code base. It allows for the`implementation to be
+changed application wide easily.
 
-Thg _**Injection**_ class allows an abstract entity to be bound to a concrete implementation. An application can use
-one of the _**wire**_ methods to perform abstract entity injection. This allows the same implementation class to be used
-in many places in the code base. It allows for the implementation to be changed application wide easily.
-
-A custom object, _**Binding__c**_, may be used to configure the binding from the abstract entity to concrete class.
+A custom object, _**Binding__c**_, may be used to configure the binding from the property or abstract entity to a
+concrete class.
 
 By default, the class wired into an application will be a singleton. For this reason, the implementation class must
 not have state that may change in use.
@@ -20,16 +22,18 @@ If an implementation class is required to have state, then the class must implem
 interface.
 
 ## Bindings
-A binding is the mapping from an abstract entity to its concrete implementation. The bindings are stored in
-the _**Injection**_ class as a _**Map**_ called the registry. The key to the registry is the abstract entity.
+A binding is the mapping from a property or abstract entity to its concrete implementation. The bindings are stored in
+the _**Injection**_ class as a _**Map**_ called the registry. The key to the registry is the type of the 
+property or abstract entity.
 
 Two types of binding are supported.
-* A binding to an abstract entity.
-* A binding to an abstract entity with an associated action.
+* A binding to an abstract entity. **Property injection is not supported for this binding.**
+* A binding to a property or abstract entity with an associated action.
 
 For the first type, the abstract entity can only have one binding in the registry.
 
-The second type can have multiple bindings of the abstract entity in the registry. Each must have a unique action.
+The second type can have multiple bindings of the property or abstract entity in the registry. Each must have a unique
+action.
 
 ## Implementation Classes
 Each implementation class must have a public or global no-op constructor. An exception will be thrown if an attempt
@@ -51,7 +55,7 @@ global interface Factory {
     Object newInstance();
 }
 ```
-The _**newInstance**_ method must return a new instance of the class to be bound to the abstract entity.
+The _**newInstance**_ method must return a new instance of the class to be bound to the property or abstract entity.
 ## Example Code
 Please review the example code in the _**example/injection**_ directory.
 
@@ -81,7 +85,7 @@ The fields of the custom object are;
 
 | Field             | Type      | Description                                                                          |
 |-------------------|-----------|--------------------------------------------------------------------------------------|
-| Type__c           | Mandatory | The class name of the abstract entity to be bound.                                   |
+| Type__c           | Mandatory | The class name of the property or abstract entity to be bound.                       |
 | Implementation__c | Mandatory | The class name of the concrete class that implements the abstract entity.            |
 | Action__c         | Optional  | The action to be used in combination with the Type__c field to identity the binding. |
 
@@ -98,40 +102,44 @@ public static void custom() {
         insert new Binding__c(Type__c = 'QueryClasses.AbstractQuery', Action__c = 'SYSTEM', Implementation__c = 'QueryClasses.SystemAbstractQueryImpl');
 ```
 ## Binding Validation
-Validation of the implementation bound to an interface or abstract class can be performed by adding a class that
+Validation of the implementation bound to a property or abstract entity class can be performed by adding a class that
 implements the _**BindingCheck**_ interface;
 
 ```
 global interface BindingCheck {
-        /**
-         * @description 
-         * Given an interface or abstract type, a class implementing this method checks that the given
-         * implementation class can be bound to it.
-         * 
-         * If the for type is an interface then an implementation of this method must check that the implementation
-         * class implements the interface.
-         * 
-         * If the for type is an abstract class then an implementation of this method must check that the implementation
-         * class extends the abstract class.
-         * 
-         * @param forType The interface or abstract class being validated.
-         * @param withImpl The implementation to assign to the interface or abstract class.
-         *
-         * @return The result of the validation.
-         */
-        ValidationResult validate(Type forType, Type withImpl);
-    }
+
+    /**
+     * @description
+     * Given a type to be bound, a class implementing this method must check that the given implementation class
+     * can be bound to it.
+     *
+     * If the for type is an interface then an implementation of this method must check that the implementation
+     * class implements the interface.
+     *
+     * If the for type is an abstract class then an implementation of this method must check that the implementation
+     * class extends the abstract class.
+     * 
+     * If the for type is a class then an implementation of this method must check that the implementation
+     * class is of the same class or a super class of it.
+     *
+     * @param forType The type to be bound.
+     * @param withImpl The implementation to bind to the type.
+     *
+     * @return The result of the validation.
+     */
+    ValidationResult validate(Type forType, Type withImpl);
+}
 ```
 
-The _**BindingCheck__mdt**_ custom metadata object holds a mapping from the abstract entity to its _**BindingCheck**_
-validator.
+The _**BindingCheck__mdt**_ custom metadata object holds a mapping from the property or abstract entity to its
+_**BindingCheck**_ validator.
 
 The fields of the metadata object are;
 
 | Field |Type | Description                                                                                             |
 |-------|-----|---------------------------------------------------------------------------------------------------------|
-| Type__c | Mandatory | The class name of the abstract entity to be validated.                                                  |                                               
-| Checker__c | Mandatory | The class name of the _**BindingCheck**_ implementation to validate the binding of the abstract entity. |
+| Type__c | Mandatory | The class name of the property or abstract entity to be validated.                                      |                                               
+| Checker__c | Mandatory | The class name of the _**BindingCheck**_ implementation to validate the binding. |
 | IsUnitTest__c | Mandatory | If true, the _**BindingCheck**_ is for unit test use only.                                              |
 
 The _**BindingCheck.validate**_ method must return an _**Injection.ValidationResult**_ object which notifies the caller
