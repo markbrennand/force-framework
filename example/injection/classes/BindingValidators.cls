@@ -71,4 +71,23 @@ public with sharing class BindingValidators {
             );
         }
     }
+
+    /**
+    * @description
+    * Class providing validation of any bindings made to AccountClasses.AccountManager.
+    *
+    * A custom metadata record for the BindingCheck__mdt type is used to register the validator.
+    */
+    public with sharing class AccountManagerValidator implements Injection.BindingCheck {
+        public Injection.ValidationResult validate(Type forType, Type withImpl) {
+            if (TypeHelper.newInstance(withImpl) instanceof AccountClasses.AccountManager) {
+                return new Injection.ValidationResult(true, null);
+            } else {
+                return new Injection.ValidationResult(
+                        false,
+                        'Implementation "' + withImpl.getName() + '" is not an instance of "' + forType.getName() + '"'
+                );
+            }
+        }
+    }
 }

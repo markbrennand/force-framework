@@ -421,7 +421,6 @@ global with sharing virtual class Injection {
         if (action == null) {
             Boolean instantiable = false;
             try {
-                System.debug(forType);
                 TypeHelper.newInstance(forType);
                 instantiable = true;
             } catch (Exception e) {

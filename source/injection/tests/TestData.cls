@@ -127,7 +127,6 @@ public with sharing class TestData {
         private String value;
 
         public SingletonCustomTest() {
-            System.debug('SingletonCustomTest(' + SINGLETON_INSTANCE + ')');
             value = 'CUSTOM' + (++SINGLETON_INSTANCE);
         }
         public String getValue() {

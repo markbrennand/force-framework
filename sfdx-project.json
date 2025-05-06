@@ -1,11 +1,19 @@
 {
   "packageDirectories": [
     {
+      "versionName": "0.1",
+      "versionNumber": "0.1.0.NEXT",
       "path": "source",
-      "default": true
+      "default": true,
+      "package": "sf-frameworks",
+      "versionDescription": "Frameworks for Salesforce development"
     }
   ],
   "namespace": null,
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "63.0"
+  "sourceApiVersion": "63.0",
+  "packageAliases": {
+    "sf-frameworks": "0HogL00000008f7SAA",
+    "sf-frameworks@0.1.0-3": "04tgL0000001VPxQAM"
+  }
 }
