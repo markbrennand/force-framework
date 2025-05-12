@@ -15,8 +15,8 @@ public with sharing class TestData {
         User manager = new User(
                 Alias = 'manager',
                 ProfileId = profileId,
-                Username = 'manager@test.com',
-                Email = 'manager@test.com',
+                Username = 'manager@sf-frameworks.test.com',
+                Email = 'manager@sf-frameworks.test.com',
                 EmailEncodingKey = 'ISO-8859-1',
                 TimeZoneSidKey = 'Europe/London',
                 LocaleSidKey = 'en_US',
@@ -28,8 +28,8 @@ public with sharing class TestData {
         User user = new User(
                 Alias = 'user',
                 ProfileId = profileId,
-                Username = 'user@test.com',
-                Email = 'user@test.com',
+                Username = 'user@sf-frameworks.test.com',
+                Email = 'user@sf-frameworks.test.com',
                 EmailEncodingKey = 'ISO-8859-1',
                 TimeZoneSidKey = 'Europe/London',
                 LocaleSidKey = 'en_US',
@@ -42,7 +42,7 @@ public with sharing class TestData {
 
         PermissionSetAssignment managerAssignment = new PermissionSetAssignment(
                 AssigneeId = manager.Id,
-                PermissionSetId = [SELECT Id FROM PermissionSet WHERE Name = 'InjectionManager' LIMIT 1].Id
+                PermissionSetId = [SELECT Id FROM PermissionSet WHERE Name = 'FrameworkManager' LIMIT 1].Id
         );
 
         PermissionSetAssignment userAssignment = new PermissionSetAssignment(
@@ -54,11 +54,11 @@ public with sharing class TestData {
     }
 
     public static User getManager() {
-        return [SELECT Id FROM User WHERE Username = 'manager@test.com' LIMIT 1];
+        return [SELECT Id FROM User WHERE Username = 'manager@sf-frameworks.test.com' LIMIT 1];
     }
 
     public static User getUser() {
-        return [SELECT Id FROM User WHERE Username = 'user@test.com' LIMIT 1];
+        return [SELECT Id FROM User WHERE Username = 'user@sf-frameworks.test.com' LIMIT 1];
     }
 
     public static void testBindingFailure(Type forType, String action, Type withImpl, String expectedError) {
@@ -156,7 +156,7 @@ public with sharing class TestData {
             } else {
                 return new Injection.ValidationResult(
                         false,
-                        'Type "' + withImpl.getName() + '" does not extend "AbstractTest"'
+                        'Class ' + withImpl.getName() + ' does not extend AbstractTest'
                 );
             }
         }
@@ -173,7 +173,7 @@ public with sharing class TestData {
             } else {
                 return new Injection.ValidationResult(
                         false,
-                        'Type "' + withImpl.getName() + '" does not implement "TestInterface"'
+                        'Class ' + withImpl.getName() + ' does not implement TestInterface'
                 );
             }
         }
@@ -197,14 +197,14 @@ public with sharing class TestData {
                 when else {
                     return new Injection.ValidationResult(
                             false,
-                            'Type "' + withImpl + '" can not be validated'
+                            'Class ' + withImpl + ' can not be validated'
                     );
                 }
             }
 
             return new Injection.ValidationResult(
                     false,
-                    'Implementation "' + withImpl.getName() + '" is not a super class of "' + forType.getName() + '"'
+                    'Implementation ' + withImpl.getName() + ' is not a super class of ' + forType.getName()
             );
         }
     }

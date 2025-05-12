@@ -15,8 +15,8 @@ public with sharing class BasicBindingTests {
     @IsTest
     static void testInstantiation() {
         System.runAs(TestData.getManager()) {
-            TestData.testBindingFailure(TestData.SingletonTest.class, null, TestData.SingletonTest.class, 'Type "TestData.SingletonTest" must not be instantiable');
-            TestData.testBindingFailure(TestData.TestInterface.class, null, TestData.AbstractTest.class, 'Implementation "TestData.AbstractTest" must be instantiable');
+            TestData.testBindingFailure(TestData.SingletonTest.class, null, TestData.SingletonTest.class, 'Class TestData.SingletonTest must not be instantiable');
+            TestData.testBindingFailure(TestData.TestInterface.class, null, TestData.AbstractTest.class, 'Implementation TestData.AbstractTest must be instantiable');
             Injection.add(TestData.TestInterface.class, TestData.SingletonTest.class);
             Injection.add(TestData.AbstractTest.class, TestData.SingletonTest.class);
             insert new Binding__c(Type__c = TestData.TestInterface.class.getName(), Implementation__c = TestData.SingletonTest.class.getName());
@@ -27,8 +27,8 @@ public with sharing class BasicBindingTests {
     @IsTest
     static void testValidation() {
         System.runAs(TestData.getManager()) {
-            TestData.testBindingFailure(TestData.TestInterface.class, null, User.class, 'Type "User" does not implement "TestInterface"');
-            TestData.testBindingFailure(TestData.AbstractTest.class, null, User.class, 'Type "User" does not extend "AbstractTest"');
+            TestData.testBindingFailure(TestData.TestInterface.class, null, User.class, 'Class User does not implement TestInterface');
+            TestData.testBindingFailure(TestData.AbstractTest.class, null, User.class, 'Class User does not extend AbstractTest');
             Injection.add(TestData.TestInterface.class, TestData.SingletonTest.class);
             Injection.add(TestData.AbstractTest.class, TestData.SingletonTest.class);
             insert new Binding__c(Type__c = TestData.TestInterface.class.getName(), Implementation__c = TestData.SingletonTest.class.getName());
@@ -39,7 +39,7 @@ public with sharing class BasicBindingTests {
     @IsTest
     static void testPropertyBinding() {
         System.runAs(TestData.getManager()) {
-            TestData.testBindingFailure(Map<String, Integer>.class, null, TestData.MapFactory.class, 'Type "Map<String,Integer>" must not be instantiable');
+            TestData.testBindingFailure(Map<String, Integer>.class, null, TestData.MapFactory.class, 'Class Map<String,Integer> must not be instantiable');
         }
     }
 
@@ -50,7 +50,7 @@ public with sharing class BasicBindingTests {
                 Injection.wire(TestData.TestInterface.class);
                 Assert.fail();
             } catch (Injection.APIException ae) {
-                Assert.areEqual('Binding for "TestData.TestInterface" not found in registry', ae.getMessage());
+                Assert.areEqual('Binding for TestData.TestInterface not found in registry', ae.getMessage());
             }
         }
     }

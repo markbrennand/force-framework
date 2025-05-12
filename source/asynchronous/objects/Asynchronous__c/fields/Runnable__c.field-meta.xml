@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Runnable__c</fullName>
+    <description>The Asynchronous.Runnable implementation called when the job is run from an Apex job.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>The Asynchronous.Runnable implementation that will be created and run in an Apex job. The class will also be created and called on the success, failure, cancellation and error conditions detected during processing. The class may implement the TypeHelper.Factory interface to allow an instance of the Asynchronous.Runnable implementation to be constructed indirectly.</inlineHelpText>
+    <label>Runnable</label>
+    <length>255</length>
+    <required>true</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

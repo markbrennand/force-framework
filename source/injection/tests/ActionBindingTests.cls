@@ -15,7 +15,7 @@ public with sharing class ActionBindingTests {
     @IsTest
     static void testInstantiation() {
         System.runAs(TestData.getManager()) {
-            TestData.testBindingFailure(TestData.TestInterface.class, 'Test', TestData.AbstractTest.class, 'Implementation "TestData.AbstractTest" must be instantiable');
+            TestData.testBindingFailure(TestData.TestInterface.class, 'Test', TestData.AbstractTest.class, 'Implementation TestData.AbstractTest must be instantiable');
             Injection.add(TestData.TestInterface.class, 'Test', TestData.SingletonTest.class);
             Injection.add(TestData.AbstractTest.class, 'Test', TestData.SingletonTest.class);
             Injection.add(Integer.class, 'Test', TesTData.IntegerFactory.class);
@@ -28,10 +28,10 @@ public with sharing class ActionBindingTests {
     @IsTest
     static void testValidation() {
         System.runAs(TestData.getManager()) {
-            TestData.testBindingFailure(TestData.TestInterface.class, 'Test', User.class, 'Type "User" does not implement "TestInterface"');
-            TestData.testBindingFailure(TestData.AbstractTest.class, 'Test', User.class, 'Type "User" does not extend "AbstractTest"');
-            TestData.testBindingFailure(Integer.class, 'Test', User.class, 'Implementation "User" is not a super class of "Integer"');
-            TestData.testBindingFailure(Map<String, Integer>.class, 'Test', Map<String, Double>.class, 'Implementation "Map<String,Double>" is not a super class of "Map<String,Integer>"');
+            TestData.testBindingFailure(TestData.TestInterface.class, 'Test', User.class, 'Class User does not implement TestInterface');
+            TestData.testBindingFailure(TestData.AbstractTest.class, 'Test', User.class, 'Class User does not extend AbstractTest');
+            TestData.testBindingFailure(Integer.class, 'Test', User.class, 'Implementation User is not a super class of Integer');
+            TestData.testBindingFailure(Map<String, Integer>.class, 'Test', Map<String, Double>.class, 'Implementation Map<String,Double> is not a super class of Map<String,Integer>');
             Injection.add(TestData.TestInterface.class, 'Test', TestData.SingletonTest.class);
             Injection.add(TestData.AbstractTest.class, 'Test', TestData.SingletonTest.class);
             Injection.add(Integer.class, 'Test', TestData.IntegerFactory.class);
@@ -51,7 +51,7 @@ public with sharing class ActionBindingTests {
                 Injection.wire(TestData.TestInterface.class, 'NotTest');
                 Assert.fail();
             } catch (Injection.APIException ae) {
-                Assert.areEqual('Binding for "TestData.TestInterface" with action "NotTest" not found in registry', ae.getMessage());
+                Assert.areEqual('Binding for TestData.TestInterface with action NotTest not found in registry', ae.getMessage());
             }
         }
     }

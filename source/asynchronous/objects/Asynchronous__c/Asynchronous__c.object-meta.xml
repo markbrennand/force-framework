@@ -143,7 +143,7 @@
     <allowInChatterGroups>false</allowInChatterGroups>
     <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
-    <description>Bindings to add to or override in injection.</description>
+    <description>Object representing a job being managed by the Asynchronous Framework.</description>
     <enableActivities>false</enableActivities>
     <enableBulkApi>true</enableBulkApi>
     <enableFeeds>false</enableFeeds>
@@ -154,13 +154,13 @@
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <externalSharingModel>Private</externalSharingModel>
-    <label>Binding</label>
+    <label>Asynchronous</label>
     <nameField>
-        <displayFormat>BINDING-{000000}</displayFormat>
-        <label>Binding Name</label>
+        <displayFormat>ASYNC-{0000000000}</displayFormat>
+        <label>Asynchronous Name</label>
         <type>AutoNumber</type>
     </nameField>
-    <pluralLabel>Bindings</pluralLabel>
+    <pluralLabel>Asynchronous</pluralLabel>
     <searchLayouts></searchLayouts>
     <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>

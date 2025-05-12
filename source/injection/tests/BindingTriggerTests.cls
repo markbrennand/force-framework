@@ -65,7 +65,7 @@ public with sharing class BindingTriggerTests {
             );
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for "TestData.TestInterface" already exists'));
+            Assert.isTrue(de.getMessage().contains('Binding for TestData.TestInterface already exists'));
         }
 
         try {
@@ -75,7 +75,7 @@ public with sharing class BindingTriggerTests {
             );
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for "TestData.AbstractTest" already exists'));
+            Assert.isTrue(de.getMessage().contains('Binding for TestData.AbstractTest already exists'));
         }
 
         try {
@@ -86,7 +86,7 @@ public with sharing class BindingTriggerTests {
             );
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for "TestData.TestInterface" with action "Test" already exists'));
+            Assert.isTrue(de.getMessage().contains('Binding for TestData.TestInterface with action Test already exists'));
         }
 
         try {
@@ -97,7 +97,7 @@ public with sharing class BindingTriggerTests {
             );
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for "TestData.AbstractTest" with action "Test" already exists'));
+            Assert.isTrue(de.getMessage().contains('Binding for TestData.AbstractTest with action Test already exists'));
         }
 
         try {
@@ -108,7 +108,7 @@ public with sharing class BindingTriggerTests {
             );
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Type "User" does not implement "TestInterface"'));
+            Assert.isTrue(de.getMessage().contains('Class User does not implement TestInterface'));
         }
 
         try {
@@ -119,7 +119,7 @@ public with sharing class BindingTriggerTests {
             );
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Type "User" does not extend "AbstractTest"'));
+            Assert.isTrue(de.getMessage().contains('Class User does not extend AbstractTest'));
         }
 
         try {
@@ -130,7 +130,7 @@ public with sharing class BindingTriggerTests {
             );
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Type "User" has no registered bind checker'));
+            Assert.isTrue(de.getMessage().contains('Class User has no registered bind checker'));
         }
 
         try {
@@ -141,7 +141,7 @@ public with sharing class BindingTriggerTests {
             );
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Implementation "TestData.AbstractTest" must be instantiable'));
+            Assert.isTrue(de.getMessage().contains('Implementation TestData.AbstractTest must be instantiable'));
         }
     }
 
@@ -154,7 +154,7 @@ public with sharing class BindingTriggerTests {
             upsert binding1;
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for "TestData.AbstractTest" already exists'));
+            Assert.isTrue(de.getMessage().contains('Binding for TestData.AbstractTest already exists'));
         }
 
         try {
@@ -166,7 +166,7 @@ public with sharing class BindingTriggerTests {
             };
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for "TestData.TestInterface" already exists'));
+            Assert.isTrue(de.getMessage().contains('Binding for TestData.TestInterface already exists'));
         }
 
         try {
@@ -174,7 +174,7 @@ public with sharing class BindingTriggerTests {
             upsert binding1;
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for "TestData.AbstractTest" with action "Test" already exists'));
+            Assert.isTrue(de.getMessage().contains('Binding for TestData.AbstractTest with action Test already exists'));
         }
     }
 }

@@ -240,7 +240,7 @@ into a class.
 public final Map<String, Integer> properties =
         (Map<String, Integer>) Injection.wire(Map<String, Integer>.class, 'animals');
 ```
-The default registry entry for the 'animals' _Map_ has 100 sheep, 50 cows and 2000 hens. If you run
+The default registry entry for the '_animals_' _Map_ has 100 sheep, 50 cows and 2000 hens. If you run
 _PropertyWiring.run()_ in Anonymous APEX, you will see the following debug output.
 ```
 DEBUG|The farm has 100 sheep
@@ -254,7 +254,7 @@ From an Anonymous APEX window, run the following DML.
 ```
 insert new Binding__c(Type__c = (Map<String, Integer>.class).getName(), Action__c = 'animals', Implementation__c = PropertyWiring.NewConfiguration.class.getName());```
 ```
-The new registry entry for the 'animals' _Map_ has 1 sheep, 2 cows and 3 hens. If you run
+The new registry entry for the '_animals_' _Map_ has 1 sheep, 2 cows and 3 hens. If you run
 _PropertyWiring.run()_ in Anonymous APEX, you will see the following debug output.
 ```
 DEBUG|The farm has 1 sheep
@@ -263,8 +263,8 @@ DEBUG|The farm has 3 hens
 ```
 The new values have been successfully wired into the application.
 
-Log on to your org. From the _App Launcher_ select _Bindings_. If you choose All, you will see the binding that was
-added to bind the class with the new configuration to the 'animals' _Map_.
+Log on to your org. From the _App Launcher_ select _Bindings_. If you choose _All_, you will see the binding that was
+added to bind the class with the new configuration to the '_animals_' _Map_.
 
 Delete the _Binding_. Then run _PropertyWiring.run()_ in Anonymous APEX, you will see that the values displayed
 are now the default values.

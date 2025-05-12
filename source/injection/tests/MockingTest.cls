@@ -20,7 +20,7 @@ public with sharing class MockingTest {
         try {
             Assert.isTrue(Injection.wire(TestData.AbstractTest.class) instanceof TestData.SingletonTest);
         } catch(Injection.APIException ae) {
-            Assert.areEqual('Binding for "TestData.AbstractTest" is not defined', ae.getMessage());
+            Assert.areEqual('Binding for TestData.AbstractTest is not defined', ae.getMessage());
         }
 
         Assert.isTrue(Injection.wire(TestData.AbstractTest.class, 'Test') instanceof TestData.PrototypeTest);
@@ -28,13 +28,13 @@ public with sharing class MockingTest {
         try {
             Assert.isTrue(Injection.wire(TestData.AbstractTest.class, 'NotTest') instanceof TestData.PrototypeTest);
         } catch(Injection.APIException ae) {
-            Assert.areEqual('Binding for "TestData.AbstractTest" for action "NotTest" is not defined', ae.getMessage());
+            Assert.areEqual('Binding for TestData.AbstractTest for action NotTest is not defined', ae.getMessage());
         }
 
         try {
             Assert.isTrue(Injection.wire(TestData.TestInterface.class, 'Test') instanceof TestData.PrototypeTest);
         } catch(Injection.APIException ae) {
-            Assert.areEqual('Binding for "TestData.TestInterface" for action "Test" is not defined', ae.getMessage());
+            Assert.areEqual('Binding for TestData.TestInterface for action Test is not defined', ae.getMessage());
         }
     }
 
@@ -46,7 +46,7 @@ public with sharing class MockingTest {
                 return handleWire(args);
             }
 
-            throw new Injection.APIException('Unexpected method "' + stubbedMethodName + '" called');
+            throw new Injection.APIException('Unexpected method ' + stubbedMethodName + ' called');
         }
 
         private Boolean handleBound(List<Object> args) {
@@ -63,9 +63,9 @@ public with sharing class MockingTest {
                     return new TestData.SingletonTest();
                 } else {
                     throw new Injection.APIException(
-                            'Binding for "'
+                            'Binding for '
                                     + args[0]
-                                    + '" is not defined'
+                                    + ' is not defined'
                     );
                 }
 
@@ -73,10 +73,10 @@ public with sharing class MockingTest {
                 return new TestData.PrototypeTest();
             } else {
                 throw new Injection.APIException(
-                        'Binding for "' + args[0]
-                                + '" for action "'
+                        'Binding for ' + args[0]
+                                + ' for action '
                                 + args[1]
-                                + '" is not defined'
+                                + ' is not defined'
                 );
             }
         }

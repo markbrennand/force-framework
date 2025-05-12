@@ -62,23 +62,6 @@ global with sharing virtual class Injection {
 
     /**
      * @description
-     * Active API instance.
-     *
-     * The instance is test visible so it can be mocked.
-     */
-    @TestVisible
-    private static Injection INSTANCE {
-        private get {
-            if (INSTANCE == null) {
-                INSTANCE = new Injection();
-            }
-            return INSTANCE;
-        }
-        private set;
-    }
-
-    /**
-     * @description
      * Mapping from a binding Type to the Binding Check class to validate it.
      */
     private static final Map<Type, List<BindingCheck>> CHECKS {
@@ -389,8 +372,8 @@ global with sharing virtual class Injection {
      * @param bindings The custom bindings to add to the registry.
      */
     public static void build(List<Binding__c> bindings) {
-        try {
-            for (Binding__c binding : bindings) {
+        for (Binding__c binding : bindings) {
+            try {
                 final Type type = TypeHelper.loadType(binding.Type__c);
                 final Type implementation = TypeHelper.loadType(binding.Implementation__c);
 
@@ -399,9 +382,9 @@ global with sharing virtual class Injection {
                 } else {
                     add(type, binding.Action__c, implementation);
                 }
+            } catch (Exception e) {
+                binding.addError(e.getMessage());
             }
-        } catch(Exception e) {
-            throw new APIException(e.getMessage(), e);
         }
     }
 
@@ -427,7 +410,7 @@ global with sharing virtual class Injection {
             }
 
             if (instantiable) {
-                throw createException('Type', forType.getName(), 'must not be instantiable');
+                throw createException('Class', forType.getName(), 'must not be instantiable');
             }
         }
 
@@ -445,7 +428,7 @@ global with sharing virtual class Injection {
                 }
             }
         } else {
-            throw createException('Type', forType.getName(), 'has no registered bind checker');
+            throw createException('Class', forType.getName(), 'has no registered bind checker');
         }
     }
 
@@ -550,9 +533,9 @@ global with sharing virtual class Injection {
         return new APIException(String.join(
                 new List<String>{
                         prefix,
-                        ' "',
+                        ' ',
                         typeName,
-                        '" ',
+                        ' ',
                         postfix
                 },
                 ''
@@ -574,15 +557,31 @@ global with sharing virtual class Injection {
         return new APIException(String.join(
                 new List<String>{
                         prefix,
-                        ' "',
+                        ' ',
                         typeName,
-                        '"',
-                        ' with action "',
+                        ' with action ',
                         action,
-                        '" ',
+                        ' ',
                         postfix
                 },
                 ''
         ));
+    }
+
+    /**
+     * @description
+     * Active API instance.
+     *
+     * The instance is test visible so it can be mocked.
+     */
+    @TestVisible
+    private static Injection INSTANCE {
+        private get {
+            if (INSTANCE == null) {
+                INSTANCE = new Injection();
+            }
+            return INSTANCE;
+        }
+        private set;
     }
 }
