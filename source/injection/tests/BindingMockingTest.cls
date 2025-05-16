@@ -5,36 +5,36 @@
  * @author Mark Brennand
  */
 @IsTest
-public with sharing class MockingTest {
+public with sharing class BindingMockingTest {
 
     @IsTest
     static void testMockedRegistry() {
         Injection.INSTANCE = (Injection) Test.createStub(Injection.class, new MockRegistry());
-        Assert.isTrue(Injection.has(TestData.TestInterface.class));
-        Assert.isFalse(Injection.has(TestData.AbstractTest.class));
-        Assert.isTrue(Injection.has(TestData.AbstractTest.class, 'Test'));
-        Assert.isFalse(Injection.has(TestData.AbstractTest.class, 'NotTest'));
-        Assert.isFalse(Injection.has(TestData.TestInterface.class, 'Test'));
-        Assert.isTrue(Injection.wire(TestData.TestInterface.class) instanceof TestData.SingletonTest);
+        Assert.isTrue(Injection.has(BindingTestHelper.TestInterface.class));
+        Assert.isFalse(Injection.has(BindingTestHelper.AbstractTest.class));
+        Assert.isTrue(Injection.has(BindingTestHelper.AbstractTest.class, 'Test'));
+        Assert.isFalse(Injection.has(BindingTestHelper.AbstractTest.class, 'NotTest'));
+        Assert.isFalse(Injection.has(BindingTestHelper.TestInterface.class, 'Test'));
+        Assert.isTrue(Injection.wire(BindingTestHelper.TestInterface.class) instanceof BindingTestHelper.SingletonTest);
 
         try {
-            Assert.isTrue(Injection.wire(TestData.AbstractTest.class) instanceof TestData.SingletonTest);
+            Assert.isTrue(Injection.wire(BindingTestHelper.AbstractTest.class) instanceof BindingTestHelper.SingletonTest);
         } catch(Injection.APIException ae) {
-            Assert.areEqual('Binding for TestData.AbstractTest is not defined', ae.getMessage());
+            Assert.areEqual('Binding for BindingTestHelper.AbstractTest is not defined', ae.getMessage());
         }
 
-        Assert.isTrue(Injection.wire(TestData.AbstractTest.class, 'Test') instanceof TestData.PrototypeTest);
+        Assert.isTrue(Injection.wire(BindingTestHelper.AbstractTest.class, 'Test') instanceof BindingTestHelper.PrototypeTest);
 
         try {
-            Assert.isTrue(Injection.wire(TestData.AbstractTest.class, 'NotTest') instanceof TestData.PrototypeTest);
+            Assert.isTrue(Injection.wire(BindingTestHelper.AbstractTest.class, 'NotTest') instanceof BindingTestHelper.PrototypeTest);
         } catch(Injection.APIException ae) {
-            Assert.areEqual('Binding for TestData.AbstractTest for action NotTest is not defined', ae.getMessage());
+            Assert.areEqual('Binding for BindingTestHelper.AbstractTest for action NotTest is not defined', ae.getMessage());
         }
 
         try {
-            Assert.isTrue(Injection.wire(TestData.TestInterface.class, 'Test') instanceof TestData.PrototypeTest);
+            Assert.isTrue(Injection.wire(BindingTestHelper.TestInterface.class, 'Test') instanceof BindingTestHelper.PrototypeTest);
         } catch(Injection.APIException ae) {
-            Assert.areEqual('Binding for TestData.TestInterface for action Test is not defined', ae.getMessage());
+            Assert.areEqual('Binding for BindingTestHelper.TestInterface for action Test is not defined', ae.getMessage());
         }
     }
 
@@ -51,16 +51,16 @@ public with sharing class MockingTest {
 
         private Boolean handleBound(List<Object> args) {
             if (args.size() == 1) {
-                return args[0] == TestData.TestInterface.class;
+                return args[0] == BindingTestHelper.TestInterface.class;
             } else {
-                return args[0] == TestData.AbstractTest.class && args[1] == 'Test';
+                return args[0] == BindingTestHelper.AbstractTest.class && args[1] == 'Test';
             }
         }
 
         private Object handleWire(List<Object> args) {
             if (args.size() == 1) {
-                if (args[0] == TestData.TestInterface.class) {
-                    return new TestData.SingletonTest();
+                if (args[0] == BindingTestHelper.TestInterface.class) {
+                    return new BindingTestHelper.SingletonTest();
                 } else {
                     throw new Injection.APIException(
                             'Binding for '
@@ -70,7 +70,7 @@ public with sharing class MockingTest {
                 }
 
             } else if (args[1] == 'Test') {
-                return new TestData.PrototypeTest();
+                return new BindingTestHelper.PrototypeTest();
             } else {
                 throw new Injection.APIException(
                         'Binding for ' + args[0]

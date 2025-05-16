@@ -1,11 +1,11 @@
 /**
  * @description
- * Common test data for unit tests.
+ * Common test data and methods for Binding related unit tests.
  *
  * @author Mark Brennand
  */
 @IsTest
-public with sharing class TestData {
+public with sharing class BindingTestHelper {
     public static Integer SINGLETON_INSTANCE = 0;
     public static Integer PROTOTYPE_INSTANCE = 0;
 

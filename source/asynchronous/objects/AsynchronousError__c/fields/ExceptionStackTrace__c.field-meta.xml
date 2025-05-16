@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ExceptionStackTrace__c</fullName>
+    <description>The stack trace of Exception thrown.</description>
+    <inlineHelpText>If the processing of the job by the Asynchronous framework fails, this field records the stack trace of the of the Exception thrown.</inlineHelpText>
+    <label>Exception Stack Trace</label>
+    <length>32768</length>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>3</visibleLines>
+</CustomField>

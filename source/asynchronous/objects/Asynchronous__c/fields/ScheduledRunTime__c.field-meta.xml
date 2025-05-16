@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ScheduledRunTime__c</fullName>
+    <description>The date and time at which the job is next scheduled to run.</description>
+    <inlineHelpText>The Asynchronous Scheduler will try and run this job as close to the date and time in this field as possible.</inlineHelpText>
+    <label>Scheduled Run Time</label>
+    <required>true</required>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
+</CustomField>

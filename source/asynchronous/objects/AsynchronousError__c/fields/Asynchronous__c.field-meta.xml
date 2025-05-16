@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Asynchronous__c</fullName>
+    <description>The Asynchronous object the error data in this object is for.</description>
+    <inlineHelpText>Details of the error are saved in this object for each failed run of a job by the Asynchronous framework . This field gives the link to the job being managed by the Asynchronous framework that the error is recorded for.</inlineHelpText>
+    <label>Asynchronous</label>
+    <referenceTo>Asynchronous__c</referenceTo>
+    <relationshipLabel>AsynchronousErrors</relationshipLabel>
+    <relationshipName>AsynchronousErrors</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

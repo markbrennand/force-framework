@@ -15,25 +15,25 @@ public with sharing class BindingTriggerTests {
     @IsTest
     static void testValidInserts() {
         binding1 = new Binding__c(
-                Type__c = TestData.TestInterface.class.getName(),
-                Implementation__c = TestData.SingletonTest.class.getName()
+                Type__c = BindingTestHelper.TestInterface.class.getName(),
+                Implementation__c = BindingTestHelper.SingletonTest.class.getName()
         );
 
         binding2 = new Binding__c(
-                Type__c = TestData.AbstractTest.class.getName(),
-                Implementation__c = TestData.SingletonTest.class.getName()
+                Type__c = BindingTestHelper.AbstractTest.class.getName(),
+                Implementation__c = BindingTestHelper.SingletonTest.class.getName()
         );
 
         binding3 = new Binding__c(
-                Type__c = TestData.TestInterface.class.getName(),
+                Type__c = BindingTestHelper.TestInterface.class.getName(),
                 Action__c = 'Test',
-                Implementation__c = TestData.SingletonTest.class.getName()
+                Implementation__c = BindingTestHelper.SingletonTest.class.getName()
         );
 
         binding4 = new Binding__c(
-                Type__c = TestData.AbstractTest.class.getName(),
+                Type__c = BindingTestHelper.AbstractTest.class.getName(),
                 Action__c = 'Test',
-                Implementation__c = TestData.SingletonTest.class.getName()
+                Implementation__c = BindingTestHelper.SingletonTest.class.getName()
         );
 
         insert new List<Binding__c> { binding1, binding2, binding3, binding4 };
@@ -43,12 +43,12 @@ public with sharing class BindingTriggerTests {
     static void testValidUpdates() {
         testValidInserts();
 
-        binding1.Type__c = TestData.AbstractTest.class.getName();
+        binding1.Type__c = BindingTestHelper.AbstractTest.class.getName();
         binding1.Action__c = 'Test';
         binding4.Action__c = 'NotTest';
         upsert new List<Binding__c> { binding1, binding4 };
 
-        binding2.Type__c = TestData.TestInterface.class.getName();
+        binding2.Type__c = BindingTestHelper.TestInterface.class.getName();
         binding2.Action__c = 'Test';
         binding3.Action__c = null;
         upsert new List<Binding__c> { binding2, binding3 };
@@ -60,49 +60,50 @@ public with sharing class BindingTriggerTests {
 
         try {
             insert new Binding__c(
-                    Type__c = TestData.TestInterface.class.getName(),
-                    Implementation__c = TestData.SingletonTest.class.getName()
+                    Type__c = BindingTestHelper.TestInterface.class.getName(),
+                    Implementation__c = BindingTestHelper.SingletonTest.class.getName()
             );
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for TestData.TestInterface already exists'));
+            Assert.isTrue(de.getMessage().contains('Binding for BindingTestHelper.TestInterface already exists'));
         }
 
         try {
             insert new Binding__c(
-                    Type__c = TestData.AbstractTest.class.getName(),
-                    Implementation__c = TestData.SingletonTest.class.getName()
+                    Type__c = BindingTestHelper.AbstractTest.class.getName(),
+                    Implementation__c = BindingTestHelper.SingletonTest.class.getName()
             );
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for TestData.AbstractTest already exists'));
+            Assert.isTrue(de.getMessage().contains('Binding for BindingTestHelper.AbstractTest already exists'));
         }
 
         try {
             insert new Binding__c(
-                    Type__c = TestData.TestInterface.class.getName(),
+                    Type__c = BindingTestHelper.TestInterface.class.getName(),
                     Action__c = 'Test',
-                    Implementation__c = TestData.SingletonTest.class.getName()
+                    Implementation__c = BindingTestHelper.SingletonTest.class.getName()
             );
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for TestData.TestInterface with action Test already exists'));
+            System.debug(de.getMessage());
+            Assert.isTrue(de.getMessage().contains('Binding for BindingTestHelper.TestInterface with action Test already exists'));
         }
 
         try {
             insert new Binding__c(
-                    Type__c = TestData.AbstractTest.class.getName(),
+                    Type__c = BindingTestHelper.AbstractTest.class.getName(),
                     Action__c = 'Test',
-                    Implementation__c = TestData.SingletonTest.class.getName()
+                    Implementation__c = BindingTestHelper.SingletonTest.class.getName()
             );
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for TestData.AbstractTest with action Test already exists'));
+            Assert.isTrue(de.getMessage().contains('Binding for BindingTestHelper.AbstractTest with action Test already exists'));
         }
 
         try {
             insert new Binding__c(
-                    Type__c = TestData.TestInterface.class.getName(),
+                    Type__c = BindingTestHelper.TestInterface.class.getName(),
                     Action__c = 'ValidationTest',
                     Implementation__c = User.class.getName()
             );
@@ -113,7 +114,7 @@ public with sharing class BindingTriggerTests {
 
         try {
             insert new Binding__c(
-                    Type__c = TestData.AbstractTest.class.getName(),
+                    Type__c = BindingTestHelper.AbstractTest.class.getName(),
                     Action__c = 'ValidationTest',
                     Implementation__c = User.class.getName()
             );
@@ -135,13 +136,13 @@ public with sharing class BindingTriggerTests {
 
         try {
             insert new Binding__c(
-                    Type__c = TestData.TestInterface.class.getName(),
+                    Type__c = BindingTestHelper.TestInterface.class.getName(),
                     Action__c = 'ValidationTest',
-                    Implementation__c = TestData.AbstractTest.class.getName()
+                    Implementation__c = BindingTestHelper.AbstractTest.class.getName()
             );
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Implementation TestData.AbstractTest must be instantiable'));
+            Assert.isTrue(de.getMessage().contains('Implementation BindingTestHelper.AbstractTest must be instantiable'));
         }
     }
 
@@ -150,15 +151,15 @@ public with sharing class BindingTriggerTests {
         testValidInserts();
 
         try {
-            binding1.Type__c = TestData.AbstractTest.class.getName();
+            binding1.Type__c = BindingTestHelper.AbstractTest.class.getName();
             upsert binding1;
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for TestData.AbstractTest already exists'));
+            Assert.isTrue(de.getMessage().contains('Binding for BindingTestHelper.AbstractTest already exists'));
         }
 
         try {
-            binding2.Type__c = TestData.TestInterface.class.getName();
+            binding2.Type__c = BindingTestHelper.TestInterface.class.getName();
             binding2.Action__c = null;
             binding3.Action__c = null;
             upsert new List<Binding__c>{
@@ -166,7 +167,7 @@ public with sharing class BindingTriggerTests {
             };
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for TestData.TestInterface already exists'));
+            Assert.isTrue(de.getMessage().contains('Binding for BindingTestHelper.TestInterface already exists'));
         }
 
         try {
@@ -174,7 +175,23 @@ public with sharing class BindingTriggerTests {
             upsert binding1;
             Assert.fail();
         } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for TestData.AbstractTest with action Test already exists'));
+            Assert.isTrue(de.getMessage().contains('Binding for BindingTestHelper.AbstractTest with action Test already exists'));
         }
+    }
+
+    @IsTest
+    private static void testReload() {
+        insert new Binding__c(
+                Type__c = BindingTestHelper.TestInterface.class.getName(),
+                Implementation__c = BindingTestHelper.SingletonTest.class.getName()
+        );
+
+        Assert.isTrue(Injection.wire(BindingTestHelper.TestInterface.class) instanceof BindingTestHelper.SingletonTest);
+
+        Injection.add(BindingTestHelper.TestInterface.class, BindingTestHelper.SingletonCustomTest.class);
+        Assert.isTrue(Injection.wire(BindingTestHelper.TestInterface.class) instanceof BindingTestHelper.SingletonCustomTest);
+
+        Injection.reload();
+        Assert.isTrue(Injection.wire(BindingTestHelper.TestInterface.class) instanceof BindingTestHelper.SingletonTest);
     }
 }

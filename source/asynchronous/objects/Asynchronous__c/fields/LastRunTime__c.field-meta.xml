@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>LastRunTime__c</fullName>
+    <description>The date and time the job was last run.</description>
+    <inlineHelpText>The date and time the job was last run. The value will be the date and time the Asynchronous Scheduler last queued the Apex job. If the job runs without an Exception, the date and time will be updated to the date and time the Apex job was run.</inlineHelpText>
+    <label>Last Run Time</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
+</CustomField>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Status__c</fullName>
+    <description>Current status of the job.</description>
+    <inlineHelpText>The status of the job managed by the Asynchronous framework. See the Asynchronous framework documentation for the information about the status vaues.</inlineHelpText>
+    <label>Status</label>
+    <required>true</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetName>AsynchronousJobStatus</valueSetName>
+    </valueSet>
+</CustomField>

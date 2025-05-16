@@ -143,7 +143,7 @@
     <allowInChatterGroups>false</allowInChatterGroups>
     <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
-    <description>Object representing a job being managed by the Asynchronous framework.</description>
+    <description>Object containing state information for a job managed by the Asynchronous framework.</description>
     <enableActivities>false</enableActivities>
     <enableBulkApi>true</enableBulkApi>
     <enableFeeds>false</enableFeeds>
@@ -153,15 +153,15 @@
     <enableSearch>false</enableSearch>
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
-    <externalSharingModel>Private</externalSharingModel>
-    <label>Asynchronous</label>
+    <externalSharingModel>ControlledByParent</externalSharingModel>
+    <label>Asynchronous State</label>
     <nameField>
-        <displayFormat>ASYNC-{0000000000}</displayFormat>
-        <label>Asynchronous Name</label>
+        <displayFormat>ASYNC-STATE-{0000000000}</displayFormat>
+        <label>Asynchronous State Name</label>
         <type>AutoNumber</type>
     </nameField>
-    <pluralLabel>Asynchronous</pluralLabel>
+    <pluralLabel>Asynchronous States</pluralLabel>
     <searchLayouts></searchLayouts>
-    <sharingModel>ReadWrite</sharingModel>
+    <sharingModel>ControlledByParent</sharingModel>
     <visibility>Public</visibility>
 </CustomObject>

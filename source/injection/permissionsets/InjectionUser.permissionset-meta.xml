@@ -18,8 +18,4 @@
         <viewAllFields>false</viewAllFields>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
-    <tabSettings>
-        <tab>Binding__c</tab>
-        <visibility>None</visibility>
-    </tabSettings>
 </PermissionSet>

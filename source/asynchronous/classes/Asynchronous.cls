@@ -6,9 +6,13 @@
  */
 global with sharing virtual class Asynchronous implements API {
 
+    static {
+        Injection.add(API.class, Asynchronous.Factory.class);
+    }
+
     /**
      * @description
-     * Defines the state of a AsynchronousJob__c under the control of this framework.
+     * Defines the status of a AsynchronousJob__c under the control of this framework.
      *
      * A job can only be in a single state at any one time.
      *
@@ -18,17 +22,14 @@ global with sharing virtual class Asynchronous implements API {
      *
      * RUNNING - An Apex job has been created for the AsynchronousJob__c and scheduled.
      *
-     * REQUEUED - The Apex Job for the AsynchronousJob__c failed and the AsynchronousJob__c can be re-tried.
-     *
      * FINISHED - The Apex Job for the AsynchronousJob__c ran successfully.
      *
      * FAILED - The last Apex Job for the AsynchronousJob__c failed to run and the maximum number of retries has been exceeded.
      */
-    global enum State {
+    global enum Status {
         CREATED,
         QUEUED,
         RUNNING,
-        REQUEUED,
         FINISHED,
         FAILED,
         CANCELLED
@@ -36,30 +37,39 @@ global with sharing virtual class Asynchronous implements API {
 
     global interface API {
         Job createJob(
-                Type forType,
-                String withReference,
-                Integer withMaxRetries,
-                Integer withRetryInterval,
-                Map<String, String> arguments
+                Type type,
+                String reference,
+                Integer maximumRetries,
+                Integer retryInterval,
+                Map<String, String> state
         );
+
+        void queueJobs(List<Job> asyncJobs);
     }
 
     global interface Runnable {
         Type getType();
-        void run(Job job);
-        Boolean onSuccess(Job job);
-        Boolean onFailure(Job job);
-        Boolean onCancel(Job job);
-        State onError(Job job, Exception error);
+        Integer getMaximumActive();
+        void run(Job asyncJob);
+        Boolean onSuccess(Job asyncJob);
+        Boolean onFailure(Job asyncJob);
+        Boolean onCancel(Job asyncJob);
+        Status onError(Job asyncJob, Exception exc);
     }
 
     global interface Job {
-        State getState();
+        Status getStatus();
         String getOwnerId();
-        Integer getMaxRetries();
-        Integer getRetriesRemaining();
         Runnable getRunnable();
-        Map<String, String> getArguments();
+        Map<String, String> getState();
+        void setState(Map<String, String> state);
+        String getReference();
+        Integer getMaximumRetries();
+        Integer getRetryNumber();
+        Integer getRetriesRemaining();
+        Integer getRetryInterval();
+        Datetime getScheduledRunTime();
+        Datetime getLastRunTime();
     }
 
     /**
@@ -68,164 +78,58 @@ global with sharing virtual class Asynchronous implements API {
      */
     global with sharing class APIException extends Exception {}
 
-    global with sharing abstract class AbstractRunnable implements Runnable {
-        private final Type type;
-
-        global AbstractRunnable(final Type type) {
-            this.type = type;
-        }
-
-        global Type getType() {
-            return type;
-        }
-
-        global virtual Boolean onSuccess(Job job) {
-            return true;
-        }
-
-        global virtual Boolean onFailure(Job job) {
-            return true;
-        }
-
-        global virtual Boolean onCancel(Job job) {
-            return true;
-        }
-
-        global virtual State onError(Job job, Exception error) {
-            return State.REQUEUED;
-        }
-    }
-
     protected Asynchronous() {}
 
     public Job createJob(
-            final Type forType,
-            final String withReference,
-            final Integer withMaxRetries,
-            final Integer withRetryInterval,
-            final Map<String, String> arguments
+            final Type type,
+            final String reference,
+            final Integer maximumRetries,
+            final Integer retryInterval,
+            final Map<String, String> state
     ) {
-        return new JobImpl(forType.getName(), State.CREATED, withReference, withMaxRetries, withRetryInterval, arguments);
+        final Asynchronous__c asynchronousObject = new Asynchronous__c(
+                Status__c = Status.CREATED.name(),
+                OwnerId = UserInfo.getUserId(),
+                Runnable__c = type.getName(),
+                Reference__c = reference,
+                MaximumRetries__c = maximumRetries,
+                RetryInterval__c = retryInterval,
+                ScheduledRunTime__c = Datetime.now(),
+                RetryNumber__c = 0
+        );
+
+        final Job job = AsynchronousJob.fromSObject(asynchronousObject);
+        job.setState(state);
+
+        return job;
     }
 
-    public static Job create(
-            final Type forType,
-            final String withReference,
-            final Integer withMaxRetries,
-            final Integer withRetryInterval,
-            final Map<String, String> withArguments
-    ) {
-        return INSTANCE.createJob(forType, withReference, withMaxRetries, withRetryInterval, withArguments);
+    public void queueJobs(final List<Asynchronous.Job> asyncJobs) {
+        Assert.isNotNull(asyncJobs, 'parameter; Asynchronous.queueJobs.asyncJobs');
+
+        final List<Asynchronous__c> asyncObjects = new List<Asynchronous__c>();
+        final List<Map<String, String>> states = new List<Map<String, String>>();
+
+        for (Asynchronous.Job job : asyncJobs) {
+            asyncObjects.add(AsynchronousJob.toSObject(job));
+            states.add(job.getState());
+        }
+
+        AsynchronousDAO.persist(asyncObjects, states);
     }
 
-    private with sharing class JobImpl implements Job, Queueable {
+    global static Job create(
+            final Type type,
+            final String reference,
+            final Integer maximumRetries,
+            final Integer retryInterval,
+            final Map<String, String> state
+    ) {
+        return INSTANCE.createJob(type, reference, maximumRetries, retryInterval, state);
+    }
 
-        /**
-         * @description
-         * The Id of the user who created the job.
-         */
-        private final String ownerId;
-
-        /**
-         * @description
-         * The maximum number of retries that will be attempted to re-run the job successfully after the first
-         * failure.
-         */
-        private final Integer maxRetries;
-
-        /**
-         * @description
-         * The interval in milliseconds between re-tries.
-         */
-        private final Integer retryInterval;
-
-        private final Map<String, String> arguments;
-        private final String reference;
-        private final State state;
-        private final Runnable runnable;
-
-        /**
-         * @description
-         * Class providing
-         *
-         * @param runnable
-         * @param maxRetries
-         * @param retryInterval
-         */
-        public JobImpl(
-                final String runnableTypeName,
-                final State state,
-                final String reference,
-                final Integer maxRetries,
-                final Integer retryInterval,
-                final Map<String, String> arguments
-        ) {
-            final Object runnable = runnableTypeName != null
-                    ? TypeHelper.newInstance(TypeHelper.loadType(runnableTypeName))
-                    : null;
-
-            Assert.isTrue(
-                    runnable != null && runnable instanceof Runnable,
-                    'Runnable class must be defined and must implement Runnable'
-            );
-
-            Assert.isTrue(state != null, 'State must be defined');
-            Assert.isTrue(maxRetries != null &&  maxRetries >= 0, 'Max retries must be defined and be 0 or more');
-            Assert.isTrue(retryInterval != null && retryInterval >= 0, 'Retry interval must be defined and be 0 or more');
-            Assert.isTrue(arguments != null, 'Arguments must be defined');
-
-            this.ownerId = UserInfo.getUserId();
-            this.state = state;
-            this.runnable = (Runnable) runnable;
-            this.reference = reference;
-            this.maxRetries = maxRetries;
-            this.retryInterval = retryInterval;
-            this.arguments = arguments;
-        }
-
-        /**
-         * @description
-         * Gets the id of the owner of the job.
-         *
-         * @return The id of the user.
-         */
-        public String getOwnerId() {
-            return this.ownerId;
-        }
-
-        /**
-         * @description
-         * The maximum number of instances of a sub-class that may be running concurrently.
-         *
-         * @return The maximum number,
-         */
-        public Integer getConcurrency() {
-            return 10;
-        }
-
-        public State getState() {
-            return state;
-        }
-
-        public Integer getMaxRetries() {
-            return maxRetries;
-        }
-
-        public Integer getRetriesRemaining() {
-            return 0;
-        }
-
-        public Runnable getRunnable() {
-            return runnable;
-        }
-
-        public Map<String, String> getArguments() {
-            return arguments;
-        }
-
-        public void execute(final QueueableContext context) {
-            runnable.run(this);
-        }
+    global static void queue(final List<Asynchronous.Job> asyncJobs) {
+        INSTANCE.queueJobs(asyncJobs);
     }
 
     public with sharing class Factory implements TypeHelper.Factory {
@@ -234,15 +138,30 @@ global with sharing virtual class Asynchronous implements API {
         }
     }
 
-    public static void isRunnable(final List<Asynchronous__c> records) {
-        for (Asynchronous__c record : records) {
+    public static void onTriggerBefore(final List<Asynchronous__c> asyncObjects) {
+        Boolean hasErrors = false;
+        Boolean startScheduler = false;
+
+        for (Asynchronous__c asyncObject : asyncObjects) {
             try {
-                if (!(TypeHelper.newInstance(TypeHelper.loadType(record.Runnable__c)) instanceof Asynchronous.Runnable)) {
-                    record.addError('Class ' + record.Runnable__c + ' does not implement Asynchronous.Runnable');
+                if (!(TypeHelper.newInstance(TypeHelper.loadType(asyncObject.Runnable__c)) instanceof Asynchronous.Runnable)) {
+                    asyncObject.addError('Class ' + asyncObject.Runnable__c + ' does not implement Asynchronous.Runnable');
+                    hasErrors = true;
+                } else if (asyncObject.Status__c == Asynchronous.Status.CREATED.name()) {
+                    asyncObject.Status__c = Asynchronous.Status.QUEUED.name();
+                    asyncObject.RetryNumber__c = 0;
+                    if (asyncObject.Runnable__c != AsynchronousScheduler.class.getName()) {
+                        startScheduler = true;
+                    }
                 }
             } catch(Exception e) {
-                record.addError(e.getMessage());
+                asyncObject.addError(e.getMessage());
+                hasErrors = true;
             }
+        }
+
+        if (!hasErrors && startScheduler) {
+            AsynchronousScheduler.queue();
         }
     }
 
@@ -290,21 +209,5 @@ global with sharing virtual class Asynchronous implements API {
             return INSTANCE;
         }
         private set;
-    }
-
-    public class TestRunnable extends AbstractRunnable {
-        public TestRunnable() {
-            super(TestRunnable.class);
-        }
-
-        public void run(Job job) {
-            System.debug('TestRunnable.run ' + job);
-        }
-    }
-
-    public class TestFactoryRunnable implements TypeHelper.Factory {
-        public Object newInstance() {
-            return new TestRunnable();
-        }
     }
 }

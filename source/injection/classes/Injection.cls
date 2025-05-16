@@ -170,7 +170,7 @@ global with sharing virtual class Injection {
      *
      * @example
      * // Binds the implementation bound to MyInterface into an application.
-     * MyInterface example = (MyInterface) Registry.wire(MyInterface.class);
+     * MyInterface example = (MyInterface) Injection.wire(MyInterface.class);
      */
     global static Object wire(final Type forType) {
         return INSTANCE.wireType(forType);
@@ -211,7 +211,7 @@ global with sharing virtual class Injection {
      *
      * @example
      * // Binds the implementation bound to MyInterface into an application for action MyAction.
-     * MyInterface example = (MyInterface) Registry.wire(MyInterface.class, 'MyAction');
+     * MyInterface example = (MyInterface) Injection.wire(MyInterface.class, 'MyAction');
      */
     global static Object wire(final Type forType, final String action) {
         return INSTANCE.wireType(forType, action);
@@ -240,7 +240,7 @@ global with sharing virtual class Injection {
      *
      * @example
      * // Determine if binding for MyInterface exists in registry.
-     * Boolean exists = Registry.has(MyInterface.class);
+     * Boolean exists = Injection.has(MyInterface.class);
      */
     global static Boolean has(final Type forType) {
         return INSTANCE.isBound(forType);
@@ -271,7 +271,7 @@ global with sharing virtual class Injection {
      *
      * @example
      * // Determine if binding for MyInterface with action MyAction exists in registry.
-     * Boolean exists = Registry.has(MyInterface.class, 'MyAction');
+     * Boolean exists = Injection.has(MyInterface.class, 'MyAction');
      */
     global static Boolean has(final Type forType, final String action) {
         return INSTANCE.isBound(forType, action);
@@ -300,7 +300,7 @@ global with sharing virtual class Injection {
     *
     * @example
     * // Add a binding to MyImplementation from interface MyInterface.
-    * Registgry.add(MyInterface,class, MyImplementation.class);
+    * Injection.add(MyInterface,class, MyImplementation.class);
     */
     global static void add(final Type forType, final Type withImpl) {
         INSTANCE.bind(forType, withImpl);
@@ -331,10 +331,33 @@ global with sharing virtual class Injection {
      *
      * @example
      * // Add a binding to MyImplementation from interface MyInterface for action Test.
-     * Registgry.add(MyInterface,class, 'Test', MyImplementation.class);
+     * Injection.add(MyInterface,class, 'Test', MyImplementation.class);
      */
     global static void add(final Type forType, final String action, final Type withImpl) {
         INSTANCE.bind(forType, action, withImpl);
+    }
+
+    /**
+     * @description
+     * Forces the custom bindings to be reloaded.
+     */
+    protected virtual void reloadCustomBindings() {
+        customBindingsAdded = false;
+    }
+
+    /**
+     * @description
+     * Forces the custom bindings to be reloaded.
+     *
+     * When running Apex jobs they can be chained by Salesforce. When using the registry, this method must be called
+     * for each job execution, to force any changes made to the custom bindings to be included in the registry.
+     *
+     * @example
+     * // Re-loads custom bindings for registry.
+     * Injection.reload();
+     */
+    global static void reload() {
+        INSTANCE.reloadCustomBindings();
     }
 
     /**
