@@ -20,28 +20,29 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
 
     public AsynchronousScheduler() {
         super(AsynchronousScheduler.class);
+        Assert.isNotNull(configuration.get(MAX_SCHEDULERS_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + MAX_SCHEDULERS_PROPERTY);
+        Assert.isNotNull(configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + NO_JOBS_TO_RUN_DELAY_PROPERTY);
     }
 
     public override void run(final Asynchronous.Job ignoreAsyncJob) {
         Assert.isNotNull(ignoreAsyncJob, 'parameter; AsynchronousScheduler.run.ignoreAsyncJob');
 
-        for (Asynchronous__c asyncObject : AsynchronousDAO.getScheduled()) {
-            final List<Asynchronous__c> executables = AsynchronousDAO.lock(asyncObject.Id);
-            if (!executables.isEmpty()) {
-                AsynchronousJob.queueJob(executables[0]);
-            }
-            return;
+        if (AsynchronousDAO.countScheduled(true) == 0) {
+            delayWhenNoJobsToRun(configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY));
         }
 
-        delayWhenNoJobsToRun(configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY));
+        final Asynchronous__c scheduledAsyncObject = AsynchronousDAO.nextScheduled();
+        if (scheduledAsyncObject != null) {
+            AsynchronousJob.queueJob(scheduledAsyncObject);
+        }
     }
 
-    private void delayWhenNoJobsToRun(final Integer delay) {
+    public static void delayWhenNoJobsToRun(final Integer delay) {
         final Long startTime = System.currentTimeMillis();
         final Long endTime = startTime + delay;
 
         for (; System.currentTimeMillis() < endTime; ) {
-            if (Limits.getAggregateQueries() < 100) {
+            if (Limits.getAggregateQueries() < 250) {
                 List<SObject> ignore = [
                         SELECT Id,
                                 (SELECT Id FROM Badges WHERE ImageUrl != 'ab'),
@@ -58,10 +59,18 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
     }
 
     public override Integer getMaximumActive() {
-        return configuration.get(MAX_SCHEDULERS_PROPERTY);
+        if (AsynchronousDAO.countScheduled(false) > 0) {
+            if (AsynchronousDAO.countScheduled(true) > 0) {
+                return configuration.get(MAX_SCHEDULERS_PROPERTY);
+            } else {
+                return 1;
+            }
+        } else {
+            return 1;
+        }
     }
 
-    public override Boolean onSuccess(final Asynchronous.Job asyncJob) {
+    public override Boolean onCompletion(final Asynchronous.Job asyncJob) {
         Assert.isNotNull(asyncJob, 'parameter; AsynchronousScheduler.onSuccess.asyncJob');
         return false;
     }
@@ -69,6 +78,11 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
     public override Boolean onFailure(final Asynchronous.Job asyncJob) {
         Assert.isNotNull(asyncJob, 'parameter; AsynchronousScheduler.onFailure.asyncJob');
         return true;
+    }
+
+    public override Boolean onCancellation(final Asynchronous.Job asyncJob) {
+        Assert.isNotNull(asyncJob, 'parameter; AsynchronousScheduler.onCancellation.asyncJob');
+        return false;
     }
 
     public static void queue() {
@@ -87,7 +101,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
         public Object newInstance() {
             return new Map<String, Integer> {
                     MAX_SCHEDULERS_PROPERTY => 1,
-                    NO_JOBS_TO_RUN_DELAY_PROPERTY => 5000
+                    NO_JOBS_TO_RUN_DELAY_PROPERTY => 2000
             };
         }
     }

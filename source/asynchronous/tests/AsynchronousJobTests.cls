@@ -30,7 +30,7 @@ public with sharing class AsynchronousJobTests {
     static void testOptionalFields() {
         Asynchronous__c asynchronous = new Asynchronous__c(
                 OwnerId = UserInfo.getUserId(),
-                Status__c = Asynchronous.Status.CREATED.name(),
+                Status__c = Asynchronous.Status.PENDING.name(),
                 Runnable__c = 'AsynchronousJobTests.Runnable',
                 Reference__c = 'Test',
                 MaximumRetries__c = 1,

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ApexJobId__c</fullName>
+    <description>The id of the last Apex job that was run for the job.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>This field records the id of the last Apex job that was run by the Asynchronous framework for the job.</inlineHelpText>
+    <label>Apex Job Id</label>
+    <length>18</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

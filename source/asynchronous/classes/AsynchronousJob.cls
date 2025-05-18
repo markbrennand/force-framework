@@ -400,7 +400,6 @@ public with sharing class AsynchronousJob implements Asynchronous.Job {
 
     public static Asynchronous__c toSObject(final Asynchronous.Job asyncJob) {
         Assert.isNotNull(asyncJob, 'parameter; AsynchronousJob.toSObject.asyncJob');
-
         return new Asynchronous__c(
                 Id = ((AsynchronousJob) asyncJob).getAsyncObjectId(),
                 OwnerId = asyncJob.getOwnerId(),
@@ -417,7 +416,6 @@ public with sharing class AsynchronousJob implements Asynchronous.Job {
 
     public static Boolean queueJob(final Asynchronous__c asyncObject) {
         Assert.isNotNull(asyncObject, 'parameter; AsynchronousJob.queueJob.asyncObject');
-
         try {
             return enqueueApexJob(asyncObject, false);
         } catch(Exception exc) {
@@ -429,15 +427,12 @@ public with sharing class AsynchronousJob implements Asynchronous.Job {
     @Future
     private static void start(final String asyncObjectId) {
         Assert.isNotNull(asyncObjectId, 'parameter; AsynchronousJob.start.asyncObjectId');
-
         final Asynchronous__c asyncObject = AsynchronousDAO.get(asyncObjectId);
 
         try {
             enqueueApexJob(asyncObject, true);
         } catch(Exception exc) {
-            asyncObject.Status__c = Asynchronous.Status.FAILED.name();
-            AsynchronousHelper.recordException(asyncObject, exc);
-            AsynchronousDAO.persist(new List<Asynchronous__c> { asyncObject });
+            AsynchronousHelper.internalFailure(asyncObject, exc);
         }
     }
 
@@ -452,7 +447,11 @@ public with sharing class AsynchronousJob implements Asynchronous.Job {
             asyncObject.Status__c = Asynchronous.Status.RUNNING.name();
             asyncObject.LastRunTime__c = Datetime.now();
             AsynchronousDAO.persist(new List<Asynchronous__c> { asyncObject });
-            System.enqueueJob(runnable.forJob(AsynchronousJob.fromSObject(AsynchronousDAO.get(asyncObject.Id))));
+
+            asyncObject.ApexJobId__c = System.enqueueJob(
+                    runnable.forJob(AsynchronousJob.fromSObject(AsynchronousDAO.get(asyncObject.Id))));
+            AsynchronousDAO.persist(new List<Asynchronous__c> { asyncObject });
+
             return true;
         } else {
             return false;

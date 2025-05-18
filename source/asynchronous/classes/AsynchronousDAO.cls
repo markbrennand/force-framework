@@ -22,19 +22,18 @@ public with sharing class AsynchronousDAO implements API {
     }
 
     public interface API {
-        Asynchronous__c getAsynchronous(Id asyncOjectId);
-        List<Asynchronous__c> lockForExecution(Id asyncOjectId);
-        Integer countScheduledJobs();
-        Integer countActiveJobs(final Asynchronous__c asyncJob);
-        List<Asynchronous__c> getScheduledJobs();
+        Asynchronous__c getObject(Id asyncOjectId);
+        Asynchronous__c getFirstScheduledObject();
+        Integer countScheduledObjects(Boolean scheduledOnly);
+        Integer countActiveObjects(final Asynchronous__c asyncJob);
         void persistAsynchronous(List<Asynchronous__c> asyncObjects);
         void persistAsynchronous(List<Asynchronous__c> asyncObjects, List<Map<String, String>> states);
         void removeAsynchronous(List<Asynchronous__c> asyncObject);
         void persistAsynchronousError(AsynchronousError__c asyncError);
     }
 
-    public Asynchronous__c getAsynchronous(Id asyncObjectId) {
-        Assert.isNotNull(asyncObjectId, 'parameter; AsynchronousDAO.getAsynchronous.asyncObjectId');
+    public Asynchronous__c getObject(Id asyncObjectId) {
+        Assert.isNotNull(asyncObjectId, 'parameter; AsynchronousDAO.getObject.asyncObjectId');
 
         return [
                 SELECT Id, OwnerId, Status__c, Reference__c, Runnable__c, MaximumRetries__c, RetryInterval__c,
@@ -47,64 +46,82 @@ public with sharing class AsynchronousDAO implements API {
         ];
     }
 
-    public List<Asynchronous__c> lockForExecution(final Id asyncObjectId) {
-        Assert.isNotNull(asyncObjectId, 'parameter; AsynchronousDAO.lockForExecution.asyncObjectId');
+    public Asynchronous__c getFirstScheduledObject() {
+        final List<Asynchronous__c> scheduledAsyncObjects = [
+                SELECT Id, ScheduledRunTime__c, RetryNumber__c, Status__c
+                FROM Asynchronous__c
+                WHERE OwnerId = :UserInfo.getUserId()
+                AND ScheduledRunTime__c <= :Datetime.now()
+                AND Runnable__c != :AsynchronousScheduler.class.getName()
+                AND Status__c = :Asynchronous.Status.QUEUED.name()
+                WITH USER_MODE
+                ORDER BY ScheduledRunTime__c
+                LIMIT 1
+        ];
+
+        if (scheduledAsyncObjects.isEmpty()) {
+            return null;
+        }
 
         try {
-            return [
+            final List<Asynchronous__c> lockedAsyncObjects = [
                     SELECT Id, OwnerId, Status__c, Reference__c, Runnable__c, MaximumRetries__c, RetryInterval__c,
                             RetryNumber__c, ScheduledRunTime__c, LastRunTime__c,
                             (SELECT Content__c FROM AsynchronousStates__r ORDER BY ChunkNumber__c)
                     FROM Asynchronous__c
-                    WHERE Id = :asyncObjectId
+                    WHERE Id = :scheduledAsyncObjects[0].Id
                     AND Status__c = :Asynchronous.Status.QUEUED.name()
+                    AND ScheduledRunTime__c = :scheduledAsyncObjects[0].ScheduledRunTime__c
+                    AND RetryNumber__c = :scheduledAsyncObjects[0].RetryNumber__c
                     WITH USER_MODE
                     FOR UPDATE
             ];
+
+            return lockedAsyncObjects.isEmpty() ? null : lockedAsyncObjects[0];
         } catch(Exception exc) {
             if (exc.getMessage().startsWith('Record Currently Unavailable')) {
-                return new List<Asynchronous__c>();
+                return null;
             } else {
                 throw exc;
             }
         }
     }
 
-    public Integer countScheduledJobs() {
+    public Integer countScheduledObjects(final Boolean scheduledOnly) {
+        Assert.isNotNull(scheduledOnly, 'parameter; AsynchronousDAO.countScheduledObjects.scheduledOnly');
+
+        if (scheduledOnly) {
+            return [
+                    SELECT COUNT()
+                    FROM Asynchronous__c
+                    WHERE OwnerId = :UserInfo.getUserId()
+                    AND ScheduledRunTime__c <= :Datetime.now()
+                    AND Status__c = :Asynchronous.Status.QUEUED.name()
+                    AND Runnable__c != :AsynchronousScheduler.class.getName()
+                    WITH USER_MODE
+            ];
+        } else {
+            return [
+                    SELECT COUNT()
+                    FROM Asynchronous__c
+                    WHERE OwnerId = :UserInfo.getUserId()
+                    AND Status__c = :Asynchronous.Status.QUEUED.name()
+                    AND Runnable__c != :AsynchronousScheduler.class.getName()
+                    WITH USER_MODE
+            ];
+        }
+    }
+
+    public Integer countActiveObjects(final Asynchronous__c asyncJob) {
+        Assert.isNotNull(asyncJob, 'parameter; AsynchronousDAO.countActiveObjects.asyncJob');
+
         return [
                 SELECT COUNT()
                 FROM Asynchronous__c
                 WHERE OwnerId = :UserInfo.getUserId()
-                AND Status__c = :Asynchronous.Status.QUEUED.name()
-                AND Runnable__c != :AsynchronousScheduler.class.getName()
-                WITH USER_MODE
-        ];
-    }
-
-    public Integer countActiveJobs(final Asynchronous__c asyncJob) {
-        Assert.isNotNull(asyncJob, 'parameter; AsynchronousDAO.countActiveJobs.asyncJob');
-
-        return [
-                SELECT COUNT()
-                FROM Asynchronous__c
-                WHERE Runnable__c = :asyncJob.Runnable__c
-                AND OwnerId = :UserInfo.getUserId()
+                AND Runnable__c = :asyncJob.Runnable__c
                 AND Status__c = :Asynchronous.Status.RUNNING.name()
                 WITH USER_MODE
-        ];
-    }
-
-    public List<Asynchronous__c> getScheduledJobs() {
-        return [
-                SELECT Id
-                FROM Asynchronous__c
-                WHERE ScheduledRunTime__c <= :Datetime.now()
-                AND OwnerId = :UserInfo.getUserId()
-                AND Runnable__c != :AsynchronousScheduler.class.getName()
-                AND Status__c = :Asynchronous.Status.QUEUED.name()
-                WITH USER_MODE
-                ORDER BY ScheduledRunTime__c
-                LIMIT 50
         ];
     }
 
@@ -147,23 +164,19 @@ public with sharing class AsynchronousDAO implements API {
     }
 
     public static Asynchronous__c get(final Id asyncObjectId) {
-        return INSTANCE.getAsynchronous(asyncObjectId);
+        return INSTANCE.getObject(asyncObjectId);
     }
 
-    public static List<Asynchronous__c> lock(final Id asyncObjectId) {
-        return INSTANCE.lockForExecution(asyncObjectId);
+    public static Asynchronous__c nextScheduled() {
+        return INSTANCE.getFirstScheduledObject();
     }
 
-    public static Integer countScheduled() {
-        return INSTANCE.countScheduledJobs();
+    public static Integer countScheduled(final Boolean scheduledOnly) {
+        return INSTANCE.countScheduledObjects(scheduledOnly);
     }
 
     public static Integer countActive(final Asynchronous__c asyncJob) {
-        return INSTANCE.countActiveJobs(asyncJob);
-    }
-
-    public static List<Asynchronous__c> getScheduled() {
-        return INSTANCE.getScheduledJobs();
+        return INSTANCE.countActiveObjects(asyncJob);
     }
 
     public static void persist(final List<Asynchronous__c> asyncObjects) {

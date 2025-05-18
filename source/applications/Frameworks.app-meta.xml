@@ -14,5 +14,6 @@
     <label>Frameworks</label>
     <navType>Standard</navType>
     <tabs>Binding__c</tabs>
+    <tabs>Asynchronous__c</tabs>
     <uiType>Lightning</uiType>
 </CustomApplication>

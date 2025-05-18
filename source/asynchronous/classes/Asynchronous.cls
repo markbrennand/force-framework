@@ -16,21 +16,21 @@ global with sharing virtual class Asynchronous implements API {
      *
      * A job can only be in a single state at any one time.
      *
-     * CREATED - The job has been created but no AsynchronousJob__c object has been persisted for it.
+     * PENDING - The job has been created but no AsynchronousJob__c object has been persisted for it.
      *
      * QUEUED - The AsynchronousJob__c has been queued for processing.
      *
      * RUNNING - An Apex job has been created for the AsynchronousJob__c and scheduled.
      *
-     * FINISHED - The Apex Job for the AsynchronousJob__c ran successfully.
+     * COMPLETED - The Apex Job for the AsynchronousJob__c ran successfully.
      *
      * FAILED - The last Apex Job for the AsynchronousJob__c failed to run and the maximum number of retries has been exceeded.
      */
     global enum Status {
-        CREATED,
+        PENDING,
         QUEUED,
         RUNNING,
-        FINISHED,
+        COMPLETED,
         FAILED,
         CANCELLED
     }
@@ -51,9 +51,9 @@ global with sharing virtual class Asynchronous implements API {
         Type getType();
         Integer getMaximumActive();
         void run(Job asyncJob);
-        Boolean onSuccess(Job asyncJob);
+        Boolean onCompletion(Job asyncJob);
         Boolean onFailure(Job asyncJob);
-        Boolean onCancel(Job asyncJob);
+        Boolean onCancellation(Job asyncJob);
         Status onError(Job asyncJob, Exception exc);
     }
 
@@ -88,7 +88,7 @@ global with sharing virtual class Asynchronous implements API {
             final Map<String, String> state
     ) {
         final Asynchronous__c asynchronousObject = new Asynchronous__c(
-                Status__c = Status.CREATED.name(),
+                Status__c = Status.PENDING.name(),
                 OwnerId = UserInfo.getUserId(),
                 Runnable__c = type.getName(),
                 Reference__c = reference,
@@ -147,7 +147,7 @@ global with sharing virtual class Asynchronous implements API {
                 if (!(TypeHelper.newInstance(TypeHelper.loadType(asyncObject.Runnable__c)) instanceof Asynchronous.Runnable)) {
                     asyncObject.addError('Class ' + asyncObject.Runnable__c + ' does not implement Asynchronous.Runnable');
                     hasErrors = true;
-                } else if (asyncObject.Status__c == Asynchronous.Status.CREATED.name()) {
+                } else if (asyncObject.Status__c == Asynchronous.Status.PENDING.name()) {
                     asyncObject.Status__c = Asynchronous.Status.QUEUED.name();
                     asyncObject.RetryNumber__c = 0;
                     if (asyncObject.Runnable__c != AsynchronousScheduler.class.getName()) {
@@ -163,6 +163,22 @@ global with sharing virtual class Asynchronous implements API {
         if (!hasErrors && startScheduler) {
             AsynchronousScheduler.queue();
         }
+    }
+
+    public static void onTriggerAfter(final List<Asynchronous__c> asyncObjects, final Map<Id, Asynchronous__c> previousAsyncObjects) {
+        final List<Asynchronous__c> toDelete = new List<Asynchronous__c>();
+        for (Asynchronous__c asyncObject : asyncObjects) {
+            if (asyncObject.Status__c == Asynchronous.Status.CANCELLED.name() &&
+                    asyncObject.Status__c != previousAsyncObjects.get(asyncObject.Id).Status__c
+            ) {
+                final Asynchronous.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
+                if (!asyncJob.getRunnable().onCancellation(asyncJob)) {
+                    toDelete.add(new Asynchronous__c(Id = asyncObject.Id));
+                }
+            }
+        }
+
+        AsynchronousDAO.remove(toDelete);
     }
 
     /**

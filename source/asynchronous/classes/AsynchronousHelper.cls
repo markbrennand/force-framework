@@ -17,21 +17,28 @@ public with sharing class AsynchronousHelper {
      * @description
      * Records the detail of an Exception in an asynchronous object.
      *
-     * @param asyncObject The asynchronous object to record the Exception in.
+     * @param asyncObject The asynchronous object to record the Exception against.
      * @param exc The exception to be recorded.
      */
     public static void recordException(final Asynchronous__c asyncObject, final Exception exc) {
-        Assert.isNotNull(asyncObject, 'parameter; asynchronousObject');
-        Assert.isNotNull(exc, 'parameter; exc');
+        Assert.isNotNull(asyncObject, 'parameter; AsynchronousHelper.recordException.asynchronousObject');
+        Assert.isNotNull(exc, 'parameter; AsynchronousHelper.recordException.exc');
 
         final AsynchronousError__c asyncError = new AsynchronousError__c(
                 Asynchronous__c = asyncObject.Id,
+                StatusOnError__c = asyncObject.Status__c,
                 ExceptionType__c = exc.getTypeName(),
                 ExceptionMessage__c = exc.getMessage(),
                 ExceptionStackTrace__c = exc.getStackTraceString()
         );
 
         AsynchronousDAO.persist(asyncError);
+    }
+
+    public static void internalFailure(final Asynchronous__c asyncObject, final Exception exc) {
+        recordException(asyncObject, exc);
+        asyncObject.Status__c = Asynchronous.Status.FAILED.name();
+        AsynchronousDAO.persist(new List<Asynchronous__c> { asyncObject });
     }
 
     public static Map<String, String> decodeState(final List<AsynchronousState__c> asyncStateObjects) {
@@ -53,7 +60,7 @@ public with sharing class AsynchronousHelper {
             final Map<String, String> state
     ) {
         Assert.isNotNull(asyncObject, 'parameter; AsynchronousHelper.encodeState.asyncObject');
-        Assert.isNotNull(state, 'parameter; state');
+        Assert.isNotNull(state, 'parameter; AsynchronousHelper.encodeState.state');
 
         final List<AsynchronousState__c> chunks = new List<AsynchronousState__c>();
         String stateJson = JSON.serialize(state);

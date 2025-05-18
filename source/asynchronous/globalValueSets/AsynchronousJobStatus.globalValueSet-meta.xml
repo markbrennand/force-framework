@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <customValue>
-        <fullName>CREATED</fullName>
+        <fullName>PENDING</fullName>
         <default>true</default>
-        <label>CREATED</label>
+        <label>PENDING</label>
     </customValue>
     <customValue>
         <fullName>QUEUED</fullName>
@@ -16,9 +16,9 @@
         <label>RUNNING</label>
     </customValue>
     <customValue>
-        <fullName>FINISHED</fullName>
+        <fullName>COMPLETED</fullName>
         <default>false</default>
-        <label>FINISHED</label>
+        <label>COMPLETED</label>
     </customValue>
     <customValue>
         <fullName>FAILED</fullName>
@@ -30,7 +30,7 @@
         <default>false</default>
         <label>CANCELLED</label>
     </customValue>
-    <description>A job managed by the Asynchronous framework will be in one of these states. See the Asynchronous framework documentation for information about the status meaning.</description>
+    <description>A job managed by the Asynchronous framework will be in one of these states. See the Asynchronous framework documentation for information about the meaning of each status.</description>
     <masterLabel>Asynchronous Job Status</masterLabel>
     <sorted>false</sorted>
 </GlobalValueSet>

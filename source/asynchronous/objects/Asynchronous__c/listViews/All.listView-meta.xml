@@ -8,6 +8,7 @@
     <columns>Runnable__c</columns>
     <columns>RetryNumber__c</columns>
     <columns>MaximumRetries__c</columns>
+    <columns>ApexJobId__c</columns>
     <filterScope>Everything</filterScope>
     <label>All</label>
 </ListView>

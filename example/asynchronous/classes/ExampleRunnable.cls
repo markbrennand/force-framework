@@ -35,7 +35,11 @@ public with sharing class ExampleRunnable extends AsynchronousRunnable {
         return config.get('maximumActive');
     }
 
-    public override Boolean onSuccess(Asynchronous.job job) {
+    public override Asynchronous.Status onError(Asynchronous.job job, Exception exc) {
+        return Asynchronous.Status.QUEUED;
+    }
+
+    public override Boolean onCancellation(Asynchronous.Job asyncJob) {
         return true;
     }
 

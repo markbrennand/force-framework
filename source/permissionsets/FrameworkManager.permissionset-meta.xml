@@ -17,7 +17,17 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>AsynchronousError__c.StatusOnError__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>AsynchronousState__c.Content__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Asynchronous__c.ApexJobId__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
