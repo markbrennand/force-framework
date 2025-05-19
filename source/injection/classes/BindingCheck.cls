@@ -1,6 +1,12 @@
 /**
  * @description
- * Class providing check on Binding made to an Apex primitive type.
+ * Class providing check on Binding made to an Apex language type.
+ *
+ * In addition to the primitive types, some Map types are validated too.
+ *
+ * See [Binding Validation](https://github.com/markbrennand/sf-frameworks/blob/main/source/injection/README.md#Binding-Validation)
+ *
+ * @author Mark Brennand
  */
 public with sharing class BindingCheck implements Injection.BindingCheck {
 

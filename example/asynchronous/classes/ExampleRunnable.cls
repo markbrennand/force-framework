@@ -10,7 +10,7 @@ public with sharing class ExampleRunnable extends AsynchronousRunnable {
         Injection.reload();
     }
 
-    private final Map<String, Integer> config =
+    private final Map<String, Integer> configuration =
             (Map<String, Integer>) Injection.wire(Map<String, Integer>.class, 'ExampleRunnable');
 
     public ExampleRunnable() {
@@ -20,7 +20,7 @@ public with sharing class ExampleRunnable extends AsynchronousRunnable {
     public override void run(Asynchronous.Job job) {
         Assert.isNotNull(job.getRetryNumber());
 
-        if (job.getRetryNumber() == 8) {
+        if (job.getRetryNumber() == configuration.get('succeedOnRetryNumber')) {
             return;
         }
 
@@ -32,7 +32,7 @@ public with sharing class ExampleRunnable extends AsynchronousRunnable {
     }
 
     public override Integer getMaximumActive() {
-        return config.get('maximumActive');
+        return configuration.get('maximumActive');
     }
 
     public override Asynchronous.Status onError(Asynchronous.job job, Exception exc) {

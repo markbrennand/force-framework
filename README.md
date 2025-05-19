@@ -9,3 +9,17 @@ allows the initialisation of a registry either programmatically or from a custom
 can be wired into APEX code.
 
 See [Injection](source/injection/README.md)
+
+## Asynchronous
+Apex provides the ability to run code asynchronously using the _Queueable_ interface and _System.enqueueJob_.
+Determining why a job failed is not easy. Re-running the job on failure is not something supported
+by Apex Jobs. Any concurrency restrictions for the Apex Job would need to be coded in the application.
+These issues, and more, are addressed by the Asynchronous framework. Jobs can be started
+using the _Asynchronous_ class and their progress can be monitored from a custom object. The framework
+will guarantee that the number of jobs running will always be the maximum concurrency set for the type
+of job or less. The framework will re-try a job on failure upto the maximum number of re-tries set for
+the job on its creation.
+
+See [Asynchronous](source/asynchronous/README.md)
+
+

@@ -7,6 +7,7 @@ public with sharing class ConfigurationOverride implements TypeHelper.Factory {
         return new Map<String, Integer> {
                 'maxSchedulers' => 256,
                 'maximumActive' => 256,
+                'succeedOnRetryNumber' => 5,
                 'noJobsToRunDelay' => 9000
         };
     }

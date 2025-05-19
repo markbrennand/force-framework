@@ -450,6 +450,7 @@ public with sharing class AsynchronousJob implements Asynchronous.Job {
 
             asyncObject.ApexJobId__c = System.enqueueJob(
                     runnable.forJob(AsynchronousJob.fromSObject(AsynchronousDAO.get(asyncObject.Id))));
+
             AsynchronousDAO.persist(new List<Asynchronous__c> { asyncObject });
 
             return true;

@@ -60,7 +60,7 @@ The _newInstance()_ method must return a new instance of the class to be bound t
 Please deploy the example code in the _example/injection_ directory to your org.
 
 You must also assign the _BindingManager_ permission set to the user you will run the example code as in
-Anonymous APEX.
+Anonymous Apex.
 
 ## Initialisation
 The registry may be initialised either programmatically or through the _Binding__c_ custom object.
@@ -196,9 +196,9 @@ static {
     Injection.add(AccountClasses.AccountManager.class, AccountClasses.SyncAccountManager.class);
 }
 ```
-Run _AbstractEntityWiring.reset()_ in Anonymous APEX to clear any current Bindings for _AccountManager_.
+Run _AbstractEntityWiring.reset()_ in Anonymous Apex to clear any current Bindings for _AccountManager_.
 
-Run _AbstractEntityWiring.example('Joe Blogs)_ in Anonymous APEX. You will see the following debug output. The
+Run _AbstractEntityWiring.example('Joe Blogs)_ in Anonymous Apex. You will see the following debug output. The
 _Account_ has been created in the scope of the current request and can be SELECTed using SOQL.
 ```
 USER_DEBUG|[23]|DEBUG|Account:{Name=Joe Bloggs, Id=****************}
@@ -217,7 +217,7 @@ _App Launcher_ select Bindings. Create a new record. Assign it the following val
 * Type : AccountClasses.AccountManager
 * Implementation: AsyncAccountClasses.AsyncAccountManager
 
-Run _AbstractEntityWiring.example('Joe Blogs)_ in Anonymous APEX, you will see the following debug output.
+Run _AbstractEntityWiring.example('Joe Blogs)_ in Anonymous Apex, you will see the following debug output.
 ```
 USER_DEBUG|[23]|DEBUG|null
 DEBUG|DEBUG|()
@@ -241,7 +241,7 @@ public final Map<String, Integer> properties =
         (Map<String, Integer>) Injection.wire(Map<String, Integer>.class, 'animals');
 ```
 The default registry entry for the '_animals_' _Map_ has 100 sheep, 50 cows and 2000 hens. If you run
-_PropertyWiring.run()_ in Anonymous APEX, you will see the following debug output.
+_PropertyWiring.run()_ in Anonymous Apex, you will see the following debug output.
 ```
 DEBUG|The farm has 100 sheep
 DEBUG|The farm has 50 cows
@@ -250,12 +250,12 @@ DEBUG|The farm has 2000 hens
 You will see there is an inner class named _NewConfiguration_ in the _PropertyWiring_ class. This can be
 used to override the base registry binding for the _Map_ setup in the test.
 
-From an Anonymous APEX window, run the following DML.
+Run the following DML in Anonymous Apex.
 ```
 insert new Binding__c(Type__c = (Map<String, Integer>.class).getName(), Action__c = 'animals', Implementation__c = PropertyWiring.NewConfiguration.class.getName());```
 ```
 The new registry entry for the '_animals_' _Map_ has 1 sheep, 2 cows and 3 hens. If you run
-_PropertyWiring.run()_ in Anonymous APEX, you will see the following debug output.
+_PropertyWiring.run()_ in Anonymous Apex, you will see the following debug output.
 ```
 DEBUG|The farm has 1 sheep
 DEBUG|The farm has 2 cows
@@ -266,7 +266,7 @@ The new values have been successfully wired into the application.
 Log on to your org. From the _App Launcher_ select _Bindings_. If you choose _All_, you will see the binding that was
 added to bind the class with the new configuration to the '_animals_' _Map_.
 
-Delete the _Binding_. Then run _PropertyWiring.run()_ in Anonymous APEX, you will see that the values displayed
+Delete the _Binding_. Then run _PropertyWiring.run()_ in Anonymous Apex, you will see that the values displayed
 are now the default values.
 
 In the _Bindings_ tab, create a new record. Assign it the following values;
@@ -274,11 +274,11 @@ In the _Bindings_ tab, create a new record. Assign it the following values;
 * Action: animals
 * Implementation: PropertyWiring.NewConfiguration
 
-Run _PropertyWiring.run()_ in Anonymous APEX, you will see that the new configuration values are displayed.
+Run _PropertyWiring.run()_ in Anonymous Apex, you will see that the new configuration values are displayed.
 
 If this was production, you've just re-configured your application without having to create custom metadata, a custom
 object or a custom setting to manage the configuration. To change the configuration, you just need to write a
-new APEX class and add a binding to the registry.
+new Apex class and add a binding to the registry.
 
 #### Checking a Wiring Exists
 Trying to wire a _Type_ into an application for which there is no binding in the registry will throw an exception.
@@ -287,7 +287,7 @@ The _Injection.has()_ methods can be used to check if a binding exists.
 The _examples/injection/classes/HasWiring_ class shows how to check whether a binding exists before wiring it
 into an application.
 
-Before running any of the example code, run _HasWiring.reset()_ from Anonymous APEX. This will clear all the
+Before running any of the example code, run _HasWiring.reset()_ from Anonymous Apex. This will clear all the
 bindings for _AccountClasses.AccountManager_.
 
 This code snippet from the _has()_ method shows how to test if a default binding exists.
@@ -301,7 +301,7 @@ if (Injection.has(AccountClasses.AccountManager.class)) {
     System.debug('Wiring for AccountClasses.AccountManager does not exist');
 }
 ```
-Run _HasWiring.has('Joe Bloggs')_ from Anonymous APEX. You should see the following DEBUG message. This shows
+Run _HasWiring.has('Joe Bloggs')_ from Anonymous Apex. You should see the following DEBUG message. This shows
 that no Binding exists for the _AccountClasses.AccountManager_ interface.
 ```
 DEBUG|Wiring for AccountClasses.AccountManager does not exist
@@ -310,7 +310,7 @@ Log on to your org. From the _App Launcher_ select _Bindings_. Create a new reco
 * Type : AccountClasses.AccountManager
 * Implementation: AccountClasses.SyncAccountManager
 
-Run _HasWiring.has('Joe Bloggs')_ from Anonymous APEX. You should no longer see the DEBUG message recording
+Run _HasWiring.has('Joe Bloggs')_ from Anonymous Apex. You should no longer see the DEBUG message recording
 a non-existent binding. And an _Account_ named _Joe Bloggs_ should have been added to the org.
 
 This code snippet from the _action()_ method shows how to test if a binding exists for a _Type_ and action.
@@ -325,7 +325,7 @@ if (Injection.has(AccountClasses.AccountManager.class, 'ASYNC')) {
     System.debug('Wiring for AccountClasses.AccountManager with action ASYNC does not exist');
 }
 ```
-Run _HasWiring.action('Joe Bloggs')_ from Anonymous APEX. You should see the following DEBUG message. This shows
+Run _HasWiring.action('Joe Bloggs')_ from Anonymous Apex. You should see the following DEBUG message. This shows
 that no Binidng exists for the _AccountClasses.AccountManager_ interface.
 ```
 DEBUG|Wiring for AccountClasses.AccountManager with action ASYNC does not exist
@@ -335,7 +335,7 @@ Log on to your org. From the _App Launcher_ select _Bindings_. Create a new reco
 * Action: ASYNC
 * Implementation: AccountClasses.AsyncAccountManager
 
-Run _HasWiring.action('Joe Bloggs')_ from Anonymous APEX. You should no longer see the DEBUG message recording
+Run _HasWiring.action('Joe Bloggs')_ from Anonymous Apex. You should no longer see the DEBUG message recording
 a non-existent binding. And an _Account_ named _Joe Bloggs_ should have been added to the org.
 
 To check the _Account_ was added asynchronously, go to _Setup > Apex Jobs_ and confirm a _Queueable_

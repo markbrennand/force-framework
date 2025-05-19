@@ -4,11 +4,15 @@
  *
  * Dependencies can be wired into an application by their interface or abstract class.
  *
+ * Variable and member variable values can also be wired into a class using the variable's class and an action.
+ *
  * An optional action argument is supported to allow for the binding of the same interface or class with different
  * implementations.
  *
  * By default, the implementation created when injected will be a singleton. If the binding is required to create
  * a new implementation for each use an application, the implementing class should implement the Prototype interface.
+ *
+ * See [Injection](https://github.com/markbrennand/sf-frameworks/blob/main/source/injection/README.md)
  *
  * @author Mark Brennand
  */

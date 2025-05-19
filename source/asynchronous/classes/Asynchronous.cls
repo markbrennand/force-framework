@@ -1,6 +1,8 @@
 /**
  * @description
- * Class providing asynchronous job creation and management.
+ * The API class for the Asynchronous framework.
+ *
+ * All access to the framework is thr
  *
  * @author Mark Brennand
  */
