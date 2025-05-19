@@ -117,7 +117,7 @@ global with sharing virtual class Injection {
 
         /**
          * @description
-         * Constructs an instance of the implementation class for the bindiong.
+         * Constructs an instance of the implementation class for the binding.
          *
          * @return Either the singleton instance or a new instance if the class being constructed implements Prototype.
          */

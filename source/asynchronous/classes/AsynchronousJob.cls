@@ -1,10 +1,14 @@
 /**
  * @description
- * Implementation of the Asynchronous.Job interface for use by an implementation of the framework.
+ * Implementation of the Asynchronous.Job interface for use by the default implementation of the framework.
+ *
+ * The class is virtual so other implementations may re-use it. The constructor, though, is protected so the
+ * class may only be extended and never instantiated outside the default implementation.
+ *
  * @author Mark Brennand
  */
 
-public with sharing class AsynchronousJob implements Asynchronous.Job {
+public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
 
     /**
      * @description
@@ -84,9 +88,9 @@ public with sharing class AsynchronousJob implements Asynchronous.Job {
 
     /**
      * @description
-     * Prevent the class being used outside of the framework.
+     * Allow extension but not modification.
      */
-    private AsynchronousJob() {}
+    protected AsynchronousJob() {}
 
     /**
      * @description

@@ -1,25 +1,10 @@
 /**
  * @description
- * API providing all SOQL and DML access for the Asyncnhronous framework.
+ * API providing all SOQL and DML access for the Asynchronous framework.
  *
  * @author Mark Brennand
  */
 public with sharing class AsynchronousDAO implements API {
-
-    static {
-        Injection.add(API.class, AsynchronousDAO.class);
-    }
-
-    @TestVisible
-    private static API INSTANCE {
-        private get {
-            if (INSTANCE == null) {
-                INSTANCE = (API) Injection.wire(API.class);
-            }
-            return INSTANCE;
-        }
-        private set;
-    }
 
     public interface API {
         Asynchronous__c getObject(Id asyncOjectId);
@@ -220,5 +205,29 @@ public with sharing class AsynchronousDAO implements API {
                 );
             }
         }
+    }
+
+    // Set the default implementation of the API. This can be overridden using an Injection Binding.
+    static {
+        Injection.add(API.class, AsynchronousDAO.class);
+    }
+
+    /**
+     * @description
+     * Active API instance.
+     *
+     * The instance is wired in from the Registry.
+     *
+     * The instance is test visible so it can be mocked.
+     */
+    @TestVisible
+    private static API INSTANCE {
+        private get {
+            if (INSTANCE == null) {
+                INSTANCE = (API) Injection.wire(API.class);
+            }
+            return INSTANCE;
+        }
+        private set;
     }
 }

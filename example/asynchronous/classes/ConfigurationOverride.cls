@@ -5,10 +5,10 @@
 public with sharing class ConfigurationOverride implements TypeHelper.Factory {
     public Object newInstance() {
         return new Map<String, Integer> {
-                'maxSchedulers' => 256,
-                'maximumActive' => 256,
+                'maxSchedulers' => 8,
+                'maximumActive' => 32,
                 'succeedOnRetryNumber' => 5,
-                'noJobsToRunDelay' => 9000
+                'noJobsToRunDelay' => 7500
         };
     }
 }

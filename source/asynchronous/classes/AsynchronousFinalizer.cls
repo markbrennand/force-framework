@@ -27,13 +27,16 @@ public with sharing class AsynchronousFinalizer {
                 } else {
                     onFailure(asyncObject, context.getException());
                 }
-
             } catch(Exception exc) {
                 AsynchronousHelper.internalFailure(asyncObject, exc);
             }
 
-            if (AsynchronousDAO.countScheduled(false) > 0) {
-                AsynchronousScheduler.queue();
+            try {
+                if (AsynchronousDAO.countScheduled(false) > 0) {
+                    AsynchronousScheduler.queue();
+                }
+            } catch(Exception exc) {
+                AsynchronousHelper.internalFailure(asyncObject, exc);
             }
         }
 

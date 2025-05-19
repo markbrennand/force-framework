@@ -15,7 +15,9 @@ public with sharing class AsynchronousHelper {
 
     /**
      * @description
-     * Records the detail of an Exception in an asynchronous object.
+     * Records the detail of an Exception in an Asynchronous Error object.
+     *
+     * A new record is created and persisted for each Exception recorded.
      *
      * @param asyncObject The asynchronous object to record the Exception against.
      * @param exc The exception to be recorded.
