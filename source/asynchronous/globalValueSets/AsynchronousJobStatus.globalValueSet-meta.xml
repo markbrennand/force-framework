@@ -16,9 +16,9 @@
         <label>RUNNING</label>
     </customValue>
     <customValue>
-        <fullName>COMPLETED</fullName>
+        <fullName>SUCCEEDED</fullName>
         <default>false</default>
-        <label>COMPLETED</label>
+        <label>SUCCEEDED</label>
     </customValue>
     <customValue>
         <fullName>FAILED</fullName>

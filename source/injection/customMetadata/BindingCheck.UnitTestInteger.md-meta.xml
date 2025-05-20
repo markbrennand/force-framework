@@ -4,7 +4,7 @@
     <protected>false</protected>
     <values>
         <field>Checker__c</field>
-        <value xsi:type="xsd:string">BindingTestHelper.SystemTypeChecker</value>
+        <value xsi:type="xsd:string">BindingCheck</value>
     </values>
     <values>
         <field>IsUnitTest__c</field>

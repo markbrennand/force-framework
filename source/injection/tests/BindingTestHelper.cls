@@ -179,36 +179,6 @@ public with sharing class BindingTestHelper {
         }
     }
 
-    public with sharing class SystemTypeChecker implements Injection.BindingCheck {
-        public Injection.ValidationResult validate(Type forType, Type withImpl) {
-            Object impl = TypeHelper.newInstance(withImpl);
-
-            switch on forType.getName() {
-                when 'Integer' {
-                    if (impl instanceof Integer) {
-                        return new Injection.ValidationResult(true, null);
-                    }
-                }
-                when 'Map<String,Integer>' {
-                    if (impl instanceof Map<String, Integer>) {
-                        return new Injection.ValidationResult(true, null);
-                    }
-                }
-                when else {
-                    return new Injection.ValidationResult(
-                            false,
-                            'Class ' + withImpl + ' can not be validated'
-                    );
-                }
-            }
-
-            return new Injection.ValidationResult(
-                    false,
-                    'Implementation ' + withImpl.getName() + ' is not a super class of ' + forType.getName()
-            );
-        }
-    }
-
     public with sharing class IntegerFactory implements TypeHelper.Factory {
         public Object newInstance() {
             return 123;

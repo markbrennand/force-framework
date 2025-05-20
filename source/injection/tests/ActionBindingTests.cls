@@ -30,8 +30,8 @@ public with sharing class ActionBindingTests {
         System.runAs(BindingTestHelper.getManager()) {
             BindingTestHelper.testBindingFailure(BindingTestHelper.TestInterface.class, 'Test', User.class, 'Class User does not implement TestInterface');
             BindingTestHelper.testBindingFailure(BindingTestHelper.AbstractTest.class, 'Test', User.class, 'Class User does not extend AbstractTest');
-            BindingTestHelper.testBindingFailure(Integer.class, 'Test', User.class, 'Implementation User is not a super class of Integer');
-            BindingTestHelper.testBindingFailure(Map<String, Integer>.class, 'Test', Map<String, Double>.class, 'Implementation Map<String,Double> is not a super class of Map<String,Integer>');
+            BindingTestHelper.testBindingFailure(Integer.class, 'Test', User.class, 'Class User cannot be assigned to an Integer');
+            BindingTestHelper.testBindingFailure(Map<String, Integer>.class, 'Test', Map<String, Double>.class, 'Class Map<String,Double> cannot be assigned to an Map<String,Integer>');
             Injection.add(BindingTestHelper.TestInterface.class, 'Test', BindingTestHelper.SingletonTest.class);
             Injection.add(BindingTestHelper.AbstractTest.class, 'Test', BindingTestHelper.SingletonTest.class);
             Injection.add(Integer.class, 'Test', BindingTestHelper.IntegerFactory.class);
@@ -40,6 +40,17 @@ public with sharing class ActionBindingTests {
             insert new Binding__c(Type__c = BindingTestHelper.AbstractTest.class.getName(), Action__c = 'Testg', Implementation__c = BindingTestHelper.SingletonTest.class.getName());
             insert new Binding__c(Type__c = Integer.class.getName(), Action__c = 'Test', Implementation__c = BindingTestHelper.IntegerFactory.class.getName());
             insert new Binding__c(Type__c = (Map<String, Integer>.class).getName(), Action__c = 'Test', Implementation__c = BindingTestHelper.MapFactory.class.getName());
+
+            // Complete testing of BindChecker;
+            Injection.add(String.class, 'Test', StringFactory.class);
+            Injection.add(Integer.class, 'Test', IntegerFactory.class);
+            Injection.add(Long.class, 'Test', LongFactory.class);
+            Injection.add(Double.class, 'Test', DoubleFactory.class);
+            Injection.add(Decimal.class, 'Test', DecimalFactory.class);
+            Injection.add(Map<String, Object>.class, 'Test', MapStringObjectFactory.class);
+            Injection.add(Map<String, String>.class, 'Test', MapStringStringFactory.class);
+            Injection.add(Map<String, Integer>.class, 'Test', MapStringIntegerFactory.class);
+            BindingTestHelper.testBindingFailure(Map<String, List<Integer>>.class, 'Test', MapStringListIntegerFactory.class, 'Class Map<String,List<Integer>> has no registered bind checker');
         }
     }
 
@@ -169,5 +180,59 @@ public with sharing class ActionBindingTests {
 
         BindingTestHelper.SINGLETON_INSTANCE =
                 BindingTestHelper.PROTOTYPE_INSTANCE = 0;
+    }
+
+    public with sharing class StringFactory implements TypeHelper.Factory {
+        public Object newInstance() {
+            return '123';
+        }
+    }
+
+    public with sharing class IntegerFactory implements TypeHelper.Factory {
+        public Object newInstance() {
+            return 123;
+        }
+    }
+
+    public with sharing class LongFactory implements TypeHelper.Factory {
+        public Object newInstance() {
+            return 123L;
+        }
+    }
+
+    public with sharing class DoubleFactory implements TypeHelper.Factory {
+        public Object newInstance() {
+            return 123.123;
+        }
+    }
+    
+    public with sharing class DecimalFactory implements TypeHelper.Factory {
+        public Object newInstance() {
+            return 123.123;
+        }
+    }
+
+    public with sharing class MapStringObjectFactory implements TypeHelper.Factory {
+        public Object newInstance() {
+            return new Map<String, Object>();
+        }
+    }
+
+    public with sharing class MapStringStringFactory implements TypeHelper.Factory {
+        public Object newInstance() {
+            return new Map<String, String>();
+        }
+    }
+
+    public with sharing class MapStringIntegerFactory implements TypeHelper.Factory {
+        public Object newInstance() {
+            return new Map<String, Integer>();
+        }
+    }
+
+    public with sharing class MapStringListIntegerFactory implements TypeHelper.Factory {
+        public Object newInstance() {
+            return new Map<String, List<Integer>>();
+        }
     }
 }

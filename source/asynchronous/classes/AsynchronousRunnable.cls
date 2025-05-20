@@ -57,11 +57,11 @@ global with sharing virtual class AsynchronousRunnable implements Asynchronous.R
         return 1;
     }
 
-    global virtual Boolean onCompletion(final Asynchronous.Job asyncJob) {
+    global virtual Boolean onSuccess(final Asynchronous.Job asyncJob) {
         return true;
     }
 
-    global virtual Boolean onFailure(final Asynchronous.Job asyncJob) {
+    global virtual Boolean onFailure(final Asynchronous.Job asyncJob, final Exception exc) {
         return true;
     }
 

@@ -70,12 +70,12 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
         }
     }
 
-    public override Boolean onCompletion(final Asynchronous.Job asyncJob) {
+    public override Boolean onSuccess(final Asynchronous.Job asyncJob) {
         Assert.isNotNull(asyncJob, 'parameter; AsynchronousScheduler.onSuccess.asyncJob');
         return false;
     }
 
-    public override Boolean onFailure(final Asynchronous.Job asyncJob) {
+    public override Boolean onFailure(final Asynchronous.Job asyncJob, final Exception exc) {
         Assert.isNotNull(asyncJob, 'parameter; AsynchronousScheduler.onFailure.asyncJob');
         return true;
     }

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>MaximumRetries__c</fullName>
-    <description>The maximum number of retries on failure.</description>
+    <description>The maximum number of re-tries on failure.</description>
     <externalId>false</externalId>
-    <inlineHelpText>After a failure on the first job invocation, upto this number of retries will be made before the job is considered to have failed.</inlineHelpText>
-    <label>Maximum Retries</label>
+    <inlineHelpText>After a failure on the first job invocation, upto this number of re-tries will be made before the job is considered to have failed.</inlineHelpText>
+    <label>Maximum Re-tries</label>
     <precision>3</precision>
     <required>true</required>
     <scale>0</scale>

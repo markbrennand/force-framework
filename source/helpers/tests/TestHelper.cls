@@ -8,14 +8,15 @@
 public with sharing class TestHelper {
     private static Integer nextId = 0;
 
-    public static String nextId(SObjectType objectType) {
+    @TestVisible
+    private static String nextId(SObjectType objectType) {
         final String id = String.valueOf(++nextId);
         final Integer length = id.length();
 
         return String.join(
                 new List<String> {
                         objectType.getDescribe().keyPrefix,
-                        '000000000000000'.substring(length),
+                        '0'.repeat(15 - length),
                         id
                 },
                 ''

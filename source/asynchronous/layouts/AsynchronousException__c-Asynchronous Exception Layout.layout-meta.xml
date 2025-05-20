@@ -19,12 +19,16 @@
                 <field>Name</field>
             </layoutItems>
             <layoutItems>
+                <behavior>Readonly</behavior>
+                <field>StatusOnError__c</field>
+            </layoutItems>
+            <layoutItems>
                 <behavior>Required</behavior>
                 <field>ExceptionType__c</field>
             </layoutItems>
             <layoutItems>
-                <behavior>Readonly</behavior>
-                <field>StatusOnError__c</field>
+                <behavior>Edit</behavior>
+                <field>ExceptionStackTrace__c</field>
             </layoutItems>
         </layoutColumns>
         <layoutColumns>
@@ -33,12 +37,12 @@
                 <field>Asynchronous__c</field>
             </layoutItems>
             <layoutItems>
-                <behavior>Edit</behavior>
-                <field>ExceptionMessage__c</field>
+                <behavior>Readonly</behavior>
+                <field>RetryNumber__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>ExceptionStackTrace__c</field>
+                <field>ExceptionMessage__c</field>
             </layoutItems>
         </layoutColumns>
         <style>TwoColumnsTopToBottom</style>

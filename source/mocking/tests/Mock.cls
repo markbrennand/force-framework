@@ -6,15 +6,18 @@
  *
  * @author Mark Brennand
  */
+@IsTest
 public with sharing class Mock {
     final static MockStubProvider PROVIDER = new MockStubProvider();
     final static Map<Object, List<Method>> METHODS = new Map<Object, List<Method>>();
 
-    public static Object stub(final Type stubbedClass) {
+    @TestVisible
+    private static Object stub(final Type stubbedClass) {
         return Test.createStub(stubbedClass, PROVIDER);
     }
 
-    public static void validate(final Object stub) {
+    @TestVisible
+    private static void validate(final Object stub) {
         if (METHODS.containsKey(stub)) {
             for (Method method : METHODS.get(stub)) {
                 method.validate();
@@ -22,7 +25,8 @@ public with sharing class Mock {
         }
     }
 
-    public static Method stubMethod(final Object stub, final String methodName) {
+    @TestVisible
+    private static Method stubMethod(final Object stub, final String methodName) {
         Method method = new Method(methodName);
         if (METHODS.containsKey(stub)) {
             METHODS.get(stub).add(method);
@@ -66,6 +70,7 @@ public with sharing class Mock {
         }
 
         public Boolean matches(final String methodName, final List<Object> arguments) {
+
             if (methodName != this.methodName) {
                 return false;
             }
@@ -75,7 +80,15 @@ public with sharing class Mock {
             }
 
             for (Integer i = 0; i < arguments.size(); i++) {
-                if (arguments[i] != this.arguments[i]) {
+                if (this.arguments[i] instanceof List<SObject>) {
+                    if (!compareSObjects((List<SObject>) this.arguments[i], (List<SObject>) arguments[i])) {
+                        return false;
+                    }
+                } else if (this.arguments[i] instanceof SObject) {
+                    if (!compareSObjects((SObject) this.arguments[i], (SObject) arguments[i])) {
+                        return false;
+                    }
+                } else if (arguments[i] != this.arguments[i]) {
                     return false;
                 }
             }
@@ -93,12 +106,41 @@ public with sharing class Mock {
         }
 
         public void validate() {
-            if (this.expectedCalls != null) {
+            if (expectedCalls != null) {
                 Assert.areEqual(
-                        this.expectedCalls,
-                        timesCalled, 'Stubbed method ' + methodName + ' was not called the expected number of times'
+                        expectedCalls,
+                        timesCalled, 'Stubbed method ' + methodName + this.arguments + ' was not called the expected number of times'
                 );
             }
+        }
+
+        private Boolean compareSObjects(final SObject expectedSObject, final SObject actualSObject) {
+            // Fields of actualSObject must match all of those in expectedSObject.
+            // Fields not defined in expectedSObject may be defined in actualSObject.
+            final Map<String, Object> values1 = expectedSObject.getPopulatedFieldsAsMap();
+            final Map<String, Object> values2 = actualSObject.getPopulatedFieldsAsMap();
+
+            for (String field : values1.keySet()) {
+                if (values1.get(field) != values2.get(field)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private Boolean compareSObjects(final List<SObject> expectedSObjects, final List<SObject> actualSObjects) {
+            if (expectedSObjects.size() != actualSObjects.size()) {
+                return false;
+            }
+
+            for (Integer i = 0; i < expectedSObjects.size(); i++) {
+                if (!compareSObjects(expectedSObjects[i], actualSObjects[i])) {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 
@@ -112,7 +154,6 @@ public with sharing class Mock {
                 final List<String> paramNames,
                 final List<Object> args
         ) {
-            System.debug(stubbedMethodName + '(' + args + ')');
             Assert.isTrue(
                     METHODS.containsKey(stubbedObject),
                     'Method ' + stubbedMethodName + ' has not been stubbed in object ' + stubbedObject
@@ -124,8 +165,12 @@ public with sharing class Mock {
                 }
             }
 
-            Assert.fail('Match for method ' + stubbedMethodName + ' and arguments not found in ' + stubbedObject);
+            Assert.fail('Match for method ' + stubbedMethodName + ' and arguments ' + args + ' not found in ' + stubbedObject);
             return null;
         }
+    }
+
+    public static Boolean isSObjectList(List<Object> theList) {
+        return theList instanceof List<SObject>;
     }
 }

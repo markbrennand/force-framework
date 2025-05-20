@@ -107,7 +107,7 @@
         <fields>CREATED_DATE</fields>
         <fields>ExceptionType__c</fields>
         <fields>ExceptionMessage__c</fields>
-        <relatedList>AsynchronousError__c.Asynchronous__c</relatedList>
+        <relatedList>AsynchronousException__c.Asynchronous__c</relatedList>
         <sortField>CREATED_DATE</sortField>
         <sortOrder>Desc</sortOrder>
     </relatedLists>

@@ -14,13 +14,13 @@ public with sharing class AsynchronousDAO implements API {
         void persistAsynchronous(List<Asynchronous__c> asyncObjects);
         void persistAsynchronous(List<Asynchronous__c> asyncObjects, List<Map<String, String>> states);
         void removeAsynchronous(List<Asynchronous__c> asyncObject);
-        void persistAsynchronousError(AsynchronousError__c asyncError);
+        void persistAsynchronousError(AsynchronousException__c asyncError);
     }
 
     public Asynchronous__c getObject(Id asyncObjectId) {
         Assert.isNotNull(asyncObjectId, 'parameter; AsynchronousDAO.getObject.asyncObjectId');
 
-        return [
+        final List<Asynchronous__c> asyncObjects = [
                 SELECT Id, OwnerId, Status__c, Reference__c, Runnable__c, MaximumRetries__c, RetryInterval__c,
                         RetryNumber__c, ScheduledRunTime__c, LastRunTime__c,
                         (SELECT Content__c FROM AsynchronousStates__r ORDER BY ChunkNumber__c)
@@ -29,6 +29,10 @@ public with sharing class AsynchronousDAO implements API {
                 WITH USER_MODE
                 LIMIT 1
         ];
+
+        Assert.areEqual(1, asyncObjects.size(), 'Asynchronous object with Id ' + asyncObjectId + ' not found');
+
+        return asyncObjects[0];
     }
 
     public Asynchronous__c getFirstScheduledObject() {
@@ -143,7 +147,7 @@ public with sharing class AsynchronousDAO implements API {
         Database.delete(asynchronousObjects, AccessLevel.USER_MODE);
     }
 
-    public void persistAsynchronousError(AsynchronousError__c asyncError) {
+    public void persistAsynchronousError(AsynchronousException__c asyncError) {
         Assert.isNotNull(asyncError, 'parameter; AsynchronousDAO.removeAsynchronous.asyncError');
         Database.insert(asyncError, AccessLevel.USER_MODE);
     }
@@ -176,7 +180,7 @@ public with sharing class AsynchronousDAO implements API {
         INSTANCE.removeAsynchronous(asyncObjects);
     }
 
-    public static void persist(AsynchronousError__c asyncError) {
+    public static void persist(AsynchronousException__c asyncError) {
         INSTANCE.persistAsynchronousError(asyncError);
     }
 

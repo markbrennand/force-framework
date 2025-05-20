@@ -28,7 +28,7 @@ global with sharing virtual class Asynchronous implements API {
      *
      * RUNNING - The job is running.
      *
-     * COMPLETED - The job ran to completion successfully.
+     * SUCCEEDED - The job ran to completion successfully.
      *
      * FAILED - The last job failed to run and the maximum number of retries has been exceeded.
      *
@@ -38,7 +38,7 @@ global with sharing virtual class Asynchronous implements API {
         PENDING,
         QUEUED,
         RUNNING,
-        COMPLETED,
+        SUCCEEDED,
         FAILED,
         CANCELLED
     }
@@ -147,7 +147,7 @@ global with sharing virtual class Asynchronous implements API {
          *
          * @return Whether to delete a record of the job or not.
          */
-        Boolean onCompletion(Job asyncJob);
+        Boolean onSuccess(Job asyncJob);
 
         /**
          * @description
@@ -156,10 +156,11 @@ global with sharing virtual class Asynchronous implements API {
          * The return value indicates whether the API implementation is to keep a record of the job or delete it.
          *
          * @param asyncJob The job that failed.
+         * @param exc The Exception that caused the job to fail on its last execution.
          *
          * @return Whether to delete a record of the job or not.
          */
-        Boolean onFailure(Job asyncJob);
+        Boolean onFailure(Job asyncJob, Exception exc);
 
         /**
          * @description
@@ -484,9 +485,11 @@ global with sharing virtual class Asynchronous implements API {
                 if (!(TypeHelper.newInstance(TypeHelper.loadType(asyncObject.Runnable__c)) instanceof Asynchronous.Runnable)) {
                     asyncObject.addError('Class ' + asyncObject.Runnable__c + ' does not implement Asynchronous.Runnable');
                     hasErrors = true;
+
                 } else if (asyncObject.Status__c == Asynchronous.Status.PENDING.name()) {
                     asyncObject.Status__c = Asynchronous.Status.QUEUED.name();
                     asyncObject.RetryNumber__c = 0;
+
                     if (asyncObject.Runnable__c != AsynchronousScheduler.class.getName()) {
                         startScheduler = true;
                     }

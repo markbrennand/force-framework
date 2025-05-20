@@ -458,6 +458,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
             AsynchronousDAO.persist(new List<Asynchronous__c> { asyncObject });
 
             return true;
+
         } else {
             return false;
         }

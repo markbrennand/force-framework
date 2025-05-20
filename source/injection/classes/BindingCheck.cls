@@ -39,10 +39,10 @@ public with sharing class BindingCheck implements Injection.BindingCheck {
             when 'Map<String,String>' {
                 return buildValidationResult(TypeHelper.newInstance(withImpl) instanceof Map<String,String>, forType, withImpl);
             }
-            when 'Map<String,Object>' {
-                return buildValidationResult(TypeHelper.newInstance(withImpl) instanceof Map<String,Object>, forType, withImpl);
-            }
             when 'Map<String,Integer>' {
+                return buildValidationResult(TypeHelper.newInstance(withImpl) instanceof Map<String,Integer>, forType, withImpl);
+            }
+            when 'Map<String,ANY>' {
                 return buildValidationResult(TypeHelper.newInstance(withImpl) instanceof Map<String,Object>, forType, withImpl);
             }
             when else {

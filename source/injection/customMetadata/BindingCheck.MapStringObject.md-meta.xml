@@ -12,6 +12,6 @@
     </values>
     <values>
         <field>Type__c</field>
-        <value xsi:type="xsd:string">Map&lt;String,Object&gt;</value>
+        <value xsi:type="xsd:string">Map&lt;String,ANY&gt;</value>
     </values>
 </CustomMetadata>
