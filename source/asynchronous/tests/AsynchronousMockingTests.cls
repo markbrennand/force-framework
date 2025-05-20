@@ -12,7 +12,7 @@ public with sharing class AsynchronousMockingTests {
         Asynchronous mockAsynchronous = createMock();
         Asynchronous.INSTANCE = mockAsynchronous;
 
-        Asynchronous.Job job = Asynchronous.create(
+        Asynchronous.Job job = Asynchronous.createJob(
                 AsynchronousMockingTests.class,
                 null,
                 1,
@@ -27,7 +27,7 @@ public with sharing class AsynchronousMockingTests {
                 .withArguments(new List<Object>{ new List<Asynchronous.Job> { job } })
                 .expected(1);
 
-        Asynchronous.queue(new List<Asynchronous.Job> { job });
+        Asynchronous.queueJobs(new List<Asynchronous.Job> { job });
 
         Mock.validate(mockAsynchronous);
     }

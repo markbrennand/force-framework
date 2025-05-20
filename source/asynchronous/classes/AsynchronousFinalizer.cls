@@ -57,8 +57,27 @@ public with sharing class AsynchronousFinalizer {
             this.asyncObjectId = asyncObjectId;
         }
 
+        /**
+         * @description
+         * Called when the Apex job has completed.
+         *
+         * The context is used to determine the status of the job.
+         *
+         * If the job succeeded, the Runnable's onSuccess method is called. The return value
+         * from the call indicates whether to keep the Asynchronous__c object or delete it.
+         *
+         * If the job failed and there are more re-tries available, the Runnable's onError method
+         * is called. The return value from the method indicates the new Status to assign to the
+         * job.
+         *
+         * If the job failed and the re-tries have been exhausted, the Runnable's onFailure method
+         * is called. The return value from the call indicates whether to keep the Asynchronous__c
+         * object or delete it.
+         *
+         * @param context Information about job result.
+         */
         public void execute(final FinalizerContext context) {
-            final Asynchronous__c asyncObject = AsynchronousDAO.get(asyncObjectId);
+            final Asynchronous__c asyncObject = AsynchronousDAO.getObject(asyncObjectId);
 
             try {
                 if (context.getResult() == ParentJobResult.SUCCESS) {
@@ -67,29 +86,46 @@ public with sharing class AsynchronousFinalizer {
                     onFailure(asyncObject, context.getException());
                 }
             } catch(Exception exc) {
-                AsynchronousHelper.internalFailure(asyncObject, exc);
+                AsynchronousHelper.recordInternalException(asyncObject, exc);
             }
 
             try {
-                if (AsynchronousDAO.countScheduled(false) > 0) {
+                if (AsynchronousDAO.countScheduledObjects(false) > 0) {
                     AsynchronousScheduler.queue();
                 }
             } catch(Exception exc) {
-                AsynchronousHelper.internalFailure(asyncObject, exc);
+                AsynchronousHelper.recordInternalException(asyncObject, exc);
             }
         }
 
+        /**
+         * @description
+         * Method handling the successful processing of a job.
+         *
+         * @param asyncObject The Asynchronous__c object for the job.
+         */
         private void onSuccess(final Asynchronous__c asyncObject) {
             final Asynchronous.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
 
             if (asyncJob.getRunnable().onSuccess(asyncJob)) {
                 asyncObject.Status__c = Asynchronous.Status.SUCCEEDED.name();
-                AsynchronousDAO.persist(new List<Asynchronous__c> { asyncObject });
+                AsynchronousDAO.persistAsynchronous(new List<Asynchronous__c> { asyncObject });
             } else {
-                AsynchronousDAO.remove(new List<Asynchronous__c> { asyncObject });
+                AsynchronousDAO.removeAsynchronous(new List<Asynchronous__c> { asyncObject });
             }
         }
 
+        /**
+         * @description
+         * Method handling the failed processing of a job.
+         *
+         * If re-tries are available, and the Status returned by the Runnable's onError method
+         * is QUEUED, then the job is scheduled to run again in the number of milliseconds given
+         * by the job's Retry Interval.
+         *
+         * @param asyncObject The Asynchronous__c object for the job.
+         * @param exc The Exception that caused the job to fail.
+         */
         private void onFailure(final Asynchronous__c asyncObject, final Exception exc) {
             final Integer maximumRetries = (Integer) asyncObject.MaximumRetries__c;
             final Integer retryNumber = (Integer) asyncObject.RetryNumber__c;
@@ -100,9 +136,9 @@ public with sharing class AsynchronousFinalizer {
             if (retryNumber == maximumRetries) {
                 if (asyncJob.getRunnable().onFailure(asyncJob, exc)) {
                     asyncObject.Status__c = Asynchronous.Status.FAILED.name();
-                    AsynchronousDAO.persist(new List<Asynchronous__c> { asyncObject });
+                    AsynchronousDAO.persistAsynchronous(new List<Asynchronous__c> { asyncObject });
                 } else {
-                    AsynchronousDAO.remove(new List<Asynchronous__c> { asyncObject });
+                    AsynchronousDAO.removeAsynchronous(new List<Asynchronous__c> { asyncObject });
                 }
             } else {
                 asyncObject.RetryNumber__c = retryNumber + 1;
@@ -110,7 +146,7 @@ public with sharing class AsynchronousFinalizer {
                 asyncObject.ScheduledRunTime__c =
                         Datetime.newInstance(System.currentTimeMillis() + asyncJob.getRetryInterval());
 
-                AsynchronousDAO.persist(new List<Asynchronous__c> { asyncObject });
+                AsynchronousDAO.persistAsynchronous(new List<Asynchronous__c> { asyncObject });
             }
         }
     }

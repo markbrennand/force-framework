@@ -14,16 +14,16 @@ public with sharing class BindingInitialisation {
     public static void programmatic() {
 
         // Add the bindings to the registry.
-        Injection.add(QueryClasses.QueryInterface.class, QueryClasses.UserQueryInterfaceImpl.class);
-        Injection.add(QueryClasses.AbstractQuery.class, QueryClasses.UserAbstractQueryImpl.class);
-        Injection.add(QueryClasses.QueryInterface.class, 'SYSTEM', QueryClasses.SystemQueryInterfaceImpl.class);
-        Injection.add(QueryClasses.AbstractQuery.class, 'SYSTEM', QueryClasses.SystemAbstractQueryImpl.class);
+        Injection.bind(QueryClasses.QueryInterface.class, QueryClasses.UserQueryInterfaceImpl.class);
+        Injection.bind(QueryClasses.AbstractQuery.class, QueryClasses.UserAbstractQueryImpl.class);
+        Injection.bind(QueryClasses.QueryInterface.class, 'SYSTEM', QueryClasses.SystemQueryInterfaceImpl.class);
+        Injection.bind(QueryClasses.AbstractQuery.class, 'SYSTEM', QueryClasses.SystemAbstractQueryImpl.class);
 
         // Check the bindings have been added.
-        Assert.isTrue(Injection.has(QueryClasses.QueryInterface.class));
-        Assert.isTrue(Injection.has(QueryClasses.AbstractQuery.class));
-        Assert.isTrue(Injection.has(QueryClasses.QueryInterface.class, 'SYSTEM'));
-        Assert.isTrue(Injection.has(QueryClasses.AbstractQuery.class, 'SYSTEM'));
+        Assert.isTrue(Injection.isBound(QueryClasses.QueryInterface.class));
+        Assert.isTrue(Injection.isBound(QueryClasses.AbstractQuery.class));
+        Assert.isTrue(Injection.isBound(QueryClasses.QueryInterface.class, 'SYSTEM'));
+        Assert.isTrue(Injection.isBound(QueryClasses.AbstractQuery.class, 'SYSTEM'));
 
         // Check the bindings have been bound correctly.
         Assert.isTrue(Injection.wire(QueryClasses.QueryInterface.class) instanceof QueryClasses.UserQueryInterfaceImpl);
@@ -71,10 +71,10 @@ public with sharing class BindingInitialisation {
         insert new Binding__c(Type__c = 'QueryClasses.AbstractQuery', Action__c = 'SYSTEM', Implementation__c = 'QueryClasses.SystemAbstractQueryImpl');
 
         // Check the bindings have been added.
-        Assert.isTrue(Injection.has(QueryClasses.QueryInterface.class));
-        Assert.isTrue(Injection.has(QueryClasses.AbstractQuery.class));
-        Assert.isTrue(Injection.has(QueryClasses.QueryInterface.class, 'SYSTEM'));
-        Assert.isTrue(Injection.has(QueryClasses.AbstractQuery.class, 'SYSTEM'));
+        Assert.isTrue(Injection.isBound(QueryClasses.QueryInterface.class));
+        Assert.isTrue(Injection.isBound(QueryClasses.AbstractQuery.class));
+        Assert.isTrue(Injection.isBound(QueryClasses.QueryInterface.class, 'SYSTEM'));
+        Assert.isTrue(Injection.isBound(QueryClasses.AbstractQuery.class, 'SYSTEM'));
 
         // Check the bindings have been bound correctly.
         Assert.isTrue(Injection.wire(QueryClasses.QueryInterface.class) instanceof QueryClasses.UserQueryInterfaceImpl);
@@ -117,7 +117,7 @@ public with sharing class BindingInitialisation {
      */
     public static void programmaticValidationFailure() {
         // User class does not implement the QueryInterface interface. The QueryValidator class will identify this.
-        Injection.add(QueryClasses.QueryInterface.class, 'SYSTEM', User.class);
+        Injection.bind(QueryClasses.QueryInterface.class, 'SYSTEM', User.class);
     }
 
     /**

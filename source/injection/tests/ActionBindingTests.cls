@@ -16,10 +16,10 @@ public with sharing class ActionBindingTests {
     static void testInstantiation() {
         System.runAs(BindingTestHelper.getManager()) {
             BindingTestHelper.testBindingFailure(BindingTestHelper.TestInterface.class, 'Test', BindingTestHelper.AbstractTest.class, 'Implementation BindingTestHelper.AbstractTest must be instantiable');
-            Injection.add(BindingTestHelper.TestInterface.class, 'Test', BindingTestHelper.SingletonTest.class);
-            Injection.add(BindingTestHelper.AbstractTest.class, 'Test', BindingTestHelper.SingletonTest.class);
-            Injection.add(Integer.class, 'Test', BindingTestHelper.IntegerFactory.class);
-            Injection.add(Map<String, Integer>.class, 'Test', BindingTestHelper.MapFactory.class);
+            Injection.bind(BindingTestHelper.TestInterface.class, 'Test', BindingTestHelper.SingletonTest.class);
+            Injection.bind(BindingTestHelper.AbstractTest.class, 'Test', BindingTestHelper.SingletonTest.class);
+            Injection.bind(Integer.class, 'Test', BindingTestHelper.IntegerFactory.class);
+            Injection.bind(Map<String, Integer>.class, 'Test', BindingTestHelper.MapFactory.class);
             insert new Binding__c(Type__c = Integer.class.getName(), Action__c = 'Test', Implementation__c = BindingTestHelper.IntegerFactory.class.getName());
             insert new Binding__c(Type__c = (Map<String, Integer>.class).getName(), Action__c = 'Test', Implementation__c = BindingTestHelper.MapFactory.class.getName());
         }
@@ -32,24 +32,24 @@ public with sharing class ActionBindingTests {
             BindingTestHelper.testBindingFailure(BindingTestHelper.AbstractTest.class, 'Test', User.class, 'Class User does not extend AbstractTest');
             BindingTestHelper.testBindingFailure(Integer.class, 'Test', User.class, 'Class User cannot be assigned to an Integer');
             BindingTestHelper.testBindingFailure(Map<String, Integer>.class, 'Test', Map<String, Double>.class, 'Class Map<String,Double> cannot be assigned to an Map<String,Integer>');
-            Injection.add(BindingTestHelper.TestInterface.class, 'Test', BindingTestHelper.SingletonTest.class);
-            Injection.add(BindingTestHelper.AbstractTest.class, 'Test', BindingTestHelper.SingletonTest.class);
-            Injection.add(Integer.class, 'Test', BindingTestHelper.IntegerFactory.class);
-            Injection.add(Map<String, Integer>.class, 'Test', BindingTestHelper.MapFactory.class);
+            Injection.bind(BindingTestHelper.TestInterface.class, 'Test', BindingTestHelper.SingletonTest.class);
+            Injection.bind(BindingTestHelper.AbstractTest.class, 'Test', BindingTestHelper.SingletonTest.class);
+            Injection.bind(Integer.class, 'Test', BindingTestHelper.IntegerFactory.class);
+            Injection.bind(Map<String, Integer>.class, 'Test', BindingTestHelper.MapFactory.class);
             insert new Binding__c(Type__c = BindingTestHelper.TestInterface.class.getName(), Action__c = 'Test', Implementation__c = BindingTestHelper.SingletonTest.class.getName());
             insert new Binding__c(Type__c = BindingTestHelper.AbstractTest.class.getName(), Action__c = 'Testg', Implementation__c = BindingTestHelper.SingletonTest.class.getName());
             insert new Binding__c(Type__c = Integer.class.getName(), Action__c = 'Test', Implementation__c = BindingTestHelper.IntegerFactory.class.getName());
             insert new Binding__c(Type__c = (Map<String, Integer>.class).getName(), Action__c = 'Test', Implementation__c = BindingTestHelper.MapFactory.class.getName());
 
             // Complete testing of BindChecker;
-            Injection.add(String.class, 'Test', StringFactory.class);
-            Injection.add(Integer.class, 'Test', IntegerFactory.class);
-            Injection.add(Long.class, 'Test', LongFactory.class);
-            Injection.add(Double.class, 'Test', DoubleFactory.class);
-            Injection.add(Decimal.class, 'Test', DecimalFactory.class);
-            Injection.add(Map<String, Object>.class, 'Test', MapStringObjectFactory.class);
-            Injection.add(Map<String, String>.class, 'Test', MapStringStringFactory.class);
-            Injection.add(Map<String, Integer>.class, 'Test', MapStringIntegerFactory.class);
+            Injection.bind(String.class, 'Test', StringFactory.class);
+            Injection.bind(Integer.class, 'Test', IntegerFactory.class);
+            Injection.bind(Long.class, 'Test', LongFactory.class);
+            Injection.bind(Double.class, 'Test', DoubleFactory.class);
+            Injection.bind(Decimal.class, 'Test', DecimalFactory.class);
+            Injection.bind(Map<String, Object>.class, 'Test', MapStringObjectFactory.class);
+            Injection.bind(Map<String, String>.class, 'Test', MapStringStringFactory.class);
+            Injection.bind(Map<String, Integer>.class, 'Test', MapStringIntegerFactory.class);
             BindingTestHelper.testBindingFailure(Map<String, List<Integer>>.class, 'Test', MapStringListIntegerFactory.class, 'Class Map<String,List<Integer>> has no registered bind checker');
         }
     }
@@ -70,8 +70,8 @@ public with sharing class ActionBindingTests {
     @IsTest
     static void testPropertyBinding() {
         System.runAs(BindingTestHelper.getManager()) {
-            Injection.add(Integer.class, 'Test', BindingTestHelper.IntegerFactory.class);
-            Injection.add(Map<String, Integer>.class, 'Test', BindingTestHelper.MapFactory.class);
+            Injection.bind(Integer.class, 'Test', BindingTestHelper.IntegerFactory.class);
+            Injection.bind(Map<String, Integer>.class, 'Test', BindingTestHelper.MapFactory.class);
         }
 
         System.runAs(BindingTestHelper.getUser()) {
@@ -111,11 +111,11 @@ public with sharing class ActionBindingTests {
     static void testIsBound() {
         setup(true);
         System.runAs(BindingTestHelper.getUser()) {
-            Assert.isTrue(Injection.has(BindingTestHelper.TestInterface.class, 'Test'));
-            Assert.isTrue(Injection.has(BindingTestHelper.AbstractTest.class, 'Test'));
-            Assert.isFalse(Injection.has(BindingTestHelper.TestInterface.class, 'NotTest'));
-            Assert.isFalse(Injection.has(BindingTestHelper.TestInterface.class));
-            Assert.isFalse(Injection.has(User.class, 'Test'));
+            Assert.isTrue(Injection.isBound(BindingTestHelper.TestInterface.class, 'Test'));
+            Assert.isTrue(Injection.isBound(BindingTestHelper.AbstractTest.class, 'Test'));
+            Assert.isFalse(Injection.isBound(BindingTestHelper.TestInterface.class, 'NotTest'));
+            Assert.isFalse(Injection.isBound(BindingTestHelper.TestInterface.class));
+            Assert.isFalse(Injection.isBound(User.class, 'Test'));
         }
     }
 
@@ -171,11 +171,11 @@ public with sharing class ActionBindingTests {
 
     private static void setup(Boolean singleton) {
         if (singleton) {
-            Injection.add(BindingTestHelper.TestInterface.class, 'Test', BindingTestHelper.SingletonTest.class);
-            Injection.add(BindingTestHelper.AbstractTest.class, 'Test', BindingTestHelper.SingletonTest.class);
+            Injection.bind(BindingTestHelper.TestInterface.class, 'Test', BindingTestHelper.SingletonTest.class);
+            Injection.bind(BindingTestHelper.AbstractTest.class, 'Test', BindingTestHelper.SingletonTest.class);
         } else {
-            Injection.add(BindingTestHelper.TestInterface.class, 'Test', BindingTestHelper.PrototypeTest.class);
-            Injection.add(BindingTestHelper.AbstractTest.class, 'Test', BindingTestHelper.PrototypeTest.class);
+            Injection.bind(BindingTestHelper.TestInterface.class, 'Test', BindingTestHelper.PrototypeTest.class);
+            Injection.bind(BindingTestHelper.AbstractTest.class, 'Test', BindingTestHelper.PrototypeTest.class);
         }
 
         BindingTestHelper.SINGLETON_INSTANCE =

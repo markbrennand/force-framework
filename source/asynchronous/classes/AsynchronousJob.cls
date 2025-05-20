@@ -431,12 +431,12 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
     @Future
     private static void start(final String asyncObjectId) {
         Assert.isNotNull(asyncObjectId, 'parameter; AsynchronousJob.start.asyncObjectId');
-        final Asynchronous__c asyncObject = AsynchronousDAO.get(asyncObjectId);
+        final Asynchronous__c asyncObject = AsynchronousDAO.getObject(asyncObjectId);
 
         try {
             enqueueApexJob(asyncObject, true);
         } catch(Exception exc) {
-            AsynchronousHelper.internalFailure(asyncObject, exc);
+            AsynchronousHelper.recordInternalException(asyncObject, exc);
         }
     }
 
@@ -447,15 +447,15 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
         final AsynchronousJob asyncJob = (AsynchronousJob) fromSObject(asyncObject);
         final AsynchronousRunnable runnable = (AsynchronousRunnable) asyncJob.getRunnable();
 
-        if (isFuture || AsynchronousDAO.countActive(asyncObject) < runnable.getMaximumActive()) {
+        if (isFuture || AsynchronousDAO.countActiveObjects(asyncObject) < runnable.getMaximumActive()) {
             asyncObject.Status__c = Asynchronous.Status.RUNNING.name();
             asyncObject.LastRunTime__c = Datetime.now();
-            AsynchronousDAO.persist(new List<Asynchronous__c> { asyncObject });
+            AsynchronousDAO.persistAsynchronous(new List<Asynchronous__c> { asyncObject });
 
             asyncObject.ApexJobId__c = System.enqueueJob(
-                    runnable.forJob(AsynchronousJob.fromSObject(AsynchronousDAO.get(asyncObject.Id))));
+                    runnable.forJob(AsynchronousJob.fromSObject(AsynchronousDAO.getObject(asyncObject.Id))));
 
-            AsynchronousDAO.persist(new List<Asynchronous__c> { asyncObject });
+            AsynchronousDAO.persistAsynchronous(new List<Asynchronous__c> { asyncObject });
 
             return true;
 

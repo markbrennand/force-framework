@@ -151,7 +151,7 @@ global with sharing virtual class Injection {
      *
      * @return The implementation of the given type.
      */
-    protected virtual Object wireType(final Type forType) {
+    protected virtual Object apiWire(final Type forType) {
         addCustomBindings();
 
         final Key key = new Key(forType);
@@ -160,6 +160,88 @@ global with sharing virtual class Injection {
         }
 
         return REGISTRY.get(key).newInstance();
+    }
+
+    /**
+     * @description
+     * If the registry contains a binding for the given type and action, its implementation is returned.
+     *
+     * Should no binding exist, an exception is thrown.
+     *
+     * @param forType The type to be bound.
+     * @param action The action specific to the binding to be bound.
+     *
+     * @return The implementation of the given type.
+     */
+    protected virtual Object apiWire(final Type forType, final String action) {
+        addCustomBindings();
+
+        final Key key = new ActionKey(forType, action);
+        if (!REGISTRY.containsKey(key)) {
+            throw createException('Binding for', forType.getName(), action, 'not found in registry');
+        }
+
+        return REGISTRY.get(key).newInstance();
+    }
+
+    /**
+     * @description
+     * Returns true if registry contains a binding for the given type and action, false if not.
+     *
+     * @param forType The type to be checked.
+     *
+     * @return True if binding exists, false if not.
+     */
+    protected virtual Boolean apiIsBound(final Type forType) {
+        addCustomBindings();
+        return REGISTRY.containsKey(new Key(forType));
+    }
+
+    /**
+     * @description
+     * Returns true if registry contains a binding for the given type and action, false if not.
+     *
+     * @param forType The type to be checked.
+     * @param action The action specific to the binding to be checked.
+     *
+     * @return True if binding exists, false if not.
+     */
+    protected virtual Boolean apiIsBound(final Type forType, final String action) {
+        addCustomBindings();
+        return REGISTRY.containsKey(new ActionKey(forType, action));
+    }
+
+    /**
+     * @description
+     * Adds a binding to the registry.
+     *
+     * @param forType The type to be bound. Must be either an interface or abstract class.
+     * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
+     */
+    protected virtual void apiBind(final Type forType, final Type withImpl) {
+        validateTypes(forType, null, withImpl);
+        REGISTRY.put(new Key(forType), new Factory(withImpl));
+    }
+
+    /**
+     * @description
+     * Adds a binding to the registry.
+     *
+     * @param forType The type to be bound. Must be either an interface or abstract class.
+     * @param action The action used in combination with the type to uniquely identify the binding.
+     * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
+     */
+    protected virtual void apiBind(final Type forType, final String action, final Type withImpl) {
+        validateTypes(forType, action, withImpl);
+        REGISTRY.put(new ActionKey(forType, action), new Factory(withImpl));
+    }
+
+    /**
+     * @description
+     * Forces the custom bindings to be reloaded.
+     */
+    protected virtual void apiReload() {
+        customBindingsAdded = false;
     }
 
     /**
@@ -177,29 +259,7 @@ global with sharing virtual class Injection {
      * MyInterface example = (MyInterface) Injection.wire(MyInterface.class);
      */
     global static Object wire(final Type forType) {
-        return INSTANCE.wireType(forType);
-    }
-
-    /**
-     * @description
-     * If the registry contains a binding for the given type and action, its implementation is returned.
-     *
-     * Should no binding exist, an exception is thrown.
-     *
-     * @param forType The type to be bound.
-     * @param action The action specific to the binding to be bound.
-     *
-     * @return The implementation of the given type.
-     */
-    protected virtual Object wireType(final Type forType, final String action) {
-        addCustomBindings();
-
-        final Key key = new ActionKey(forType, action);
-        if (!REGISTRY.containsKey(key)) {
-            throw createException('Binding for', forType.getName(), action, 'not found in registry');
-        }
-
-        return REGISTRY.get(key).newInstance();
+        return INSTANCE.apiWire(forType);
     }
 
     /**
@@ -218,20 +278,7 @@ global with sharing virtual class Injection {
      * MyInterface example = (MyInterface) Injection.wire(MyInterface.class, 'MyAction');
      */
     global static Object wire(final Type forType, final String action) {
-        return INSTANCE.wireType(forType, action);
-    }
-
-    /**
-     * @description
-     * Returns true if registry contains a binding for the given type and action, false if not.
-     *
-     * @param forType The type to be checked.
-     *
-     * @return True if binding exists, false if not.
-     */
-    protected virtual Boolean isBound(final Type forType) {
-        addCustomBindings();
-        return REGISTRY.containsKey(new Key(forType));
+        return INSTANCE.apiWire(forType, action);
     }
 
     /**
@@ -244,24 +291,10 @@ global with sharing virtual class Injection {
      *
      * @example
      * // Determine if binding for MyInterface exists in registry.
-     * Boolean exists = Injection.has(MyInterface.class);
+     * Boolean exists = Injection.isBound(MyInterface.class);
      */
-    global static Boolean has(final Type forType) {
-        return INSTANCE.isBound(forType);
-    }
-
-    /**
-     * @description
-     * Returns true if registry contains a binding for the given type and action, false if not.
-     *
-     * @param forType The type to be checked.
-     * @param action The action specific to the binding to be checked.
-     *
-     * @return True if binding exists, false if not.
-     */
-    protected virtual Boolean isBound(final Type forType, final String action) {
-        addCustomBindings();
-        return REGISTRY.containsKey(new ActionKey(forType, action));
+    global static Boolean isBound(final Type forType) {
+        return INSTANCE.apiIsBound(forType);
     }
 
     /**
@@ -275,22 +308,10 @@ global with sharing virtual class Injection {
      *
      * @example
      * // Determine if binding for MyInterface with action MyAction exists in registry.
-     * Boolean exists = Injection.has(MyInterface.class, 'MyAction');
+     * Boolean exists = Injection.isBound(MyInterface.class, 'MyAction');
      */
-    global static Boolean has(final Type forType, final String action) {
-        return INSTANCE.isBound(forType, action);
-    }
-
-    /**
-     * @description
-     * Adds a binding to the registry.
-     *
-     * @param forType The type to be bound. Must be either an interface or abstract class.
-     * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
-     */
-    protected virtual void bind(final Type forType, final Type withImpl) {
-        validateTypes(forType, null, withImpl);
-        REGISTRY.put(new Key(forType), new Factory(withImpl));
+    global static Boolean isBound(final Type forType, final String action) {
+        return INSTANCE.apiIsBound(forType, action);
     }
 
     /**
@@ -304,23 +325,10 @@ global with sharing virtual class Injection {
     *
     * @example
     * // Add a binding to MyImplementation from interface MyInterface.
-    * Injection.add(MyInterface,class, MyImplementation.class);
+    * Injection.bind(MyInterface,class, MyImplementation.class);
     */
-    global static void add(final Type forType, final Type withImpl) {
-        INSTANCE.bind(forType, withImpl);
-    }
-
-    /**
-     * @description
-     * Adds a binding to the registry.
-     *
-     * @param forType The type to be bound. Must be either an interface or abstract class.
-     * @param action The action used in combination with the type to uniquely identify the binding.
-     * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
-     */
-    protected virtual void bind(final Type forType, final String action, final Type withImpl) {
-        validateTypes(forType, action, withImpl);
-        REGISTRY.put(new ActionKey(forType, action), new Factory(withImpl));
+    global static void bind(final Type forType, final Type withImpl) {
+        INSTANCE.apiBind(forType, withImpl);
     }
 
     /**
@@ -335,18 +343,10 @@ global with sharing virtual class Injection {
      *
      * @example
      * // Add a binding to MyImplementation from interface MyInterface for action Test.
-     * Injection.add(MyInterface,class, 'Test', MyImplementation.class);
+     * Injection.bind(MyInterface,class, 'Test', MyImplementation.class);
      */
-    global static void add(final Type forType, final String action, final Type withImpl) {
-        INSTANCE.bind(forType, action, withImpl);
-    }
-
-    /**
-     * @description
-     * Forces the custom bindings to be reloaded.
-     */
-    protected virtual void reloadCustomBindings() {
-        customBindingsAdded = false;
+    global static void bind(final Type forType, final String action, final Type withImpl) {
+        INSTANCE.apiBind(forType, action, withImpl);
     }
 
     /**
@@ -361,7 +361,7 @@ global with sharing virtual class Injection {
      * Injection.reload();
      */
     global static void reload() {
-        INSTANCE.reloadCustomBindings();
+        INSTANCE.apiReload();
     }
 
     /**
@@ -405,9 +405,9 @@ global with sharing virtual class Injection {
                 final Type implementation = TypeHelper.loadType(binding.Implementation__c);
 
                 if (binding.Action__c == null) {
-                    add(type, implementation);
+                    bind(type, implementation);
                 } else {
-                    add(type, binding.Action__c, implementation);
+                    bind(type, binding.Action__c, implementation);
                 }
             } catch (Exception e) {
                 binding.addError(e.getMessage());

@@ -9,7 +9,7 @@ public with sharing class PropertyWiring {
     // Setup a default registry. The default registry will take the Map to assign to the 'properties' member
     // variable from the DefaultConfiguration class.
     static {
-        Injection.add(Map<String, Integer>.class, 'animals', DefaultConfiguration.class);
+        Injection.bind(Map<String, Integer>.class, 'animals', DefaultConfiguration.class);
     }
 
     // The member variable 'properties' value is wired into the class on construction.

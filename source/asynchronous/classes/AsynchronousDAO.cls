@@ -7,18 +7,18 @@
 public with sharing class AsynchronousDAO implements API {
 
     public interface API {
-        Asynchronous__c getObject(Id asyncOjectId);
-        Asynchronous__c getFirstScheduledObject();
-        Integer countScheduledObjects(Boolean scheduledOnly);
-        Integer countActiveObjects(final Asynchronous__c asyncJob);
-        void persistAsynchronous(List<Asynchronous__c> asyncObjects);
-        void persistAsynchronous(List<Asynchronous__c> asyncObjects, List<Map<String, String>> states);
-        void removeAsynchronous(List<Asynchronous__c> asyncObject);
-        void persistAsynchronousError(AsynchronousException__c asyncError);
+        Asynchronous__c apiGetObject(Id asyncOjectId);
+        Asynchronous__c apiGetNextScheduled();
+        Integer apiCountScheduledObjects(Boolean scheduledOnly);
+        Integer apiCountActiveObjects(final Asynchronous__c asyncJob);
+        void apiPersistAsynchronous(List<Asynchronous__c> asyncObjects);
+        void apiPersistAsynchronous(List<Asynchronous__c> asyncObjects, List<Map<String, String>> states);
+        void apiRemoveAsynchronous(List<Asynchronous__c> asyncObject);
+        void apiPersistAsynchronousError(AsynchronousException__c asyncError);
     }
 
-    public Asynchronous__c getObject(Id asyncObjectId) {
-        Assert.isNotNull(asyncObjectId, 'parameter; AsynchronousDAO.getObject.asyncObjectId');
+    public Asynchronous__c apiGetObject(Id asyncObjectId) {
+        Assert.isNotNull(asyncObjectId, 'parameter; AsynchronousDAO.apiGetObject.asyncObjectId');
 
         final List<Asynchronous__c> asyncObjects = [
                 SELECT Id, OwnerId, Status__c, Reference__c, Runnable__c, MaximumRetries__c, RetryInterval__c,
@@ -35,7 +35,7 @@ public with sharing class AsynchronousDAO implements API {
         return asyncObjects[0];
     }
 
-    public Asynchronous__c getFirstScheduledObject() {
+    public Asynchronous__c apiGetNextScheduled() {
         final List<Asynchronous__c> scheduledAsyncObjects = [
                 SELECT Id, ScheduledRunTime__c, RetryNumber__c, Status__c
                 FROM Asynchronous__c
@@ -76,8 +76,8 @@ public with sharing class AsynchronousDAO implements API {
         }
     }
 
-    public Integer countScheduledObjects(final Boolean scheduledOnly) {
-        Assert.isNotNull(scheduledOnly, 'parameter; AsynchronousDAO.countScheduledObjects.scheduledOnly');
+    public Integer apiCountScheduledObjects(final Boolean scheduledOnly) {
+        Assert.isNotNull(scheduledOnly, 'parameter; AsynchronousDAO.apiCountScheduledObjects.scheduledOnly');
 
         if (scheduledOnly) {
             return [
@@ -101,8 +101,8 @@ public with sharing class AsynchronousDAO implements API {
         }
     }
 
-    public Integer countActiveObjects(final Asynchronous__c asyncJob) {
-        Assert.isNotNull(asyncJob, 'parameter; AsynchronousDAO.countActiveObjects.asyncJob');
+    public Integer apiCountActiveObjects(final Asynchronous__c asyncJob) {
+        Assert.isNotNull(asyncJob, 'parameter; AsynchronousDAO.apiCountActiveObjects.asyncJob');
 
         return [
                 SELECT COUNT()
@@ -114,9 +114,9 @@ public with sharing class AsynchronousDAO implements API {
         ];
     }
 
-    public void persistAsynchronous(final List<Asynchronous__c> asyncObjects, final List<Map<String, String>> states) {
-        Assert.isNotNull(asyncObjects, 'parameter; AsynchronousDAO.persistAsynchronous.asyncObjects');
-        Assert.isNotNull(states, 'parameter; AsynchronousDAO.persistAsynchronous.states');
+    public void apiPersistAsynchronous(final List<Asynchronous__c> asyncObjects, final List<Map<String, String>> states) {
+        Assert.isNotNull(asyncObjects, 'parameter; AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
+        Assert.isNotNull(states, 'parameter; AsynchronousDAO.apiPersistAsynchronous.states');
         Assert.areEqual(asyncObjects.size(), states.size(), 'The number of Asynchronous objects does not match the number of states');
 
         Database.upsert(asyncObjects, AccessLevel.USER_MODE);
@@ -137,51 +137,51 @@ public with sharing class AsynchronousDAO implements API {
         Database.upsert(newStates, AccessLevel.USER_MODE);
     }
 
-    public void persistAsynchronous(final List<Asynchronous__c> asyncObjects) {
-        Assert.isNotNull(asyncObjects, 'parameter; AsynchronousDAO.persistAsynchronous.asyncObjects');
+    public void apiPersistAsynchronous(final List<Asynchronous__c> asyncObjects) {
+        Assert.isNotNull(asyncObjects, 'parameter; AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
         Database.upsert(asyncObjects, AccessLevel.USER_MODE);
     }
 
-    public void removeAsynchronous(final List<Asynchronous__c> asynchronousObjects) {
-        Assert.isNotNull(asynchronousObjects, 'parameter; AsynchronousDAO.removeAsynchronous.asynchronousObjects');
+    public void apiRemoveAsynchronous(final List<Asynchronous__c> asynchronousObjects) {
+        Assert.isNotNull(asynchronousObjects, 'parameter; AsynchronousDAO.apiRemoveAsynchronous.asynchronousObjects');
         Database.delete(asynchronousObjects, AccessLevel.USER_MODE);
     }
 
-    public void persistAsynchronousError(AsynchronousException__c asyncError) {
-        Assert.isNotNull(asyncError, 'parameter; AsynchronousDAO.removeAsynchronous.asyncError');
+    public void apiPersistAsynchronousError(AsynchronousException__c asyncError) {
+        Assert.isNotNull(asyncError, 'parameter; AsynchronousDAO.apiPersistAsynchronousError.asyncError');
         Database.insert(asyncError, AccessLevel.USER_MODE);
     }
 
-    public static Asynchronous__c get(final Id asyncObjectId) {
-        return INSTANCE.getObject(asyncObjectId);
+    public static Asynchronous__c getObject(final Id asyncObjectId) {
+        return INSTANCE.apiGetObject(asyncObjectId);
     }
 
-    public static Asynchronous__c nextScheduled() {
-        return INSTANCE.getFirstScheduledObject();
+    public static Asynchronous__c getNextScheduled() {
+        return INSTANCE.apiGetNextScheduled();
     }
 
-    public static Integer countScheduled(final Boolean scheduledOnly) {
-        return INSTANCE.countScheduledObjects(scheduledOnly);
+    public static Integer countScheduledObjects(final Boolean scheduledOnly) {
+        return INSTANCE.apiCountScheduledObjects(scheduledOnly);
     }
 
-    public static Integer countActive(final Asynchronous__c asyncJob) {
-        return INSTANCE.countActiveObjects(asyncJob);
+    public static Integer countActiveObjects(final Asynchronous__c asyncJob) {
+        return INSTANCE.apiCountActiveObjects(asyncJob);
     }
 
-    public static void persist(final List<Asynchronous__c> asyncObjects) {
-        INSTANCE.persistAsynchronous(asyncObjects);
+    public static void persistAsynchronous(final List<Asynchronous__c> asyncObjects) {
+        INSTANCE.apiPersistAsynchronous(asyncObjects);
     }
 
-    public static void persist(final List<Asynchronous__c> asyncObjects, final List<Map<String, String>> states) {
-        INSTANCE.persistAsynchronous(asyncObjects, states);
+    public static void persistAsynchronous(final List<Asynchronous__c> asyncObjects, final List<Map<String, String>> states) {
+        INSTANCE.apiPersistAsynchronous(asyncObjects, states);
     }
 
-    public static void remove(final List<Asynchronous__c> asyncObjects) {
-        INSTANCE.removeAsynchronous(asyncObjects);
+    public static void removeAsynchronous(final List<Asynchronous__c> asyncObjects) {
+        INSTANCE.apiRemoveAsynchronous(asyncObjects);
     }
 
-    public static void persist(AsynchronousException__c asyncError) {
-        INSTANCE.persistAsynchronousError(asyncError);
+    public static void persistAsynchronousError(AsynchronousException__c asyncError) {
+        INSTANCE.apiPersistAsynchronousError(asyncError);
     }
 
     /**
@@ -213,7 +213,7 @@ public with sharing class AsynchronousDAO implements API {
 
     // Set the default implementation of the API. This can be overridden using an Injection Binding.
     static {
-        Injection.add(API.class, AsynchronousDAO.class);
+        Injection.bind(API.class, AsynchronousDAO.class);
     }
 
     /**

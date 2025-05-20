@@ -9,7 +9,7 @@ public with sharing class AbstractEntityWiring {
     // Setup a default registry. The default registry will configure the creation of the Account to be performed
     // synchronously.
     static {
-        Injection.add(AccountClasses.AccountManager.class, AccountClasses.SyncAccountManager.class);
+        Injection.bind(AccountClasses.AccountManager.class, AccountClasses.SyncAccountManager.class);
     }
 
     public static void example(String name) {

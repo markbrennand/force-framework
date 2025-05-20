@@ -64,9 +64,9 @@ public with sharing class BindingTestHelper {
     public static void testBindingFailure(Type forType, String action, Type withImpl, String expectedError) {
         try {
             if (action == null) {
-                Injection.add(forType, withImpl);
+                Injection.bind(forType, withImpl);
             } else {
-                Injection.add(forType, action, withImpl);
+                Injection.bind(forType, action, withImpl);
             }
             Assert.fail();
         } catch(Exception e) {

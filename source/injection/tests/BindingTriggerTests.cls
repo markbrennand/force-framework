@@ -188,7 +188,7 @@ public with sharing class BindingTriggerTests {
 
         Assert.isTrue(Injection.wire(BindingTestHelper.TestInterface.class) instanceof BindingTestHelper.SingletonTest);
 
-        Injection.add(BindingTestHelper.TestInterface.class, BindingTestHelper.SingletonCustomTest.class);
+        Injection.bind(BindingTestHelper.TestInterface.class, BindingTestHelper.SingletonCustomTest.class);
         Assert.isTrue(Injection.wire(BindingTestHelper.TestInterface.class) instanceof BindingTestHelper.SingletonCustomTest);
 
         Injection.reload();

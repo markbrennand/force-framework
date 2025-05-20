@@ -6,7 +6,7 @@
 public with sharing class ExampleRunnable extends AsynchronousRunnable {
 
     static {
-        Injection.add(Map<String, Integer>.class, 'ExampleRunnable', Configuration.class);
+        Injection.bind(Map<String, Integer>.class, 'ExampleRunnable', Configuration.class);
         Injection.reload();
     }
 

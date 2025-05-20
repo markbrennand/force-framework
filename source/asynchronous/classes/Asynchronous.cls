@@ -69,7 +69,7 @@ global with sharing virtual class Asynchronous implements API {
          *
          * @return The job specific to the implementation.
          */
-        Job createJob(
+        Job apiCreateJob(
                 Type type,
                 String reference,
                 Integer maximumRetries,
@@ -85,7 +85,7 @@ global with sharing virtual class Asynchronous implements API {
          *
          * @param asyncJobs The jobs to schedule for processing.
          */
-        void queueJobs(List<Job> asyncJobs);
+        void apiQueueJobs(List<Job> asyncJobs);
     }
 
     /**
@@ -340,7 +340,7 @@ global with sharing virtual class Asynchronous implements API {
      *
      * @return The job.
      */
-    public Job createJob(
+    public Job apiCreateJob(
             final Type type,
             final String reference,
             final Integer maximumRetries,
@@ -376,7 +376,7 @@ global with sharing virtual class Asynchronous implements API {
      *
      * @param asyncJobs The jobs to schedule for processing.
      */
-    public void queueJobs(final List<Asynchronous.Job> asyncJobs) {
+    public void apiQueueJobs(final List<Asynchronous.Job> asyncJobs) {
         Assert.isNotNull(asyncJobs, 'parameter; Asynchronous.queueJobs.asyncJobs');
 
         final List<Asynchronous__c> asyncObjects = new List<Asynchronous__c>();
@@ -387,7 +387,7 @@ global with sharing virtual class Asynchronous implements API {
             states.add(job.getState());
         }
 
-        AsynchronousDAO.persist(asyncObjects, states);
+        AsynchronousDAO.persistAsynchronous(asyncObjects, states);
     }
 
     /**
@@ -419,14 +419,14 @@ global with sharing virtual class Asynchronous implements API {
      *     new Map<String, String> { 'argument' => 'Example' }
      * );
      */
-    global static Job create(
+    global static Job createJob(
             final Type type,
             final String reference,
             final Integer maximumRetries,
             final Integer retryInterval,
             final Map<String, String> state
     ) {
-        return INSTANCE.createJob(type, reference, maximumRetries, retryInterval, state);
+        return INSTANCE.apiCreateJob(type, reference, maximumRetries, retryInterval, state);
     }
 
     /**
@@ -449,8 +449,8 @@ global with sharing virtual class Asynchronous implements API {
      *
      * Asynchronous.queue(new List<Asynchronous.Job> { example });
      */
-    global static void queue(final List<Asynchronous.Job> asyncJobs) {
-        INSTANCE.queueJobs(asyncJobs);
+    global static void queueJobs(final List<Asynchronous.Job> asyncJobs) {
+        INSTANCE.apiQueueJobs(asyncJobs);
     }
 
     /**
@@ -528,7 +528,7 @@ global with sharing virtual class Asynchronous implements API {
             }
         }
 
-        AsynchronousDAO.remove(toDelete);
+        AsynchronousDAO.removeAsynchronous(toDelete);
     }
 
     /**
@@ -560,7 +560,7 @@ global with sharing virtual class Asynchronous implements API {
 
     // Set the default implementation of the API. This can be overridden using an Injection Binding.
     static {
-        Injection.add(API.class, Asynchronous.Factory.class);
+        Injection.bind(API.class, Asynchronous.Factory.class);
     }
 
     /**

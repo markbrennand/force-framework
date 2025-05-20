@@ -15,7 +15,7 @@ public with sharing class HasWiring {
     public static void has(String name) {
 
         // Check if a Binding exists for the AccountManager interface.
-        if (Injection.has(AccountClasses.AccountManager.class)) {
+        if (Injection.isBound(AccountClasses.AccountManager.class)) {
 
             // The Binding exists, it can be wired in and called.
             ((AccountClasses.AccountManager) Injection.wire(AccountClasses.AccountManager.class)).newAccount(name);
@@ -33,7 +33,7 @@ public with sharing class HasWiring {
     public static void action(String name) {
 
         // Check if a Binding exists for the AccountManager interface with action ASYNC.
-        if (Injection.has(AccountClasses.AccountManager.class, 'ASYNC')) {
+        if (Injection.isBound(AccountClasses.AccountManager.class, 'ASYNC')) {
 
             // The Binding exists, it can be wired in and called.
             ((AccountClasses.AccountManager) Injection.wire(AccountClasses.AccountManager.class, 'ASYNC')).newAccount(name);

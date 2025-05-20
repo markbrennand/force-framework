@@ -11,7 +11,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
     private final static String NO_JOBS_TO_RUN_DELAY_PROPERTY = 'noJobsToRunDelay';
 
     static {
-        Injection.add(Map<String, Integer>.class, CONFIG_ACTION, Configuration.class);
+        Injection.bind(Map<String, Integer>.class, CONFIG_ACTION, Configuration.class);
         Injection.reload();
     }
 
@@ -27,11 +27,11 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
     public override void run(final Asynchronous.Job ignoreAsyncJob) {
         Assert.isNotNull(ignoreAsyncJob, 'parameter; AsynchronousScheduler.run.ignoreAsyncJob');
 
-        if (AsynchronousDAO.countScheduled(true) == 0) {
+        if (AsynchronousDAO.countScheduledObjects(true) == 0) {
             delayWhenNoJobsToRun(configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY));
         }
 
-        final Asynchronous__c scheduledAsyncObject = AsynchronousDAO.nextScheduled();
+        final Asynchronous__c scheduledAsyncObject = AsynchronousDAO.getNextScheduled();
         if (scheduledAsyncObject != null) {
             AsynchronousJob.queueJob(scheduledAsyncObject);
         }
@@ -59,8 +59,8 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
     }
 
     public override Integer getMaximumActive() {
-        if (AsynchronousDAO.countScheduled(false) > 0) {
-            if (AsynchronousDAO.countScheduled(true) > 0) {
+        if (AsynchronousDAO.countScheduledObjects(false) > 0) {
+            if (AsynchronousDAO.countScheduledObjects(true) > 0) {
                 return configuration.get(MAX_SCHEDULERS_PROPERTY);
             } else {
                 return 1;
@@ -86,7 +86,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
     }
 
     public static void queue() {
-        Asynchronous.Job asyncJob = Asynchronous.create(
+        Asynchronous.Job asyncJob = Asynchronous.createJob(
                 AsynchronousScheduler.class,
                 null,
                 0,

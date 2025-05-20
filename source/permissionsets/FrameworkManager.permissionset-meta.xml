@@ -7,17 +7,17 @@
     <description>Permission set required to manage injection.</description>
     <fieldPermissions>
         <editable>true</editable>
-        <field>AsynchronousError__c.ExceptionMessage__c</field>
+        <field>AsynchronousException__c.ExceptionMessage__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>AsynchronousError__c.ExceptionStackTrace__c</field>
+        <field>AsynchronousException__c.ExceptionStackTrace__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>AsynchronousError__c.StatusOnError__c</field>
+        <field>AsynchronousException__c.StatusOnError__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -53,7 +53,7 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>true</modifyAllRecords>
-        <object>AsynchronousError__c</object>
+        <object>AsynchronousException__c</object>
         <viewAllFields>false</viewAllFields>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>

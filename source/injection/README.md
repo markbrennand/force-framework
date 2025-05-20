@@ -65,7 +65,7 @@ Anonymous Apex.
 ## Initialisation
 The registry may be initialised either programmatically or through the _Binding__c_ custom object.
 ### Programmatic Initialisation
-The _Injection.add()_ methods can be called to add a binding to the registry. If an application requires a default
+The _Injection.bind()_ methods can be called to add a binding to the registry. If an application requires a default
 registry to be setup, the application must call these methods to add the bindings.
 
 The following snippet taken from _example/injection/classes/BindingInitalisation.cls_ shows the initialisation of
@@ -74,10 +74,10 @@ a default registry.
  public static void programmatic() {
 
         // Add the bindings to the registry.
-        Injection.add(QueryClasses.QueryInterface.class, QueryClasses.UserQueryInterfaceImpl.class);
-        Injection.add(QueryClasses.AbstractQuery.class, QueryClasses.UserAbstractQueryImpl.class);
-        Injection.add(QueryClasses.QueryInterface.class, 'SYSTEM', QueryClasses.SystemQueryInterfaceImpl.class);
-        Injection.add(QueryClasses.AbstractQuery.class, 'SYSTEM', QueryClasses.SystemAbstractQueryImpl.class);
+        Injection.bind(QueryClasses.QueryInterface.class, QueryClasses.UserQueryInterfaceImpl.class);
+        Injection.bind(QueryClasses.AbstractQuery.class, QueryClasses.UserAbstractQueryImpl.class);
+        Injection.bind(QueryClasses.QueryInterface.class, 'SYSTEM', QueryClasses.SystemQueryInterfaceImpl.class);
+        Injection.bind(QueryClasses.AbstractQuery.class, 'SYSTEM', QueryClasses.SystemAbstractQueryImpl.class);
 ```
 ### Custom Object Initialisation
 The bindings can be configured using the _Binding__c_ custom object. The values in the custom object records will
@@ -193,7 +193,7 @@ The default registry in the example has been configured to create the _Account_ 
 // Setup a default registry. The default registry will configure the creation of the Account to be performed
 // synchronously.
 static {
-    Injection.add(AccountClasses.AccountManager.class, AccountClasses.SyncAccountManager.class);
+    Injection.bind(AccountClasses.AccountManager.class, AccountClasses.SyncAccountManager.class);
 }
 ```
 Run _AbstractEntityWiring.reset()_ in Anonymous Apex to clear any current Bindings for _AccountManager_.
@@ -282,7 +282,7 @@ new Apex class and add a binding to the registry.
 
 #### Checking a Wiring Exists
 Trying to wire a _Type_ into an application for which there is no binding in the registry will throw an exception.
-The _Injection.has()_ methods can be used to check if a binding exists.
+The _Injection.isBound()_ methods can be used to check if a binding exists.
 
 The _examples/injection/classes/HasWiring_ class shows how to check whether a binding exists before wiring it
 into an application.
@@ -290,10 +290,10 @@ into an application.
 Before running any of the example code, run _HasWiring.reset()_ from Anonymous Apex. This will clear all the
 bindings for _AccountClasses.AccountManager_.
 
-This code snippet from the _has()_ method shows how to test if a default binding exists.
+This code snippet from the _isBound()_ method shows how to test if a default binding exists.
 ```
 // Check if a Binding exists for the AccountManager interface.
-if (Injection.has(AccountClasses.AccountManager.class)) {
+if (Injection.isBound(AccountClasses.AccountManager.class)) {
     
     // The Binding exists, it can be wired in and called.
     ((AccountClasses.AccountManager) Injection.wire(AccountClasses.AccountManager.class)).newAccount(name);
@@ -317,7 +317,7 @@ This code snippet from the _action()_ method shows how to test if a binding exis
 In this example, the _Account_ will be created asynchronously using an Apex Job.
 ```
 // Check if a Binding exists for the AccountManager interface with action ASYNC.
-if (Injection.has(AccountClasses.AccountManager.class, 'ASYNC')) {
+if (Injection.isBound(AccountClasses.AccountManager.class, 'ASYNC')) {
 
     // The Binding exists, it can be wired in and called.
     ((AccountClasses.AccountManager) Injection.wire(AccountClasses.AccountManager.class, 'ASYNC')).newAccount(name);

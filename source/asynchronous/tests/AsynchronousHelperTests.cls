@@ -49,7 +49,7 @@ public with sharing class AsynchronousHelperTests {
         AsynchronousDAO.INSTANCE = mockDAO;
 
         // Perform the test.
-        AsynchronousHelper.internalFailure(asyncObject, exc);
+        AsynchronousHelper.recordInternalException(asyncObject, exc);
 
         // Confirm the mocked methods were called correctly.
         Mock.validate(mockDAO);
@@ -78,7 +78,7 @@ public with sharing class AsynchronousHelperTests {
         AsynchronousDAO mockDAO = (AsynchronousDAO) Mock.stub(AsynchronousDAO.class);
 
         // The error should be persisted once.
-        Mock.stubMethod(mockDAO, 'persistAsynchronousError')
+        Mock.stubMethod(mockDAO, 'apiPersistAsynchronousError')
                 .withArguments(new List<Object> {
                         new AsynchronousException__c(
                                 Asynchronous__c = asyncObject.Id,
@@ -102,7 +102,7 @@ public with sharing class AsynchronousHelperTests {
         Asynchronous__c expectedAsyncObject = asyncObject.clone(true);
         expectedAsyncObject.Status__c = Asynchronous.Status.FAILED.name();
 
-        Mock.stubMethod(mockDAO, 'persistAsynchronous')
+        Mock.stubMethod(mockDAO, 'apiPersistAsynchronous')
                 .withArguments(new List<Object> { new List<Asynchronous__c> { expectedAsyncObject } })
                 .expected(1);
 

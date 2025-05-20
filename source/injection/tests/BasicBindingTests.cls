@@ -17,8 +17,8 @@ public with sharing class BasicBindingTests {
         System.runAs(BindingTestHelper.getManager()) {
             BindingTestHelper.testBindingFailure(BindingTestHelper.SingletonTest.class, null, BindingTestHelper.SingletonTest.class, 'Class BindingTestHelper.SingletonTest must not be instantiable');
             BindingTestHelper.testBindingFailure(BindingTestHelper.TestInterface.class, null, BindingTestHelper.AbstractTest.class, 'Implementation BindingTestHelper.AbstractTest must be instantiable');
-            Injection.add(BindingTestHelper.TestInterface.class, BindingTestHelper.SingletonTest.class);
-            Injection.add(BindingTestHelper.AbstractTest.class, BindingTestHelper.SingletonTest.class);
+            Injection.bind(BindingTestHelper.TestInterface.class, BindingTestHelper.SingletonTest.class);
+            Injection.bind(BindingTestHelper.AbstractTest.class, BindingTestHelper.SingletonTest.class);
             insert new Binding__c(Type__c = BindingTestHelper.TestInterface.class.getName(), Implementation__c = BindingTestHelper.SingletonTest.class.getName());
             insert new Binding__c(Type__c = BindingTestHelper.AbstractTest.class.getName(), Implementation__c = BindingTestHelper.SingletonTest.class.getName());
         }
@@ -29,8 +29,8 @@ public with sharing class BasicBindingTests {
         System.runAs(BindingTestHelper.getManager()) {
             BindingTestHelper.testBindingFailure(BindingTestHelper.TestInterface.class, null, User.class, 'Class User does not implement TestInterface');
             BindingTestHelper.testBindingFailure(BindingTestHelper.AbstractTest.class, null, User.class, 'Class User does not extend AbstractTest');
-            Injection.add(BindingTestHelper.TestInterface.class, BindingTestHelper.SingletonTest.class);
-            Injection.add(BindingTestHelper.AbstractTest.class, BindingTestHelper.SingletonTest.class);
+            Injection.bind(BindingTestHelper.TestInterface.class, BindingTestHelper.SingletonTest.class);
+            Injection.bind(BindingTestHelper.AbstractTest.class, BindingTestHelper.SingletonTest.class);
             insert new Binding__c(Type__c = BindingTestHelper.TestInterface.class.getName(), Implementation__c = BindingTestHelper.SingletonTest.class.getName());
             insert new Binding__c(Type__c = BindingTestHelper.AbstractTest.class.getName(), Implementation__c = BindingTestHelper.SingletonTest.class.getName());
         }
@@ -81,10 +81,10 @@ public with sharing class BasicBindingTests {
     static void testIsBound() {
         setup(true);
         System.runAs(BindingTestHelper.getUser()) {
-            Assert.isTrue(Injection.has(BindingTestHelper.TestInterface.class));
-            Assert.isTrue(Injection.has(BindingTestHelper.AbstractTest.class));
-            Assert.isFalse(Injection.has(BindingTestHelper.TestInterface.class, 'Test'));
-            Assert.isFalse(Injection.has(User.class));
+            Assert.isTrue(Injection.isBound(BindingTestHelper.TestInterface.class));
+            Assert.isTrue(Injection.isBound(BindingTestHelper.AbstractTest.class));
+            Assert.isFalse(Injection.isBound(BindingTestHelper.TestInterface.class, 'Test'));
+            Assert.isFalse(Injection.isBound(User.class));
         }
     }
 
@@ -142,11 +142,11 @@ public with sharing class BasicBindingTests {
     private static void setup(Boolean singleton) {
         System.runAs(BindingTestHelper.getManager()) {
             if (singleton) {
-                Injection.add(BindingTestHelper.TestInterface.class, BindingTestHelper.SingletonTest.class);
-                Injection.add(BindingTestHelper.AbstractTest.class, BindingTestHelper.SingletonTest.class);
+                Injection.bind(BindingTestHelper.TestInterface.class, BindingTestHelper.SingletonTest.class);
+                Injection.bind(BindingTestHelper.AbstractTest.class, BindingTestHelper.SingletonTest.class);
             } else {
-                Injection.add(BindingTestHelper.TestInterface.class, BindingTestHelper.PrototypeTest.class);
-                Injection.add(BindingTestHelper.AbstractTest.class, BindingTestHelper.PrototypeTest.class);
+                Injection.bind(BindingTestHelper.TestInterface.class, BindingTestHelper.PrototypeTest.class);
+                Injection.bind(BindingTestHelper.AbstractTest.class, BindingTestHelper.PrototypeTest.class);
             }
 
             BindingTestHelper.SINGLETON_INSTANCE =
