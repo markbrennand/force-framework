@@ -20,12 +20,12 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
 
     public AsynchronousScheduler() {
         super(AsynchronousScheduler.class);
-        Assert.isNotNull(configuration.get(MAX_SCHEDULERS_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + MAX_SCHEDULERS_PROPERTY);
-        Assert.isNotNull(configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + NO_JOBS_TO_RUN_DELAY_PROPERTY);
+        Assertion.isNotNull(configuration.get(MAX_SCHEDULERS_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + MAX_SCHEDULERS_PROPERTY);
+        Assertion.isNotNull(configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + NO_JOBS_TO_RUN_DELAY_PROPERTY);
     }
 
     public override void run(final Asynchronous.Job ignoreAsyncJob) {
-        Assert.isNotNull(ignoreAsyncJob, 'parameter; AsynchronousScheduler.run.ignoreAsyncJob');
+        Assertion.isNotNull(ignoreAsyncJob, 'parameter; AsynchronousScheduler.run.ignoreAsyncJob');
 
         if (AsynchronousDAO.countScheduledObjects(true) == 0) {
             delayWhenNoJobsToRun(configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY));
@@ -71,17 +71,17 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
     }
 
     public override Boolean onSuccess(final Asynchronous.Job asyncJob) {
-        Assert.isNotNull(asyncJob, 'parameter; AsynchronousScheduler.onSuccess.asyncJob');
+        Assertion.isNotNull(asyncJob, 'parameter; AsynchronousScheduler.onSuccess.asyncJob');
         return false;
     }
 
     public override Boolean onFailure(final Asynchronous.Job asyncJob, final Exception exc) {
-        Assert.isNotNull(asyncJob, 'parameter; AsynchronousScheduler.onFailure.asyncJob');
+        Assertion.isNotNull(asyncJob, 'parameter; AsynchronousScheduler.onFailure.asyncJob');
         return true;
     }
 
     public override Boolean onCancellation(final Asynchronous.Job asyncJob) {
-        Assert.isNotNull(asyncJob, 'parameter; AsynchronousScheduler.onCancellation.asyncJob');
+        Assertion.isNotNull(asyncJob, 'parameter; AsynchronousScheduler.onCancellation.asyncJob');
         return false;
     }
 

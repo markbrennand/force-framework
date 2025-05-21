@@ -77,8 +77,8 @@ public with sharing virtual class AsynchronousHelper implements API {
      * @param exc The exception to be recorded.
      */
     public void apiRecordException(final Asynchronous__c asyncObject, final Exception exc) {
-        Assert.isNotNull(asyncObject, 'parameter; AsynchronousHelper.apiRecordException.asynchronousObject');
-        Assert.isNotNull(exc, 'parameter; AsynchronousHelper.apiRecordException.exc');
+        Assertion.isNotNull(asyncObject, 'parameter; AsynchronousHelper.apiRecordException.asynchronousObject');
+        Assertion.isNotNull(exc, 'parameter; AsynchronousHelper.apiRecordException.exc');
 
         final AsynchronousException__c asyncError = new AsynchronousException__c(
                 Asynchronous__c = asyncObject.Id,
@@ -119,7 +119,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      * @return The decoded state.
      */
     public Map<String, String> apiDecodeState(final List<AsynchronousState__c> asyncStateObjects) {
-        Assert.isNotNull(asyncStateObjects, 'parameter; AsynchronousHelper.apiDecodeState.asyncStateObjects');
+        Assertion.isNotNull(asyncStateObjects, 'parameter; AsynchronousHelper.apiDecodeState.asyncStateObjects');
 
         final List<String> chunks = new List<String>();
 
@@ -145,8 +145,8 @@ public with sharing virtual class AsynchronousHelper implements API {
             final Asynchronous__c asyncObject,
             final Map<String, String> state
     ) {
-        Assert.isNotNull(asyncObject, 'parameter; AsynchronousHelper.apiEncodeState.asyncObject');
-        Assert.isNotNull(state, 'parameter; AsynchronousHelper.apiEncodeState.state');
+        Assertion.isNotNull(asyncObject, 'parameter; AsynchronousHelper.apiEncodeState.asyncObject');
+        Assertion.isNotNull(state, 'parameter; AsynchronousHelper.apiEncodeState.state');
 
         final List<AsynchronousState__c> chunks = new List<AsynchronousState__c>();
         String stateJson = JSON.serialize(state);

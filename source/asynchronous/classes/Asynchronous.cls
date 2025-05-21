@@ -377,7 +377,7 @@ global with sharing virtual class Asynchronous implements API {
      * @param asyncJobs The jobs to schedule for processing.
      */
     public void apiQueueJobs(final List<Asynchronous.Job> asyncJobs) {
-        Assert.isNotNull(asyncJobs, 'parameter; Asynchronous.queueJobs.asyncJobs');
+        Assertion.isNotNull(asyncJobs, 'parameter; Asynchronous.queueJobs.asyncJobs');
 
         final List<Asynchronous__c> asyncObjects = new List<Asynchronous__c>();
         final List<Map<String, String>> states = new List<Map<String, String>>();

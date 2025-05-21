@@ -18,7 +18,7 @@ public with sharing class AsynchronousDAO implements API {
     }
 
     public Asynchronous__c apiGetObject(Id asyncObjectId) {
-        Assert.isNotNull(asyncObjectId, 'parameter; AsynchronousDAO.apiGetObject.asyncObjectId');
+        Assertion.isNotNull(asyncObjectId, 'parameter; AsynchronousDAO.apiGetObject.asyncObjectId');
 
         final List<Asynchronous__c> asyncObjects = [
                 SELECT Id, OwnerId, Status__c, Reference__c, Runnable__c, MaximumRetries__c, RetryInterval__c,
@@ -30,7 +30,7 @@ public with sharing class AsynchronousDAO implements API {
                 LIMIT 1
         ];
 
-        Assert.areEqual(1, asyncObjects.size(), 'Asynchronous object with Id ' + asyncObjectId + ' not found');
+        Assertion.areEqual(1, asyncObjects.size(), 'Asynchronous object with Id ' + asyncObjectId + ' not found');
 
         return asyncObjects[0];
     }
@@ -77,7 +77,7 @@ public with sharing class AsynchronousDAO implements API {
     }
 
     public Integer apiCountScheduledObjects(final Boolean scheduledOnly) {
-        Assert.isNotNull(scheduledOnly, 'parameter; AsynchronousDAO.apiCountScheduledObjects.scheduledOnly');
+        Assertion.isNotNull(scheduledOnly, 'parameter; AsynchronousDAO.apiCountScheduledObjects.scheduledOnly');
 
         if (scheduledOnly) {
             return [
@@ -102,7 +102,7 @@ public with sharing class AsynchronousDAO implements API {
     }
 
     public Integer apiCountActiveObjects(final Asynchronous__c asyncJob) {
-        Assert.isNotNull(asyncJob, 'parameter; AsynchronousDAO.apiCountActiveObjects.asyncJob');
+        Assertion.isNotNull(asyncJob, 'parameter; AsynchronousDAO.apiCountActiveObjects.asyncJob');
 
         return [
                 SELECT COUNT()
@@ -115,9 +115,9 @@ public with sharing class AsynchronousDAO implements API {
     }
 
     public void apiPersistAsynchronous(final List<Asynchronous__c> asyncObjects, final List<Map<String, String>> states) {
-        Assert.isNotNull(asyncObjects, 'parameter; AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
-        Assert.isNotNull(states, 'parameter; AsynchronousDAO.apiPersistAsynchronous.states');
-        Assert.areEqual(asyncObjects.size(), states.size(), 'The number of Asynchronous objects does not match the number of states');
+        Assertion.isNotNull(asyncObjects, 'parameter; AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
+        Assertion.isNotNull(states, 'parameter; AsynchronousDAO.apiPersistAsynchronous.states');
+        Assertion.areEqual(asyncObjects.size(), states.size(), 'The number of Asynchronous objects does not match the number of states');
 
         Database.upsert(asyncObjects, AccessLevel.USER_MODE);
 
@@ -138,17 +138,17 @@ public with sharing class AsynchronousDAO implements API {
     }
 
     public void apiPersistAsynchronous(final List<Asynchronous__c> asyncObjects) {
-        Assert.isNotNull(asyncObjects, 'parameter; AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
+        Assertion.isNotNull(asyncObjects, 'parameter; AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
         Database.upsert(asyncObjects, AccessLevel.USER_MODE);
     }
 
     public void apiRemoveAsynchronous(final List<Asynchronous__c> asynchronousObjects) {
-        Assert.isNotNull(asynchronousObjects, 'parameter; AsynchronousDAO.apiRemoveAsynchronous.asynchronousObjects');
+        Assertion.isNotNull(asynchronousObjects, 'parameter; AsynchronousDAO.apiRemoveAsynchronous.asynchronousObjects');
         Database.delete(asynchronousObjects, AccessLevel.USER_MODE);
     }
 
     public void apiPersistAsynchronousError(AsynchronousException__c asyncError) {
-        Assert.isNotNull(asyncError, 'parameter; AsynchronousDAO.apiPersistAsynchronousError.asyncError');
+        Assertion.isNotNull(asyncError, 'parameter; AsynchronousDAO.apiPersistAsynchronousError.asyncError');
         Database.insert(asyncError, AccessLevel.USER_MODE);
     }
 

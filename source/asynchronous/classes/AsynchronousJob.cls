@@ -134,7 +134,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
      * @return The current instance of the class, so the calls can be chained.
      */
     private AsynchronousJob withStatus(final String status) {
-        Assert.isNotNull(status, 'parameter; AsynchronousJob.withStatus.status');
+        Assertion.isNotNull(status, 'parameter; AsynchronousJob.withStatus.status');
         this.status = Asynchronous.Status.valueOf(status);
         return this;
     }
@@ -158,7 +158,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
      * @return The current instance of the class, so the calls can be chained.
      */
     private AsynchronousJob withOwnerId(final String ownerId) {
-        Assert.isNotNull(ownerId, 'parameter; AsynchronousJob.withOwnerId.ownerId');
+        Assertion.isNotNull(ownerId, 'parameter; AsynchronousJob.withOwnerId.ownerId');
         this.ownerId = ownerId;
         return this;
     }
@@ -181,10 +181,10 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
      * @return The current instance of the class, so the calls can be chained.
      */
     private AsynchronousJob withRunnable(final String runnableTypeName) {
-        Assert.isNotNull(runnableTypeName, 'parameter; AsynchronousJob.withRunnable.runnableTypeName');
+        Assertion.isNotNull(runnableTypeName, 'parameter; AsynchronousJob.withRunnable.runnableTypeName');
 
         final Object runnable = TypeHelper.newInstance(TypeHelper.loadType(runnableTypeName));
-        Assert.isTrue(
+        Assertion.isTrue(
                  runnable instanceof Asynchronous.Runnable,
                 'The class ' + runnableTypeName + ' does not implement Asynchronous.Runnable'
         );
@@ -210,7 +210,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
      * @param state The state.
      */
     public void setState(final Map<String, String> state) {
-        Assert.isNotNull(state, 'parameter; AsynchronousJob.setState.state');
+        Assertion.isNotNull(state, 'parameter; AsynchronousJob.setState.state');
         this.state = state;
     }
 
@@ -256,8 +256,8 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
      * @return The current instance of the class, so the calls can be chained.
      */
     private AsynchronousJob withMaximumRetries(final Integer maximumRetries) {
-        Assert.isNotNull(maximumRetries, 'parameter; AsynchronousJob.withMaximumRetries.maximumRetries');
-        Assert.isTrue(maximumRetries >= 0, 'Maximum retries must be 0 or greater');
+        Assertion.isNotNull(maximumRetries, 'parameter; AsynchronousJob.withMaximumRetries.maximumRetries');
+        Assertion.isTrue(maximumRetries >= 0, 'Maximum retries must be 0 or greater');
         this.maximumRetries = maximumRetries;
         return this;
     }
@@ -281,8 +281,8 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
      * @return The current instance of the class, so the calls can be chained.
      */
     private AsynchronousJob withRetryInterval(final Integer retryInterval) {
-        Assert.isNotNull(retryInterval, 'parameter; AsynchronousJob.withRetryInterval.retryInterval');
-        Assert.isTrue(retryInterval >= 0, 'Retry interval must be 0 or greater');
+        Assertion.isNotNull(retryInterval, 'parameter; AsynchronousJob.withRetryInterval.retryInterval');
+        Assertion.isTrue(retryInterval >= 0, 'Retry interval must be 0 or greater');
         this.retryInterval = retryInterval;
         return this;
     }
@@ -306,8 +306,8 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
      * @return The current instance of the class, so the calls can be chained.
      */
     private AsynchronousJob withRetryNumber(final Integer retryNumber) {
-        Assert.isNotNull(retryNumber, 'parameter; AsynchronousJob.withRetryNumber.retryNumber');
-        Assert.isTrue(retryNumber >= 0, 'Retry number must be 0 or greater');
+        Assertion.isNotNull(retryNumber, 'parameter; AsynchronousJob.withRetryNumber.retryNumber');
+        Assertion.isTrue(retryNumber >= 0, 'Retry number must be 0 or greater');
         this.retryNumber = retryNumber;
         return this;
     }
@@ -341,7 +341,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
      * @return The current instance of the class, so the calls can be chained.
      */
     private AsynchronousJob withScheduledRunTime(final Datetime scheduledRunTime) {
-        Assert.isNotNull(scheduledRunTime, 'parameter; AsynchronousJob.withScheduledRunTime.scheduledRunTime');
+        Assertion.isNotNull(scheduledRunTime, 'parameter; AsynchronousJob.withScheduledRunTime.scheduledRunTime');
         this.scheduledRunTime = scheduledRunTime;
         return this;
     }
@@ -379,7 +379,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
      * @return The internal representation.
      */
     public static Asynchronous.Job fromSObject(final Asynchronous__c asyncObject) {
-        Assert.isNotNull(asyncObject, 'parameter; AsynchronousJob.fromSObject.asyncObject');
+        Assertion.isNotNull(asyncObject, 'parameter; AsynchronousJob.fromSObject.asyncObject');
 
         final Map<String, String> state =
                 asyncObject.AsynchronousStates__r.isEmpty()
@@ -403,7 +403,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
     }
 
     public static Asynchronous__c toSObject(final Asynchronous.Job asyncJob) {
-        Assert.isNotNull(asyncJob, 'parameter; AsynchronousJob.toSObject.asyncJob');
+        Assertion.isNotNull(asyncJob, 'parameter; AsynchronousJob.toSObject.asyncJob');
         return new Asynchronous__c(
                 Id = ((AsynchronousJob) asyncJob).getAsyncObjectId(),
                 OwnerId = asyncJob.getOwnerId(),
@@ -419,7 +419,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
     }
 
     public static Boolean queueJob(final Asynchronous__c asyncObject) {
-        Assert.isNotNull(asyncObject, 'parameter; AsynchronousJob.queueJob.asyncObject');
+        Assertion.isNotNull(asyncObject, 'parameter; AsynchronousJob.queueJob.asyncObject');
         try {
             return enqueueApexJob(asyncObject, false);
         } catch(Exception exc) {
@@ -430,7 +430,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
 
     @Future
     private static void start(final String asyncObjectId) {
-        Assert.isNotNull(asyncObjectId, 'parameter; AsynchronousJob.start.asyncObjectId');
+        Assertion.isNotNull(asyncObjectId, 'parameter; AsynchronousJob.start.asyncObjectId');
         final Asynchronous__c asyncObject = AsynchronousDAO.getObject(asyncObjectId);
 
         try {
@@ -441,8 +441,8 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
     }
 
     private static Boolean enqueueApexJob(final Asynchronous__c asyncObject, final Boolean isFuture) {
-        Assert.isNotNull(asyncObject, 'parameter; AsynchronousJob.enqueueApexJob.asyncObject');
-        Assert.isNotNull(isFuture, 'parameter; AsynchronousJob.enqueueApexJob.isFuture');
+        Assertion.isNotNull(asyncObject, 'parameter; AsynchronousJob.enqueueApexJob.asyncObject');
+        Assertion.isNotNull(isFuture, 'parameter; AsynchronousJob.enqueueApexJob.isFuture');
 
         final AsynchronousJob asyncJob = (AsynchronousJob) fromSObject(asyncObject);
         final AsynchronousRunnable runnable = (AsynchronousRunnable) asyncJob.getRunnable();
