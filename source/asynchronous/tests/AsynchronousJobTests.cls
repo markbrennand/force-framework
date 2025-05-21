@@ -15,7 +15,7 @@ public with sharing class AsynchronousJobTests {
             Asynchronous__c asynchronous = new Asynchronous__c(
                     OwnerId = UserInfo.getUserId(),
                     Status__c = status.name(),
-                    Runnable__c = 'AsynchronousJobTests.Runnable',
+                    Runnable__c = AsynchronousJobTests.Runnable.class.getName(),
                     Reference__c = 'Test',
                     MaximumRetries__c = 1,
                     RetryInterval__c = 1000,
@@ -24,6 +24,68 @@ public with sharing class AsynchronousJobTests {
             );
             AsynchronousJob.fromSObject(asynchronous);
         }
+    }
+
+    @IsTest
+    private static void testMandatoryFields() {
+        Asynchronous__c asyncObject = new Asynchronous__c(
+                OwnerId = UserInfo.getUserId(),
+                Status__c = Asynchronous.Status.PENDING.name(),
+                Runnable__c = AsynchronousJobTests.Runnable.class.getName(),
+                MaximumRetries__c = 0,
+                RetryNumber__c = 0,
+                RetryInterval__c = 0,
+                ScheduledRunTime__c = Datetime.now()
+        );
+
+        try {
+            Asynchronous__c copyObject = asyncObject.clone();
+            copyObject.OwnerId = null;
+            AsynchronousJob.fromSObject(copyObject);
+            Assert.fail();
+        } catch(Assertion.AssertionException ae) {}
+
+        try {
+            Asynchronous__c copyObject = asyncObject.clone();
+            copyObject.Status__c = null;
+            AsynchronousJob.fromSObject(copyObject);
+            Assert.fail();
+        } catch(Assertion.AssertionException ae) {}
+
+        try {
+            Asynchronous__c copyObject = asyncObject.clone();
+            copyObject.Runnable__c = null;
+            AsynchronousJob.fromSObject(copyObject);
+            Assert.fail();
+        } catch(Assertion.AssertionException ae) {}
+
+        try {
+            Asynchronous__c copyObject = asyncObject.clone();
+            copyObject.MaximumRetries__c = null;
+            AsynchronousJob.fromSObject(copyObject);
+            Assert.fail();
+        } catch(Assertion.AssertionException ae) {}
+
+        try {
+            Asynchronous__c copyObject = asyncObject.clone();
+            copyObject.RetryNumber__c = null;
+            AsynchronousJob.fromSObject(copyObject);
+            Assert.fail();
+        } catch(Assertion.AssertionException ae) {}
+
+        try {
+            Asynchronous__c copyObject = asyncObject.clone();
+            copyObject.RetryInterval__c = null;
+            AsynchronousJob.fromSObject(copyObject);
+            Assert.fail();
+        } catch(Assertion.AssertionException ae) {}
+
+        try {
+            Asynchronous__c copyObject = asyncObject.clone();
+            copyObject.ScheduledRunTime__c = null;
+            AsynchronousJob.fromSObject(copyObject);
+            Assert.fail();
+        } catch(Assertion.AssertionException ae) {}
     }
 
     @IsTest
@@ -48,12 +110,36 @@ public with sharing class AsynchronousJobTests {
     }
 
     @IsTest
-    private static void testAssignment() {
-        Asynchronous__c asynchronous = new Asynchronous__c(
-                Runnable__c = 'AsynchronousJobTests.Runnable'
+    private static void testFromSObject() {
+        try {
+            AsynchronousJob.fromSObject(null);
+            Assert.fail();
+        } catch(Assertion.AssertionException ae) {}
+
+        Datetime now = Datetime.now();
+        Asynchronous__c asyncObject = new Asynchronous__c(
+                Id = TestHelper.nextId(Asynchronous__c.SObjectType),
+                OwnerId = UserInfo.getUserId(),
+                Status__c = Asynchronous.Status.PENDING.name(),
+                Runnable__c = AsynchronousJobTests.Runnable.class.getName(),
+                Reference__c = 'Test',
+                MaximumRetries__c = 1,
+                RetryInterval__c = 1000,
+                RetryNumber__c = 0,
+                ScheduledRunTime__c = now.addMinutes(1),
+                LastRunTime__c = now
         );
 
-        Asynchronous.Job job = AsynchronousJob.fromSObject(asynchronous);
+        Asynchronous.Job job = AsynchronousJob.fromSObject(asyncObject);
+        Assert.areEqual(UserInfo.getUserId(), job.getOwnerId());
+        Assert.areEqual(Asynchronous.Status.PENDING, job.getStatus());
+        Assert.isTrue(job.getRunnable() instanceof AsynchronousJobTests.Runnable);
+        Assert.areEqual('Test', job.getReference());
+        Assert.areEqual(1, job.getMaximumRetries());
+        Assert.areEqual(1000, job.getRetryInterval());
+        Assert.areEqual(0, job.getRetryNumber());
+        Assert.areEqual(now.addMinutes(1), job.getScheduledRunTime());
+        Assert.areEqual(now, job.getLastRunTime());
     }
 
     public with sharing class Runnable extends AsynchronousRunnable {

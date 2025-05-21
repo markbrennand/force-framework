@@ -57,8 +57,8 @@ global with sharing virtual class Injection {
         global final String errorMessage { public get; private set; }
 
         global ValidationResult(final Boolean isValid, final String errorMessage) {
-            Assertion.isNotNull(isValid, 'parameter; Injection.ValidationResult.isValid may not be null');
-            Assertion.isTrue(isValid || errorMessage != null, 'parameter; Injection.ValidationResult.errorMessage must be set');
+            Assertion.isNotNull(isValid, 'argument: Injection.ValidationResult.isValid may not be null');
+            Assertion.isTrue(isValid || errorMessage != null, 'argument: Injection.ValidationResult.errorMessage must be set');
             this.isValid = isValid;
             this.errorMessage = errorMessage;
         }

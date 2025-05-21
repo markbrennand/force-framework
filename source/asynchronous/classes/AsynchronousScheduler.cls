@@ -10,22 +10,17 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
     private final static String MAX_SCHEDULERS_PROPERTY = 'maxSchedulers';
     private final static String NO_JOBS_TO_RUN_DELAY_PROPERTY = 'noJobsToRunDelay';
 
-    static {
-        Injection.bind(Map<String, Integer>.class, CONFIG_ACTION, Configuration.class);
-        Injection.reload();
-    }
-
     final Map<String, Integer> configuration =
             (Map<String, Integer>) Injection.wire(Map<String, Integer>.class, CONFIG_ACTION);
 
-    public AsynchronousScheduler() {
-        super(AsynchronousScheduler.class);
+    private AsynchronousScheduler() {
+        super(Executor.class);
         Assertion.isNotNull(configuration.get(MAX_SCHEDULERS_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + MAX_SCHEDULERS_PROPERTY);
         Assertion.isNotNull(configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + NO_JOBS_TO_RUN_DELAY_PROPERTY);
     }
 
     public override void run(final Asynchronous.Job ignoreAsyncJob) {
-        Assertion.isNotNull(ignoreAsyncJob, 'parameter; AsynchronousScheduler.run.ignoreAsyncJob');
+        Assertion.isNotNull(ignoreAsyncJob, 'argument: AsynchronousScheduler.run.ignoreAsyncJob');
 
         if (AsynchronousDAO.countScheduledObjects(true) == 0) {
             delayWhenNoJobsToRun(configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY));
@@ -33,7 +28,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
 
         final Asynchronous__c scheduledAsyncObject = AsynchronousDAO.getNextScheduled();
         if (scheduledAsyncObject != null) {
-            AsynchronousJob.queueJob(scheduledAsyncObject);
+            AsynchronousHelper.queueJob(scheduledAsyncObject);
         }
     }
 
@@ -71,30 +66,30 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
     }
 
     public override Boolean onSuccess(final Asynchronous.Job asyncJob) {
-        Assertion.isNotNull(asyncJob, 'parameter; AsynchronousScheduler.onSuccess.asyncJob');
+        Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onSuccess.asyncJob');
         return false;
     }
 
     public override Boolean onFailure(final Asynchronous.Job asyncJob, final Exception exc) {
-        Assertion.isNotNull(asyncJob, 'parameter; AsynchronousScheduler.onFailure.asyncJob');
+        Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onFailure.asyncJob');
         return true;
     }
 
     public override Boolean onCancellation(final Asynchronous.Job asyncJob) {
-        Assertion.isNotNull(asyncJob, 'parameter; AsynchronousScheduler.onCancellation.asyncJob');
+        Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onCancellation.asyncJob');
         return false;
     }
 
     public static void queue() {
         Asynchronous.Job asyncJob = Asynchronous.createJob(
-                AsynchronousScheduler.class,
+                Executor.class,
                 null,
                 0,
                 0,
                 new Map<String, String>()
         );
 
-        AsynchronousJob.queueJob(AsynchronousJob.toSObject(asyncJob));
+        AsynchronousHelper.queueJob(AsynchronousJob.toSObject(asyncJob));
     }
 
     public with sharing class Configuration implements TypeHelper.Factory {
@@ -104,5 +99,17 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
                     NO_JOBS_TO_RUN_DELAY_PROPERTY => 2000
             };
         }
+    }
+
+    public with sharing class Executor implements TypeHelper.Factory {
+
+        public Object newInstance() {
+            return new AsynchronousScheduler();
+        }
+    }
+
+    static {
+        Injection.bind(Map<String, Integer>.class, CONFIG_ACTION, Configuration.class);
+        Injection.reload();
     }
 }

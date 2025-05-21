@@ -34,7 +34,7 @@ global with sharing class TypeHelper {
      * @return The Type for the class. Or an exception if the class doesn't exist.
      */
     public static Type loadType(final String typeName) {
-        Assertion.isNotNull(typeName, 'parameter; TypeHelper.loadType.typeName');
+        Assertion.isNotNull(typeName, 'argument: TypeHelper.loadType.typeName');
 
         Type type = Type.forName(typeName);
         if (type == null) {

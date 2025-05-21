@@ -169,8 +169,4 @@ public with sharing class Mock {
             return null;
         }
     }
-
-    public static Boolean isSObjectList(List<Object> theList) {
-        return theList instanceof List<SObject>;
-    }
 }

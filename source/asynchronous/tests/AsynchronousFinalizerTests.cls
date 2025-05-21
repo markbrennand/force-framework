@@ -169,6 +169,33 @@ public with sharing class AsynchronousFinalizerTests {
     }
 
     @IsTest
+    private static void testCancellationFromOnError() {
+
+        // The test is for when there are more jobs to run.
+        Asynchronous__c asyncObject = new Asynchronous__c(Id = TestHelper.nextId(Asynchronous__c.SObjectType));
+        asyncObject.Status__c = Asynchronous.Status.RUNNING.name();
+        asyncObject.OwnerId = UserInfo.getUserId();
+        asyncObject.MaximumRetries__c = 4;
+        asyncObject.RetryInterval__c = 2;   // Causes Runnable.onError to return CANCELLED.
+        asyncObject.RetryNumber__c = 2;
+        asyncObject.Runnable__c = TestRunnable.class.getName();
+        asyncObject.ScheduledRunTime__c = Datetime.now();
+
+        // And the Exception.
+        Exception exc = new Asynchronous.APIException('Test');
+
+        // Add the mocking.
+        AsynchronousDAO mockDAO = mockForFailure(asyncObject, Asynchronous.Status.CANCELLED, exc, false, true);
+        AsynchronousDAO.INSTANCE = mockDao;
+
+        // Perform the test.
+        AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
+
+        // Confirm the mocked methods were called correctly.
+        Mock.validate(mockDAO);
+    }
+
+    @IsTest
     private static void testExceptionInOnSuccess() {
 
         // The test is for an exception thrown from onSuccess.
@@ -192,7 +219,7 @@ public with sharing class AsynchronousFinalizerTests {
                 .returns(asyncObject);
 
         // And the error must be persisted.
-        Mock.stubMethod(mockDAO, 'apiPersistAsynchronousError')
+        Mock.stubMethod(mockDAO, 'apiPersistException')
                 .withArguments(new List<Object> {
                         new AsynchronousException__c(
                                 Asynchronous__c = asyncObject.Id,
@@ -208,7 +235,7 @@ public with sharing class AsynchronousFinalizerTests {
         Asynchronous__c persistedObject = AsyncObject.clone(true);
         persistedObject.Status__c = Asynchronous.Status.FAILED.name();
 
-        Mock.stubMethod(mockDAO, 'apiPersistAsynchronous')
+        Mock.stubMethod(mockDAO, 'apiPersistObjects')
                 .withArguments(new List<Object> { new List<Asynchronous__c> { persistedObject } })
                 .expected(1);
 
@@ -253,7 +280,7 @@ public with sharing class AsynchronousFinalizerTests {
                 .returns(asyncObject);
 
         // The error from the job must be persisted.
-        Mock.stubMethod(mockDAO, 'apiPersistAsynchronousError')
+        Mock.stubMethod(mockDAO, 'apiPersistException')
                 .withArguments(new List<Object> {
                         new AsynchronousException__c(
                                 Asynchronous__c = asyncObject.Id,
@@ -267,7 +294,7 @@ public with sharing class AsynchronousFinalizerTests {
                 .expected(1);
 
         // The error from the onFailure method must be persisted.
-        Mock.stubMethod(mockDAO, 'apiPersistAsynchronousError')
+        Mock.stubMethod(mockDAO, 'apiPersistException')
                 .withArguments(new List<Object> {
                         new AsynchronousException__c(
                                 Asynchronous__c = asyncObject.Id,
@@ -283,7 +310,7 @@ public with sharing class AsynchronousFinalizerTests {
         Asynchronous__c persistedObject = AsyncObject.clone(true);
         persistedObject.Status__c = Asynchronous.Status.FAILED.name();
 
-        Mock.stubMethod(mockDAO, 'apiPersistAsynchronous')
+        Mock.stubMethod(mockDAO, 'apiPersistObjects')
                 .withArguments(new List<Object> { new List<Asynchronous__c> { persistedObject } })
                 .expected(1);
 
@@ -296,6 +323,67 @@ public with sharing class AsynchronousFinalizerTests {
 
         // Perform the test.
         AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
+
+        // Confirm the mocked methods were called correctly.
+        Mock.validate(mockDAO);
+    }
+
+    @IsTest
+    private static void testExceptionInCountScheduledObjects() {
+
+        // The test is for when an Exception is thrown from AsynchronousDAO.countScheduledObjects.
+        Asynchronous__c asyncObject = new Asynchronous__c(Id = TestHelper.nextId(Asynchronous__c.SObjectType));
+        asyncObject.Status__c = Asynchronous.Status.RUNNING.name();
+        asyncObject.OwnerId = UserInfo.getUserId();
+        asyncObject.MaximumRetries__c = 0;
+        asyncObject.RetryInterval__c = 0;
+        asyncObject.RetryNumber__c = 0;
+        asyncObject.Runnable__c = TestRunnable.class.getName();
+        asyncObject.ScheduledRunTime__c = Datetime.now();
+
+        // Setup the mocking.
+        AsynchronousDAO mockDAO = (AsynchronousDAO) Mock.stub(AsynchronousDAO.class);
+        AsynchronousDAO.INSTANCE = mockDAO;
+
+        // Finalizer must get the job once.
+        Mock.stubMethod(mockDAO, 'apiGetObject')
+                .withArguments(new List<Object> { asyncObject.Id })
+                .expected(1)
+                .returns(asyncObject);
+
+        // The status must be set to SUCCEEDED initially..
+        Asynchronous__c succeededAsyncObject = asyncObject.clone(true);
+        succeededAsyncObject.Status__c = Asynchronous.Status.SUCCEEDED.name();
+
+        Mock.stubMethod(mockDAO, 'apiPersistObjects')
+                .withArguments(new List<Object> { new List <Asynchronous__c> { succeededAsyncObject } })
+                .expected(1);
+
+        // And when the count exception occurs set to FAILED.
+        Asynchronous__c failureAsyncObject = asyncObject.clone(true);
+        failureAsyncObject.Status__c = Asynchronous.Status.FAILED.name();
+
+        Mock.stubMethod(mockDAO, 'apiPersistObjects')
+                .withArguments(new List<Object> { new List <Asynchronous__c> { failureAsyncObject } })
+                .expected(1);
+
+        // Force an Exception when counting the number of scheduled jobs.
+        Mock.stubMethod(mockDAO, 'apiCountScheduledObjects')
+                .withArguments(new List<Object> { false })
+                .throws(new Asynchronous.APIException('Test'));
+
+        // The Exception should be persisted.
+        Mock.stubMethod(mockDAO, 'apiPersistException')
+                .withArguments(new List<Object> {
+                        new AsynchronousException__c(
+                                Asynchronous__c = asyncObject.Id,
+                                ExceptionType__c = Asynchronous.APIException.class.getName(),
+                                ExceptionMessage__c = 'Test'
+                        )
+                });
+
+        // Perform the test.
+        AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
 
         // Confirm the mocked methods were called correctly.
         Mock.validate(mockDAO);
@@ -316,7 +404,7 @@ public with sharing class AsynchronousFinalizerTests {
 
         if (jobToBeDeleted) {
             // The Runnable's onFailure method will have asked for the job to be deleted.
-            Mock.stubMethod(mockDAO, 'apiRemoveAsynchronous')
+            Mock.stubMethod(mockDAO, 'apiRemoveObjects')
                     .withArguments(new List<Object>{new List<Asynchronous__c>{ asyncObject } })
                     .expected(1);
         } else {
@@ -324,7 +412,7 @@ public with sharing class AsynchronousFinalizerTests {
             Asynchronous__c persistedAsyncObject = asyncObject.clone(true);
             persistedAsyncObject.Status__c = Asynchronous.Status.SUCCEEDED.name();
 
-            Mock.stubMethod(mockDAO, 'apiPersistAsynchronous')
+            Mock.stubMethod(mockDAO, 'apiPersistObjects')
                     .withArguments(new List<Object> { new List<Asynchronous__c> { persistedAsyncObject } })
                     .expected(1);
         }
@@ -349,7 +437,7 @@ public with sharing class AsynchronousFinalizerTests {
                     OwnerId = UserInfo.getUserId(),
                     Status__c = Asynchronous.Status.PENDING.name(),
                     Reference__c = null,
-                    Runnable__c = AsynchronousScheduler.class.getName(),
+                    Runnable__c = AsynchronousScheduler.Executor.class.getName(),
                     MaximumRetries__c = 0,
                     RetryInterval__c = 0,
                     RetryNumber__c = 0
@@ -389,7 +477,7 @@ public with sharing class AsynchronousFinalizerTests {
                 .returns(asyncObject);
 
         // An Exception should be recorded.
-        Mock.stubMethod(mockDAO, 'apiPersistAsynchronousError')
+        Mock.stubMethod(mockDAO, 'apiPersistException')
                 .withArguments(new List<Object> {
                         new AsynchronousException__c(
                                 StatusOnError__c = asyncObject.Status__c,
@@ -407,21 +495,21 @@ public with sharing class AsynchronousFinalizerTests {
             queuedAsyncObject.Status__c = expectedStatus.name();
             queuedAsyncObject.RetryNumber__c++;
 
-            Mock.stubMethod(mockDAO, 'apiPersistAsynchronous')
+            Mock.stubMethod(mockDAO, 'apiPersistObjects')
                     .withArguments(new List<Object> { new List<Asynchronous__c> { queuedAsyncObject } })
                     .expected(1);
 
         } else if (jobToBeDeleted) {
                 // The Runnable's onFailure method will have asked for the job to be deleted.
-                Mock.stubMethod(mockDAO, 'apiRemoveAsynchronous')
+                Mock.stubMethod(mockDAO, 'apiRemoveObjects')
                         .withArguments(new List<Object>{new List<Asynchronous__c>{ asyncObject } })
                         .expected(1);
         } else {
             // After a successful call to Runnable.onFailed, the job should be marked as FAILED.
             Asynchronous__c persistedAsyncObject = asyncObject.clone(true);
-            persistedAsyncObject.Status__c = Asynchronous.Status.FAILED.name();
+            persistedAsyncObject.Status__c = expectedStatus.name();
 
-            Mock.stubMethod(mockDAO, 'apiPersistAsynchronous')
+            Mock.stubMethod(mockDAO, 'apiPersistObjects')
                     .withArguments(new List<Object> { new List<Asynchronous__c> { persistedAsyncObject } })
                     .expected(1);
         }
@@ -446,7 +534,7 @@ public with sharing class AsynchronousFinalizerTests {
                     OwnerId = UserInfo.getUserId(),
                     Status__c = Asynchronous.Status.PENDING.name(),
                     Reference__c = null,
-                    Runnable__c = AsynchronousScheduler.class.getName(),
+                    Runnable__c = AsynchronousScheduler.Executor.class.getName(),
                     MaximumRetries__c = 0,
                     RetryInterval__c = 0,
                     RetryNumber__c = 0
@@ -499,7 +587,7 @@ public with sharing class AsynchronousFinalizerTests {
         }
 
         public override Asynchronous.Status onError(Asynchronous.Job job, Exception exc) {
-            return job.getMaximumRetries() == 0 ? Asynchronous.Status.CANCELLED : Asynchronous.Status.QUEUED;
+            return job.getRetryInterval() == 2 ? Asynchronous.Status.CANCELLED : Asynchronous.Status.QUEUED;
         }
     }
 

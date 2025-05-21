@@ -11,14 +11,14 @@ public with sharing class AsynchronousDAO implements API {
         Asynchronous__c apiGetNextScheduled();
         Integer apiCountScheduledObjects(Boolean scheduledOnly);
         Integer apiCountActiveObjects(final Asynchronous__c asyncJob);
-        void apiPersistAsynchronous(List<Asynchronous__c> asyncObjects);
-        void apiPersistAsynchronous(List<Asynchronous__c> asyncObjects, List<Map<String, String>> states);
-        void apiRemoveAsynchronous(List<Asynchronous__c> asyncObject);
-        void apiPersistAsynchronousError(AsynchronousException__c asyncError);
+        void apiPersistObjects(List<Asynchronous__c> asyncObjects);
+        void apiPersistObjects(List<Asynchronous__c> asyncObjects, List<Map<String, String>> states);
+        void apiRemoveObjects(List<Asynchronous__c> asyncObject);
+        void apiPersistException(AsynchronousException__c asyncError);
     }
 
     public Asynchronous__c apiGetObject(Id asyncObjectId) {
-        Assertion.isNotNull(asyncObjectId, 'parameter; AsynchronousDAO.apiGetObject.asyncObjectId');
+        Assertion.isNotNull(asyncObjectId, 'argument: AsynchronousDAO.apiGetObject.asyncObjectId');
 
         final List<Asynchronous__c> asyncObjects = [
                 SELECT Id, OwnerId, Status__c, Reference__c, Runnable__c, MaximumRetries__c, RetryInterval__c,
@@ -77,7 +77,7 @@ public with sharing class AsynchronousDAO implements API {
     }
 
     public Integer apiCountScheduledObjects(final Boolean scheduledOnly) {
-        Assertion.isNotNull(scheduledOnly, 'parameter; AsynchronousDAO.apiCountScheduledObjects.scheduledOnly');
+        Assertion.isNotNull(scheduledOnly, 'argument: AsynchronousDAO.apiCountScheduledObjects.scheduledOnly');
 
         if (scheduledOnly) {
             return [
@@ -102,21 +102,22 @@ public with sharing class AsynchronousDAO implements API {
     }
 
     public Integer apiCountActiveObjects(final Asynchronous__c asyncJob) {
-        Assertion.isNotNull(asyncJob, 'parameter; AsynchronousDAO.apiCountActiveObjects.asyncJob');
+        Assertion.isNotNull(asyncJob, 'argument: AsynchronousDAO.apiCountActiveObjects.asyncJob');
+        final String runnableName = AsynchronousJob.fromSObject(asyncJob).getRunnable().getType().getName();
 
         return [
                 SELECT COUNT()
                 FROM Asynchronous__c
                 WHERE OwnerId = :UserInfo.getUserId()
-                AND Runnable__c = :asyncJob.Runnable__c
+                AND Runnable__c = :runnableName
                 AND Status__c = :Asynchronous.Status.RUNNING.name()
                 WITH USER_MODE
         ];
     }
 
-    public void apiPersistAsynchronous(final List<Asynchronous__c> asyncObjects, final List<Map<String, String>> states) {
-        Assertion.isNotNull(asyncObjects, 'parameter; AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
-        Assertion.isNotNull(states, 'parameter; AsynchronousDAO.apiPersistAsynchronous.states');
+    public void apiPersistObjects(final List<Asynchronous__c> asyncObjects, final List<Map<String, String>> states) {
+        Assertion.isNotNull(asyncObjects, 'argument: AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
+        Assertion.isNotNull(states, 'argument: AsynchronousDAO.apiPersistAsynchronous.states');
         Assertion.areEqual(asyncObjects.size(), states.size(), 'The number of Asynchronous objects does not match the number of states');
 
         Database.upsert(asyncObjects, AccessLevel.USER_MODE);
@@ -137,18 +138,18 @@ public with sharing class AsynchronousDAO implements API {
         Database.upsert(newStates, AccessLevel.USER_MODE);
     }
 
-    public void apiPersistAsynchronous(final List<Asynchronous__c> asyncObjects) {
-        Assertion.isNotNull(asyncObjects, 'parameter; AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
+    public void apiPersistObjects(final List<Asynchronous__c> asyncObjects) {
+        Assertion.isNotNull(asyncObjects, 'argument: AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
         Database.upsert(asyncObjects, AccessLevel.USER_MODE);
     }
 
-    public void apiRemoveAsynchronous(final List<Asynchronous__c> asynchronousObjects) {
-        Assertion.isNotNull(asynchronousObjects, 'parameter; AsynchronousDAO.apiRemoveAsynchronous.asynchronousObjects');
+    public void apiRemoveObjects(final List<Asynchronous__c> asynchronousObjects) {
+        Assertion.isNotNull(asynchronousObjects, 'argument: AsynchronousDAO.apiRemoveAsynchronous.asynchronousObjects');
         Database.delete(asynchronousObjects, AccessLevel.USER_MODE);
     }
 
-    public void apiPersistAsynchronousError(AsynchronousException__c asyncError) {
-        Assertion.isNotNull(asyncError, 'parameter; AsynchronousDAO.apiPersistAsynchronousError.asyncError');
+    public void apiPersistException(AsynchronousException__c asyncError) {
+        Assertion.isNotNull(asyncError, 'argument: AsynchronousDAO.apiPersistAsynchronousError.asyncError');
         Database.insert(asyncError, AccessLevel.USER_MODE);
     }
 
@@ -168,20 +169,20 @@ public with sharing class AsynchronousDAO implements API {
         return INSTANCE.apiCountActiveObjects(asyncJob);
     }
 
-    public static void persistAsynchronous(final List<Asynchronous__c> asyncObjects) {
-        INSTANCE.apiPersistAsynchronous(asyncObjects);
+    public static void persistObjects(final List<Asynchronous__c> asyncObjects) {
+        INSTANCE.apiPersistObjects(asyncObjects);
     }
 
-    public static void persistAsynchronous(final List<Asynchronous__c> asyncObjects, final List<Map<String, String>> states) {
-        INSTANCE.apiPersistAsynchronous(asyncObjects, states);
+    public static void persistObjects(final List<Asynchronous__c> asyncObjects, final List<Map<String, String>> states) {
+        INSTANCE.apiPersistObjects(asyncObjects, states);
     }
 
-    public static void removeAsynchronous(final List<Asynchronous__c> asyncObjects) {
-        INSTANCE.apiRemoveAsynchronous(asyncObjects);
+    public static void removeObjects(final List<Asynchronous__c> asyncObjects) {
+        INSTANCE.apiRemoveObjects(asyncObjects);
     }
 
-    public static void persistAsynchronousError(AsynchronousException__c asyncError) {
-        INSTANCE.apiPersistAsynchronousError(asyncError);
+    public static void persistException(AsynchronousException__c asyncError) {
+        INSTANCE.apiPersistException(asyncError);
     }
 
     /**

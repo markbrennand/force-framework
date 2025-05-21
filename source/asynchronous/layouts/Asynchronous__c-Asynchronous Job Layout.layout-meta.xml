@@ -51,7 +51,7 @@
                 <field>Runnable__c</field>
             </layoutItems>
             <layoutItems>
-                <behavior>Required</behavior>
+                <behavior>Edit</behavior>
                 <field>ApexJobId__c</field>
             </layoutItems>
             <layoutItems>

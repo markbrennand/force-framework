@@ -23,7 +23,7 @@ public with sharing class AsynchronousMockingTests {
         Assert.areEqual(Asynchronous.Status.CANCELLED, job.getStatus());
         Assert.areEqual('MOCKED', job.getReference());
 
-        Mock.stubMethod(mockAsynchronous, 'queueJobs')
+        Mock.stubMethod(mockAsynchronous, 'apiQueueJobs')
                 .withArguments(new List<Object>{ new List<Asynchronous.Job> { job } })
                 .expected(1);
 
@@ -39,7 +39,7 @@ public with sharing class AsynchronousMockingTests {
 
         Asynchronous mocked = (Asynchronous) Mock.stub(Asynchronous.class);
 
-        Mock.stubMethod(mocked, 'createJob')
+        Mock.stubMethod(mocked, 'apiCreateJob')
                 .withArguments(new List<Object>{
                         AsynchronousMockingTests.class,
                         null,

@@ -377,7 +377,7 @@ global with sharing virtual class Asynchronous implements API {
      * @param asyncJobs The jobs to schedule for processing.
      */
     public void apiQueueJobs(final List<Asynchronous.Job> asyncJobs) {
-        Assertion.isNotNull(asyncJobs, 'parameter; Asynchronous.queueJobs.asyncJobs');
+        Assertion.isNotNull(asyncJobs, 'argument: Asynchronous.queueJobs.asyncJobs');
 
         final List<Asynchronous__c> asyncObjects = new List<Asynchronous__c>();
         final List<Map<String, String>> states = new List<Map<String, String>>();
@@ -387,7 +387,7 @@ global with sharing virtual class Asynchronous implements API {
             states.add(job.getState());
         }
 
-        AsynchronousDAO.persistAsynchronous(asyncObjects, states);
+        AsynchronousDAO.persistObjects(asyncObjects, states);
     }
 
     /**
@@ -482,7 +482,8 @@ global with sharing virtual class Asynchronous implements API {
 
         for (Asynchronous__c asyncObject : asyncObjects) {
             try {
-                if (!(TypeHelper.newInstance(TypeHelper.loadType(asyncObject.Runnable__c)) instanceof Asynchronous.Runnable)) {
+                final Object runnable = TypeHelper.newInstance(TypeHelper.loadType(asyncObject.Runnable__c));
+                if (! (runnable instanceof Asynchronous.Runnable)) {
                     asyncObject.addError('Class ' + asyncObject.Runnable__c + ' does not implement Asynchronous.Runnable');
                     hasErrors = true;
 
@@ -490,7 +491,7 @@ global with sharing virtual class Asynchronous implements API {
                     asyncObject.Status__c = Asynchronous.Status.QUEUED.name();
                     asyncObject.RetryNumber__c = 0;
 
-                    if (asyncObject.Runnable__c != AsynchronousScheduler.class.getName()) {
+                    if (! (runnable instanceof AsynchronousScheduler)) {
                         startScheduler = true;
                     }
                 }
@@ -528,7 +529,7 @@ global with sharing virtual class Asynchronous implements API {
             }
         }
 
-        AsynchronousDAO.removeAsynchronous(toDelete);
+        AsynchronousDAO.removeObjects(toDelete);
     }
 
     /**

@@ -24,6 +24,12 @@ public with sharing class ExampleRunnable extends AsynchronousRunnable {
             return;
         }
 
+        String delay = job.getState().get('delay');
+        if (!String.isEmpty(delay)) {
+            Long endTime = System.currentTimeMillis() + Long.valueOf(delay);
+            for (Long now = System.currentTimeMillis(); now < endTime; now = System.currentTimeMillis()) {}
+        }
+
         if (job.getState().get('action') == 'soql-201') {
             for (Integer i = 0; i < 201; i++) {
                 List<Account> accounts = [SELECT Id FROM Account];

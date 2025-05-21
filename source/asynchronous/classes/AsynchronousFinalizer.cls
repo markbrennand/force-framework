@@ -109,9 +109,9 @@ public with sharing class AsynchronousFinalizer {
 
             if (asyncJob.getRunnable().onSuccess(asyncJob)) {
                 asyncObject.Status__c = Asynchronous.Status.SUCCEEDED.name();
-                AsynchronousDAO.persistAsynchronous(new List<Asynchronous__c> { asyncObject });
+                AsynchronousDAO.persistObjects(new List<Asynchronous__c> { asyncObject });
             } else {
-                AsynchronousDAO.removeAsynchronous(new List<Asynchronous__c> { asyncObject });
+                AsynchronousDAO.removeObjects(new List<Asynchronous__c> { asyncObject });
             }
         }
 
@@ -136,17 +136,20 @@ public with sharing class AsynchronousFinalizer {
             if (retryNumber == maximumRetries) {
                 if (asyncJob.getRunnable().onFailure(asyncJob, exc)) {
                     asyncObject.Status__c = Asynchronous.Status.FAILED.name();
-                    AsynchronousDAO.persistAsynchronous(new List<Asynchronous__c> { asyncObject });
+                    AsynchronousDAO.persistObjects(new List<Asynchronous__c> { asyncObject });
                 } else {
-                    AsynchronousDAO.removeAsynchronous(new List<Asynchronous__c> { asyncObject });
+                    AsynchronousDAO.removeObjects(new List<Asynchronous__c> { asyncObject });
                 }
             } else {
-                asyncObject.RetryNumber__c = retryNumber + 1;
-                asyncObject.Status__c = asyncJob.getRunnable().onError(asyncJob, exc).name();
-                asyncObject.ScheduledRunTime__c =
-                        Datetime.newInstance(System.currentTimeMillis() + asyncJob.getRetryInterval());
 
-                AsynchronousDAO.persistAsynchronous(new List<Asynchronous__c> { asyncObject });
+                asyncObject.Status__c = asyncJob.getRunnable().onError(asyncJob, exc).name();
+                if (asyncObject.Status__c == Asynchronous.Status.QUEUED.name()) {
+                    asyncObject.RetryNumber__c = retryNumber + 1;
+                    asyncObject.ScheduledRunTime__c =
+                            Datetime.newInstance(System.currentTimeMillis() + asyncJob.getRetryInterval());
+                }
+
+                AsynchronousDAO.persistObjects(new List<Asynchronous__c> { asyncObject });
             }
         }
     }
