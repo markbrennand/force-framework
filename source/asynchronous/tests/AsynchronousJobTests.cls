@@ -12,7 +12,7 @@ public with sharing class AsynchronousJobTests {
     @IsTest
     static void testAllStatuses() {
         for (Asynchronous.Status status : Asynchronous.Status.values()) {
-            Asynchronous__c asynchronous = new Asynchronous__c(
+            AsynchronousJob__c asynchronous = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Status__c = status.name(),
                     Runnable__c = AsynchronousJobTests.Runnable.class.getName(),
@@ -28,7 +28,7 @@ public with sharing class AsynchronousJobTests {
 
     @IsTest
     private static void testMandatoryFields() {
-        Asynchronous__c asyncObject = new Asynchronous__c(
+        AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                 OwnerId = UserInfo.getUserId(),
                 Status__c = Asynchronous.Status.PENDING.name(),
                 Runnable__c = AsynchronousJobTests.Runnable.class.getName(),
@@ -39,49 +39,49 @@ public with sharing class AsynchronousJobTests {
         );
 
         try {
-            Asynchronous__c copyObject = asyncObject.clone();
+            AsynchronousJob__c copyObject = asyncObject.clone();
             copyObject.OwnerId = null;
             AsynchronousJob.fromSObject(copyObject);
             Assert.fail();
         } catch(Assertion.AssertionException ae) {}
 
         try {
-            Asynchronous__c copyObject = asyncObject.clone();
+            AsynchronousJob__c copyObject = asyncObject.clone();
             copyObject.Status__c = null;
             AsynchronousJob.fromSObject(copyObject);
             Assert.fail();
         } catch(Assertion.AssertionException ae) {}
 
         try {
-            Asynchronous__c copyObject = asyncObject.clone();
+            AsynchronousJob__c copyObject = asyncObject.clone();
             copyObject.Runnable__c = null;
             AsynchronousJob.fromSObject(copyObject);
             Assert.fail();
         } catch(Assertion.AssertionException ae) {}
 
         try {
-            Asynchronous__c copyObject = asyncObject.clone();
+            AsynchronousJob__c copyObject = asyncObject.clone();
             copyObject.MaximumRetries__c = null;
             AsynchronousJob.fromSObject(copyObject);
             Assert.fail();
         } catch(Assertion.AssertionException ae) {}
 
         try {
-            Asynchronous__c copyObject = asyncObject.clone();
+            AsynchronousJob__c copyObject = asyncObject.clone();
             copyObject.RetryNumber__c = null;
             AsynchronousJob.fromSObject(copyObject);
             Assert.fail();
         } catch(Assertion.AssertionException ae) {}
 
         try {
-            Asynchronous__c copyObject = asyncObject.clone();
+            AsynchronousJob__c copyObject = asyncObject.clone();
             copyObject.RetryInterval__c = null;
             AsynchronousJob.fromSObject(copyObject);
             Assert.fail();
         } catch(Assertion.AssertionException ae) {}
 
         try {
-            Asynchronous__c copyObject = asyncObject.clone();
+            AsynchronousJob__c copyObject = asyncObject.clone();
             copyObject.ScheduledRunTime__c = null;
             AsynchronousJob.fromSObject(copyObject);
             Assert.fail();
@@ -90,7 +90,7 @@ public with sharing class AsynchronousJobTests {
 
     @IsTest
     static void testOptionalFields() {
-        Asynchronous__c asynchronous = new Asynchronous__c(
+        AsynchronousJob__c asynchronous = new AsynchronousJob__c(
                 OwnerId = UserInfo.getUserId(),
                 Status__c = Asynchronous.Status.PENDING.name(),
                 Runnable__c = 'AsynchronousJobTests.Runnable',
@@ -117,8 +117,8 @@ public with sharing class AsynchronousJobTests {
         } catch(Assertion.AssertionException ae) {}
 
         Datetime now = Datetime.now();
-        Asynchronous__c asyncObject = new Asynchronous__c(
-                Id = TestHelper.nextId(Asynchronous__c.SObjectType),
+        AsynchronousJob__c asyncObject = new AsynchronousJob__c(
+                Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
                 OwnerId = UserInfo.getUserId(),
                 Status__c = Asynchronous.Status.PENDING.name(),
                 Runnable__c = AsynchronousJobTests.Runnable.class.getName(),

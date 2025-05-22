@@ -11,10 +11,10 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
     private final static String NO_JOBS_TO_RUN_DELAY_PROPERTY = 'noJobsToRunDelay';
 
     final Map<String, Integer> configuration =
-            (Map<String, Integer>) Injection.wire(Map<String, Integer>.class, CONFIG_ACTION);
+            (Map<String, Integer>) Dependency.inject(Map<String, Integer>.class, CONFIG_ACTION);
 
     private AsynchronousScheduler() {
-        super(Executor.class);
+        super(QueueNext.class);
         Assertion.isNotNull(configuration.get(MAX_SCHEDULERS_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + MAX_SCHEDULERS_PROPERTY);
         Assertion.isNotNull(configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + NO_JOBS_TO_RUN_DELAY_PROPERTY);
     }
@@ -26,7 +26,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
             delayWhenNoJobsToRun(configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY));
         }
 
-        final Asynchronous__c scheduledAsyncObject = AsynchronousDAO.getNextScheduled();
+        final AsynchronousJob__c scheduledAsyncObject = AsynchronousDAO.getNextScheduled();
         if (scheduledAsyncObject != null) {
             AsynchronousHelper.queueJob(scheduledAsyncObject);
         }
@@ -82,7 +82,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
 
     public static void queue() {
         Asynchronous.Job asyncJob = Asynchronous.createJob(
-                Executor.class,
+                QueueNext.class,
                 null,
                 0,
                 0,
@@ -101,7 +101,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
         }
     }
 
-    public with sharing class Executor implements TypeHelper.Factory {
+    public with sharing class QueueNext implements TypeHelper.Factory {
 
         public Object newInstance() {
             return new AsynchronousScheduler();
@@ -109,7 +109,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
     }
 
     static {
-        Injection.bind(Map<String, Integer>.class, CONFIG_ACTION, Configuration.class);
-        Injection.reload();
+        Dependency.bind(Map<String, Integer>.class, CONFIG_ACTION, Configuration.class);
+        Dependency.reload();
     }
 }

@@ -9,6 +9,6 @@ public with sharing class AsynchronousSchedulerTests {
 
     @IsTest
     private static void testNullJobArgument() {
-        new Asunc
+        // new Asunc
     }
 }

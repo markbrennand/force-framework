@@ -4,40 +4,40 @@
         <application>Frameworks</application>
         <visible>true</visible>
     </applicationVisibilities>
-    <description>Permission set required to manage injection.</description>
+    <description>Permission set required to manage dependency.</description>
     <fieldPermissions>
         <editable>true</editable>
-        <field>AsynchronousException__c.ExceptionMessage__c</field>
+        <field>AsynchronousJobException__c.ExceptionMessage__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>AsynchronousException__c.ExceptionStackTrace__c</field>
+        <field>AsynchronousJobException__c.ExceptionStackTrace__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>AsynchronousException__c.StatusOnError__c</field>
+        <field>AsynchronousJobException__c.StatusOnError__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>AsynchronousState__c.Content__c</field>
+        <field>AsynchronousJobState__c.Content__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Asynchronous__c.ApexJobId__c</field>
+        <field>AsynchronousJob__c.ApexJobId__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Asynchronous__c.LastRunTime__c</field>
+        <field>AsynchronousJob__c.LastRunTime__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Asynchronous__c.Reference__c</field>
+        <field>AsynchronousJob__c.Reference__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -53,7 +53,7 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>true</modifyAllRecords>
-        <object>AsynchronousException__c</object>
+        <object>AsynchronousJobException__c</object>
         <viewAllFields>false</viewAllFields>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
@@ -63,7 +63,7 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>true</modifyAllRecords>
-        <object>AsynchronousState__c</object>
+        <object>AsynchronousJobState__c</object>
         <viewAllFields>false</viewAllFields>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
@@ -73,7 +73,7 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>true</modifyAllRecords>
-        <object>Asynchronous__c</object>
+        <object>AsynchronousJob__c</object>
         <viewAllFields>false</viewAllFields>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
@@ -88,7 +88,7 @@
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
     <tabSettings>
-        <tab>Asynchronous__c</tab>
+        <tab>AsynchronousJob__c</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>

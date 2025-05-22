@@ -5,9 +5,9 @@
  * All access to the framework must be through this class.
  *
  * The API interface defines the contract that implementations must provide to the methods of this class to create
- * and run jobs asynchronously. The implementation may be overridden using an Injection Binding.
+ * and run jobs asynchronously. The implementation may be overridden using a Dependency Binding.
  *
- * The default implementation of the API in this class uses the Asynchronous__c object to represent a job. The object
+ * The default implementation of the API in this class uses the AsynchronousJob__c object to represent a job. The object
  * may be queried to find all the information about the job.
  *
  * See [Asynchronous](https://github.com/markbrennand/sf-frameworks/blob/main/source/asynchronous/README.md)
@@ -347,7 +347,7 @@ global with sharing virtual class Asynchronous implements API {
             final Integer retryInterval,
             final Map<String, String> state
     ) {
-        final Asynchronous__c asynchronousObject = new Asynchronous__c(
+        final AsynchronousJob__c asynchronousObject = new AsynchronousJob__c(
                 Status__c = Status.PENDING.name(),
                 OwnerId = UserInfo.getUserId(),
                 Runnable__c = type.getName(),
@@ -368,10 +368,10 @@ global with sharing virtual class Asynchronous implements API {
      * @description
      * Schedules the given job for processing by the default API implementation.
      *
-     * Each job will have an Asynchronous__c object created for it. The job's state will be saved in the
+     * Each job will have an AsynchronousJob__c object created for it. The job's state will be saved in the
      * AsynchronousState__c object.
      *
-     * The trigger on Asynchronous__c will validate the job. If the job is valid, the trigger will change the
+     * The trigger on AsynchronousJob__c will validate the job. If the job is valid, the trigger will change the
      * Status to QUEUED and start an Asynchronous Scheduler to run the job.
      *
      * @param asyncJobs The jobs to schedule for processing.
@@ -379,7 +379,7 @@ global with sharing virtual class Asynchronous implements API {
     public void apiQueueJobs(final List<Asynchronous.Job> asyncJobs) {
         Assertion.isNotNull(asyncJobs, 'argument: Asynchronous.queueJobs.asyncJobs');
 
-        final List<Asynchronous__c> asyncObjects = new List<Asynchronous__c>();
+        final List<AsynchronousJob__c> asyncObjects = new List<AsynchronousJob__c>();
         final List<Map<String, String>> states = new List<Map<String, String>>();
 
         for (Asynchronous.Job job : asyncJobs) {
@@ -457,7 +457,7 @@ global with sharing virtual class Asynchronous implements API {
      * @description
      * Creates the default API implementation.
      *
-     * The constructor for the implementation is protected. This prevents the Injection framework constructing it.
+     * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
     public with sharing class Factory implements TypeHelper.Factory {
@@ -468,7 +468,7 @@ global with sharing virtual class Asynchronous implements API {
 
     /**
      * @description
-     * Processes any persisted Asynchronous__c objects before they are added to the database.
+     * Processes any persisted AsynchronousJob__c objects before they are added to the database.
      *
      * Validation is performed on the objects.
      *
@@ -476,11 +476,11 @@ global with sharing virtual class Asynchronous implements API {
      *
      * @param asyncObjects The persisted objects.
      */
-    public static void onTriggerBefore(final List<Asynchronous__c> asyncObjects) {
+    public static void onTriggerBefore(final List<AsynchronousJob__c> asyncObjects) {
         Boolean hasErrors = false;
         Boolean startScheduler = false;
 
-        for (Asynchronous__c asyncObject : asyncObjects) {
+        for (AsynchronousJob__c asyncObject : asyncObjects) {
             try {
                 final Object runnable = TypeHelper.newInstance(TypeHelper.loadType(asyncObject.Runnable__c));
                 if (! (runnable instanceof Asynchronous.Runnable)) {
@@ -508,23 +508,23 @@ global with sharing virtual class Asynchronous implements API {
 
     /**
      * @description
-     * Processes any persisted Asynchronous__c objects after they have been added to the database.
+     * Processes any persisted AsynchronousJob__c objects after they have been added to the database.
      *
      * Any new cancellations are processed.
      *
      * @param asyncObjects The persisted objects.
      * @param previousAsyncObjects The previous values of the persisted objects.
      */
-    public static void onTriggerAfter(final List<Asynchronous__c> asyncObjects, final Map<Id, Asynchronous__c> previousAsyncObjects) {
-        final List<Asynchronous__c> toDelete = new List<Asynchronous__c>();
+    public static void onTriggerAfter(final List<AsynchronousJob__c> asyncObjects, final Map<Id, AsynchronousJob__c> previousAsyncObjects) {
+        final List<AsynchronousJob__c> toDelete = new List<AsynchronousJob__c>();
 
-        for (Asynchronous__c asyncObject : asyncObjects) {
+        for (AsynchronousJob__c asyncObject : asyncObjects) {
             if (asyncObject.Status__c == Asynchronous.Status.CANCELLED.name() &&
                     asyncObject.Status__c != previousAsyncObjects.get(asyncObject.Id)?.Status__c
             ) {
                 final Asynchronous.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
                 if (!asyncJob.getRunnable().onCancellation(asyncJob)) {
-                    toDelete.add(new Asynchronous__c(Id = asyncObject.Id));
+                    toDelete.add(new AsynchronousJob__c(Id = asyncObject.Id));
                 }
             }
         }
@@ -536,7 +536,7 @@ global with sharing virtual class Asynchronous implements API {
      * @description
      * Class providing check on Binding made to Asynchronous.API.
      */
-    public with sharing class BindingCheck implements Injection.BindingCheck {
+    public with sharing class BindingCheck implements Dependency.BindingCheck {
 
         /**
          * @description
@@ -547,11 +547,11 @@ global with sharing virtual class Asynchronous implements API {
          *
          * @return The result of the validation.
          */
-        public Injection.ValidationResult validate(Type forType, Type withImpl) {
+        public Dependency.ValidationResult validate(Type forType, Type withImpl) {
             if (TypeHelper.newInstance(withImpl) instanceof Asynchronous.API) {
-                return new Injection.ValidationResult(true, null);
+                return new Dependency.ValidationResult(true, null);
             } else {
-                return new Injection.ValidationResult(
+                return new Dependency.ValidationResult(
                         false,
                         'Class ' + withImpl.getName() + ' does not implement ' + forType.getName()
                 );
@@ -559,9 +559,9 @@ global with sharing virtual class Asynchronous implements API {
         }
     }
 
-    // Set the default implementation of the API. This can be overridden using an Injection Binding.
+    // Set the default implementation of the API. This can be overridden using a Dpendency Binding.
     static {
-        Injection.bind(API.class, Asynchronous.Factory.class);
+        Dependency.bind(API.class, Asynchronous.Factory.class);
     }
 
     /**
@@ -576,7 +576,7 @@ global with sharing virtual class Asynchronous implements API {
     private static API INSTANCE {
         private get {
             if (INSTANCE == null) {
-                INSTANCE = (API) Injection.wire(API.class);
+                INSTANCE = (API) Dependency.inject(API.class);
             }
             return INSTANCE;
         }

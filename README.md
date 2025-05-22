@@ -8,7 +8,7 @@ The D of SOLID is Dependency Injection. This is not something supported natively
 allows the initialisation of a registry either programmatically or from a custom object. Once initialised, dependencies
 can be wired into APEX code.
 
-See [Injection](source/injection/README.md)
+See [Dependency Injection](source/dependency/README.md)
 
 ## Asynchronous
 Apex provides the ability to run code asynchronously using the _Queueable_ interface and _System.enqueueJob_.

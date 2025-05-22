@@ -50,14 +50,14 @@ global with sharing virtual class AsynchronousRunnable implements Asynchronous.R
      * @param context The Salesforce context for the Apex job.
      */
     public void execute(final QueueableContext context) {
-        final Asynchronous__c asynchronousJob = AsynchronousJob.toSObject(asyncJob);
+        final AsynchronousJob__c asynchronousJob = AsynchronousJob.toSObject(asyncJob);
         asynchronousJob.LastRunTime__c = Datetime.now();
 
         System.attachFinalizer(AsynchronousFinalizer.createFinalizer(asynchronousJob.Id));
         run(asyncJob);
 
         AsynchronousDAO.persistObjects(
-                new List<Asynchronous__c> { asynchronousJob },
+                new List<AsynchronousJob__c> { asynchronousJob },
                 new List<Map<String, String>> { asyncJob.getState() }
         );
     }

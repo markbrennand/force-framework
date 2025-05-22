@@ -11,8 +11,8 @@ public with sharing class AsynchronousHelperTests {
     private static void testRecordException() {
 
         // The job for the test.
-        Asynchronous__c asyncObject = new Asynchronous__c(
-                Id = TestHelper.nextId(Asynchronous__c.SObjectType),
+        AsynchronousJob__c asyncObject = new AsynchronousJob__c(
+                Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
                 Status__c = Asynchronous.Status.RUNNING.name(),
                 RetryNumber__c = 1
         );
@@ -35,8 +35,8 @@ public with sharing class AsynchronousHelperTests {
     private static void testInternalFailure() {
 
         // The job for the test.
-        Asynchronous__c asyncObject = new Asynchronous__c(
-                Id = TestHelper.nextId(Asynchronous__c.SObjectType),
+        AsynchronousJob__c asyncObject = new AsynchronousJob__c(
+                Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
                 Status__c = Asynchronous.Status.RUNNING.name(),
                 RetryNumber__c = 3
         );
@@ -66,22 +66,22 @@ public with sharing class AsynchronousHelperTests {
         };
 
         // Repeat the encode/decode test for different chunk sizes.
-        Asynchronous__c asynchronousObject = new Asynchronous__c(Id = TestHelper.nextId(Asynchronous__c.SObjectType));
+        AsynchronousJob__c asynchronousObject = new AsynchronousJob__c(Id = TestHelper.nextId(AsynchronousJob__c.SObjectType));
         for (Integer size : new List<Integer> { AsynchronousHelper.MAX_CHUNK_SIZE, 1, 2, 4, 8, 16, 32, 62, 128, 256 }) {
             AsynchronousHelper.MAX_CHUNK_SIZE = size;
-            List<AsynchronousState__c> chunks = AsynchronousHelper.encodeState(asynchronousObject, state);
+            List<AsynchronousJobState__c> chunks = AsynchronousHelper.encodeState(asynchronousObject, state);
             Assert.areEqual(state, AsynchronousHelper.decodeState(chunks));
         }
     }
 
-    private static AsynchronousDAO mockForRecordException(Asynchronous__c asyncObject, Exception exc) {
+    private static AsynchronousDAO mockForRecordException(AsynchronousJob__c asyncObject, Exception exc) {
         AsynchronousDAO mockDAO = (AsynchronousDAO) Mock.stub(AsynchronousDAO.class);
 
         // The error should be persisted once.
         Mock.stubMethod(mockDAO, 'apiPersistException')
                 .withArguments(new List<Object> {
-                        new AsynchronousException__c(
-                                Asynchronous__c = asyncObject.Id,
+                        new AsynchronousJobException__c(
+                                AsynchronousJob__c = asyncObject.Id,
                                 RetryNumber__c = asyncObject.RetryNumber__c,
                                 StatusOnError__c = Asynchronous.Status.RUNNING.name(),
                                 ExceptionType__c = exc.getTypeName(),
@@ -94,16 +94,16 @@ public with sharing class AsynchronousHelperTests {
         return mockDao;
     }
 
-    private static AsynchronousDAO mockForInternalFailure(Asynchronous__c asyncObject, Exception exc) {
+    private static AsynchronousDAO mockForInternalFailure(AsynchronousJob__c asyncObject, Exception exc) {
         // The Exception should be recorded.
         AsynchronousDAO mockDAO = mockForRecordException(asyncObject, exc);
 
         // And the status of the Asynchronous object set to FAILED.
-        Asynchronous__c expectedAsyncObject = asyncObject.clone(true);
+        AsynchronousJob__c expectedAsyncObject = asyncObject.clone(true);
         expectedAsyncObject.Status__c = Asynchronous.Status.FAILED.name();
 
         Mock.stubMethod(mockDAO, 'apiPersistObjects')
-                .withArguments(new List<Object> { new List<Asynchronous__c> { expectedAsyncObject } })
+                .withArguments(new List<Object> { new List<AsynchronousJob__c> { expectedAsyncObject } })
                 .expected(1);
 
         return mockDAO;

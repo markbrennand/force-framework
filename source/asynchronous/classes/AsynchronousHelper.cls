@@ -26,7 +26,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          * @param asyncObject The Asynchronous object to record the Exception against.
          * @param exc The exception to be recorded.
          */
-        void apiRecordException(Asynchronous__c asyncObject, Exception exc);
+        void apiRecordException(AsynchronousJob__c asyncObject, Exception exc);
 
         /**
          * @description
@@ -35,7 +35,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          * @param asyncObject The Asynchronous object to record the Exception against.
          * @param exc The exception to be recorded.
          */
-        void apiRecordInternalException(Asynchronous__c asyncObject, Exception exc);
+        void apiRecordInternalException(AsynchronousJob__c asyncObject, Exception exc);
 
         /**
          * @description
@@ -45,7 +45,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          *
          * @return The decoded state.
          */
-        Map<String, String> apiDecodeState(final List<AsynchronousState__c> asyncStateObjects);
+        Map<String, String> apiDecodeState(final List<AsynchronousJobState__c> asyncStateObjects);
 
         /**
          * @description
@@ -56,7 +56,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          *
          * @return The state objects representing the internal state.
          */
-        List<AsynchronousState__c> apiEncodeState(Asynchronous__c asyncObject, Map<String, String> state);
+        List<AsynchronousJobState__c> apiEncodeState(AsynchronousJob__c asyncObject, Map<String, String> state);
 
         /**
          * @description
@@ -66,7 +66,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          *
          * @return True if the job was queued, false if not.
          */
-        Boolean apiQueueJob(Asynchronous__c asyncObject);
+        Boolean apiQueueJob(AsynchronousJob__c asyncObject);
     }
 
     /**
@@ -86,12 +86,12 @@ public with sharing virtual class AsynchronousHelper implements API {
      * @param asyncObject The Asynchronous object to record the Exception against.
      * @param exc The exception to be recorded.
      */
-    public void apiRecordException(final Asynchronous__c asyncObject, final Exception exc) {
+    public void apiRecordException(final AsynchronousJob__c asyncObject, final Exception exc) {
         Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.apiRecordException.asynchronousObject');
         Assertion.isNotNull(exc, 'argument: AsynchronousHelper.apiRecordException.exc');
 
-        final AsynchronousException__c asyncError = new AsynchronousException__c(
-                Asynchronous__c = asyncObject.Id,
+        final AsynchronousJobException__c asyncError = new AsynchronousJobException__c(
+                AsynchronousJob__c = asyncObject.Id,
                 RetryNumber__c = asyncObject.RetryNumber__c,
                 StatusOnError__c = asyncObject.Status__c,
                 ExceptionType__c = exc.getTypeName(),
@@ -114,10 +114,10 @@ public with sharing virtual class AsynchronousHelper implements API {
      * @param asyncObject The Asynchronous object to record the Exception against.
      * @param exc The exception to be recorded.
      */
-    public void apiRecordInternalException(final Asynchronous__c asyncObject, final Exception exc) {
+    public void apiRecordInternalException(final AsynchronousJob__c asyncObject, final Exception exc) {
         apiRecordException(asyncObject, exc);
         asyncObject.Status__c = Asynchronous.Status.FAILED.name();
-        AsynchronousDAO.persistObjects(new List<Asynchronous__c> { asyncObject });
+        AsynchronousDAO.persistObjects(new List<AsynchronousJob__c> { asyncObject });
     }
 
     /**
@@ -128,12 +128,12 @@ public with sharing virtual class AsynchronousHelper implements API {
      *
      * @return The decoded state.
      */
-    public Map<String, String> apiDecodeState(final List<AsynchronousState__c> asyncStateObjects) {
+    public Map<String, String> apiDecodeState(final List<AsynchronousJobState__c> asyncStateObjects) {
         Assertion.isNotNull(asyncStateObjects, 'argument: AsynchronousHelper.apiDecodeState.asyncStateObjects');
 
         final List<String> chunks = new List<String>();
 
-        for (AsynchronousState__c chunk : asyncStateObjects) {
+        for (AsynchronousJobState__c chunk : asyncStateObjects) {
             chunks.add(chunk.Content__c);
         }
 
@@ -151,21 +151,21 @@ public with sharing virtual class AsynchronousHelper implements API {
      *
      * @return The state objects representing the internal state.
      */
-    public static List<AsynchronousState__c> apiEncodeState(
-            final Asynchronous__c asyncObject,
+    public static List<AsynchronousJobState__c> apiEncodeState(
+            final AsynchronousJob__c asyncObject,
             final Map<String, String> state
     ) {
         Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.apiEncodeState.asyncObject');
         Assertion.isNotNull(state, 'argument: AsynchronousHelper.apiEncodeState.state');
 
-        final List<AsynchronousState__c> chunks = new List<AsynchronousState__c>();
+        final List<AsynchronousJobState__c> chunks = new List<AsynchronousJobState__c>();
         String stateJson = JSON.serialize(state);
         Integer size = stateJson.length();
         Integer chunkNumber = 0;
 
         while (size > MAX_CHUNK_SIZE) {
-            chunks.add(new AsynchronousState__c(
-                    Asynchronous__c = asyncObject.Id,
+            chunks.add(new AsynchronousJobState__c(
+                    AsynchronousJob__c = asyncObject.Id,
                     ChunkNumber__c = ++chunkNumber,
                     Content__c = stateJSON.substring(0, MAX_CHUNK_SIZE)
             ));
@@ -175,8 +175,8 @@ public with sharing virtual class AsynchronousHelper implements API {
         }
 
         if (size > 0) {
-            chunks.add(new AsynchronousState__c(
-                    Asynchronous__c = asyncObject.Id,
+            chunks.add(new AsynchronousJobState__c(
+                    AsynchronousJob__c = asyncObject.Id,
                     ChunkNumber__c = ++chunkNumber,
                     Content__c = stateJSON
             ));
@@ -195,7 +195,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      *
      * @return True if the job was queued, false if not.
      */
-    public Boolean apiQueueJob(final Asynchronous__c asyncObject) {
+    public Boolean apiQueueJob(final AsynchronousJob__c asyncObject) {
         Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.apiQueueJob.asyncObject');
 
         try {
@@ -213,7 +213,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      * @param asyncObject The Asynchronous object to record the Exception against.
      * @param exc The exception to be recorded.
      */
-    public static void recordException(final Asynchronous__c asyncObject, final Exception exc) {
+    public static void recordException(final AsynchronousJob__c asyncObject, final Exception exc) {
         INSTANCE.apiRecordException(asyncObject, exc);
     }
 
@@ -224,7 +224,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      * @param asyncObject The Asynchronous object to record the Exception against.
      * @param exc The exception to be recorded.
      */
-    public static void recordInternalException(final Asynchronous__c asyncObject, final Exception exc) {
+    public static void recordInternalException(final AsynchronousJob__c asyncObject, final Exception exc) {
         INSTANCE.apiRecordInternalException(asyncObject, exc);
     }
 
@@ -236,7 +236,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      *
      * @return The decoded state.
      */
-    public static Map<String, String> decodeState(final List<AsynchronousState__c> asyncStateObjects) {
+    public static Map<String, String> decodeState(final List<AsynchronousJobState__c> asyncStateObjects) {
         return INSTANCE.apiDecodeState(asyncStateObjects);
     }
 
@@ -249,8 +249,8 @@ public with sharing virtual class AsynchronousHelper implements API {
      *
      * @return The state objects representing the internal state.
      */
-    public static List<AsynchronousState__c> encodeState(
-            final Asynchronous__c asyncObject,
+    public static List<AsynchronousJobState__c> encodeState(
+            final AsynchronousJob__c asyncObject,
             final Map<String, String> state
     ) {
         return INSTANCE.apiEncodeState(asyncObject, state);
@@ -264,7 +264,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      *
      * @return True if the job was queued, false if not.
      */
-    public static Boolean queueJob(final Asynchronous__c asyncObject) {
+    public static Boolean queueJob(final AsynchronousJob__c asyncObject) {
         return INSTANCE.apiQueueJob(asyncObject);
     }
 
@@ -274,12 +274,12 @@ public with sharing virtual class AsynchronousHelper implements API {
      *
      * The most likely reason the job could not be started is exceeding the Apex job chaining limit.
      *
-     * @param asyncObjectId The id of the Asynchronous__c to be started.
+     * @param asyncObjectId The id of the AsynchronousJob__c to be started.
      */
     @Future
     private static void startAsynchronousJob(final String asyncObjectId) {
         Assertion.isNotNull(asyncObjectId, 'argument: AsynchronousHelper.startAsynchronousJob.asyncObjectId');
-        final Asynchronous__c asyncObject = AsynchronousDAO.getObject(asyncObjectId);
+        final AsynchronousJob__c asyncObject = AsynchronousDAO.getObject(asyncObjectId);
 
         try {
             enqueueApexJob(asyncObject, true);
@@ -300,7 +300,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      *
      * @return True if the Apex job was created, false if not.
      */
-    private static Boolean enqueueApexJob(final Asynchronous__c asyncObject, final Boolean isFuture) {
+    private static Boolean enqueueApexJob(final AsynchronousJob__c asyncObject, final Boolean isFuture) {
         Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.enqueueApexJob.asyncObject');
         Assertion.isNotNull(isFuture, 'argument: AsynchronousHelper.enqueueApexJob.isFuture');
 
@@ -310,13 +310,13 @@ public with sharing virtual class AsynchronousHelper implements API {
         if (isFuture || AsynchronousDAO.countActiveObjects(asyncObject) < runnable.getMaximumActive()) {
             asyncObject.Status__c = Asynchronous.Status.RUNNING.name();
             asyncObject.LastRunTime__c = Datetime.now();
-            AsynchronousDAO.persistObjects(new List<Asynchronous__c> { asyncObject });
+            AsynchronousDAO.persistObjects(new List<AsynchronousJob__c> { asyncObject });
 
             asyncObject.ApexJobId__c = System.enqueueJob(
                     runnable.forJob(AsynchronousJob.fromSObject(AsynchronousDAO.getObject(asyncObject.Id)))
             );
 
-            AsynchronousDAO.persistObjects(new List<Asynchronous__c> { asyncObject });
+            AsynchronousDAO.persistObjects(new List<AsynchronousJob__c> { asyncObject });
 
             return true;
 

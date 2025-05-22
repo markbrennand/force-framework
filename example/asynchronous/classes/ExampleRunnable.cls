@@ -6,15 +6,15 @@
 public with sharing class ExampleRunnable extends AsynchronousRunnable {
 
     static {
-        Injection.bind(Map<String, Integer>.class, 'ExampleRunnable', Configuration.class);
-        Injection.reload();
+        Dependency.bind(Map<String, Integer>.class, 'ExampleRunnable', Configuration.class);
+        Dependency.reload();
     }
 
     private final Map<String, Integer> configuration =
-            (Map<String, Integer>) Injection.wire(Map<String, Integer>.class, 'ExampleRunnable');
+            (Map<String, Integer>) Dependency.inject(Map<String, Integer>.class, 'ExampleRunnable');
 
     public ExampleRunnable() {
-        super(ExampleRunnable.class);
+        super(Executor.class);
     }
 
     public override void run(Asynchronous.Job job) {
@@ -47,6 +47,13 @@ public with sharing class ExampleRunnable extends AsynchronousRunnable {
 
     public override Boolean onCancellation(Asynchronous.Job asyncJob) {
         return true;
+    }
+
+    public class Executor implements TypeHelper.Factory {
+
+        public Object newInstance() {
+            return new ExampleRunnable();
+        }
     }
 
     public class Configuration implements TypeHelper.Factory {

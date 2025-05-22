@@ -12,7 +12,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
 
     /**
      * @description
-     * The Id of the Asynchronous__c object in the data store for the job.
+     * The Id of the AsynchronousJob__c object in the data store for the job.
      */
     private String asyncObjectId;
 
@@ -94,7 +94,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
 
     /**
      * @description
-     * Gets the id of the Asynchronous__c object representing the job.
+     * Gets the id of the AsynchronousJob__c object representing the job.
      *
      * @return The object Id.
      */
@@ -104,7 +104,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
 
     /**
      * @description
-     * Sets the id of the Asynchronous__c object representing the job.
+     * Sets the id of the AsynchronousJob__c object representing the job.
      *
      * @param asyncObjectId The new job id.
      *
@@ -371,20 +371,20 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
 
     /**
      * @description
-     * Given an Asynchronous__c object fetched from the data store and its associated state data, this method
+     * Given an AsynchronousJob__c object fetched from the data store and its associated state data, this method
      * return the equivalent internal representation.
      *
-     * @param asyncObject The Asynchronous__c object for the job.
+     * @param asyncObject The AsynchronousJob__c object for the job.
      *
      * @return The internal representation.
      */
-    public static Asynchronous.Job fromSObject(final Asynchronous__c asyncObject) {
+    public static Asynchronous.Job fromSObject(final AsynchronousJob__c asyncObject) {
         Assertion.isNotNull(asyncObject, 'argument: AsynchronousJob.fromSObject.asyncObject');
 
         final Map<String, String> state =
-                asyncObject.AsynchronousStates__r.isEmpty()
+                asyncObject.AsynchronousJobState__r.isEmpty()
                         ? new Map<String, String>()
-                        : AsynchronousHelper.decodeState(asyncObject.AsynchronousStates__r);
+                        : AsynchronousHelper.decodeState(asyncObject.AsynchronousJobState__r);
 
         final Asynchronous.Job asyncJob = new AsynchronousJob()
                 .withAsyncObjectId(asyncObject.Id)
@@ -402,9 +402,9 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
         return asyncJob;
     }
 
-    public static Asynchronous__c toSObject(final Asynchronous.Job asyncJob) {
+    public static AsynchronousJob__c toSObject(final Asynchronous.Job asyncJob) {
         Assertion.isNotNull(asyncJob, 'argument: AsynchronousJob.toSObject.asyncJob');
-        return new Asynchronous__c(
+        return new AsynchronousJob__c(
                 Id = ((AsynchronousJob) asyncJob).getAsyncObjectId(),
                 OwnerId = asyncJob.getOwnerId(),
                 Status__c = asyncJob.getStatus().name(),
