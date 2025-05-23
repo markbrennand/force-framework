@@ -223,7 +223,7 @@ public with sharing class AsynchronousFinalizerTests {
                 .whenArgument(false)
                     .expectMethod('apiCountScheduledObjects').called(1).returns(0);
 
-        AsynchronousDAO.INSTANCE = (AsynchronousDAO) mocked.getMockedObject();
+        AsynchronousDAO.INSTANCE = (AsynchronousDAO) mocked.mock();
 
         // Perform the test.
         AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
@@ -286,7 +286,7 @@ public with sharing class AsynchronousFinalizerTests {
                 .whenArgument(false)
                     .expectMethod('apiCountScheduledObjects').called(1).returns(0);
 
-        AsynchronousDAO.INSTANCE = (AsynchronousDAO) mocked.getMockedObject();
+        AsynchronousDAO.INSTANCE = (AsynchronousDAO) mocked.mock();
 
         // Perform the test.
         AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
@@ -340,7 +340,7 @@ public with sharing class AsynchronousFinalizerTests {
                 ))
                     .expectMethod('apiPersistException').called(1);
 
-        AsynchronousDAO.INSTANCE = (AsynchronousDAO) mocked.getMockedObject();
+        AsynchronousDAO.INSTANCE = (AsynchronousDAO) mocked.mock();
 
         // Perform the test.
         AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
@@ -355,7 +355,6 @@ public with sharing class AsynchronousFinalizerTests {
             Boolean jobToBeDeleted
     ) {
         Mocker mocked = Mocker.of(AsynchronousDAO.class);
-
         mocked
                 .whenArgument(asyncObject.Id)
                     .expectMethod('apiGetObject').called(1).returns(asyncObject);
@@ -395,7 +394,7 @@ public with sharing class AsynchronousFinalizerTests {
                         .expectMethod('apiCountScheduledObjects').called(1).returns(0);
         }
 
-        return (AsynchronousDAO) mocked.getMockedObject();
+        return (AsynchronousDAO) mocked.mock();
     }
 
     private static AsynchronousDAO mockForFailure(
@@ -406,7 +405,6 @@ public with sharing class AsynchronousFinalizerTests {
             Boolean moreJobsToRun
     ) {
         Mocker mocked = Mocker.of(AsynchronousDAO.class);
-
         mocked
                 // Finalizer must get the job once.
                 .whenArgument(asyncObject.Id)
@@ -470,7 +468,7 @@ public with sharing class AsynchronousFinalizerTests {
                     .expectMethod('apiCountScheduledObjects').called(1).returns(0);
         }
 
-        return (AsynchronousDAO) mocked.getMockedObject();
+        return (AsynchronousDAO) mocked.mock();
     }
 
     public with sharing class TestRunnable extends AsynchronousRunnable {

@@ -74,11 +74,27 @@ public with sharing class AsynchronousHelperTests {
         }
     }
 
-    private static AsynchronousDAO mockForRecordException(AsynchronousJob__c asyncObject, Exception exc) {
-        Mocker mocked = Mocker.of(AsynchronousDAO.class);
+    @IsTest
+    private static void testMocking() {
+        final AsynchronousJob__c asyncObject = new AsynchronousJob__c(Id = TestHelper.nextId(AsynchronousJob__c.SObjectType));
+        final Exception exc = new DMLException('Test');
 
-        // The error should be persisted once.
-        mocked
+        AsynchronousHelper.INSTANCE = (AsynchronousHelper) Mocker.of(AsynchronousHelper.class)
+                .whenArguments(asyncObject, new Asynchronous.APIException('Wrapper', exc))
+                    .expectMethod('apiRecordException').called(1)
+                    .expectMethod('apiRecordInternalException').called(1)
+                .whenArgument(asyncObject)
+                    .expectMethod('apiQueueJob').called(1).returns(true)
+                .mock();
+
+        AsynchronousHelper.recordException(asyncObject, exc);
+        AsynchronousHelper.recordInternalException(asyncObject, exc);
+        Assert.isTrue(AsynchronousHelper.queueJob(asyncObject));
+    }
+
+    private static AsynchronousDAO mockForRecordException(AsynchronousJob__c asyncObject, Exception exc) {
+        return (AsynchronousDAO) Mocker.of(AsynchronousDAO.class)
+                // The error should be persisted once.
                 .whenArgument(new AsynchronousJobException__c(
                         AsynchronousJob__c = asyncObject.Id,
                         RetryNumber__c = asyncObject.RetryNumber__c,
@@ -88,15 +104,12 @@ public with sharing class AsynchronousHelperTests {
                         ExceptionStackTrace__c = exc.getStackTraceString()
 
                 ))
-                    .expectMethod('apiPersistException').called(1);
-
-        return (AsynchronousDAO) mocked.getMockedObject();
+                    .expectMethod('apiPersistException').called(1)
+                .mock();
     }
 
     private static AsynchronousDAO mockForInternalFailure(AsynchronousJob__c asyncObject, Exception exc) {
-        Mocker mocked = Mocker.of(AsynchronousDAO.class);
-
-        mocked
+        return (AsynchronousDAO) Mocker.of(AsynchronousDAO.class)
                 // The error should be persisted once.
                 .whenArgument(new AsynchronousJobException__c(
                         AsynchronousJob__c = asyncObject.Id,
@@ -113,8 +126,7 @@ public with sharing class AsynchronousHelperTests {
                 .whenArgument(new List<AsynchronousJob__c> {
                         new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.FAILED.name())
                 })
-                    .expectMethod('apiPersistObjects').called(1);
-
-        return (AsynchronousDAO) mocked.getMockedObject();
+                    .expectMethod('apiPersistObjects').called(1)
+                .mock();
     }
 }

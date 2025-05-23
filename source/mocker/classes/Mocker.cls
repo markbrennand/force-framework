@@ -20,15 +20,11 @@ public with sharing virtual class Mocker extends WhenArguments {
         this.mockedObject = mockedObject;
     }
 
-    public Object getMockedObject() {
-        return mockedObject;
-    }
-
     public static Mocker of(final Type forType) {
-        Assertion.isNotNull(forType, 'argument: Mocker.mock.forType');
+        Assertion.isNotNull(forType, 'argument: Mocker.of.forType');
 
-        final Mocker mock = new Mocker(Test.createStub(forType, MATCHER));
-        return mock;
+        final Mocker mocked = new Mocker(Test.createStub(forType, MATCHER));
+        return mocked;
     }
 
     public static void validate() {
@@ -71,11 +67,9 @@ public with sharing virtual class Mocker extends WhenArguments {
             }
 
             Assertion.fail(
-                    'Method '
-                    + stubbedMethodName
+                    'Method ' + stubbedObject.toString().split(':')[0].split('__sfdc')[0] + '.' + stubbedMethodName +
                     + ' not found for arguments '
                     + arguments
-                    + ' for the stub ' + stubbedObject
             );
 
             return null;
@@ -242,6 +236,10 @@ public with sharing virtual class Mocker extends WhenArguments {
             Assertion.isNotNull(expectedArguments, 'argument: Mocker.WhenArguments.whenListOfArguments.expectedArguments');
 
             return new Arguments(parent, expectedArguments);
+        }
+
+        public Object mock(){
+            return parent.mockedObject;
         }
     }
 

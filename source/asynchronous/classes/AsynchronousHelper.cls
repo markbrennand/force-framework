@@ -17,25 +17,33 @@ public with sharing virtual class AsynchronousHelper implements API {
     @TestVisible
     private static Integer MAX_CHUNK_SIZE = 131072;
 
+    /**
+     * @description
+     * Interface defining the API provided by this class.
+     */
     public interface API {
 
         /**
          * @description
          * Records the detail of an Exception.
          *
+         * Due to a stubbing issue with Exception, the actual Exception must be wrapped in APIException.
+         *
          * @param asyncObject The Asynchronous object to record the Exception against.
          * @param exc The exception to be recorded.
          */
-        void apiRecordException(AsynchronousJob__c asyncObject, Exception exc);
+        void apiRecordException(AsynchronousJob__c asyncObject, Asynchronous.APIException exc);
 
         /**
          * @description
          * Records a new internal Exception encountered in the framework.
          *
+         * Due to a stubbing issue with Exception, the actual Exception must be wrapped in APIException.
+         *
          * @param asyncObject The Asynchronous object to record the Exception against.
          * @param exc The exception to be recorded.
          */
-        void apiRecordInternalException(AsynchronousJob__c asyncObject, Exception exc);
+        void apiRecordInternalException(AsynchronousJob__c asyncObject, Asynchronous.APIException exc);
 
         /**
          * @description
@@ -84,9 +92,9 @@ public with sharing virtual class AsynchronousHelper implements API {
      * A new record is created and persisted for each Exception recorded.
      *
      * @param asyncObject The Asynchronous object to record the Exception against.
-     * @param exc The exception to be recorded.
+     * @param exc The wrapped exception to be recorded.
      */
-    public void apiRecordException(final AsynchronousJob__c asyncObject, final Exception exc) {
+    public void apiRecordException(final AsynchronousJob__c asyncObject, final Asynchronous.APIException exc) {
         Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.apiRecordException.asynchronousObject');
         Assertion.isNotNull(exc, 'argument: AsynchronousHelper.apiRecordException.exc');
 
@@ -94,9 +102,9 @@ public with sharing virtual class AsynchronousHelper implements API {
                 AsynchronousJob__c = asyncObject.Id,
                 RetryNumber__c = asyncObject.RetryNumber__c,
                 StatusOnError__c = asyncObject.Status__c,
-                ExceptionType__c = exc.getTypeName(),
-                ExceptionMessage__c = exc.getMessage(),
-                ExceptionStackTrace__c = exc.getStackTraceString()
+                ExceptionType__c = exc.getCause().getTypeName(),
+                ExceptionMessage__c = exc.getCause().getMessage(),
+                ExceptionStackTrace__c = exc.getCause().getStackTraceString()
         );
 
         AsynchronousDAO.persistException(asyncError);
@@ -112,9 +120,9 @@ public with sharing virtual class AsynchronousHelper implements API {
      * is changed to indicate it failed. No further processing will be performed on the job.
      *
      * @param asyncObject The Asynchronous object to record the Exception against.
-     * @param exc The exception to be recorded.
+     * @param exc The wrapped exception to be recorded.
      */
-    public void apiRecordInternalException(final AsynchronousJob__c asyncObject, final Exception exc) {
+    public void apiRecordInternalException(final AsynchronousJob__c asyncObject, final Asynchronous.APIException exc) {
         apiRecordException(asyncObject, exc);
         asyncObject.Status__c = Asynchronous.Status.FAILED.name();
         AsynchronousDAO.persistObjects(new List<AsynchronousJob__c> { asyncObject });
@@ -151,7 +159,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      *
      * @return The state objects representing the internal state.
      */
-    public static List<AsynchronousJobState__c> apiEncodeState(
+    public List<AsynchronousJobState__c> apiEncodeState(
             final AsynchronousJob__c asyncObject,
             final Map<String, String> state
     ) {
@@ -214,7 +222,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      * @param exc The exception to be recorded.
      */
     public static void recordException(final AsynchronousJob__c asyncObject, final Exception exc) {
-        INSTANCE.apiRecordException(asyncObject, exc);
+        INSTANCE.apiRecordException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
     }
 
     /**
@@ -225,7 +233,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      * @param exc The exception to be recorded.
      */
     public static void recordInternalException(final AsynchronousJob__c asyncObject, final Exception exc) {
-        INSTANCE.apiRecordInternalException(asyncObject, exc);
+        INSTANCE.apiRecordInternalException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
     }
 
     /**
@@ -293,7 +301,11 @@ public with sharing virtual class AsynchronousHelper implements API {
      * Creates an Apex job for the given Asynchronous object.
      *
      * The concurrency for the Runnable associated with job is checked against the number of RUNNING jobs of the
-     * same type. If the concurrency would be exceeded by starting a new job, no job is starged.
+     * same type. If the concurrency would be exceeded by starting a new job, no job is started.
+     *
+     * If the job is not started due to concurrency being hit, it is not persisted. This logic is important to
+     * maintain for the Scheduler. Any new Scheduler jobs that could not be started due to concurrency will not
+     * have their Asynchronous__c object persisted and so will not be re-run later.
      *
      * @param asyncObject The job to be started.
      * @param isFuture Is the method being called as a result of a @future call.

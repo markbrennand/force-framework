@@ -28,16 +28,13 @@ public with sharing class AsynchronousMockingTests {
     }
 
     private static Asynchronous createMock() {
-        Mocker jobMock = Mocker.of(AsynchronousJob.class);
-        jobMock
+        Asynchronous.Job job = (Asynchronous.Job) Mocker.of(AsynchronousJob.class)
                 .whenNoArguments()
                     .expectMethod('getReference').called(1).returns('MOCKED')
-                    .expectMethod('getStatus').called(1).returns(Asynchronous.Status.CANCELLED);
+                    .expectMethod('getStatus').called(1).returns(Asynchronous.Status.CANCELLED)
+                .mock();
 
-        Asynchronous.Job job = (Asynchronous.Job) jobMock.getMockedObject();
-
-        Mocker asyncMock = Mocker.of(Asynchronous.class);
-        asyncMock
+        return (Asynchronous) Mocker.of(Asynchronous.class)
                 .whenArguments(
                         AsynchronousMockingTests.class,
                         null,
@@ -47,9 +44,7 @@ public with sharing class AsynchronousMockingTests {
                 )
                     .expectMethod('apiCreateJob').returns(job)
                 .whenArgument(new List<Asynchronous.Job> { job })
-                    .expectMethod('apiQueueJobs').called(1);
-
-
-        return (Asynchronous) asyncMock.getMockedObject();
+                    .expectMethod('apiQueueJobs').called(1)
+                .mock();
     }
 }

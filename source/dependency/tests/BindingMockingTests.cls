@@ -65,6 +65,6 @@ public with sharing class BindingMockingTests {
                 .expectMethod('apiIsBound').called(1).returns(false)
                 .expectMethod('apiInject').called(1).throws(new Dependency.APIException('Binding for BindingTestHelper.AbstractTest for action NotTest is not defined'));
 
-        return (Dependency) mocked.getMockedObject();
+        return (Dependency) mocked.mock();
     }
 }
