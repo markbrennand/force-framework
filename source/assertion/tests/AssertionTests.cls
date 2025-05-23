@@ -42,4 +42,13 @@ public with sharing class AssertionTests {
             Assert.isTrue(ae.getMessage().contains('false'));
         }
     }
+
+    @IsTest
+    private static void testFail() {
+        try {
+            Assertion.fail('Should fail');
+        } catch(Assertion.AssertionException ae) {
+            Assert.isTrue(ae.getMessage().contains('Should fail'));
+        }
+    }
 }

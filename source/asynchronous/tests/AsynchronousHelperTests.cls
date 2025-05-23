@@ -28,7 +28,7 @@ public with sharing class AsynchronousHelperTests {
         AsynchronousHelper.recordException(asyncObject, exc);
 
         // Confirm the mocked methods were called correctly.
-        Mock.validate(mockDAO);
+        Mocker.validate();
     }
 
     @IsTest
@@ -52,7 +52,7 @@ public with sharing class AsynchronousHelperTests {
         AsynchronousHelper.recordInternalException(asyncObject, exc);
 
         // Confirm the mocked methods were called correctly.
-        Mock.validate(mockDAO);
+        Mocker.validate();
     }
 
     @IsTest
@@ -75,37 +75,46 @@ public with sharing class AsynchronousHelperTests {
     }
 
     private static AsynchronousDAO mockForRecordException(AsynchronousJob__c asyncObject, Exception exc) {
-        AsynchronousDAO mockDAO = (AsynchronousDAO) Mock.stub(AsynchronousDAO.class);
+        Mocker mocked = Mocker.of(AsynchronousDAO.class);
 
         // The error should be persisted once.
-        Mock.stubMethod(mockDAO, 'apiPersistException')
-                .withArguments(new List<Object> {
-                        new AsynchronousJobException__c(
-                                AsynchronousJob__c = asyncObject.Id,
-                                RetryNumber__c = asyncObject.RetryNumber__c,
-                                StatusOnError__c = Asynchronous.Status.RUNNING.name(),
-                                ExceptionType__c = exc.getTypeName(),
-                                ExceptionMessage__c = exc.getMessage(),
-                                ExceptionStackTrace__c = exc.getStackTraceString()
-                        )
-                })
-                .expected(1);
+        mocked
+                .whenArgument(new AsynchronousJobException__c(
+                        AsynchronousJob__c = asyncObject.Id,
+                        RetryNumber__c = asyncObject.RetryNumber__c,
+                        StatusOnError__c = Asynchronous.Status.RUNNING.name(),
+                        ExceptionType__c = exc.getTypeName(),
+                        ExceptionMessage__c = exc.getMessage(),
+                        ExceptionStackTrace__c = exc.getStackTraceString()
 
-        return mockDao;
+                ))
+                    .expectMethod('apiPersistException').called(1);
+
+        return (AsynchronousDAO) mocked.getMockedObject();
     }
 
     private static AsynchronousDAO mockForInternalFailure(AsynchronousJob__c asyncObject, Exception exc) {
-        // The Exception should be recorded.
-        AsynchronousDAO mockDAO = mockForRecordException(asyncObject, exc);
+        Mocker mocked = Mocker.of(AsynchronousDAO.class);
 
-        // And the status of the Asynchronous object set to FAILED.
-        AsynchronousJob__c expectedAsyncObject = asyncObject.clone(true);
-        expectedAsyncObject.Status__c = Asynchronous.Status.FAILED.name();
+        mocked
+                // The error should be persisted once.
+                .whenArgument(new AsynchronousJobException__c(
+                        AsynchronousJob__c = asyncObject.Id,
+                        RetryNumber__c = asyncObject.RetryNumber__c,
+                        StatusOnError__c = Asynchronous.Status.RUNNING.name(),
+                        ExceptionType__c = exc.getTypeName(),
+                        ExceptionMessage__c = exc.getMessage(),
+                        ExceptionStackTrace__c = exc.getStackTraceString()
 
-        Mock.stubMethod(mockDAO, 'apiPersistObjects')
-                .withArguments(new List<Object> { new List<AsynchronousJob__c> { expectedAsyncObject } })
-                .expected(1);
+                ))
+                    .expectMethod('apiPersistException').called(1)
 
-        return mockDAO;
+                // And the status of the Asynchronous object set to FAILED.
+                .whenArgument(new List<AsynchronousJob__c> {
+                        new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.FAILED.name())
+                })
+                    .expectMethod('apiPersistObjects').called(1);
+
+        return (AsynchronousDAO) mocked.getMockedObject();
     }
 }

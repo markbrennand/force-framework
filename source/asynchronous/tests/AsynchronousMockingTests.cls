@@ -9,8 +9,7 @@ public with sharing class AsynchronousMockingTests {
 
     @IsTest
     private static void testMockedAPI() {
-        Asynchronous mockAsynchronous = createMock();
-        Asynchronous.INSTANCE = mockAsynchronous;
+        Asynchronous.INSTANCE = createMock();
 
         Asynchronous.Job job = Asynchronous.createJob(
                 AsynchronousMockingTests.class,
@@ -23,33 +22,34 @@ public with sharing class AsynchronousMockingTests {
         Assert.areEqual(Asynchronous.Status.CANCELLED, job.getStatus());
         Assert.areEqual('MOCKED', job.getReference());
 
-        Mock.stubMethod(mockAsynchronous, 'apiQueueJobs')
-                .withArguments(new List<Object>{ new List<Asynchronous.Job> { job } })
-                .expected(1);
-
         Asynchronous.queueJobs(new List<Asynchronous.Job> { job });
 
-        Mock.validate(mockAsynchronous);
+        Mocker.validate();
     }
 
     private static Asynchronous createMock() {
-        AsynchronousJob jobMock = (AsynchronousJob) Mock.stub(AsynchronousJob.class);
-        Mock.stubMethod(jobMock, 'getReference').returns('MOCKED');
-        Mock.stubMethod(jobMock, 'getStatus').returns(Asynchronous.Status.CANCELLED);
+        Mocker jobMock = Mocker.of(AsynchronousJob.class);
+        jobMock
+                .whenNoArguments()
+                    .expectMethod('getReference').called(1).returns('MOCKED')
+                    .expectMethod('getStatus').called(1).returns(Asynchronous.Status.CANCELLED);
 
-        Asynchronous mocked = (Asynchronous) Mock.stub(Asynchronous.class);
+        Asynchronous.Job job = (Asynchronous.Job) jobMock.getMockedObject();
 
-        Mock.stubMethod(mocked, 'apiCreateJob')
-                .withArguments(new List<Object>{
+        Mocker asyncMock = Mocker.of(Asynchronous.class);
+        asyncMock
+                .whenArguments(
                         AsynchronousMockingTests.class,
                         null,
                         1,
                         1000,
                         new Map<String, String>()
-                })
-                .expected(1)
-                .returns(jobMock);
+                )
+                    .expectMethod('apiCreateJob').returns(job)
+                .whenArgument(new List<Asynchronous.Job> { job })
+                    .expectMethod('apiQueueJobs').called(1);
 
-        return mocked;
+
+        return (Asynchronous) asyncMock.getMockedObject();
     }
 }

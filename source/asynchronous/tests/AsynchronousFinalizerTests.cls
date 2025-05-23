@@ -21,12 +21,9 @@ public with sharing class AsynchronousFinalizerTests {
         asyncObject.Runnable__c = TestRunnable.class.getName();
         asyncObject.ScheduledRunTime__c = Datetime.now();
 
-        AsynchronousDAO mockDAO = mockForSuccess(asyncObject, true, false);
-        AsynchronousDAO.INSTANCE = mockDao;
-
+        AsynchronousDAO.INSTANCE = mockForSuccess(asyncObject, true, false);
         AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
-
-        Mock.validate(mockDAO);
+        Mocker.validate();
 
         // The second test is for when there are no more jobs to run.
         // The AsynchronousJob__c object should be kept.
@@ -39,12 +36,9 @@ public with sharing class AsynchronousFinalizerTests {
         asyncObject.Runnable__c = TestRunnable.class.getName();
         asyncObject.ScheduledRunTime__c = Datetime.now();
 
-        mockDAO = mockForSuccess(asyncObject, false, false);
-        AsynchronousDAO.INSTANCE = mockDao;
-
+        AsynchronousDAO.INSTANCE = mockForSuccess(asyncObject, false, false);
         AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
-
-        Mock.validate(mockDAO);
+        Mocker.validate();
 
         // The third test is for when there are no more jobs to run.
         // The AsynchronousJob__c object should be kept.
@@ -57,12 +51,9 @@ public with sharing class AsynchronousFinalizerTests {
         asyncObject.Runnable__c = TestRunnable.class.getName();
         asyncObject.ScheduledRunTime__c = Datetime.now();
 
-        mockDAO = mockForSuccess(asyncObject, false, true);
-        AsynchronousDAO.INSTANCE = mockDao;
-
+        AsynchronousDAO.INSTANCE = mockForSuccess(asyncObject, false, true);
         AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
-
-        Mock.validate(mockDAO);
+        Mocker.validate();
     }
 
     @IsTest
@@ -90,7 +81,7 @@ public with sharing class AsynchronousFinalizerTests {
         AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
 
         // Confirm the mocked methods were called correctly.
-        Mock.validate(mockDAO);
+        Mocker.validate();
 
         // The second test is for when there are no more jobs to run.
         // The AsynchronousJob__c object should be kept.
@@ -114,7 +105,7 @@ public with sharing class AsynchronousFinalizerTests {
         AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
 
         // Confirm the mocked methods were called correctly.
-        Mock.validate(mockDAO);
+        Mocker.validate();
 
         // The third test is for when there are no more jobs to run.
         // The AsynchronousJob__c object should not be kept.
@@ -131,14 +122,13 @@ public with sharing class AsynchronousFinalizerTests {
         exc = new Asynchronous.APIException('Test');
 
         // Add the mocking.
-        mockDAO = mockForFailure(asyncObject, Asynchronous.Status.FAILED, exc, true, false);
-        AsynchronousDAO.INSTANCE = mockDao;
+        AsynchronousDAO.INSTANCE = mockForFailure(asyncObject, Asynchronous.Status.FAILED, exc, true, false);
 
         // Perform the test.
         AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
 
         // Confirm the mocked methods were called correctly.
-        Mock.validate(mockDAO);
+        Mocker.validate();
     }
 
     @IsTest
@@ -158,14 +148,13 @@ public with sharing class AsynchronousFinalizerTests {
         Exception exc = new Asynchronous.APIException('Test');
 
         // Add the mocking.
-        AsynchronousDAO mockDAO = mockForFailure(asyncObject, Asynchronous.Status.QUEUED, exc, false, true);
-        AsynchronousDAO.INSTANCE = mockDao;
+        AsynchronousDAO.INSTANCE = mockForFailure(asyncObject, Asynchronous.Status.QUEUED, exc, false, true);
 
         // Perform the test.
         AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
 
         // Confirm the mocked methods were called correctly.
-        Mock.validate(mockDAO);
+        Mocker.validate();
     }
 
     @IsTest
@@ -185,14 +174,13 @@ public with sharing class AsynchronousFinalizerTests {
         Exception exc = new Asynchronous.APIException('Test');
 
         // Add the mocking.
-        AsynchronousDAO mockDAO = mockForFailure(asyncObject, Asynchronous.Status.CANCELLED, exc, false, true);
-        AsynchronousDAO.INSTANCE = mockDao;
+        AsynchronousDAO.INSTANCE = mockForFailure(asyncObject, Asynchronous.Status.CANCELLED, exc, false, true);
 
         // Perform the test.
         AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
 
         // Confirm the mocked methods were called correctly.
-        Mock.validate(mockDAO);
+        Mocker.validate();
     }
 
     @IsTest
@@ -209,48 +197,39 @@ public with sharing class AsynchronousFinalizerTests {
         asyncObject.ScheduledRunTime__c = Datetime.now();
 
         // Setup the mocking.
-        AsynchronousDAO mockDAO = (AsynchronousDAO) Mock.stub(AsynchronousDAO.class);
-        AsynchronousDAO.INSTANCE = mockDAO;
+        Mocker mocked = Mocker.of(AsynchronousDAO.class);
 
-        // Finalizer must get the job once.
-        Mock.stubMethod(mockDAO, 'apiGetObject')
-                .withArguments(new List<Object> { asyncObject.Id })
-                .expected(1)
-                .returns(asyncObject);
+        mocked
+                // Finalizer must get the job once.
+                .whenArgument(asyncObject.Id)
+                    .expectMethod('apiGetObject').called(1).returns(asyncObject)
 
-        // And the error must be persisted.
-        Mock.stubMethod(mockDAO, 'apiPersistException')
-                .withArguments(new List<Object> {
-                        new AsynchronousJobException__c(
-                                AsynchronousJob__c = asyncObject.Id,
-                                ExceptionType__c = Asynchronous.APIException.class.getName(),
-                                RetryNumber__c = asyncObject.RetryNumber__c,
-                                StatusOnError__c = asyncObject.Status__c,
-                                ExceptionMessage__c = 'onSuccess failed'
-                        )
-                })
-                .expected(1);
+                // And the error must be persisted.
+                .whenArgument(new AsynchronousJobException__c(
+                        AsynchronousJob__c = asyncObject.Id,
+                        RetryNumber__c = asyncObject.RetryNumber__c,
+                        StatusOnError__c = asyncObject.Status__c,
+                        ExceptionType__c = Asynchronous.APIException.class.getName(),
+                        ExceptionMessage__c = 'onSuccess failed'
+                ))
+                    .expectMethod('apiPersistException').called(1)
 
-        // The job status will be changed to FAILED.
-        AsynchronousJob__c persistedObject = AsyncObject.clone(true);
-        persistedObject.Status__c = Asynchronous.Status.FAILED.name();
+                // The job status will be changed to FAILED.
+                .whenArgument(new List<AsynchronousJob__c> { new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.FAILED.name()) } )
+                    .expectMethod('apiPersistObjects').called(1)
 
-        Mock.stubMethod(mockDAO, 'apiPersistObjects')
-                .withArguments(new List<Object> { new List<AsynchronousJob__c> { persistedObject } })
-                .expected(1);
+                // The Finalizer should then check if there are any jobs left to run. In this case, return 0 as
+                // to make it think there are no more jobs to run.
+                .whenArgument(false)
+                    .expectMethod('apiCountScheduledObjects').called(1).returns(0);
 
-        // The Finalizer should then check if there are any jobs left to run. In this case, return 0 as
-        // to make it think there are no more jobs to run.
-        Mock.stubMethod(mockDAO, 'apiCountScheduledObjects')
-                .withArguments(new List<Object>{ false })
-                .expected(1)
-                .returns(0);
+        AsynchronousDAO.INSTANCE = (AsynchronousDAO) mocked.getMockedObject();
 
         // Perform the test.
         AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
 
         // Confirm the mocked methods were called correctly.
-        Mock.validate(mockDAO);
+        Mocker.validate();
     }
 
     @IsTest
@@ -270,62 +249,50 @@ public with sharing class AsynchronousFinalizerTests {
         Asynchronous.APIException exc = new Asynchronous.APIException('Test');
 
         // Setup the mocking.
-        AsynchronousDAO mockDAO = (AsynchronousDAO) Mock.stub(AsynchronousDAO.class);
-        AsynchronousDAO.INSTANCE = mockDAO;
+        Mocker mocked = Mocker.of(AsynchronousDAO.class);
 
-        // Finalizer must get the job once.
-        Mock.stubMethod(mockDAO, 'apiGetObject')
-                .withArguments(new List<Object> { asyncObject.Id })
-                .expected(1)
-                .returns(asyncObject);
+        mocked
+                // Finalizer must get the job once.
+                .whenArgument(asyncObject.Id)
+                    .expectMethod('apiGetObject').called(1).returns(asyncObject)
 
-        // The error from the job must be persisted.
-        Mock.stubMethod(mockDAO, 'apiPersistException')
-                .withArguments(new List<Object> {
-                        new AsynchronousJobException__c(
-                                AsynchronousJob__c = asyncObject.Id,
-                                ExceptionType__c = exc.getTypeName(),
-                                RetryNumber__c = asyncObject.RetryNumber__c,
-                                StatusOnError__c = asyncObject.Status__c,
-                                ExceptionMessage__c = exc.getMessage(),
-                                ExceptionStackTrace__c = exc.getStackTraceString()
-                        )
-                })
-                .expected(1);
+                // And the error must be persisted.
+                .whenArgument(new AsynchronousJobException__c(
+                        AsynchronousJob__c = asyncObject.Id,
+                        RetryNumber__c = asyncObject.RetryNumber__c,
+                        StatusOnError__c = asyncObject.Status__c,
+                        ExceptionType__c = exc.getTypeName(),
+                        ExceptionMessage__c = exc.getMessage(),
+                        ExceptionStackTrace__c = exc.getStackTraceString()
+                ))
+                    .expectMethod('apiPersistException').called(1)
 
-        // The error from the onFailure method must be persisted.
-        Mock.stubMethod(mockDAO, 'apiPersistException')
-                .withArguments(new List<Object> {
-                        new AsynchronousJobException__c(
-                                AsynchronousJob__c = asyncObject.Id,
-                                ExceptionType__c = Asynchronous.APIException.class.getName(),
-                                RetryNumber__c = asyncObject.RetryNumber__c,
-                                StatusOnError__c = asyncObject.Status__c,
-                                ExceptionMessage__c = 'onFailure failed'
-                        )
-                })
-                .expected(1);
+                // The error from the onFailure method must be persisted.
+                .whenArgument(new AsynchronousJobException__c(
+                        AsynchronousJob__c = asyncObject.Id,
+                        ExceptionType__c = Asynchronous.APIException.class.getName(),
+                        RetryNumber__c = asyncObject.RetryNumber__c,
+                        StatusOnError__c = asyncObject.Status__c,
+                        ExceptionMessage__c = 'onFailure failed'
+                ))
+                    .expectMethod('apiPersistException').called(1)
 
-        // The job status will be changed to FAILED.
-        AsynchronousJob__c persistedObject = AsyncObject.clone(true);
-        persistedObject.Status__c = Asynchronous.Status.FAILED.name();
+                // The job status will be changed to FAILED.
+                .whenArgument(new List<AsynchronousJob__c> { new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.FAILED.name()) } )
+                    .expectMethod('apiPersistObjects').called(1)
 
-        Mock.stubMethod(mockDAO, 'apiPersistObjects')
-                .withArguments(new List<Object> { new List<AsynchronousJob__c> { persistedObject } })
-                .expected(1);
+                // The Finalizer should then check if there are any jobs left to run. In this case, return 0 as
+                // to make it think there are no more jobs to run.
+                .whenArgument(false)
+                    .expectMethod('apiCountScheduledObjects').called(1).returns(0);
 
-        // The Finalizer should then check if there are any jobs left to run. In this case, return 0 as
-        // to make it think there are no more jobs to run.
-        Mock.stubMethod(mockDAO, 'apiCountScheduledObjects')
-                .withArguments(new List<Object>{ false })
-                .expected(1)
-                .returns(0);
+        AsynchronousDAO.INSTANCE = (AsynchronousDAO) mocked.getMockedObject();
 
         // Perform the test.
         AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
 
         // Confirm the mocked methods were called correctly.
-        Mock.validate(mockDAO);
+        Mocker.validate();
     }
 
     @IsTest
@@ -342,51 +309,44 @@ public with sharing class AsynchronousFinalizerTests {
         asyncObject.ScheduledRunTime__c = Datetime.now();
 
         // Setup the mocking.
-        AsynchronousDAO mockDAO = (AsynchronousDAO) Mock.stub(AsynchronousDAO.class);
-        AsynchronousDAO.INSTANCE = mockDAO;
+        Mocker mocked = Mocker.of(AsynchronousDAO.class);
 
-        // Finalizer must get the job once.
-        Mock.stubMethod(mockDAO, 'apiGetObject')
-                .withArguments(new List<Object> { asyncObject.Id })
-                .expected(1)
-                .returns(asyncObject);
+        mocked
+                // Finalizer must get the job once.
+                .whenArgument(asyncObject.Id)
+                    .expectMethod('apiGetObject').called(1).returns(asyncObject)
 
-        // The status must be set to SUCCEEDED initially..
-        AsynchronousJob__c succeededAsyncObject = asyncObject.clone(true);
-        succeededAsyncObject.Status__c = Asynchronous.Status.SUCCEEDED.name();
+                // The status must be set to SUCCEEDED initially..
+                .whenArgument(new List<AsynchronousJob__c> {
+                        new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.SUCCEEDED.name())
+                })
+                    .expectMethod('apiPersistObjects').called(1)
 
-        Mock.stubMethod(mockDAO, 'apiPersistObjects')
-                .withArguments(new List<Object> { new List <AsynchronousJob__c> { succeededAsyncObject } })
-                .expected(1);
+                // And when the count exception occurs set to FAILED.
+                .whenArgument(new List<AsynchronousJob__c> {
+                        new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.FAILED.name())
+                })
+                .expectMethod('apiPersistObjects').called(1)
 
-        // And when the count exception occurs set to FAILED.
-        AsynchronousJob__c failureAsyncObject = asyncObject.clone(true);
-        failureAsyncObject.Status__c = Asynchronous.Status.FAILED.name();
+                // Force an Exception when counting the number of scheduled jobs.
+                .whenArgument(false)
+                    .expectMethod('apiCountScheduledObjects').called(1).throws(new Asynchronous.APIException('Test'))
 
-        Mock.stubMethod(mockDAO, 'apiPersistObjects')
-                .withArguments(new List<Object> { new List <AsynchronousJob__c> { failureAsyncObject } })
-                .expected(1);
+                // The Exception should be persisted.
+                .whenArgument(new AsynchronousJobException__c(
+                    AsynchronousJob__c = asyncObject.Id,
+                    ExceptionType__c = Asynchronous.APIException.class.getName(),
+                    ExceptionMessage__c = 'Test'
+                ))
+                    .expectMethod('apiPersistException').called(1);
 
-        // Force an Exception when counting the number of scheduled jobs.
-        Mock.stubMethod(mockDAO, 'apiCountScheduledObjects')
-                .withArguments(new List<Object> { false })
-                .throws(new Asynchronous.APIException('Test'));
-
-        // The Exception should be persisted.
-        Mock.stubMethod(mockDAO, 'apiPersistException')
-                .withArguments(new List<Object> {
-                        new AsynchronousJobException__c(
-                                AsynchronousJob__c = asyncObject.Id,
-                                ExceptionType__c = Asynchronous.APIException.class.getName(),
-                                ExceptionMessage__c = 'Test'
-                        )
-                });
+        AsynchronousDAO.INSTANCE = (AsynchronousDAO) mocked.getMockedObject();
 
         // Perform the test.
         AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
 
         // Confirm the mocked methods were called correctly.
-        Mock.validate(mockDAO);
+        Mocker.validate();
     }
 
     private static AsynchronousDAO mockForSuccess(
@@ -394,71 +354,48 @@ public with sharing class AsynchronousFinalizerTests {
             Boolean withMoreJobs,
             Boolean jobToBeDeleted
     ) {
-        AsynchronousDAO mockDAO = (AsynchronousDAO) Mock.stub(AsynchronousDAO.class);
+        Mocker mocked = Mocker.of(AsynchronousDAO.class);
 
-        // Finalizer must get the job once.
-        Mock.stubMethod(mockDAO, 'apiGetObject')
-                .withArguments(new List<Object> { asyncObject.Id })
-                .expected(1)
-                .returns(asyncObject);
+        mocked
+                .whenArgument(asyncObject.Id)
+                    .expectMethod('apiGetObject').called(1).returns(asyncObject);
 
         if (jobToBeDeleted) {
-            // The Runnable's onFailure method will have asked for the job to be deleted.
-            Mock.stubMethod(mockDAO, 'apiRemoveObjects')
-                    .withArguments(new List<Object>{new List<AsynchronousJob__c>{ asyncObject } })
-                    .expected(1);
+            mocked
+                    // The Runnable's onFailure method will have asked for the job to be deleted.
+                    .whenArgument(new List<AsynchronousJob__c>{ asyncObject })
+                        .expectMethod('apiRemoveObjects').called(1);
         } else {
-            // After a successful call to Runnable.onSuccess, the job should be marked as SUCCEEDED.
-            AsynchronousJob__c persistedAsyncObject = asyncObject.clone(true);
-            persistedAsyncObject.Status__c = Asynchronous.Status.SUCCEEDED.name();
-
-            Mock.stubMethod(mockDAO, 'apiPersistObjects')
-                    .withArguments(new List<Object> { new List<AsynchronousJob__c> { persistedAsyncObject } })
-                    .expected(1);
+            mocked
+                    // After a successful call to Runnable.onSuccess, the job should be marked as SUCCEEDED.
+                    .whenArgument(new List<AsynchronousJob__c> { new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.SUCCEEDED.name()) })
+                        .expectMethod('apiPersistObjects').called(1);
         }
 
         if (withMoreJobs) {
-            // The Finalizer should then check if there are any jobs left to run. In this case, return 2 as
-            // the AsyncScheduler.getMaximumActive method will also call the same DAO method.
-            Mock.stubMethod(mockDAO, 'apiCountScheduledObjects')
-                    .withArguments(new List<Object>{ false })
-                    .expected(2)
-                    .returns(1);
+            mocked
+                    // The Finalizer should then check if there are any jobs left to run. In this case, return 2 as
+                    // the AsyncScheduler.getMaximumActive method will also call the same DAO method.
+                    .whenArgument(false)
+                        .expectMethod('apiCountScheduledObjects').called(2).returns(1)
 
-            // The AsynchronousScheduler.getMaximumActive method will call the DAO method once.
-            Mock.stubMethod(mockDAO, 'apiCountScheduledObjects')
-                    .withArguments(new List<Object>{ true })
-                    .expected(1)
-                    .returns(1);
+                    // The AsynchronousScheduler.getMaximumActive method will call the DAO method once.
+                    .whenArgument(true)
+                        .expectMethod('apiCountScheduledObjects').called(1).returns(1);
 
-            // The Finalizer will then try to start the scheduler.
-            AsynchronousJob__c schedulerAsyncObject = new AsynchronousJob__c(
-                    Id = null,
-                    OwnerId = UserInfo.getUserId(),
-                    Status__c = Asynchronous.Status.PENDING.name(),
-                    Reference__c = null,
-                    Runnable__c = AsynchronousScheduler.QueueNext.class.getName(),
-                    MaximumRetries__c = 0,
-                    RetryInterval__c = 0,
-                    RetryNumber__c = 0
-            );
-
-            // The call to this method will make the Asynchronous Scheduler think it has jobs to run.
-            Mock.stubMethod(mockDAO, 'apiCountActiveObjects')
-                    .withArguments(new List<Object>{ schedulerAsyncObject })
-                    .expected(1)
-                    .returns(1);
-
+            mocked
+                    // The call to this method will make the Asynchronous Scheduler think it has jobs to run.
+                    .whenArgument(new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName(), Status__c = Asynchronous.Status.PENDING.name()))
+                        .expectMethod('apiCountActiveObjects').called(1).returns(1);
         } else {
-            // The Finalizer should then check if there are any jobs left to run. In this case, return 0 as
-            // to make it think there are no more jobs to run.
-            Mock.stubMethod(mockDAO, 'apiCountScheduledObjects')
-                    .withArguments(new List<Object>{ false })
-                    .expected(1)
-                    .returns(0);
+            mocked
+                    // The Finalizer should then check if there are any jobs left to run. In this case, return 0 as
+                    // to make it think there are no more jobs to run.
+                    .whenArgument(false)
+                        .expectMethod('apiCountScheduledObjects').called(1).returns(0);
         }
 
-        return mockDAO;
+        return (AsynchronousDAO) mocked.getMockedObject();
     }
 
     private static AsynchronousDAO mockForFailure(
@@ -466,98 +403,74 @@ public with sharing class AsynchronousFinalizerTests {
             Asynchronous.Status expectedStatus,
             Exception exc,
             Boolean jobToBeDeleted,
-            Boolean moreTestsToRun
+            Boolean moreJobsToRun
     ) {
-        AsynchronousDAO mockDAO = (AsynchronousDAO) Mock.stub(AsynchronousDAO.class);
+        Mocker mocked = Mocker.of(AsynchronousDAO.class);
 
-        // Finalizer must get the job once.
-        Mock.stubMethod(mockDAO, 'apiGetObject')
-                .withArguments(new List<Object> { asyncObject.Id })
-                .expected(1)
-                .returns(asyncObject);
+        mocked
+                // Finalizer must get the job once.
+                .whenArgument(asyncObject.Id)
+                    .expectMethod('apiGetObject').called(1).returns(asyncObject)
 
-        // An Exception should be recorded.
-        Mock.stubMethod(mockDAO, 'apiPersistException')
-                .withArguments(new List<Object> {
-                        new AsynchronousJobException__c(
-                                StatusOnError__c = asyncObject.Status__c,
-                                RetryNumber__c = asyncObject.RetryNumber__c,
-                                ExceptionType__c = exc.getTypeName(),
-                                ExceptionMessage__c = exc.getMessage(),
-                                ExceptionStackTrace__c = exc.getStackTraceString()
-                        )
-                })
-                .expected(1);
+                // An Exception should be recorded.
+                .whenArgument(new AsynchronousJobException__c(
+                        AsynchronousJob__c = asyncObject.Id,
+                        StatusOnError__c = asyncObject.Status__c,
+                        RetryNumber__c = asyncObject.RetryNumber__c,
+                        ExceptionType__c = exc.getTypeName(),
+                        ExceptionMessage__c = exc.getMessage(),
+                        ExceptionStackTrace__c = exc.getStackTraceString()
+                ))
+                    .expectMethod('apiPersistException').called(1);
 
         if (expectedStatus == Asynchronous.Status.QUEUED) {
-            // The retries have not been exhausted so the job should be queued.
-            AsynchronousJob__c queuedAsyncObject = asyncObject.clone(true);
-            queuedAsyncObject.Status__c = expectedStatus.name();
-            queuedAsyncObject.RetryNumber__c++;
-
-            Mock.stubMethod(mockDAO, 'apiPersistObjects')
-                    .withArguments(new List<Object> { new List<AsynchronousJob__c> { queuedAsyncObject } })
-                    .expected(1);
+            mocked
+                    // The retries have not been exhausted so the job should be queued.
+                    .whenArgument(new List<AsynchronousJob__c> {
+                            new AsynchronousJob__c(Id = asyncObject.Id, Status__c = expectedStatus.name(), RetryNumber__c = asyncObject.RetryNumber__c+1)
+                    })
+                        .expectMethod('apiPersistObjects').called(1);
 
         } else if (jobToBeDeleted) {
-                // The Runnable's onFailure method will have asked for the job to be deleted.
-                Mock.stubMethod(mockDAO, 'apiRemoveObjects')
-                        .withArguments(new List<Object>{new List<AsynchronousJob__c>{ asyncObject } })
-                        .expected(1);
-        } else {
-            // After a successful call to Runnable.onFailed, the job should be marked as FAILED.
-            AsynchronousJob__c persistedAsyncObject = asyncObject.clone(true);
-            persistedAsyncObject.Status__c = expectedStatus.name();
-
-            Mock.stubMethod(mockDAO, 'apiPersistObjects')
-                    .withArguments(new List<Object> { new List<AsynchronousJob__c> { persistedAsyncObject } })
-                    .expected(1);
-        }
-
-        if (moreTestsToRun) {
-            // The Finalizer should then check if there are any jobs left to run. In this case, return 2 as
-            // the AsyncScheduler.getMaximumActive method will also call the same DAO method.
-            Mock.stubMethod(mockDAO, 'apiCountScheduledObjects')
-                    .withArguments(new List<Object>{ false })
-                    .expected(2)
-                    .returns(1);
-
-            // The AsynchronousScheduler.getMaximumActive method will call the DAO method once.
-            Mock.stubMethod(mockDAO, 'apiCountScheduledObjects')
-                    .withArguments(new List<Object>{ true })
-                    .expected(1)
-                    .returns(1);
-
-            // The Finalizer will then try to start the scheduler.
-            AsynchronousJob__c schedulerAsyncObject = new AsynchronousJob__c(
-                    Id = null,
-                    OwnerId = UserInfo.getUserId(),
-                    Status__c = Asynchronous.Status.PENDING.name(),
-                    Reference__c = null,
-                    Runnable__c = AsynchronousScheduler.QueueNext.class.getName(),
-                    MaximumRetries__c = 0,
-                    RetryInterval__c = 0,
-                    RetryNumber__c = 0
-            );
-
-            // The call to this method will make the Asynchronous Scheduler think it has jobs to run.
-            Mock.stubMethod(mockDAO, 'apiCountActiveObjects')
-                    .withArguments(new List<Object>{ schedulerAsyncObject })
-                    .expected(1)
-                    .returns(1);
-
-        } else {
-            // The Finalizer should then check if there are any jobs left to run. In this case, return 0 as
-            // to make it think there are no more jobs to run.
-            Mock.stubMethod(mockDAO, 'apiCountScheduledObjects')
-                    .withArguments(new List<Object>{
-                            false
+            mocked
+                    // The Runnable's onFailure method will have asked for the job to be deleted.
+                    .whenArgument(new List<AsynchronousJob__c> {
+                            new AsynchronousJob__c(Id = asyncObject.Id)
                     })
-                    .expected(1)
-                    .returns(0);
+                        .expectMethod('apiRemoveObjects').called(1);
+        } else {
+            mocked
+                    // After a successful call to Runnable.onFailed, the job should be marked as FAILED.
+                    .whenArgument(new List<AsynchronousJob__c> {
+                            new AsynchronousJob__c(Id = asyncObject.Id, Status__c = expectedStatus.name())
+                    })
+                        .expectMethod('apiPersistObjects').called(1);
         }
 
-        return mockDAO;
+        if (moreJobsToRun) {
+            mocked
+                    // The Finalizer should then check if there are any jobs left to run. In this case, return 2 as
+                    // the AsyncScheduler.getMaximumActive method will also call the same DAO method.
+                    .whenArgument(false)
+                    .expectMethod('apiCountScheduledObjects').called(2).returns(1)
+
+                    // The AsynchronousScheduler.getMaximumActive method will call the DAO method once.
+                    .whenArgument(true)
+                    .expectMethod('apiCountScheduledObjects').called(1).returns(1);
+
+            mocked
+                    // The call to this method will make the Asynchronous Scheduler think it has jobs to run.
+                    .whenArgument(new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName(), Status__c = Asynchronous.Status.PENDING.name()))
+                    .expectMethod('apiCountActiveObjects').called(1).returns(1);
+        } else {
+            mocked
+                    // The Finalizer should then check if there are any jobs left to run. In this case, return 0 as
+                    // to make it think there are no more jobs to run.
+                    .whenArgument(false)
+                    .expectMethod('apiCountScheduledObjects').called(1).returns(0);
+        }
+
+        return (AsynchronousDAO) mocked.getMockedObject();
     }
 
     public with sharing class TestRunnable extends AsynchronousRunnable {

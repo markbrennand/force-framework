@@ -42,62 +42,29 @@ public with sharing class BindingMockingTests {
             Assert.areEqual('Binding for BindingTestHelper.TestInterface for action Test is not defined', ae.getMessage());
         }
 
-        Mock.validate(mockInjection);
+        Mocker.validate();
     }
 
     private static Dependency createMock() {
-        Dependency mocked = (Dependency) Mock.stub(Dependency.class);
+        Mocker mocked = Mocker.of(Dependency.class);
 
-        Mock.stubMethod(mocked, 'apiIsBound')
-                .withArguments(new List<Object>{ BindingTestHelper.TestInterface.class })
-                .expected(1)
-                .returns(true);
+        mocked
+            .whenArgument(BindingTestHelper.TestInterface.class)
+                .expectMethod('apiIsBound').called(1).returns(  true)
+                .expectMethod('apiInject').called(1).returns(new BindingTestHelper.SingletonTest())
+            .whenArguments(BindingTestHelper.TestInterface.class, 'Test')
+                .expectMethod('apiIsBound').called(1).returns(false)
+                .expectMethod('apiInject').called(1).throws(new Dependency.APIException('Binding for BindingTestHelper.TestInterface for action Test is not defined'))
+            .whenArgument(BindingTestHelper.AbstractTest.class)
+                .expectMethod('apiIsBound').called(1).returns(false)
+                .expectMethod('apiInject').called(1).throws(new Dependency.APIException('Binding for BindingTestHelper.AbstractTest is not defined'))
+            .whenArguments(BindingTestHelper.AbstractTest.class, 'Test')
+                .expectMethod('apiIsBound').called(1).returns(true)
+                .expectMethod('apiInject').called(1).returns(new BindingTestHelper.PrototypeTest())
+            .whenArguments(BindingTestHelper.AbstractTest.class, 'NotTest')
+                .expectMethod('apiIsBound').called(1).returns(false)
+                .expectMethod('apiInject').called(1).throws(new Dependency.APIException('Binding for BindingTestHelper.AbstractTest for action NotTest is not defined'));
 
-        Mock.stubMethod(mocked, 'apiIsBound')
-                .withArguments(new List<Object>{ BindingTestHelper.TestInterface.class, 'Test' })
-                .expected(1)
-                .returns(false);
-
-        Mock.stubMethod(mocked, 'apiIsBound')
-                .withArguments(new List<Object>{ BindingTestHelper.AbstractTest.class })
-                .expected(1)
-                .returns(false);
-
-        Mock.stubMethod(mocked, 'apiIsBound')
-                .withArguments(new List<Object>{ BindingTestHelper.AbstractTest.class, 'Test' })
-                .expected(1)
-                .returns(true);
-
-        Mock.stubMethod(mocked, 'apiIsBound')
-                .withArguments(new List<Object>{ BindingTestHelper.AbstractTest.class, 'NotTest' })
-                .expected(1)
-                .returns(false);
-
-        Mock.stubMethod(mocked, 'apiInject')
-                .withArguments(new List<Object>{ BindingTestHelper.TestInterface.class })
-                .expected(1)
-                .returns(new BindingTestHelper.SingletonTest());
-
-        Mock.stubMethod(mocked, 'apiInject')
-                .withArguments(new List<Object>{ BindingTestHelper.AbstractTest.class })
-                .expected(1)
-                .throws(new Dependency.APIException('Binding for BindingTestHelper.AbstractTest is not defined'));
-
-        Mock.stubMethod(mocked, 'apiInject')
-                .withArguments(new List<Object>{ BindingTestHelper.AbstractTest.class, 'Test' })
-                .expected(1)
-                .returns(new BindingTestHelper.PrototypeTest());
-
-        Mock.stubMethod(mocked, 'apiInject')
-                .withArguments(new List<Object>{ BindingTestHelper.AbstractTest.class, 'NotTest' })
-                .expected(1)
-                .throws(new Dependency.APIException('Binding for BindingTestHelper.AbstractTest for action NotTest is not defined'));
-
-        Mock.stubMethod(mocked, 'apiInject')
-                .withArguments(new List<Object>{ BindingTestHelper.TestInterface.class, 'Test' })
-                .expected(1)
-                .throws(new Dependency.APIException('Binding for BindingTestHelper.TestInterface for action Test is not defined'));
-
-        return mocked;
+        return (Dependency) mocked.getMockedObject();
     }
 }

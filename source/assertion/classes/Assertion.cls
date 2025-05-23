@@ -19,13 +19,13 @@ public with sharing class Assertion {
      */
     public static void isNotNull(final Object value, final String errorMessage) {
         if (value == null) {
-            throw new AssertionException(String.join(
+            throw new AssertionException(buildMessage(String.join(
                     new List<String> {
-                            'Assertion Failed: Non null value expected: ',
+                            'Non null value expected: ',
                             errorMessage
                     },
                     ''
-            ));
+            )));
         }
     }
 
@@ -38,13 +38,7 @@ public with sharing class Assertion {
      */
     public static void isTrue(final Boolean value, final String errorMessage) {
         if (value != true) {
-            throw new AssertionException(String.join(
-                    new List<String> {
-                            'Assertion Failed: ',
-                            errorMessage
-                    },
-                    ''
-            ));
+            throw new AssertionException(buildMessage(errorMessage));
         }
     }
 
@@ -55,9 +49,9 @@ public with sharing class Assertion {
      */
     public static void areEqual(final Object expected, final Object actual, final String errorMessage) {
         if (expected != actual  ) {
-            throw new AssertionException(String.join(
+            throw new AssertionException(buildMessage(String.join(
                     new List<String> {
-                            'Assertion Failed: test: ',
+                            'test: ',
                             asString(errorMessage),
                             ': Expected: ',
                             asString(expected),
@@ -65,13 +59,25 @@ public with sharing class Assertion {
                             String.valueOf(actual)
                     },
                     ''
-            ));
+            )));
         }
+    }
+
+    /**
+     * @description
+     * Records a failure.
+     */
+    public static void fail(final String errorMessage) {
+        throw new AssertionException(buildMessage(errorMessage));
     }
 
     public with sharing class AssertionException extends Exception {}
 
     private static String asString(Object value) {
         return value == null ? 'null' : String.valueOf(value);
+    }
+
+    private static String buildMessage(final String errorMessage) {
+        return String.join(new List<String> { 'Assertion failed: ', errorMessage }, '');
     }
 }
