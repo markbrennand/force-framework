@@ -34,11 +34,11 @@ global with sharing class TypeHelper {
      * @return The Type for the class. Or an exception if the class doesn't exist.
      */
     public static Type loadType(final String typeName) {
-        Assert.isNotNull(typeName, 'TypeHelper.loadType.typeName');
+        Assertion.isNotNull(typeName, 'argument: TypeHelper.loadType.typeName');
 
         Type type = Type.forName(typeName);
         if (type == null) {
-            throw new TypeException('Type "' + typeName + '" does not exist');
+            throw new TypeException('Class ' + typeName + ' does not exist');
         } else {
             return type;
         }
@@ -64,7 +64,7 @@ global with sharing class TypeHelper {
                 return instance;
             }
         } catch(Exception e) {
-            throw new TypeException('Type "' + type.getName() + '" could not be constructed' ,e);
+            throw new TypeException('Class ' + type.getName() + ' could not be constructed' ,e);
         }
     }
 

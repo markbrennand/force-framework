@@ -18,7 +18,7 @@ public with sharing class TypeHelperTests {
         try {
             Type t = TypeHelper.loadType('TypeHelperTests.NoSuchClass');
         } catch(TypeHelper.TypeException te) {
-            Assert.areEqual('Type "TypeHelperTests.NoSuchClass" does not exist', te.getMessage());
+            Assert.areEqual('Class TypeHelperTests.NoSuchClass does not exist', te.getMessage());
         }
     }
 
@@ -34,21 +34,21 @@ public with sharing class TypeHelperTests {
             TypeHelper.newInstance(Integer.class);
             Assert.fail();
         } catch(TypeHelper.TypeException te) {
-            Assert.areEqual('Type "Integer" could not be constructed', te.getMessage());
+            Assert.areEqual('Class Integer could not be constructed', te.getMessage());
         }
 
         try {
             TypeHelper.newInstance(TestInterface.class);
             Assert.fail();
         } catch(TypeHelper.TypeException te) {
-            Assert.areEqual('Type "TypeHelperTests.TestInterface" could not be constructed', te.getMessage());
+            Assert.areEqual('Class TypeHelperTests.TestInterface could not be constructed', te.getMessage());
         }
 
         try {
             TypeHelper.newInstance(AbstractTestClass.class);
             Assert.fail();
         } catch(TypeHelper.TypeException te) {
-            Assert.areEqual('Type "TypeHelperTests.AbstractTestClass" could not be constructed', te.getMessage());
+            Assert.areEqual('Class TypeHelperTests.AbstractTestClass could not be constructed', te.getMessage());
         }
     }
 
