@@ -24,6 +24,10 @@ public with sharing class ComparisonHelper {
 
     /**
      * @description
+     * Compares two objects for equality.
+     *
+     * A built in List of comparators is used to check. If a match is made by one of the comparators, the objects
+     * are considered equal.
      *
      * @param expected The expect object.
      * @param actual The object to be compared.
@@ -31,26 +35,33 @@ public with sharing class ComparisonHelper {
      * @return True of objects match.
      */
     public static Boolean compare(final Object expected, final Object actual) {
+        return compare(new List<Comparator<Object>>(), expected, actual);
+    }
 
-        for (Comparator<Object> comparator : COMPARATORS) {
+    /**
+     * @description
+     * Compares two objects for equality using additional comparators.
+     *
+     * The built in List of comparators is supplemented with the additional comparators. When checking for equality,
+     * the additional comparators are used before the built ins.
+     *
+     * @param expected The expect object.
+     * @param actual The object to be compared.
+     * @param additionalComparators Additional comparators to use when checking for equality.
+     *
+     * @return True of objects match.
+     */
+    public static Boolean compare(final List<Comparator<Object>> additionalComparators, Object expected, final Object actual) {
+        final List<Comparator<Object>> allComparators = additionalComparators.clone();
+        allComparators.addAll(COMPARATORS);
+
+        for (Comparator<Object> comparator : allComparators) {
             if (comparator.compare(expected, actual) == 0) {
                 return true;
             }
         }
 
         return false;
-    }
-
-    /**
-     * @description
-     * Adds a comparator to the List of comparators run to match the objects.
-     *
-     * The comparator is added as the first entry in the List.
-     *
-     * @param comparator The comparator to add.
-     */
-    public static void addComparator(final Comparator<Object> comparator) {
-        COMPARATORS.add(0, comparator);
     }
 
     /**
@@ -152,7 +163,7 @@ public with sharing class ComparisonHelper {
      * @description
      * Comparator for two SObjects.
      */
-    private with sharing class SObjectComparator implements Comparator<Object> {
+    public with sharing class SObjectComparator implements Comparator<Object> {
 
         public Integer compare(final Object param1, final Object param2) {
             return (param1 instanceof SObject && (!(param1 instanceof List<SObject>) && !(param1 instanceof Set<SObject>)))
@@ -165,7 +176,7 @@ public with sharing class ComparisonHelper {
      * @description
      * Comparator for two collections of SObjects.
      */
-    private with sharing class SObjectCollectionComparator implements Comparator<Object> {
+    public with sharing class SObjectCollectionComparator implements Comparator<Object> {
 
         public Integer compare(final Object param1, final Object param2) {
 

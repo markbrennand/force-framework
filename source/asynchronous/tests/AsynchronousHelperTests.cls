@@ -81,13 +81,12 @@ public with sharing class AsynchronousHelperTests {
 
         AsynchronousHelper.INSTANCE = (AsynchronousHelper) Mocker.of(AsynchronousHelper.class)
                 .whenArguments(asyncObject, new Asynchronous.APIException('Wrapper', exc))
+                    .withComparators(new List<Comparator<Object>> { new ExceptionComparator() })
                     .expectMethod('apiRecordException').called(1)
                     .expectMethod('apiRecordInternalException').called(1)
                 .whenArgument(asyncObject)
                     .expectMethod('apiQueueJob').called(1).returns(true)
                 .mock();
-
-        Mocker.addArgumentComparator(new ExceptionComparator());
 
         AsynchronousHelper.recordException(asyncObject, exc);
         AsynchronousHelper.recordInternalException(asyncObject, exc);

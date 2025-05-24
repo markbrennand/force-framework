@@ -79,14 +79,22 @@ public with sharing class ComparisonHelperTests {
     }
 
     @IsTest
-    private static void testNewComparator() {
+    private static void testAdditionalComparator() {
         Exception exc1 = new DMLException('TEST');
 
         Assert.isFalse(ComparisonHelper.compare(exc1, new Asynchronous.APIException('TEST')));
 
-        ComparisonHelper.addComparator(new ExceptionComparator());
-        Assert.isTrue(ComparisonHelper.compare(exc1, new Asynchronous.APIException('TEST')));
-        Assert.isFalse(ComparisonHelper.compare(exc1, new Asynchronous.APIException('ANOTHER')));
+        Assert.isTrue(ComparisonHelper.compare(
+                new List<Comparator<Object>> { new ExceptionComparator() },
+                exc1,
+                new Asynchronous.APIException('TEST'))
+        );
+
+        Assert.isFalse(ComparisonHelper.compare(
+                new List<Comparator<Object>> { new ExceptionComparator() },
+                exc1,
+                new Asynchronous.APIException('ANOTHER'))
+        );
     }
 
     private with sharing class ExceptionComparator implements Comparator<Object> {

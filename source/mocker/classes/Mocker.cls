@@ -27,10 +27,6 @@ public with sharing virtual class Mocker extends WhenArguments {
         return mocked;
     }
 
-    public static void addArgumentComparator(final Comparator<Object> comparator) {
-        ComparisonHelper.addComparator(comparator);
-    }
-
     public static void validate() {
         for (Object mocked : STUBBED_OBJECTS.keySet()) {
             for (Arguments arguments : STUBBED_OBJECTS.get(mocked)) {
@@ -83,6 +79,7 @@ public with sharing virtual class Mocker extends WhenArguments {
     public with sharing class Arguments extends WhenArguments {
         final List<Object> expectedArguments;
         final List<Method> methods = new List<Method>();
+        List<Comparator<Object>> comparators = new List<Comparator<Object>>();
 
         private Arguments(final Mocker parent, final List<Object> expectedArguments) {
             Assertion.isNotNull(parent, 'argument: Mocker.Arguments.parent');
@@ -96,6 +93,11 @@ public with sharing virtual class Mocker extends WhenArguments {
             } else {
                 STUBBED_OBJECTS.put(parent.mockedObject, new List<Arguments> { this });
             }
+        }
+
+        public Arguments withComparators(final List<Comparator<Object>> comparators) {
+            this.comparators = comparators;
+            return this;
         }
 
         public Method expectMethod(final String methodName) {
@@ -112,7 +114,7 @@ public with sharing virtual class Mocker extends WhenArguments {
             }
 
             for (Integer i = 0; i < expectedArguments.size(); i++) {
-                if (!ComparisonHelper.compare(expectedArguments[i], actualArguments[i])) {
+                if (!ComparisonHelper.compare(comparators, expectedArguments[i], actualArguments[i])) {
                     return false;
                 }
             }
