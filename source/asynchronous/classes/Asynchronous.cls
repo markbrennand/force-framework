@@ -559,11 +559,6 @@ global with sharing virtual class Asynchronous implements API {
         }
     }
 
-    // Set the default implementation of the API. This can be overridden using a Dpendency Binding.
-    static {
-        Dependency.bind(API.class, Asynchronous.Factory.class);
-    }
-
     /**
      * @description
      * Active API instance.
@@ -581,5 +576,10 @@ global with sharing virtual class Asynchronous implements API {
             return INSTANCE;
         }
         private set;
+    }
+
+    // Set the default implementation of the API. This can be overridden using a Dpendency Binding.
+    static {
+        Dependency.bind(API.class, Asynchronous.Factory.class);
     }
 }

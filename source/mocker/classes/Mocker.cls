@@ -27,6 +27,10 @@ public with sharing virtual class Mocker extends WhenArguments {
         return mocked;
     }
 
+    public static void addArgumentComparator(final Comparator<Object> comparator) {
+        ComparisonHelper.addComparator(comparator);
+    }
+
     public static void validate() {
         for (Object mocked : STUBBED_OBJECTS.keySet()) {
             for (Arguments arguments : STUBBED_OBJECTS.get(mocked)) {
@@ -108,22 +112,7 @@ public with sharing virtual class Mocker extends WhenArguments {
             }
 
             for (Integer i = 0; i < expectedArguments.size(); i++) {
-                final Boolean actualIsListSObject = actualArguments[i] instanceof List<SObject>;
-                final Boolean actualIsSObject = actualArguments[i] instanceof SObject;
-
-                if (expectedArguments[i] instanceof List<SObject>) {
-                    if (actualIsListSObject) {
-                        return compareSObjects((List<SObject>) expectedArguments[i], (List<SObject>) actualArguments[i]);
-                    } else {
-                        return false;
-                    }
-                } else if (expectedArguments[i] instanceof SObject) {
-                    if (!actualIsListSObject && actualIsSObject) {
-                        return compareSObjects((SObject) expectedArguments[i], (SObject) actualArguments[i]);
-                    } else {
-                        return false;
-                    }
-                } else if (expectedArguments[i] != actualArguments[i]) {
+                if (!ComparisonHelper.compare(expectedArguments[i], actualArguments[i])) {
                     return false;
                 }
             }
@@ -172,7 +161,7 @@ public with sharing virtual class Mocker extends WhenArguments {
             return arguments.expectMethod(methodName);
         }
 
-        public Boolean isMatch(final String methodName) {
+        private Boolean isMatch(final String methodName) {
             Assertion.isNotNull(methodName, 'argument: Mocker.Method.isMatch.methodName');
 
             return this.methodName == methodName;
@@ -241,34 +230,5 @@ public with sharing virtual class Mocker extends WhenArguments {
         public Object mock(){
             return parent.mockedObject;
         }
-    }
-
-    private static Boolean compareSObjects(final SObject expectedSObject, final SObject actualSObject) {
-        // Fields of actualSObject must match all of those in expectedSObject.
-        // Fields not defined in expectedSObject may be defined in actualSObject.
-        final Map<String, Object> values1 = expectedSObject.getPopulatedFieldsAsMap();
-        final Map<String, Object> values2 = actualSObject.getPopulatedFieldsAsMap();
-
-        for (String field : values1.keySet()) {
-            if (values1.get(field) != values2.get(field)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private static Boolean compareSObjects(final List<SObject> expectedSObjects, final List<SObject> actualSObjects) {
-        if (expectedSObjects.size() != actualSObjects.size()) {
-            return false;
-        }
-
-        for (Integer i = 0; i < expectedSObjects.size(); i++) {
-            if (!compareSObjects(expectedSObjects[i], actualSObjects[i])) {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

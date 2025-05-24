@@ -4,7 +4,7 @@
  *
  * @author Mark Brennand
  */
-public with sharing class AsynchronousDAO implements API {
+public with sharing virtual class AsynchronousDAO implements API {
 
     public interface API {
         AsynchronousJob__c apiGetObject(Id asyncOjectId);
@@ -16,6 +16,8 @@ public with sharing class AsynchronousDAO implements API {
         void apiRemoveObjects(List<AsynchronousJob__c> asyncObject);
         void apiPersistException(AsynchronousJobException__c asyncError);
     }
+
+    protected AsynchronousDAO() {}
 
     public AsynchronousJob__c apiGetObject(Id asyncObjectId) {
         Assertion.isNotNull(asyncObjectId, 'argument: AsynchronousDAO.apiGetObject.asyncObjectId');
@@ -187,6 +189,19 @@ public with sharing class AsynchronousDAO implements API {
 
     /**
      * @description
+     * Creates the default API implementation.
+     *
+     * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
+     * We use the factory to defer the construction by injection to this class, which is able to construct it.
+     */
+    public with sharing class Factory implements TypeHelper.Factory {
+        public Object newInstance() {
+            return new AsynchronousDAO();
+        }
+    }
+
+    /**
+     * @description
      * Class providing check on Binding made to AsynchronousDAO.API.
      */
     public with sharing class BindingCheck implements Dependency.BindingCheck {
@@ -212,11 +227,6 @@ public with sharing class AsynchronousDAO implements API {
         }
     }
 
-    // Set the default implementation of the API. This can be overridden using a Dependency Binding.
-    static {
-        Dependency.bind(API.class, AsynchronousDAO.class);
-    }
-
     /**
      * @description
      * Active API instance.
@@ -234,5 +244,10 @@ public with sharing class AsynchronousDAO implements API {
             return INSTANCE;
         }
         private set;
+    }
+
+    // Set the default implementation of the API. This can be overridden using a Dependency Binding.
+    static {
+        Dependency.bind(API.class, Factory.class);
     }
 }

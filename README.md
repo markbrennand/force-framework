@@ -22,4 +22,10 @@ the job on its creation.
 
 See [Asynchronous](source/asynchronous/README.md)
 
+## Mocking
+A Framework for a new way of mocking is included. Rather than defining the method and arguments expected, as
+is the normal way of mocking. Redundancy was identified in the arguments in those definitions. In the solution in
+this framework, first the arguments are defined and then the methods expecting those arguments are defined.
+
+See [Mocking](source/mocker/README.md)
 

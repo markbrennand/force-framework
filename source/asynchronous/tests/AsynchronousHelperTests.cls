@@ -87,6 +87,8 @@ public with sharing class AsynchronousHelperTests {
                     .expectMethod('apiQueueJob').called(1).returns(true)
                 .mock();
 
+        Mocker.addArgumentComparator(new ExceptionComparator());
+
         AsynchronousHelper.recordException(asyncObject, exc);
         AsynchronousHelper.recordInternalException(asyncObject, exc);
         Assert.isTrue(AsynchronousHelper.queueJob(asyncObject));
@@ -128,5 +130,17 @@ public with sharing class AsynchronousHelperTests {
                 })
                     .expectMethod('apiPersistObjects').called(1)
                 .mock();
+    }
+
+    private with sharing class ExceptionComparator implements Comparator<Object> {
+
+        public Integer compare(Object param1, Object param2) {
+            return param1 instanceof Exception
+                    && param2 instanceof Exception
+                    && ((Exception) param1).getMessage() == ((Exception) param2).getMessage()
+                    && ((Exception) param1).getCause()?.getTypeName() == ((Exception) param2).getCause()?.getTypeName()
+                    && ((Exception) param1).getCause()?.getMessage() == ((Exception) param2).getCause()?.getMessage()
+                        ? 0 : -1;
+        }
     }
 }

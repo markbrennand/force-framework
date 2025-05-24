@@ -8,7 +8,7 @@
 public with sharing class BindingMockingTests {
 
     @IsTest
-    static void testMockedAPI() {
+    static void testMocking() {
         Dependency mockInjection = createMock();
         Dependency.INSTANCE = mockInjection;
 
