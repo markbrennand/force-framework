@@ -147,6 +147,6 @@ public with sharing class AsynchronousJobTests {
             super(Runnable.class);
         }
 
-        public override void run(Asynchronous.Job job) {}
+        public override void run(Asynchronous.Job job, String apexJobId) {}
     }
 }

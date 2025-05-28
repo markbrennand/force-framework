@@ -134,8 +134,9 @@ global with sharing virtual class Asynchronous implements API {
          * argument.
          *
          * @param asyncJob The job being run.
+         * @param apexJobId The Id of the Apex job for the Runnable.
          */
-        void run(Job asyncJob);
+        void run(Job asyncJob, String apexJobId);
 
         /**
          * @description

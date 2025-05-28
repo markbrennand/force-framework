@@ -41,6 +41,10 @@
                 <field>RetryNumber__c</field>
             </layoutItems>
             <layoutItems>
+                <behavior>Readonly</behavior>
+                <field>ApexJobId__c</field>
+            </layoutItems>
+            <layoutItems>
                 <behavior>Edit</behavior>
                 <field>ExceptionMessage__c</field>
             </layoutItems>

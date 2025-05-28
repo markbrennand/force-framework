@@ -51,10 +51,11 @@ global with sharing virtual class AsynchronousRunnable implements Asynchronous.R
      */
     public void execute(final QueueableContext context) {
         final AsynchronousJob__c asynchronousJob = AsynchronousJob.toSObject(asyncJob);
+        asynchronousJob.ApexJobId__c = context.getJobId();
         asynchronousJob.LastRunTime__c = Datetime.now();
 
         System.attachFinalizer(AsynchronousFinalizer.createFinalizer(asynchronousJob.Id));
-        run(asyncJob);
+        run(asyncJob, context.getJobId());
 
         AsynchronousDAO.persistObjects(
                 new List<AsynchronousJob__c> { asynchronousJob },
@@ -71,8 +72,9 @@ global with sharing virtual class AsynchronousRunnable implements Asynchronous.R
      * A developer must override this method and code the business logic the job needs to perform.
      *
      * @param asyncJob The job being run.
+     * @param apexJobId The Id of the Apex job for the Runnable.
      */
-    global virtual void run(Asynchronous.Job asyncJob) {}
+    global virtual void run(final Asynchronous.Job asyncJob, final String apexJobId) {}
 
     /**
      * @description

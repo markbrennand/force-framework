@@ -384,8 +384,9 @@ public with sharing class AsynchronousFinalizerTests {
 
             mocked
                     // The call to this method will make the Asynchronous Scheduler think it has jobs to run.
-                    .whenArgument(new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName(), Status__c = Asynchronous.Status.PENDING.name()))
-                        .expectMethod('apiCountActiveObjects').called(1).returns(1);
+                    // the AsyncScheduler.getMaximumActive method will also call the same DAO method.
+                    .whenArgument(new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName()))
+                        .expectMethod('apiCountActiveObjects').called(2).returns(1);
         } else {
             mocked
                     // The Finalizer should then check if there are any jobs left to run. In this case, return 0 as
@@ -458,8 +459,9 @@ public with sharing class AsynchronousFinalizerTests {
 
             mocked
                     // The call to this method will make the Asynchronous Scheduler think it has jobs to run.
-                    .whenArgument(new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName(), Status__c = Asynchronous.Status.PENDING.name()))
-                    .expectMethod('apiCountActiveObjects').called(1).returns(1);
+                    // the AsyncScheduler.getMaximumActive method will also call the same DAO method.
+                    .whenArgument(new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName()))
+                    .expectMethod('apiCountActiveObjects').called(2).returns(1);
         } else {
             mocked
                     // The Finalizer should then check if there are any jobs left to run. In this case, return 0 as

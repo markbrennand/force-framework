@@ -253,10 +253,6 @@ global with sharing virtual class Dependency {
      * @param forType The type to be bound.
      *
      * @return The implementation of the given type.
-     *
-     * @example
-     * // Injects the implementation bound to MyInterface into an application.
-     * MyInterface example = (MyInterface) Dependency.inject(MyInterface.class);
      */
     global static Object inject(final Type forType) {
         return INSTANCE.apiInject(forType);
@@ -272,10 +268,6 @@ global with sharing virtual class Dependency {
      * @param action The action specific to the binding to be bound.
      *
      * @return The implementation of the given type.
-     *
-     * @example
-     * // Injects the implementation bound to MyInterface into an application for action MyAction.
-     * MyInterface example = (MyInterface) Dependency.inject(MyInterface.class, 'MyAction');
      */
     global static Object inject(final Type forType, final String action) {
         return INSTANCE.apiInject(forType, action);
@@ -288,10 +280,6 @@ global with sharing virtual class Dependency {
      * @param forType The type to be checked.
      *
      * @return True if binding exists, false if not.
-     *
-     * @example
-     * // Determine if binding for MyInterface exists in registry.
-     * Boolean exists = Dependency.isBound(MyInterface.class);
      */
     global static Boolean isBound(final Type forType) {
         return INSTANCE.apiIsBound(forType);
@@ -305,10 +293,6 @@ global with sharing virtual class Dependency {
      * @param action The action specific to the binding to be checked.
      *
      * @return True if binding exists, false if not.
-     *
-     * @example
-     * // Determine if binding for MyInterface with action MyAction exists in registry.
-     * Boolean exists = Dependency.isBound(MyInterface.class, 'MyAction');
      */
     global static Boolean isBound(final Type forType, final String action) {
         return INSTANCE.apiIsBound(forType, action);
@@ -322,10 +306,6 @@ global with sharing virtual class Dependency {
     *
     * @param forType The type to be bound. Must be either an interface or abstract class.
     * @param withImpl The implementation for the type. Must be a concrete class with a no-op constructor.
-    *
-    * @example
-    * // Add a binding to MyImplementation from interface MyInterface.
-    * Dependency.bind(MyInterface,class, MyImplementation.class);
     */
     global static void bind(final Type forType, final Type withImpl) {
         INSTANCE.apiBind(forType, withImpl);
@@ -340,10 +320,6 @@ global with sharing virtual class Dependency {
      * @param forType The type to be bound. Must be either an interface or abstract class.
      * @param action The action used in combination with the type to uniquely identify the binding.
      * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
-     *
-     * @example
-     * // Add a binding to MyImplementation from interface MyInterface for action Test.
-     * Dependency.bind(MyInterface,class, 'Test', MyImplementation.class);
      */
     global static void bind(final Type forType, final String action, final Type withImpl) {
         INSTANCE.apiBind(forType, action, withImpl);
@@ -355,10 +331,6 @@ global with sharing virtual class Dependency {
      *
      * When running Apex jobs they can be chained by Salesforce. When using the registry, this method must be called
      * for each job execution, to force any changes made to the custom bindings to be included in the registry.
-     *
-     * @example
-     * // Re-loads custom bindings for registry.
-     * Dependency.reload();
      */
     global static void reload() {
         INSTANCE.apiReload();

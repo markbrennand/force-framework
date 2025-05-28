@@ -17,17 +17,18 @@ public with sharing class ExampleRunnable extends AsynchronousRunnable {
         super(Executor.class);
     }
 
-    public override void run(Asynchronous.Job job) {
+    public override void run(Asynchronous.Job job, String apexJobId) {
         Assert.isNotNull(job.getRetryNumber());
-
-        if (job.getRetryNumber() == configuration.get('succeedOnRetryNumber')) {
-            return;
-        }
+        Assert.isNotNull(apexJobId);
 
         String delay = job.getState().get('delay');
         if (!String.isEmpty(delay)) {
             Long endTime = System.currentTimeMillis() + Long.valueOf(delay);
             for (Long now = System.currentTimeMillis(); now < endTime; now = System.currentTimeMillis()) {}
+        }
+
+        if (job.getRetryNumber() == configuration.get('succeedOnRetryNumber')) {
+            return;
         }
 
         if (job.getState().get('action') == 'soql-201') {

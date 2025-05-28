@@ -23,6 +23,12 @@ public with sharing class AsynchronousFinalizer {
 
     /**
      * @description
+     * Used to pass value bacl from Scheduler job to indicate if a new Scheduler is to be started or not.
+     */
+    public final static String START_SCHEDULER_ARGUMENT = 'StartScheduler';
+
+    /**
+     * @description
      * Factory method to create a new Finalizer.
      *
      * The implementation is hidden to prevent re-use outside the framework.
@@ -91,7 +97,9 @@ public with sharing class AsynchronousFinalizer {
 
             try {
                 if (AsynchronousDAO.countScheduledObjects(false) > 0) {
-                    AsynchronousScheduler.queue();
+                    if (AsynchronousJob.fromSObject(asyncObject).getState().get(START_SCHEDULER_ARGUMENT) != 'false') {
+                        AsynchronousScheduler.queue();
+                    }
                 }
             } catch(Exception exc) {
                 AsynchronousHelper.recordInternalException(asyncObject, exc);
@@ -141,7 +149,6 @@ public with sharing class AsynchronousFinalizer {
                     AsynchronousDAO.removeObjects(new List<AsynchronousJob__c> { asyncObject });
                 }
             } else {
-
                 asyncObject.Status__c = asyncJob.getRunnable().onError(asyncJob, exc).name();
                 if (asyncObject.Status__c == Asynchronous.Status.QUEUED.name()) {
                     asyncObject.RetryNumber__c = retryNumber + 1;

@@ -24,7 +24,7 @@ public with sharing virtual class AsynchronousDAO implements API {
 
         final List<AsynchronousJob__c> asyncObjects = [
                 SELECT Id, OwnerId, Status__c, Reference__c, Runnable__c, MaximumRetries__c, RetryInterval__c,
-                        RetryNumber__c, ScheduledRunTime__c, LastRunTime__c,
+                        RetryNumber__c, ScheduledRunTime__c, LastRunTime__c, ApexJobId__c,
                         (SELECT Content__c FROM AsynchronousJobState__r ORDER BY ChunkNumber__c)
                 FROM AsynchronousJob__c
                 WHERE Id = :asyncObjectId
@@ -39,7 +39,7 @@ public with sharing virtual class AsynchronousDAO implements API {
 
     public AsynchronousJob__c apiGetNextScheduled() {
         final List<AsynchronousJob__c> scheduledAsyncObjects = [
-                SELECT Id, ScheduledRunTime__c, RetryNumber__c, Status__c
+                SELECT Id, ScheduledRunTime__c, RetryNumber__c, Status__c, LastRunTime__c
                 FROM AsynchronousJob__c
                 WHERE OwnerId = :UserInfo.getUserId()
                 AND ScheduledRunTime__c <= :Datetime.now()
@@ -57,18 +57,26 @@ public with sharing virtual class AsynchronousDAO implements API {
         try {
             final List<AsynchronousJob__c> lockedAsyncObjects = [
                     SELECT Id, OwnerId, Status__c, Reference__c, Runnable__c, MaximumRetries__c, RetryInterval__c,
-                            RetryNumber__c, ScheduledRunTime__c, LastRunTime__c,
+                            RetryNumber__c, ScheduledRunTime__c, LastRunTime__c, ApexJobId__c,
                             (SELECT Content__c FROM AsynchronousJobState__r ORDER BY ChunkNumber__c)
                     FROM AsynchronousJob__c
                     WHERE Id = :scheduledAsyncObjects[0].Id
-                    AND Status__c = :Asynchronous.Status.QUEUED.name()
-                    AND ScheduledRunTime__c = :scheduledAsyncObjects[0].ScheduledRunTime__c
-                    AND RetryNumber__c = :scheduledAsyncObjects[0].RetryNumber__c
                     WITH USER_MODE
                     FOR UPDATE
             ];
 
+            // When running a high number of schedulers, the same locked row can be returned to the scheduler job.
+            // This is despite the job's status having been set to RUNNING. To counter this, re-select the job
+            // and confirm it is still waiting to be run.
+            if (!lockedAsyncObjects.isEmpty()) {
+                final AsynchronousJob__c afterLockObject = apiGetObject(lockedAsyncObjects[0].Id);
+                if (afterLockObject.Status__c != Asynchronous.Status.QUEUED.name()) {
+                    return null;
+                }
+            }
+
             return lockedAsyncObjects.isEmpty() ? null : lockedAsyncObjects[0];
+
         } catch(Exception exc) {
             if (exc.getMessage().startsWith('Record Currently Unavailable')) {
                 return null;
@@ -103,15 +111,14 @@ public with sharing virtual class AsynchronousDAO implements API {
         }
     }
 
-    public Integer apiCountActiveObjects(final AsynchronousJob__c asyncJob) {
-        Assertion.isNotNull(asyncJob, 'argument: AsynchronousDAO.apiCountActiveObjects.asyncJob');
-        final String runnableName = AsynchronousJob.fromSObject(asyncJob).getRunnable().getType().getName();
+    public Integer apiCountActiveObjects(final AsynchronousJob__c asyncObject) {
+        Assertion.isNotNull(asyncObject, 'argument: AsynchronousDAO.apiCountActiveObjects.asyncObject');
 
         return [
                 SELECT COUNT()
                 FROM AsynchronousJob__c
                 WHERE OwnerId = :UserInfo.getUserId()
-                AND Runnable__c = :runnableName
+                AND Runnable__c = :asyncObject.Runnable__c
                 AND Status__c = :Asynchronous.Status.RUNNING.name()
                 WITH USER_MODE
         ];

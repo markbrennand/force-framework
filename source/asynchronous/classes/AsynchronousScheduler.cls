@@ -70,18 +70,27 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
      * Synchronisation is performed in the next job query to ensure that no more than one Scheduler tries to start
      * the same job.
      *
-     * @param ignoreAsyncJob The Asynchronous job for the Scheduler.
+     * @param asyncJob The Asynchronous job for the Scheduler.
+     * @param apexJobId The Id of the Apex job for the Runnable.
      */
-    public override void run(final Asynchronous.Job ignoreAsyncJob) {
-        Assertion.isNotNull(ignoreAsyncJob, 'argument: AsynchronousScheduler.run.ignoreAsyncJob');
+    public override void run(final Asynchronous.Job asyncJob, final String apexJobId) {
+        Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.run.asyncJob');
 
         if (AsynchronousDAO.countScheduledObjects(true) == 0) {
             delayWhenNoJobsToRun(configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY));
         }
 
         final AsynchronousJob__c scheduledAsyncObject = AsynchronousDAO.getNextScheduled();
+
         if (scheduledAsyncObject != null) {
-            AsynchronousHelper.queueJob(scheduledAsyncObject);
+            scheduledAsyncObject.ApexJobId__c = apexJobId;
+
+            final Boolean jobStarted = AsynchronousHelper.queueJob(scheduledAsyncObject);
+            asyncJob.setState(
+                    new Map<String, String> {
+                            AsynchronousFinalizer.START_SCHEDULER_ARGUMENT => String.valueOf(jobStarted)
+                    }
+            );
         }
     }
 
@@ -128,9 +137,20 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
      * @return The Scheduler concurrency.
      */
     public override Integer getMaximumActive() {
-        if (AsynchronousDAO.countScheduledObjects(false) > 0) {
+        final Integer scheduledObjectCount = AsynchronousDAO.countScheduledObjects(false);
+        if (scheduledObjectCount > 0) {
             if (AsynchronousDAO.countScheduledObjects(true) > 0) {
-                return configuration.get(MAX_SCHEDULERS_PROPERTY);
+                // If several Schedulers all run at the same time, their RUNNING counts will include the other
+                // schedulers that are completing. Their active counts will thus be skewed by the other jobs
+                // that are also completing and have a status of SUCCEEDED or FAILED which has not yet been
+                // committed.
+                //
+                // To counter for this scenario, we drop the limit each time by 1, for the Scheduler that has
+                // completed.
+                return Math.max(
+                        Math.max(1, AsynchronousDAO.countActiveObjects(new AsynchronousJob__c(Runnable__c = QueueNext.class.getName())) - 1),
+                        Math.min(scheduledObjectCount, configuration.get(MAX_SCHEDULERS_PROPERTY))
+                );
             } else {
                 return 1;
             }
@@ -192,7 +212,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
                 null,
                 0,
                 0,
-                new Map<String, String>()
+                new Map<String, String> {}
         );
 
         AsynchronousHelper.queueJob(AsynchronousJob.toSObject(asyncJob));

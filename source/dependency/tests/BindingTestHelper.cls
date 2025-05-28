@@ -47,7 +47,7 @@ public with sharing class BindingTestHelper {
 
         PermissionSetAssignment userAssignment = new PermissionSetAssignment(
                 AssigneeId = user.Id,
-                PermissionSetId = [SELECT Id FROM PermissionSet WHERE Name = 'InjectionUser' LIMIT 1].Id
+                PermissionSetId = [SELECT Id FROM PermissionSet WHERE Name = 'DependencyInjection' LIMIT 1].Id
         );
 
         insert new List<PermissionSetAssignment> { managerAssignment, userAssignment };

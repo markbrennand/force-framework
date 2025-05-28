@@ -102,6 +102,7 @@ public with sharing virtual class AsynchronousHelper implements API {
                 AsynchronousJob__c = asyncObject.Id,
                 RetryNumber__c = asyncObject.RetryNumber__c,
                 StatusOnError__c = asyncObject.Status__c,
+                ApexJobId__c = asyncObject.ApexJobId__c,
                 ExceptionType__c = exc.getCause().getTypeName(),
                 ExceptionMessage__c = exc.getCause().getMessage(),
                 ExceptionStackTrace__c = exc.getCause().getStackTraceString()
@@ -332,8 +333,15 @@ public with sharing virtual class AsynchronousHelper implements API {
 
             return true;
 
-        } else {
+        } else if (runnable instanceof AsynchronousScheduler) {
             return false;
+
+        } else {
+            asyncObject.ScheduledRunTime__c = Datetime.now().addSeconds(5);
+            asyncObject.Status__c = Asynchronous.Status.QUEUED.name();
+            AsynchronousDAO.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+            return false;
+
         }
     }
 

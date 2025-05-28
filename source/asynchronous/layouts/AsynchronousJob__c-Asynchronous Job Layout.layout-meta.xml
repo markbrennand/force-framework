@@ -105,7 +105,7 @@
     <relatedLists>
         <fields>NAME</fields>
         <fields>CREATED_DATE</fields>
-        <fields>RetryNumber__c</fields>
+        <fields>ApexJobId__c</fields>
         <fields>ExceptionMessage__c</fields>
         <relatedList>AsynchronousJobException__c.AsynchronousJob__c</relatedList>
         <sortField>CREATED_DATE</sortField>
