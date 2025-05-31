@@ -1,18 +1,31 @@
 /**
  * @description
  * Class providing dependency injection.
- *
+ * <br><br>
  * Dependencies can be wired into an application by their interface or abstract class.
- *
+ * <br><br>
  * Variable and member variable values can also be wired into a class using the variable's class and an action.
- *
+ * <br><br>
  * An optional action argument is supported to allow for the binding of the same interface or class with different
  * implementations.
- *
+ * <br><br>
  * By default, the implementation created when injected will be a singleton. If the binding is required to create
- * a new implementation for each use an application, the implementing class should implement the Prototype interface.
+ * a new implementation for each use an application, the implementing class should implement the Prototype
+ * interface.
+ * <br><br>
+ * For a detailed description of the dependency injection provided by this class, copy the url below into a browser.
+ * <br><br>
+ * https://github.com/markbrennand/force-frameworks/blob/main/source/dependency/README.md
+ * <br><br>
+ * Examples
+ * <br>
+ * <code>
+ * // Inject a variable into your application.
+ * Map<String, Integer> configuration = (Map<String, Integer>) Dependency.inject(Map<String, Integer>.class, 'Configuration');
  *
- * See [Dependency Injection](https://github.com/markbrennand/sf-frameworks/blob/main/source/dependency/README.md)
+ * // Inject an interface implementation into your application.
+ * PersistenceDAO = (PersistenceDAO) Dependency.inject(PersistenceDAO.class);
+ * </code>
  *
  * @author Mark Brennand
  */
@@ -20,7 +33,7 @@ global with sharing virtual class Dependency {
 
     /**
      * @description
-     * Interface to be implemented to check a binding in the registry.
+     * Interface to be implemented to check a binding in the registry.<br><br>
      *
      * Each checker must be defined in a record in the Binding Check custom metadata.
      */
@@ -29,13 +42,13 @@ global with sharing virtual class Dependency {
         /**
          * @description
          * Given a type to be bound, a class implementing this method must check that the given implementation class
-         * can be bound to it.
+         * can be bound to it.<br><br>
          *
          * If the for type is an interface then an implementation of this method must check that the implementation
-         * class implements the interface.
+         * class implements the interface.<br><br>
          *
          * If the for type is an abstract class then an implementation of this method must check that the implementation
-         * class extends the abstract class.
+         * class extends the abstract class.<br><br>
          *
          * If the for type is a class then an implementation of this method must check that the implementation
          * class is of the same class or a super class of it.
@@ -50,12 +63,20 @@ global with sharing virtual class Dependency {
 
     /**
      * @description
-     * Class representing result of a binding validation check.
+     * Class representing result of a binding validation check.<br><br>
      */
     global with sharing class ValidationResult {
-        global final Boolean isValid { public get; private set; }
-        global final String errorMessage { public get; private set; }
+        public final Boolean isValid { public get; private set; }
+        public final String errorMessage { public get; private set; }
 
+        /**
+         * @description
+         * Constructs a validation result object which is used to inform the caller of the BindingCheck.validate
+         * method of the result of the validation.
+         *
+         * @param isValid True if the validation passed. False if not.
+         * @param errorMessage The error message to be recorded in the Exception thrown to record the failure.
+         */
         global ValidationResult(final Boolean isValid, final String errorMessage) {
             Assertion.isNotNull(isValid, 'argument: Dependency.ValidationResult.isValid may not be null');
             Assertion.isTrue(isValid || errorMessage != null, 'argument: Dependency.ValidationResult.errorMessage must be set');
@@ -89,14 +110,13 @@ global with sharing virtual class Dependency {
 
     /**
      * @description
-     * Exception thrown when a registry operation fails.
+     * Exception thrown when a dependency injection operation fails.
      */
     global with sharing class APIException extends Exception {}
 
     /**
-     * @description
-     * A class implementing this interface will have a new instance of itself created each time it is in injected into an
-     * application.
+     * @description A class implementing this interface will have a new instance of itself created each time it is in
+     * injected into an application.
      */
     global interface Prototype {}
 
@@ -245,9 +265,7 @@ global with sharing virtual class Dependency {
     }
 
     /**
-     * @description
-     * If the registry contains a binding for the given type, its implementation is returned.
-     *
+     * @description If the registry contains a binding for the given type, its implementation is returned.
      * Should no binding exist, an exception is thrown.
      *
      * @param forType The type to be bound.
