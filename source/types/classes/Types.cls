@@ -4,7 +4,7 @@
  *
  * @author Mark Brennand
  */
-global with sharing class TypeHelper {
+global with sharing class Types {
 
     /**
      * @description
@@ -33,7 +33,7 @@ global with sharing class TypeHelper {
      *
      * @return The Type for the class. Or an exception if the class doesn't exist.
      */
-    public static Type loadType(final String typeName) {
+    public static Type load(final String typeName) {
         Assertion.isNotNull(typeName, 'argument: TypeHelper.loadType.typeName');
 
         Type type = Type.forName(typeName);
@@ -55,7 +55,7 @@ global with sharing class TypeHelper {
      * @return The new instance of an object for the given type. Or an exception if an instance could not be
      * constructed.
      */
-    public static Object newInstance(final Type type) {
+    global static Object newInstance(final Type type) {
         try {
             Object instance =  type.newInstance();
             if (instance instanceof Factory) {
@@ -68,5 +68,5 @@ global with sharing class TypeHelper {
         }
     }
 
-    public with sharing class TypeException extends Exception {}
+    global with sharing class TypeException extends Exception {}
 }

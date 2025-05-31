@@ -23,6 +23,7 @@ global with sharing virtual class AsynchronousRunnable implements Asynchronous.R
      * @description
      * On execution, this field holds the Id of the Asynchronous__c object of the job being run.
      */
+    @TestVisible
     private Asynchronous.Job asyncJob;
 
     /**

@@ -7,90 +7,95 @@
 @IsTest
 public with sharing class AsynchronousHelperTests {
 
+    @TestSetup
+    private static void setup() {
+        AsynchronousTestHelper.createUsers();
+    }
+
     @IsTest
     private static void testRecordException() {
+        System.runAs(AsynchronousTestHelper.getUser()) {
+            AsynchronousJob__c asyncObject = new AsynchronousJob__c(
+                    Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    RetryNumber__c = 1
+            );
 
-        // The job for the test.
-        AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
-                Status__c = Asynchronous.Status.RUNNING.name(),
-                RetryNumber__c = 1
-        );
+            Exception exc = new Asynchronous.APIException('Test');
 
-        // And the Exception to record.
-        Exception exc = new Asynchronous.APIException('Test');
-
-        // Add the mocking.
-        AsynchronousDAO mockDAO = mockForRecordException(asyncObject, exc);
-        AsynchronousDAO.INSTANCE = mockDAO;
-
-        // Perform the test.
-        AsynchronousHelper.recordException(asyncObject, exc);
-
-        // Confirm the mocked methods were called correctly.
-        Mocker.validate();
+            AsynchronousDAO.INSTANCE = mockForRecordException(asyncObject, exc);
+            AsynchronousHelper.recordException(asyncObject, exc);
+            Mocker.validate();
+        }
     }
 
     @IsTest
     private static void testInternalFailure() {
+        System.runAs(AsynchronousTestHelper.getUser()) {
+            AsynchronousJob__c asyncObject = new AsynchronousJob__c(
+                    Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    RetryNumber__c = 3
+            );
 
-        // The job for the test.
-        AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
-                Status__c = Asynchronous.Status.RUNNING.name(),
-                RetryNumber__c = 3
-        );
+            Exception exc = new Asynchronous.APIException('Test');
 
-        // And the Exception to record.
-        Exception exc = new Asynchronous.APIException('Test');
-
-        // Add the mocking.
-        AsynchronousDAO mockDAO = mockForInternalFailure(asyncObject, exc);
-        AsynchronousDAO.INSTANCE = mockDAO;
-
-        // Perform the test.
-        AsynchronousHelper.recordInternalException(asyncObject, exc);
-
-        // Confirm the mocked methods were called correctly.
-        Mocker.validate();
+            AsynchronousDAO.INSTANCE = mockForInternalFailure(asyncObject, exc);
+            AsynchronousHelper.recordInternalException(asyncObject, exc);
+            Mocker.validate();
+        }
     }
 
     @IsTest
     private static void testState() {
-        Map<String, String> state = new Map<String, String> {
-                'property1' => 'value1',
-                'property2' => 'value2',
-                'property3' => 'value3',
-                'property4' => 'value4',
-                'property5' => 'a lot longer value for value number 5'
-        };
+        System.runAs(AsynchronousTestHelper.getUser()) {
+            Map<String, String> state = new Map<String, String>{
+                    'property1' => 'value1',
+                    'property2' => 'value2',
+                    'property3' => 'value3',
+                    'property4' => 'value4',
+                    'property5' => 'a lot longer value for value number 5'
+            };
 
-        // Repeat the encode/decode test for different chunk sizes.
-        AsynchronousJob__c asynchronousObject = new AsynchronousJob__c(Id = TestHelper.nextId(AsynchronousJob__c.SObjectType));
-        for (Integer size : new List<Integer> { AsynchronousHelper.MAX_CHUNK_SIZE, 1, 2, 4, 8, 16, 32, 62, 128, 256 }) {
-            AsynchronousHelper.MAX_CHUNK_SIZE = size;
-            List<AsynchronousJobState__c> chunks = AsynchronousHelper.encodeState(asynchronousObject, state);
-            Assert.areEqual(state, AsynchronousHelper.decodeState(chunks));
+            // Repeat the encode/decode test for different chunk sizes.
+            AsynchronousJob__c asynchronousObject = new AsynchronousJob__c(Id = TestHelper.nextId(AsynchronousJob__c.SObjectType));
+            for (Integer size : new List<Integer>{
+                    AsynchronousHelper.MAX_CHUNK_SIZE, 1, 2, 4, 8, 16, 32, 62, 128, 256
+            }) {
+                AsynchronousHelper.MAX_CHUNK_SIZE = size;
+                List<AsynchronousJobState__c> chunks = AsynchronousHelper.encodeState(asynchronousObject, state);
+                Assert.areEqual(state, AsynchronousHelper.decodeState(chunks));
+            }
         }
     }
 
     @IsTest
     private static void testMocking() {
-        final AsynchronousJob__c asyncObject = new AsynchronousJob__c(Id = TestHelper.nextId(AsynchronousJob__c.SObjectType));
-        final Exception exc = new DMLException('Test');
+        System.runAs(AsynchronousTestHelper.getUser()) {
+            final AsynchronousJob__c asyncObject = new AsynchronousJob__c(Id = TestHelper.nextId(AsynchronousJob__c.SObjectType));
+            final Exception exc = new DMLException('Test');
 
-        AsynchronousHelper.INSTANCE = (AsynchronousHelper) Mocker.of(AsynchronousHelper.class)
-                .whenArguments(asyncObject, new Asynchronous.APIException('Wrapper', exc))
-                    .withComparators(new List<Comparator<Object>> { new ExceptionComparator() })
-                    .expectMethod('apiRecordException').called(1)
-                    .expectMethod('apiRecordInternalException').called(1)
-                .whenArgument(asyncObject)
-                    .expectMethod('apiQueueJob').called(1).returns(true)
-                .mock();
+            AsynchronousHelper.INSTANCE = (AsynchronousHelper) Mocker.of(AsynchronousHelper.class)
+                    .whenArguments(asyncObject, new Asynchronous.APIException('Wrapper', exc))
+                        .withComparators(new List<Comparator<Object>>{
+                                new TestHelper.ExceptionComparator()
+                        })
+                        .expectMethod('apiRecordException').called(1)
+                        .expectMethod('apiRecordInternalException').called(1)
+                    .whenArgument(asyncObject)
+                        .expectMethod('apiQueueJob').called(1).throws(exc)
+                    .mock();
 
-        AsynchronousHelper.recordException(asyncObject, exc);
-        AsynchronousHelper.recordInternalException(asyncObject, exc);
-        Assert.isTrue(AsynchronousHelper.queueJob(asyncObject));
+            AsynchronousHelper.recordException(asyncObject, exc);
+            AsynchronousHelper.recordInternalException(asyncObject, exc);
+
+            try {
+                AsynchronousHelper.queueJob(asyncObject);
+                Assert.fail();
+            } catch (DmlException de) {
+                Assert.areEqual(de, exc, 'Unexpected exception thrown');
+            }
+        }
     }
 
     private static AsynchronousDAO mockForRecordException(AsynchronousJob__c asyncObject, Exception exc) {
@@ -129,17 +134,5 @@ public with sharing class AsynchronousHelperTests {
                 })
                     .expectMethod('apiPersistObjects').called(1)
                 .mock();
-    }
-
-    private with sharing class ExceptionComparator implements Comparator<Object> {
-
-        public Integer compare(Object param1, Object param2) {
-            return param1 instanceof Exception
-                    && param2 instanceof Exception
-                    && ((Exception) param1).getMessage() == ((Exception) param2).getMessage()
-                    && ((Exception) param1).getCause()?.getTypeName() == ((Exception) param2).getCause()?.getTypeName()
-                    && ((Exception) param1).getCause()?.getMessage() == ((Exception) param2).getCause()?.getMessage()
-                        ? 0 : -1;
-        }
     }
 }

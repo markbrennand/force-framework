@@ -71,10 +71,8 @@ public with sharing virtual class AsynchronousHelper implements API {
          * Queues the given job for processing.
          *
          * @param asyncObject The job to be queued for processing.
-         *
-         * @return True if the job was queued, false if not.
          */
-        Boolean apiQueueJob(AsynchronousJob__c asyncObject);
+        void apiQueueJob(AsynchronousJob__c asyncObject);
     }
 
     /**
@@ -201,17 +199,14 @@ public with sharing virtual class AsynchronousHelper implements API {
      * If an Exception occurs during the queueing, a future job is started to run the job.
      *
      * @param asyncObject The job to be queued.
-     *
-     * @return True if the job was queued, false if not.
      */
-    public Boolean apiQueueJob(final AsynchronousJob__c asyncObject) {
+    public void apiQueueJob(final AsynchronousJob__c asyncObject) {
         Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.apiQueueJob.asyncObject');
 
         try {
-            return enqueueApexJob(asyncObject, false);
+            enqueueApexJob(asyncObject);
         } catch(Exception exc) {
             startAsynchronousJob(asyncObject.Id);
-            return true;
         }
     }
 
@@ -270,11 +265,9 @@ public with sharing virtual class AsynchronousHelper implements API {
      * Queues the given job for processing.
      *
      * @param asyncObject The job to be queued for processing.
-     *
-     * @return True if the job was queued, false if not.
      */
-    public static Boolean queueJob(final AsynchronousJob__c asyncObject) {
-        return INSTANCE.apiQueueJob(asyncObject);
+    public static void queueJob(final AsynchronousJob__c asyncObject) {
+        INSTANCE.apiQueueJob(asyncObject);
     }
 
     /**
@@ -291,7 +284,7 @@ public with sharing virtual class AsynchronousHelper implements API {
         final AsynchronousJob__c asyncObject = AsynchronousDAO.getObject(asyncObjectId);
 
         try {
-            enqueueApexJob(asyncObject, true);
+            enqueueApexJob(asyncObject);
         } catch(Exception exc) {
             AsynchronousHelper.recordInternalException(asyncObject, exc);
         }
@@ -301,48 +294,23 @@ public with sharing virtual class AsynchronousHelper implements API {
      * @description
      * Creates an Apex job for the given Asynchronous object.
      *
-     * The concurrency for the Runnable associated with job is checked against the number of RUNNING jobs of the
-     * same type. If the concurrency would be exceeded by starting a new job, no job is started.
-     *
-     * If the job is not started due to concurrency being hit, it is not persisted. This logic is important to
-     * maintain for the Scheduler. Any new Scheduler jobs that could not be started due to concurrency will not
-     * have their Asynchronous__c object persisted and so will not be re-run later.
-     *
      * @param asyncObject The job to be started.
-     * @param isFuture Is the method being called as a result of a @future call.
-     *
-     * @return True if the Apex job was created, false if not.
      */
-    private static Boolean enqueueApexJob(final AsynchronousJob__c asyncObject, final Boolean isFuture) {
+    private static void enqueueApexJob(final AsynchronousJob__c asyncObject) {
         Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.enqueueApexJob.asyncObject');
-        Assertion.isNotNull(isFuture, 'argument: AsynchronousHelper.enqueueApexJob.isFuture');
 
         final AsynchronousJob asyncJob = (AsynchronousJob) AsynchronousJob.fromSObject(asyncObject);
         final AsynchronousRunnable runnable = (AsynchronousRunnable) asyncJob.getRunnable();
 
-        if (isFuture || AsynchronousDAO.countActiveObjects(asyncObject) < runnable.getMaximumActive()) {
-            asyncObject.Status__c = Asynchronous.Status.RUNNING.name();
-            asyncObject.LastRunTime__c = Datetime.now();
-            AsynchronousDAO.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+        asyncObject.Status__c = Asynchronous.Status.RUNNING.name();
+        asyncObject.LastRunTime__c = Datetime.now();
+        AsynchronousDAO.persistObjects(new List<AsynchronousJob__c> { asyncObject });
 
-            asyncObject.ApexJobId__c = System.enqueueJob(
-                    runnable.forJob(AsynchronousJob.fromSObject(AsynchronousDAO.getObject(asyncObject.Id)))
-            );
+        asyncObject.ApexJobId__c = System.enqueueJob(
+                runnable.forJob(AsynchronousJob.fromSObject(AsynchronousDAO.getObject(asyncObject.Id)))
+        );
 
-            AsynchronousDAO.persistObjects(new List<AsynchronousJob__c> { asyncObject });
-
-            return true;
-
-        } else if (runnable instanceof AsynchronousScheduler) {
-            return false;
-
-        } else {
-            asyncObject.ScheduledRunTime__c = Datetime.now().addSeconds(5);
-            asyncObject.Status__c = Asynchronous.Status.QUEUED.name();
-            AsynchronousDAO.persistObjects(new List<AsynchronousJob__c> { asyncObject });
-            return false;
-
-        }
+        AsynchronousDAO.persistObjects(new List<AsynchronousJob__c> { asyncObject });
     }
 
     /**

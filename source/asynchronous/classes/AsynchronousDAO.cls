@@ -8,8 +8,8 @@ public with sharing virtual class AsynchronousDAO implements API {
 
     public interface API {
         AsynchronousJob__c apiGetObject(Id asyncOjectId);
-        AsynchronousJob__c apiGetNextScheduled();
-        Integer apiCountScheduledObjects(Boolean scheduledOnly);
+        Set<AsynchronousJob__c> apiGetScheduledObjects(Integer maxJobsToReturn);
+        Integer apiCountSchedulableObjects();
         Integer apiCountActiveObjects(final AsynchronousJob__c asyncJob);
         void apiPersistObjects(List<AsynchronousJob__c> asyncObjects);
         void apiPersistObjects(List<AsynchronousJob__c> asyncObjects, List<Map<String, String>> states);
@@ -37,78 +37,34 @@ public with sharing virtual class AsynchronousDAO implements API {
         return asyncObjects[0];
     }
 
-    public AsynchronousJob__c apiGetNextScheduled() {
-        final List<AsynchronousJob__c> scheduledAsyncObjects = [
-                SELECT Id, ScheduledRunTime__c, RetryNumber__c, Status__c, LastRunTime__c
+    public Set<AsynchronousJob__c> apiGetScheduledObjects(final Integer maxJobsToReturn) {
+        return new Set<AsynchronousJob__c>([
+                SELECT Id, Runnable__c
                 FROM AsynchronousJob__c
                 WHERE OwnerId = :UserInfo.getUserId()
                 AND ScheduledRunTime__c <= :Datetime.now()
-                AND Runnable__c != :AsynchronousScheduler.class.getName()
+                AND Runnable__c != :AsynchronousScheduler.QueueNext.class.getName()
                 AND Status__c = :Asynchronous.Status.QUEUED.name()
                 WITH USER_MODE
                 ORDER BY ScheduledRunTime__c
-                LIMIT 1
-        ];
-
-        if (scheduledAsyncObjects.isEmpty()) {
-            return null;
-        }
-
-        try {
-            final List<AsynchronousJob__c> lockedAsyncObjects = [
-                    SELECT Id, OwnerId, Status__c, Reference__c, Runnable__c, MaximumRetries__c, RetryInterval__c,
-                            RetryNumber__c, ScheduledRunTime__c, LastRunTime__c, ApexJobId__c,
-                            (SELECT Content__c FROM AsynchronousJobState__r ORDER BY ChunkNumber__c)
-                    FROM AsynchronousJob__c
-                    WHERE Id = :scheduledAsyncObjects[0].Id
-                    WITH USER_MODE
-                    FOR UPDATE
-            ];
-
-            // When running a high number of schedulers, the same locked row can be returned to the scheduler job.
-            // This is despite the job's status having been set to RUNNING. To counter this, re-select the job
-            // and confirm it is still waiting to be run.
-            if (!lockedAsyncObjects.isEmpty()) {
-                final AsynchronousJob__c afterLockObject = apiGetObject(lockedAsyncObjects[0].Id);
-                if (afterLockObject.Status__c != Asynchronous.Status.QUEUED.name()) {
-                    return null;
-                }
-            }
-
-            return lockedAsyncObjects.isEmpty() ? null : lockedAsyncObjects[0];
-
-        } catch(Exception exc) {
-            if (exc.getMessage().startsWith('Record Currently Unavailable')) {
-                return null;
-            } else {
-                throw exc;
-            }
-        }
+                LIMIT :maxJobsToReturn
+        ]);
     }
 
-    public Integer apiCountScheduledObjects(final Boolean scheduledOnly) {
-        Assertion.isNotNull(scheduledOnly, 'argument: AsynchronousDAO.apiCountScheduledObjects.scheduledOnly');
+    public Integer apiCountSchedulableObjects() {
+        final Set<String> SCHEDULABLE_STATUSES = new Set<String> {
+                Asynchronous.Status.QUEUED.name(),
+                Asynchronous.Status.RUNNING.name()
+        };
 
-        if (scheduledOnly) {
-            return [
-                    SELECT COUNT()
-                    FROM AsynchronousJob__c
-                    WHERE OwnerId = :UserInfo.getUserId()
-                    AND ScheduledRunTime__c <= :Datetime.now()
-                    AND Status__c = :Asynchronous.Status.QUEUED.name()
-                    AND Runnable__c != :AsynchronousScheduler.class.getName()
-                    WITH USER_MODE
-            ];
-        } else {
-            return [
-                    SELECT COUNT()
-                    FROM AsynchronousJob__c
-                    WHERE OwnerId = :UserInfo.getUserId()
-                    AND Status__c = :Asynchronous.Status.QUEUED.name()
-                    AND Runnable__c != :AsynchronousScheduler.class.getName()
-                    WITH USER_MODE
-            ];
-        }
+        return [
+                SELECT COUNT()
+                FROM AsynchronousJob__c
+                WHERE OwnerId = :UserInfo.getUserId()
+                AND Status__c IN :SCHEDULABLE_STATUSES
+                AND Runnable__c != :AsynchronousScheduler.QueueNext.class.getName()
+                WITH USER_MODE
+        ];
     }
 
     public Integer apiCountActiveObjects(final AsynchronousJob__c asyncObject) {
@@ -166,12 +122,12 @@ public with sharing virtual class AsynchronousDAO implements API {
         return INSTANCE.apiGetObject(asyncObjectId);
     }
 
-    public static AsynchronousJob__c getNextScheduled() {
-        return INSTANCE.apiGetNextScheduled();
+    public static Set<AsynchronousJob__c> getScheduledObjects(final Integer maxJobsToReturn) {
+        return INSTANCE.apiGetScheduledObjects(maxJobsToReturn);
     }
 
-    public static Integer countScheduledObjects(final Boolean scheduledOnly) {
-        return INSTANCE.apiCountScheduledObjects(scheduledOnly);
+    public static Integer countSchedulableObjects() {
+        return INSTANCE.apiCountSchedulableObjects();
     }
 
     public static Integer countActiveObjects(final AsynchronousJob__c asyncJob) {
@@ -201,7 +157,7 @@ public with sharing virtual class AsynchronousDAO implements API {
      * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
-    public with sharing class Factory implements TypeHelper.Factory {
+    public with sharing class Factory implements Types.Factory {
         public Object newInstance() {
             return new AsynchronousDAO();
         }
@@ -223,7 +179,7 @@ public with sharing virtual class AsynchronousDAO implements API {
          * @return The result of the validation.
          */
         public Dependency.ValidationResult validate(Type forType, Type withImpl) {
-            if (TypeHelper.newInstance(withImpl) instanceof AsynchronousDAO.API) {
+            if (Types.newInstance(withImpl) instanceof AsynchronousDAO.API) {
                 return new Dependency.ValidationResult(true, null);
             } else {
                 return new Dependency.ValidationResult(

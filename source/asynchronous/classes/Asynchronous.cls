@@ -84,8 +84,10 @@ global with sharing virtual class Asynchronous implements API {
          * The implementation should consider the jobs as available to run and take the appropriate action.
          *
          * @param asyncJobs The jobs to schedule for processing.
+         *
+         * @return The jobs queued for processing.
          */
-        void apiQueueJobs(List<Job> asyncJobs);
+        List<Job> apiQueueJobs(List<Job> asyncJobs);
     }
 
     /**
@@ -108,7 +110,7 @@ global with sharing virtual class Asynchronous implements API {
          * @description
          * The class of the Runnable's implementation.
          *
-         * The class can either be a Runnable or TypeHelper.Factory implementation. In the case of the latter,
+         * The class can either be a Runnable or Types.Factory implementation. In the case of the latter,
          * the class returned by the newInstance method must implement Runnable.
          *
          * @return The Apex class of the Runnable implementation.
@@ -376,8 +378,10 @@ global with sharing virtual class Asynchronous implements API {
      * Status to QUEUED and start an Asynchronous Scheduler to run the job.
      *
      * @param asyncJobs The jobs to schedule for processing.
+     *
+     * @return The jobs queued for processing.
      */
-    public void apiQueueJobs(final List<Asynchronous.Job> asyncJobs) {
+    public List<Job> apiQueueJobs(final List<Asynchronous.Job> asyncJobs) {
         Assertion.isNotNull(asyncJobs, 'argument: Asynchronous.queueJobs.asyncJobs');
 
         final List<AsynchronousJob__c> asyncObjects = new List<AsynchronousJob__c>();
@@ -389,6 +393,19 @@ global with sharing virtual class Asynchronous implements API {
         }
 
         AsynchronousDAO.persistObjects(asyncObjects, states);
+
+        final List<Job> returnList = new List<Job>();
+        Integer i = 0;
+
+        for (AsynchronousJob__c asyncObject : asyncObjects) {
+            Assertion.isNotNull(asyncObject.Id, 'Asynchronous Job object has not been assigned an Id');
+
+            final Job updatedJob = AsynchronousJob.fromSObject(asyncObject);
+            updatedJob.setState(states[i++]);
+            returnList.add(updatedJob);
+        }
+
+        return returnList;
     }
 
     /**
@@ -438,6 +455,8 @@ global with sharing virtual class Asynchronous implements API {
      *
      * @param asyncJobs The jobs to schedule for processing.
      *
+     * @return The jobs queued for processing.
+     *
      * @example
      * // Queues a job for processing.
      * Asynchronous.Job example = Asynchronous.create(
@@ -450,8 +469,8 @@ global with sharing virtual class Asynchronous implements API {
      *
      * Asynchronous.queue(new List<Asynchronous.Job> { example });
      */
-    global static void queueJobs(final List<Asynchronous.Job> asyncJobs) {
-        INSTANCE.apiQueueJobs(asyncJobs);
+    global static List<Job> queueJobs(final List<Job> asyncJobs) {
+        return INSTANCE.apiQueueJobs(asyncJobs);
     }
 
     /**
@@ -461,7 +480,7 @@ global with sharing virtual class Asynchronous implements API {
      * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
-    public with sharing class Factory implements TypeHelper.Factory {
+    public with sharing class Factory implements Types.Factory {
         public Object newInstance() {
             return new Asynchronous();
         }
@@ -479,11 +498,10 @@ global with sharing virtual class Asynchronous implements API {
      */
     public static void onTriggerBefore(final List<AsynchronousJob__c> asyncObjects) {
         Boolean hasErrors = false;
-        Boolean startScheduler = false;
 
         for (AsynchronousJob__c asyncObject : asyncObjects) {
             try {
-                final Object runnable = TypeHelper.newInstance(TypeHelper.loadType(asyncObject.Runnable__c));
+                final Object runnable = Types.newInstance(Types.load(asyncObject.Runnable__c));
                 if (! (runnable instanceof Asynchronous.Runnable)) {
                     asyncObject.addError('Class ' + asyncObject.Runnable__c + ' does not implement Asynchronous.Runnable');
                     hasErrors = true;
@@ -491,19 +509,12 @@ global with sharing virtual class Asynchronous implements API {
                 } else if (asyncObject.Status__c == Asynchronous.Status.PENDING.name()) {
                     asyncObject.Status__c = Asynchronous.Status.QUEUED.name();
                     asyncObject.RetryNumber__c = 0;
-
-                    if (! (runnable instanceof AsynchronousScheduler)) {
-                        startScheduler = true;
-                    }
                 }
+
             } catch(Exception e) {
                 asyncObject.addError(e.getMessage());
                 hasErrors = true;
             }
-        }
-
-        if (!hasErrors && startScheduler) {
-            AsynchronousScheduler.queue();
         }
     }
 
@@ -518,19 +529,28 @@ global with sharing virtual class Asynchronous implements API {
      */
     public static void onTriggerAfter(final List<AsynchronousJob__c> asyncObjects, final Map<Id, AsynchronousJob__c> previousAsyncObjects) {
         final List<AsynchronousJob__c> toDelete = new List<AsynchronousJob__c>();
+        Boolean startScheduler = false;
 
         for (AsynchronousJob__c asyncObject : asyncObjects) {
+            final Boolean isScheduler = AsynchronousJob.fromSObject(asyncObject).getRunnable() instanceof AsynchronousScheduler;
+
             if (asyncObject.Status__c == Asynchronous.Status.CANCELLED.name() &&
-                    asyncObject.Status__c != previousAsyncObjects.get(asyncObject.Id)?.Status__c
+                    asyncObject.Status__c != previousAsyncObjects?.get(asyncObject.Id)?.Status__c
             ) {
                 final Asynchronous.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
                 if (!asyncJob.getRunnable().onCancellation(asyncJob)) {
                     toDelete.add(new AsynchronousJob__c(Id = asyncObject.Id));
                 }
+            } else if (!isScheduler) {
+                startScheduler = true;
             }
         }
 
         AsynchronousDAO.removeObjects(toDelete);
+
+        if (startScheduler) {
+            AsynchronousScheduler.queue(new Set<String>());
+        }
     }
 
     /**
@@ -549,7 +569,7 @@ global with sharing virtual class Asynchronous implements API {
          * @return The result of the validation.
          */
         public Dependency.ValidationResult validate(Type forType, Type withImpl) {
-            if (TypeHelper.newInstance(withImpl) instanceof Asynchronous.API) {
+            if (Types.newInstance(withImpl) instanceof Asynchronous.API) {
                 return new Dependency.ValidationResult(true, null);
             } else {
                 return new Dependency.ValidationResult(

@@ -22,28 +22,28 @@ public with sharing class BindingCheck implements Dependency.BindingCheck {
     public Dependency.ValidationResult validate(final Type forType, final Type withImpl) {
         switch on forType.getName() {
             when 'String' {
-                return buildValidationResult(TypeHelper.newInstance(withImpl) instanceof String, forType, withImpl);
+                return buildValidationResult(Types.newInstance(withImpl) instanceof String, forType, withImpl);
             }
             when 'Integer' {
-                return buildValidationResult(TypeHelper.newInstance(withImpl) instanceof Integer, forType, withImpl);
+                return buildValidationResult(Types.newInstance(withImpl) instanceof Integer, forType, withImpl);
             }
             when 'Long' {
-                return buildValidationResult(TypeHelper.newInstance(withImpl) instanceof Long, forType, withImpl);
+                return buildValidationResult(Types.newInstance(withImpl) instanceof Long, forType, withImpl);
             }
             when 'Decimal' {
-                return buildValidationResult(TypeHelper.newInstance(withImpl) instanceof Decimal, forType, withImpl);
+                return buildValidationResult(Types.newInstance(withImpl) instanceof Decimal, forType, withImpl);
             }
             when 'Double' {
-                return buildValidationResult(TypeHelper.newInstance(withImpl) instanceof Double, forType, withImpl);
+                return buildValidationResult(Types.newInstance(withImpl) instanceof Double, forType, withImpl);
             }
             when 'Map<String,String>' {
-                return buildValidationResult(TypeHelper.newInstance(withImpl) instanceof Map<String,String>, forType, withImpl);
+                return buildValidationResult(Types.newInstance(withImpl) instanceof Map<String,String>, forType, withImpl);
             }
             when 'Map<String,Integer>' {
-                return buildValidationResult(TypeHelper.newInstance(withImpl) instanceof Map<String,Integer>, forType, withImpl);
+                return buildValidationResult(Types.newInstance(withImpl) instanceof Map<String,Integer>, forType, withImpl);
             }
             when 'Map<String,ANY>' {
-                return buildValidationResult(TypeHelper.newInstance(withImpl) instanceof Map<String,Object>, forType, withImpl);
+                return buildValidationResult(Types.newInstance(withImpl) instanceof Map<String,Object>, forType, withImpl);
             }
             when else {
                 return new Dependency.ValidationResult(

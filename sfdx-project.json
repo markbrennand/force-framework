@@ -1,19 +1,24 @@
 {
   "packageDirectories": [
     {
-      "versionName": "0.1",
+      "versionName": "ver 0.1",
       "versionNumber": "0.1.0.NEXT",
       "path": "source",
       "default": true,
-      "package": "sf-frameworks",
+      "package": "force-fw",
       "versionDescription": "Frameworks for Salesforce development"
     }
   ],
-  "namespace": null,
+  "namespace": "forcefw",
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "63.0",
   "packageAliases": {
     "sf-frameworks": "0HogL00000008f7SAA",
-    "sf-frameworks@0.1.0-3": "04tgL0000001VPxQAM"
+    "sf-frameworks@0.1.0-3": "04tgL0000001VPxQAM",
+    "force-fw": "0HogL0000000CHJSA2",
+    "force-fw@0.1.0-1": "04tgL0000002I8vQAE",
+    "force-fw@0.1.0-2": "04tgL0000002ILpQAM",
+    "force-fw@0.1.0-3": "04tgL0000002JJVQA2",
+    "force-fw@0.1.0-4": "04tgL0000002L0LQAU"
   }
 }

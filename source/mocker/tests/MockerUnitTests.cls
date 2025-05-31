@@ -9,15 +9,44 @@ public with sharing class MockerUnitTests {
     private static void testThrows() {
         try {
             Mocker mocked = (Mocker) Mocker.of(Mocker.class)
-                .whenNoArguments()
+                    .whenNoArguments()
                     .expectMethod('mock').throws(new DMLException('Test'))
-                .mock();
+                    .mock();
 
             mocked.mock();
             Assert.fail();
-        } catch(DMLException de) {
+        } catch (DMLException de) {
             Assert.areEqual('Test', de.getMessage());
         }
+    }
+
+    @IsTest
+    private static void testReturns() {
+        Mocker mocked = (Mocker) Mocker.of(Mocker.class)
+                .whenNoArguments()
+                .expectMethod('mock').returns(123)
+                .mock();
+
+        Assert.areEqual(123, mocked.mock());
+        Mocker.validate();
+
+        mocked = (Mocker) Mocker.of(Mocker.class)
+                .whenNoArguments()
+                .expectMethod('mock').returns(new TestModifier())
+                .mock();
+
+        Assert.areEqual(456, mocked.mock());
+        Mocker.validate();
+
+        try {
+            Mocker.of(Mocker.class)
+                    .whenNoArguments()
+                    .expectMethod('mock').returns(123).returns(new TestModifier())
+                    .mock();
+
+            Assert.fail();
+
+        } catch (Assertion.AssertionException ae) {}
     }
 
     @IsTest
@@ -104,6 +133,7 @@ public with sharing class MockerUnitTests {
         Mocker mocked = (Mocker) Mocker.of(Mocker.class)
                 .whenArgument(a1)
                     .expectMethod('whenArgument').called(1)
+                    .expectMethod('whenArguments').called(0)
                 .whenArgument(a2)
                     .expectMethod('whenArgument').called(1)
                 .whenNoArguments()
@@ -120,5 +150,40 @@ public with sharing class MockerUnitTests {
         Assert.areEqual(123, mocked.mock());
 
         Mocker.validate();
+    }
+
+    @IsTest
+    private static void testComparator() {
+        Account a1 = new Account(Id = TestHelper.nextId(Account.SObjectType), Name = 'Bill');
+
+        Mocker mocked = (Mocker) Mocker.of(Mocker.class)
+                .whenArgument(a1)
+                .withComparators(new List<Comparator<Object>> { new TestComparator() })
+                .expectMethod('whenArgument').called(1)
+                .mock();
+
+        mocked.whenArgument(new Account(Name = 'Bill'));
+
+        try {
+            mocked = (Mocker) Mocker.of(Mocker.class)
+                    .whenArgument(a1)
+                    .expectMethod('whenArgument').called(1)
+                    .mock();
+
+            mocked.whenArgument(new Account(Name = 'Bill'));
+
+        } catch(Assertion.AssertionException ae) {}
+    }
+
+    private with sharing class TestModifier implements Mocker.Modifier {
+        public Object process(List<Object> arguments) {
+            return 456;
+        }
+    }
+
+    private with sharing class TestComparator implements Comparator<Object> {
+        public Integer compare(Object param1, Object param2) {
+            return ((Account) param1).Name == ((Account) param2).Name ? 0 : -1;
+        }
     }
 }

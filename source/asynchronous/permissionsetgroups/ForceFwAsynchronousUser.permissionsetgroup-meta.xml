@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSetGroup xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>All permissions required for user to run Asynchronous jobs in the Force Framework.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Force Framework Asynchronous User</label>
+    <permissionSets>forcefw__ForceFwAsynchronousPermissions</permissionSets>
+    <permissionSets>forcefw__ForceFwDependencyInjectionPermissions</permissionSets>
+    <status>Updated</status>
+</PermissionSetGroup>

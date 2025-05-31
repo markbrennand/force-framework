@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <applicationVisibilities>
-        <application>Frameworks</application>
+        <application>ForceFramework</application>
         <visible>true</visible>
     </applicationVisibilities>
-    <description>Permission set required to manage SF-Framework.</description>
+    <description>Permission set required to manage Force Framework.</description>
     <fieldPermissions>
         <editable>true</editable>
         <field>AsynchronousJobException__c.ApexJobId__c</field>
@@ -51,7 +51,7 @@
         <readable>true</readable>
     </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
-    <label>Framework Manager</label>
+    <label>Force Framework Manager</label>
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>true</allowDelete>

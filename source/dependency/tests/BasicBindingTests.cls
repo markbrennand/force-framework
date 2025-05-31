@@ -50,7 +50,10 @@ public with sharing class BasicBindingTests {
                 Dependency.inject(BindingTestHelper.TestInterface.class);
                 Assert.fail();
             } catch (Dependency.APIException ae) {
-                Assert.areEqual('Binding for BindingTestHelper.TestInterface not found in registry', ae.getMessage());
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Binding for BindingTestHelper.TestInterface not found in registry', ae),
+                        'Unexpected exception: ' + ae
+                );
             }
         }
     }

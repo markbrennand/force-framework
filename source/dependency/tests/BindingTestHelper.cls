@@ -6,17 +6,22 @@
  */
 @IsTest
 public with sharing class BindingTestHelper {
-    public static Integer SINGLETON_INSTANCE = 0;
-    public static Integer PROTOTYPE_INSTANCE = 0;
 
-    public static void createUsers() {
+    @TestVisible
+    private static Integer SINGLETON_INSTANCE = 0;
+
+    @TestVisible
+    private static Integer PROTOTYPE_INSTANCE = 0;
+
+    @TestVisible
+    private static void createUsers() {
         final Id profileId = [SELECT Id FROM Profile WHERE Name = 'Minimum Access - Salesforce' LIMIT 1].Id;
 
         User manager = new User(
                 Alias = 'manager',
                 ProfileId = profileId,
-                Username = 'manager@sf-frameworks.test.com',
-                Email = 'manager@sf-frameworks.test.com',
+                Username = 'manager@dependency.force-fw.test.com',
+                Email = 'manager@dependency.force-fw.test.com',
                 EmailEncodingKey = 'ISO-8859-1',
                 TimeZoneSidKey = 'Europe/London',
                 LocaleSidKey = 'en_US',
@@ -28,8 +33,8 @@ public with sharing class BindingTestHelper {
         User user = new User(
                 Alias = 'user',
                 ProfileId = profileId,
-                Username = 'user@sf-frameworks.test.com',
-                Email = 'user@sf-frameworks.test.com',
+                Username = 'user@dependency.force-fw.test.com',
+                Email = 'user@dependency.force-fw.test.com',
                 EmailEncodingKey = 'ISO-8859-1',
                 TimeZoneSidKey = 'Europe/London',
                 LocaleSidKey = 'en_US',
@@ -40,28 +45,35 @@ public with sharing class BindingTestHelper {
 
         insert new List<User> { manager, user };
 
+        Id userPermSetId = [SELECT Id FROM PermissionSet WHERE Name = 'ForceFwDependencyInjectionPermissions' LIMIT 1].Id;
+        Id managerPermSetId = [SELECT Id FROM PermissionSet WHERE Name = 'ForceFwManager' LIMIT 1].Id;
+        delete [SELECT Id FROM PermissionSetAssignment WHERE AssigneeId IN (:user.Id, :manager.Id) AND PermissionSetId IN (:userPermSetId, :managerPermSetId)];
+
         PermissionSetAssignment managerAssignment = new PermissionSetAssignment(
                 AssigneeId = manager.Id,
-                PermissionSetId = [SELECT Id FROM PermissionSet WHERE Name = 'FrameworkManager' LIMIT 1].Id
+                PermissionSetId = managerPermSetId
         );
 
         PermissionSetAssignment userAssignment = new PermissionSetAssignment(
                 AssigneeId = user.Id,
-                PermissionSetId = [SELECT Id FROM PermissionSet WHERE Name = 'DependencyInjection' LIMIT 1].Id
+                PermissionSetId = userPermSetId
         );
 
         insert new List<PermissionSetAssignment> { managerAssignment, userAssignment };
     }
 
-    public static User getManager() {
-        return [SELECT Id FROM User WHERE Username = 'manager@sf-frameworks.test.com' LIMIT 1];
+    @TestVisible
+    private static User getManager() {
+        return [SELECT Id FROM User WHERE Username = 'manager@dependency.force-fw.test.com' LIMIT 1];
     }
 
-    public static User getUser() {
-        return [SELECT Id FROM User WHERE Username = 'user@sf-frameworks.test.com' LIMIT 1];
+    @TestVisible
+    private static User getUser() {
+        return [SELECT Id FROM User WHERE Username = 'user@dependency.force-fw.test.com' LIMIT 1];
     }
 
-    public static void testBindingFailure(Type forType, String action, Type withImpl, String expectedError) {
+    @TestVisible
+    private static void testBindingFailure(Type forType, String action, Type withImpl, String expectedError) {
         try {
             if (action == null) {
                 Dependency.bind(forType, withImpl);
@@ -85,14 +97,13 @@ public with sharing class BindingTestHelper {
         }
     }
 
-    private static void handleException(Exception e, String expectedError) {
-        if (! (e instanceof DMLException || e instanceof Dependency.APIException)) {
-            throw e;
+    @TestVisible
+    private static void handleException(Exception exc, String expectedError) {
+        if (! (exc instanceof DMLException || exc instanceof Dependency.APIException)) {
+            throw exc;
         }
 
-        if (!e.getMessage().contains(expectedError)) {
-            Assert.fail('Unexpected error message; ' + e.getMessage());
-        }
+        Assert.isTrue(TestHelper.exceptionContains(expectedError, exc), 'Unexpected exception: ' + exc);
     }
 
     public interface TestInterface {
@@ -147,7 +158,7 @@ public with sharing class BindingTestHelper {
 
     public with sharing class AbstractTestChecker implements Dependency.BindingCheck {
         public Dependency.ValidationResult validate(Type forType, Type withImpl) {
-            Object instance = TypeHelper.newInstance(withImpl);
+            Object instance = Types.newInstance(withImpl);
             SINGLETON_INSTANCE =
             PROTOTYPE_INSTANCE = 0;
 
@@ -164,7 +175,7 @@ public with sharing class BindingTestHelper {
 
     public with sharing class TestInterfaceChecker implements Dependency.BindingCheck {
         public Dependency.ValidationResult validate(Type forType, Type withImpl) {
-            Object instance = TypeHelper.newInstance(withImpl);
+            Object instance = Types.newInstance(withImpl);
             SINGLETON_INSTANCE =
             PROTOTYPE_INSTANCE = 0;
 
@@ -179,13 +190,13 @@ public with sharing class BindingTestHelper {
         }
     }
 
-    public with sharing class IntegerFactory implements TypeHelper.Factory {
+    public with sharing class IntegerFactory implements Types.Factory {
         public Object newInstance() {
             return 123;
         }
     }
 
-    public with sharing class MapFactory implements TypeHelper.Factory {
+    public with sharing class MapFactory implements Types.Factory {
         public Object newInstance() {
             return new Map<String, Integer> { 'a' => 456, 'b' => 789 };
         }

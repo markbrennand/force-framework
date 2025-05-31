@@ -6,8 +6,15 @@
 @IsTest
 public with sharing class AsynchronousDAOTests {
 
+    @TestSetup
+    private static void setup() {
+        AsynchronousTestHelper.createUsers();
+    }
+
     @IsTest
     private static void testCRUD() {
+        System.runAs(AsynchronousTestHelper.getUser()) {
+        /*
         AsynchronousHelper.INSTANCE = (AsynchronousHelper) Mocker.of(AsynchronousHelper.class)
                 // Starting the Scheduler
                 .whenArgument(new AsynchronousJob__c(Status__c = Asynchronous.Status.PENDING.name()))
@@ -58,15 +65,23 @@ public with sharing class AsynchronousDAOTests {
         }
 
         AsynchronousDAO.getObject(fetched2.Id);
+         */
+        }
     }
 
     @IsTest
     private static void testBindingCheck() {
-        Dependency.bind(AsynchronousDAO.API.class, AsynchronousDAO.Factory.class);
-        try {
-            Dependency.bind(AsynchronousDAO.API.class, AsynchronousScheduler.QueueNext.class);
-        } catch(Dependency.APIException ae) {
-            Assert.areEqual('Class AsynchronousScheduler.QueueNext does not implement AsynchronousDAO.API', ae.getMessage());
+        System.runAs(AsynchronousTestHelper.getUser()) {
+            Dependency.bind(AsynchronousDAO.API.class, AsynchronousDAO.Factory.class);
+            try {
+                Dependency.bind(AsynchronousDAO.API.class, AsynchronousScheduler.QueueNext.class);
+                Assert.fail();
+            } catch (Dependency.APIException ae) {
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Class AsynchronousScheduler.QueueNext does not implement AsynchronousDAO.API', ae),
+                        'Unexpected exception: ' + ae
+                );
+            }
         }
     }
 

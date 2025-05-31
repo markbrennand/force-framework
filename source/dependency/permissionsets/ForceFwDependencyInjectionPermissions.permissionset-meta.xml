@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>Permission set required to use dependency injection.</description>
+    <description>Permission set required for user to use Force Framework's Dependency Injection.</description>
     <fieldPermissions>
         <editable>false</editable>
         <field>Binding__c.Action__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
-    <label>Dependency Injection</label>
+    <label>Force Framework Dependency Injection Permissions</label>
     <objectPermissions>
         <allowCreate>false</allowCreate>
         <allowDelete>false</allowDelete>

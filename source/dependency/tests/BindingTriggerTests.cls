@@ -7,6 +7,11 @@
 
 @IsTest
 public with sharing class BindingTriggerTests {
+    @TestSetup
+    private static void setup() {
+        BindingTestHelper.createUsers();
+    }
+
     private static Binding__c binding1;
     private static Binding__c binding2;
     private static Binding__c binding3;
@@ -14,135 +19,170 @@ public with sharing class BindingTriggerTests {
 
     @IsTest
     static void testValidInserts() {
-        binding1 = new Binding__c(
-                Type__c = BindingTestHelper.TestInterface.class.getName(),
-                Implementation__c = BindingTestHelper.SingletonTest.class.getName()
-        );
+        System.runAs(BindingTestHelper.getUser()) {
+            binding1 = new Binding__c(
+                    Type__c = BindingTestHelper.TestInterface.class.getName(),
+                    Implementation__c = BindingTestHelper.SingletonTest.class.getName()
+            );
 
-        binding2 = new Binding__c(
-                Type__c = BindingTestHelper.AbstractTest.class.getName(),
-                Implementation__c = BindingTestHelper.SingletonTest.class.getName()
-        );
+            binding2 = new Binding__c(
+                    Type__c = BindingTestHelper.AbstractTest.class.getName(),
+                    Implementation__c = BindingTestHelper.SingletonTest.class.getName()
+            );
 
-        binding3 = new Binding__c(
-                Type__c = BindingTestHelper.TestInterface.class.getName(),
-                Action__c = 'Test',
-                Implementation__c = BindingTestHelper.SingletonTest.class.getName()
-        );
+            binding3 = new Binding__c(
+                    Type__c = BindingTestHelper.TestInterface.class.getName(),
+                    Action__c = 'Test',
+                    Implementation__c = BindingTestHelper.SingletonTest.class.getName()
+            );
 
-        binding4 = new Binding__c(
-                Type__c = BindingTestHelper.AbstractTest.class.getName(),
-                Action__c = 'Test',
-                Implementation__c = BindingTestHelper.SingletonTest.class.getName()
-        );
+            binding4 = new Binding__c(
+                    Type__c = BindingTestHelper.AbstractTest.class.getName(),
+                    Action__c = 'Test',
+                    Implementation__c = BindingTestHelper.SingletonTest.class.getName()
+            );
 
-        insert new List<Binding__c> { binding1, binding2, binding3, binding4 };
+            insert new List<Binding__c>{
+                    binding1, binding2, binding3, binding4
+            };
+        }
     }
 
     @IsTest
     static void testValidUpdates() {
-        testValidInserts();
+        System.runAs(BindingTestHelper.getUser()) {
+            testValidInserts();
 
-        binding1.Type__c = BindingTestHelper.AbstractTest.class.getName();
-        binding1.Action__c = 'Test';
-        binding4.Action__c = 'NotTest';
-        upsert new List<Binding__c> { binding1, binding4 };
+            binding1.Type__c = BindingTestHelper.AbstractTest.class.getName();
+            binding1.Action__c = 'Test';
+            binding4.Action__c = 'NotTest';
+            upsert new List<Binding__c>{
+                    binding1, binding4
+            };
 
-        binding2.Type__c = BindingTestHelper.TestInterface.class.getName();
-        binding2.Action__c = 'Test';
-        binding3.Action__c = null;
-        upsert new List<Binding__c> { binding2, binding3 };
+            binding2.Type__c = BindingTestHelper.TestInterface.class.getName();
+            binding2.Action__c = 'Test';
+            binding3.Action__c = null;
+            upsert new List<Binding__c>{
+                    binding2, binding3
+            };
+        }
     }
 
     @IsTest
     static void testInvalidInserts() {
         testValidInserts();
 
-        try {
-            insert new Binding__c(
-                    Type__c = BindingTestHelper.TestInterface.class.getName(),
-                    Implementation__c = BindingTestHelper.SingletonTest.class.getName()
-            );
-            Assert.fail();
-        } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for BindingTestHelper.TestInterface already exists'));
-        }
+        System.runAs(BindingTestHelper.getUser()) {
+            try {
+                insert new Binding__c(
+                        Type__c = BindingTestHelper.TestInterface.class.getName(),
+                        Implementation__c = BindingTestHelper.SingletonTest.class.getName()
+                );
+                Assert.fail();
+            } catch (DmlException de) {
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Binding for BindingTestHelper.TestInterface already exists', de),
+                        'Unexpected exception: ' + de
+                );
+            }
 
-        try {
-            insert new Binding__c(
-                    Type__c = BindingTestHelper.AbstractTest.class.getName(),
-                    Implementation__c = BindingTestHelper.SingletonTest.class.getName()
-            );
-            Assert.fail();
-        } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for BindingTestHelper.AbstractTest already exists'));
-        }
+            try {
+                insert new Binding__c(
+                        Type__c = BindingTestHelper.AbstractTest.class.getName(),
+                        Implementation__c = BindingTestHelper.SingletonTest.class.getName()
+                );
+                Assert.fail();
+            } catch (DmlException de) {
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Binding for BindingTestHelper.AbstractTest already exists', de),
+                        'Unexpected exception: ' + de
+                );
+            }
 
-        try {
-            insert new Binding__c(
-                    Type__c = BindingTestHelper.TestInterface.class.getName(),
-                    Action__c = 'Test',
-                    Implementation__c = BindingTestHelper.SingletonTest.class.getName()
-            );
-            Assert.fail();
-        } catch(DmlException de) {
-            System.debug(de.getMessage());
-            Assert.isTrue(de.getMessage().contains('Binding for BindingTestHelper.TestInterface with action Test already exists'));
-        }
+            try {
+                insert new Binding__c(
+                        Type__c = BindingTestHelper.TestInterface.class.getName(),
+                        Action__c = 'Test',
+                        Implementation__c = BindingTestHelper.SingletonTest.class.getName()
+                );
+                Assert.fail();
+            } catch (DmlException de) {
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Binding for BindingTestHelper.TestInterface with action Test already exists', de),
+                        'Unexpected exception: ' + de
+                );
+            }
 
-        try {
-            insert new Binding__c(
-                    Type__c = BindingTestHelper.AbstractTest.class.getName(),
-                    Action__c = 'Test',
-                    Implementation__c = BindingTestHelper.SingletonTest.class.getName()
-            );
-            Assert.fail();
-        } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for BindingTestHelper.AbstractTest with action Test already exists'));
-        }
+            try {
+                insert new Binding__c(
+                        Type__c = BindingTestHelper.AbstractTest.class.getName(),
+                        Action__c = 'Test',
+                        Implementation__c = BindingTestHelper.SingletonTest.class.getName()
+                );
+                Assert.fail();
+            } catch (DmlException de) {
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Binding for BindingTestHelper.AbstractTest with action Test already exists', de),
+                        'Unexpected exception: ' + de
+                );
+            }
 
-        try {
-            insert new Binding__c(
-                    Type__c = BindingTestHelper.TestInterface.class.getName(),
-                    Action__c = 'ValidationTest',
-                    Implementation__c = User.class.getName()
-            );
-            Assert.fail();
-        } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Class User does not implement TestInterface'));
-        }
+            try {
+                insert new Binding__c(
+                        Type__c = BindingTestHelper.TestInterface.class.getName(),
+                        Action__c = 'ValidationTest',
+                        Implementation__c = User.class.getName()
+                );
+                Assert.fail();
+            } catch (DmlException de) {
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Class User does not implement TestInterface', de),
+                        'Unexpected exception: ' + de
+                );
+            }
 
-        try {
-            insert new Binding__c(
-                    Type__c = BindingTestHelper.AbstractTest.class.getName(),
-                    Action__c = 'ValidationTest',
-                    Implementation__c = User.class.getName()
-            );
-            Assert.fail();
-        } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Class User does not extend AbstractTest'));
-        }
+            try {
+                insert new Binding__c(
+                        Type__c = BindingTestHelper.AbstractTest.class.getName(),
+                        Action__c = 'ValidationTest',
+                        Implementation__c = User.class.getName()
+                );
+                Assert.fail();
+            } catch (DmlException de) {
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Class User does not extend AbstractTest', de),
+                        'Unexpected exception: ' + de
+                );
+            }
 
-        try {
-            insert new Binding__c(
-                    Type__c = User.class.getName(),
-                    Action__c = 'ValidationTest',
-                    Implementation__c = User.class.getName()
-            );
-            Assert.fail();
-        } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Class User has no registered bind checker'));
-        }
+            try {
+                insert new Binding__c(
+                        Type__c = User.class.getName(),
+                        Action__c = 'ValidationTest',
+                        Implementation__c = User.class.getName()
+                );
+                Assert.fail();
+            } catch (DmlException de) {
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Class User has no registered bind checker', de),
+                        'Unexpected exception: ' + de
+                );
+            }
 
-        try {
-            insert new Binding__c(
-                    Type__c = BindingTestHelper.TestInterface.class.getName(),
-                    Action__c = 'ValidationTest',
-                    Implementation__c = BindingTestHelper.AbstractTest.class.getName()
-            );
-            Assert.fail();
-        } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Implementation BindingTestHelper.AbstractTest must be instantiable'));
+            try {
+                insert new Binding__c(
+                        Type__c = BindingTestHelper.TestInterface.class.getName(),
+                        Action__c = 'ValidationTest',
+                        Implementation__c = BindingTestHelper.AbstractTest.class.getName()
+                );
+                Assert.fail();
+            } catch (DmlException de) {
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Implementation BindingTestHelper.AbstractTest must be instantiable', de),
+                        'Unexpected exception: ' + de
+                );
+            }
         }
     }
 
@@ -150,48 +190,61 @@ public with sharing class BindingTriggerTests {
     static void testInvalidUpdates() {
         testValidInserts();
 
-        try {
-            binding1.Type__c = BindingTestHelper.AbstractTest.class.getName();
-            upsert binding1;
-            Assert.fail();
-        } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for BindingTestHelper.AbstractTest already exists'));
-        }
+        System.runAs(BindingTestHelper.getUser()) {
+            try {
+                binding1.Type__c = BindingTestHelper.AbstractTest.class.getName();
+                upsert binding1;
+                Assert.fail();
+            } catch (DmlException de) {
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Binding for BindingTestHelper.AbstractTest already exists', de),
+                        'Unexpected exception: ' + de
+                );
+            }
 
-        try {
-            binding2.Type__c = BindingTestHelper.TestInterface.class.getName();
-            binding2.Action__c = null;
-            binding3.Action__c = null;
-            upsert new List<Binding__c>{
-                    binding2, binding3
-            };
-            Assert.fail();
-        } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for BindingTestHelper.TestInterface already exists'));
-        }
+            try {
+                binding2.Type__c = BindingTestHelper.TestInterface.class.getName();
+                binding2.Action__c = null;
+                binding3.Action__c = null;
+                upsert new List<Binding__c>{
+                        binding2, binding3
+                };
+                Assert.fail();
+            } catch (DmlException de) {
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Binding for BindingTestHelper.TestInterface already exists', de),
+                        'Unexpected exception: ' + de
+                );
+            }
 
-        try {
-            binding1.Action__c = 'Test';
-            upsert binding1;
-            Assert.fail();
-        } catch(DmlException de) {
-            Assert.isTrue(de.getMessage().contains('Binding for BindingTestHelper.AbstractTest with action Test already exists'));
+            try {
+                binding1.Action__c = 'Test';
+                upsert binding1;
+                Assert.fail();
+            } catch (DmlException de) {
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Binding for BindingTestHelper.AbstractTest with action Test already exists', de),
+                        'Unexpected exception: ' + de
+                );
+            }
         }
     }
 
     @IsTest
     private static void testReload() {
-        insert new Binding__c(
-                Type__c = BindingTestHelper.TestInterface.class.getName(),
-                Implementation__c = BindingTestHelper.SingletonTest.class.getName()
-        );
+        System.runAs(BindingTestHelper.getUser()) {
+            insert new Binding__c(
+                    Type__c = BindingTestHelper.TestInterface.class.getName(),
+                    Implementation__c = BindingTestHelper.SingletonTest.class.getName()
+            );
 
-        Assert.isTrue(Dependency.inject(BindingTestHelper.TestInterface.class) instanceof BindingTestHelper.SingletonTest);
+            Assert.isTrue(Dependency.inject(BindingTestHelper.TestInterface.class) instanceof BindingTestHelper.SingletonTest);
 
-        Dependency.bind(BindingTestHelper.TestInterface.class, BindingTestHelper.SingletonCustomTest.class);
-        Assert.isTrue(Dependency.inject(BindingTestHelper.TestInterface.class) instanceof BindingTestHelper.SingletonCustomTest);
+            Dependency.bind(BindingTestHelper.TestInterface.class, BindingTestHelper.SingletonCustomTest.class);
+            Assert.isTrue(Dependency.inject(BindingTestHelper.TestInterface.class) instanceof BindingTestHelper.SingletonCustomTest);
 
-        Dependency.reload();
-        Assert.isTrue(Dependency.inject(BindingTestHelper.TestInterface.class) instanceof BindingTestHelper.SingletonTest);
+            Dependency.reload();
+            Assert.isTrue(Dependency.inject(BindingTestHelper.TestInterface.class) instanceof BindingTestHelper.SingletonTest);
+        }
     }
 }

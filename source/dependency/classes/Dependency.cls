@@ -123,11 +123,11 @@ global with sharing virtual class Dependency {
          */
         public Object newInstance() {
             if (instance instanceof Prototype) {
-                return TypeHelper.newInstance(type);
+                return Types.newInstance(type);
             } else if (instance != null) {
                 return instance;
             } else {
-                instance = TypeHelper.newInstance(type);
+                instance = Types.newInstance(type);
                 return instance;
             }
         }
@@ -373,8 +373,8 @@ global with sharing virtual class Dependency {
     public static void build(List<Binding__c> bindings) {
         for (Binding__c binding : bindings) {
             try {
-                final Type type = TypeHelper.loadType(binding.Type__c);
-                final Type implementation = TypeHelper.loadType(binding.Implementation__c);
+                final Type type = Types.load(binding.Type__c);
+                final Type implementation = Types.load(binding.Implementation__c);
 
                 if (binding.Action__c == null) {
                     bind(type, implementation);
@@ -403,7 +403,7 @@ global with sharing virtual class Dependency {
         if (action == null) {
             Boolean instantiable = false;
             try {
-                TypeHelper.newInstance(forType);
+                Types.newInstance(forType);
                 instantiable = true;
             } catch (Exception e) {
             }
@@ -414,7 +414,7 @@ global with sharing virtual class Dependency {
         }
 
         try {
-            TypeHelper.newInstance(withImpl);
+            Types.newInstance(withImpl);
         } catch(Exception e) {
             throw createException('Implementation', withImpl.getName(), 'must be instantiable');
         }
@@ -457,8 +457,8 @@ global with sharing virtual class Dependency {
 
         for (BindingCheck__mdt check : BindingCheck__mdt.getAll().values()) {
             if (check.IsUnitTest__c == isTest) {
-                final Type forType = TypeHelper.loadType(check.Type__c);
-                final Object checker = TypeHelper.newInstance(TypeHelper.loadType(check.Checker__c));
+                final Type forType = Types.load(check.Type__c);
+                final Object checker = Types.newInstance(Types.load(check.Checker__c));
 
                 if (! (checker instanceof BindingCheck)) {
                     throw createException('Class', check.Checker__c, 'does not implement BindingCheck');

@@ -23,9 +23,9 @@ public with sharing class AsynchronousFinalizer {
 
     /**
      * @description
-     * Used to pass value bacl from Scheduler job to indicate if a new Scheduler is to be started or not.
+     * Set of job Ids that remain to be started.
      */
-    public final static String START_SCHEDULER_ARGUMENT = 'StartScheduler';
+    public final static String JOBS_TO_START = 'JobsToStart';
 
     /**
      * @description
@@ -96,11 +96,14 @@ public with sharing class AsynchronousFinalizer {
             }
 
             try {
-                if (AsynchronousDAO.countScheduledObjects(false) > 0) {
-                    if (AsynchronousJob.fromSObject(asyncObject).getState().get(START_SCHEDULER_ARGUMENT) != 'false') {
-                        AsynchronousScheduler.queue();
-                    }
+                final Asynchronous.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
+                if (asyncJob.getRunnable() instanceof AsynchronousScheduler) {
+                    AsynchronousScheduler.queue(
+                            (Set<String>) JSON.deserialize(
+                                    asyncJob.getState().get(JOBS_TO_START), Set<String>.class)
+                    );
                 }
+
             } catch(Exception exc) {
                 AsynchronousHelper.recordInternalException(asyncObject, exc);
             }

@@ -14,6 +14,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
      * @description
      * The Id of the AsynchronousJob__c object in the data store for the job.
      */
+    @TestVisible
     private String asyncObjectId;
 
     /**
@@ -183,7 +184,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
     private AsynchronousJob withRunnable(final String runnableTypeName) {
         Assertion.isNotNull(runnableTypeName, 'argument: AsynchronousJob.withRunnable.runnableTypeName');
 
-        final Object runnable = TypeHelper.newInstance(TypeHelper.loadType(runnableTypeName));
+        final Object runnable = Types.newInstance(Types.load(runnableTypeName));
         Assertion.isTrue(
                  runnable instanceof Asynchronous.Runnable,
                 'The class ' + runnableTypeName + ' does not implement Asynchronous.Runnable'

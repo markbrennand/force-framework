@@ -2,12 +2,19 @@
  * @description
  * The Scheduler is responsible for finding and starting the next job that can be run based on its scheduled time.
  *
- * The Scheduler is the controller for the concurrency. The job that is to be run next will have its status set
- * to RUNNING and will be locked for update to prevent any other Scheduler jobs running it. The job itself is
- * queued to be run by Apex. When control is returned to SF from the run method, the job status change is committed
- * which prevents other Schedulers selecting the job as its status is now RUNNING. The status change to RUNNING also
- * means it is counted in the query to find the number of running jobs for the Runnable, allowing an accurate count
- * of the number of active jobs for the Runnable to be determined.
+ * The Scheduler queue method is the controller for the concurrency. The Scheduler selects the jobs that are runnable.
+ * The number of active instances of each job is checked against its maximum concurrency. If there is concurrency
+ * available the Id of the job is added to a Set jobs to start. A Scheduler job is started passing in the Set
+ * as an argument.
+ *
+ * The Scheduler job starts the first job in the Set and removes the Id of the job from the Set. The new Set is
+ * saved in the Set.
+ *
+ * The Finalizer, if finalizing, a Scheduler, extracts the Set from the job. It calls the Scheduler's queue method
+ * passing the Set as argument. If the Set is not empty, a new Scheduler is started, passing in the new Set as
+ * argument. This pattern is repeated till the Set is empty.
+ *
+ * When an empty Set is passed to the queue method, the Scheduler builds the next Set of job ids that can be run.
  *
  * Due to the Queueable limit of only 1 Apex job being allowed to be started, a Scheduler will be run for every
  * job that is started.
@@ -22,12 +29,15 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
      */
     private final static String CONFIG_ACTION = 'AsynchronousConfiguration';
 
-    /**
-     * @description
-     * The maximum number of Schedulers that may be active concurrently.
+    /*
+     * Initialise the registry.
+     *
+     * We have to do this before the property wiring of the CONFIGURATION.
      */
-    @TestVisible
-    private final static String MAX_SCHEDULERS_PROPERTY = 'maxSchedulers';
+    static {
+        Dependency.bind(Map<String, Integer>.class, CONFIG_ACTION, Configuration.class);
+        Dependency.reload();
+    }
 
     /**
      * @description
@@ -40,12 +50,19 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
 
     /**
      * @description
+     * The number of jobs to be run that the Scheduler should select in the queue method.
+     */
+    @TestVisible
+    private final static String MAXIMUM_JOBS_TO_START_PROPERTY = 'maximumJobsToStart';
+
+    /**
+     * @description
      * Configuration options for thge Scheduler.
      *
      * Test visible to it can be overridden from unit tests.
      */
     @TestVisible
-    private Map<String, Integer> configuration =
+    private static Map<String, Integer> CONFIGURATION =
             (Map<String, Integer>) Dependency.inject(Map<String, Integer>.class, CONFIG_ACTION);
 
     /**
@@ -57,8 +74,8 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
     @TestVisible
     private AsynchronousScheduler() {
         super(QueueNext.class);
-        Assertion.isNotNull(configuration.get(MAX_SCHEDULERS_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + MAX_SCHEDULERS_PROPERTY);
-        Assertion.isNotNull(configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + NO_JOBS_TO_RUN_DELAY_PROPERTY);
+        Assertion.isNotNull(CONFIGURATION.get(NO_JOBS_TO_RUN_DELAY_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + NO_JOBS_TO_RUN_DELAY_PROPERTY);
+        Assertion.isNotNull(CONFIGURATION.get(MAXIMUM_JOBS_TO_START_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + MAXIMUM_JOBS_TO_START_PROPERTY);
     }
 
     /**
@@ -76,19 +93,23 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
     public override void run(final Asynchronous.Job asyncJob, final String apexJobId) {
         Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.run.asyncJob');
 
-        if (AsynchronousDAO.countScheduledObjects(true) == 0) {
-            delayWhenNoJobsToRun(configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY));
-        }
+        final Set<String> jobsToStart = (Set<String>)
+                JSON.deserialize(asyncJob.getState().get(AsynchronousFinalizer.JOBS_TO_START), Set<String>.class);
 
-        final AsynchronousJob__c scheduledAsyncObject = AsynchronousDAO.getNextScheduled();
+        if (jobsToStart.isEmpty()) {
+            delayWhenNoJobsToRun(CONFIGURATION.get(NO_JOBS_TO_RUN_DELAY_PROPERTY));
 
-        if (scheduledAsyncObject != null) {
-            scheduledAsyncObject.ApexJobId__c = apexJobId;
+        } else {
+            final String jobId = jobsToStart.iterator().next();
+            final AsynchronousJob__c asyncObject = AsynchronousDAO.getObject(jobId);
 
-            final Boolean jobStarted = AsynchronousHelper.queueJob(scheduledAsyncObject);
+            asyncObject.ApexJobId__c = apexJobId;
+            AsynchronousHelper.queueJob(asyncObject);
+            jobsToStart.remove(jobId);
+
             asyncJob.setState(
                     new Map<String, String> {
-                            AsynchronousFinalizer.START_SCHEDULER_ARGUMENT => String.valueOf(jobStarted)
+                            AsynchronousFinalizer.JOBS_TO_START => JSON.serialize(jobsToStart)
                     }
             );
         }
@@ -128,35 +149,12 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
      * @description
      * Returns the maximum number of Schedulers that may be active for the user at any one time.
      *
-     * If there are jobs available to run now, the maximum number set in the configuration is returned. Otherwise,
-     * 1 is returned if there are jobs to run in the future.
-     *
-     * If there are no jobs to run at all, 1 is returned. This is to make it the Finalizer's decision not to start
-     * a new Scheduler.
+     * Running more than one Scheduler concurrently would break the synchronisation, so always use 1.
      *
      * @return The Scheduler concurrency.
      */
     public override Integer getMaximumActive() {
-        final Integer scheduledObjectCount = AsynchronousDAO.countScheduledObjects(false);
-        if (scheduledObjectCount > 0) {
-            if (AsynchronousDAO.countScheduledObjects(true) > 0) {
-                // If several Schedulers all run at the same time, their RUNNING counts will include the other
-                // schedulers that are completing. Their active counts will thus be skewed by the other jobs
-                // that are also completing and have a status of SUCCEEDED or FAILED which has not yet been
-                // committed.
-                //
-                // To counter for this scenario, we drop the limit each time by 1, for the Scheduler that has
-                // completed.
-                return Math.max(
-                        Math.max(1, AsynchronousDAO.countActiveObjects(new AsynchronousJob__c(Runnable__c = QueueNext.class.getName())) - 1),
-                        Math.min(scheduledObjectCount, configuration.get(MAX_SCHEDULERS_PROPERTY))
-                );
-            } else {
-                return 1;
-            }
-        } else {
-            return 1;
-        }
+        return 1;
     }
 
     /**
@@ -205,28 +203,104 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
      *
      * The processing logic for the Scheduler requires that the Asynchronous__c object for the new Scheduler job
      * is only persisted if an Apex job could be created for it.
+     *
+     * @param jobsLeftToStart The jobs that are left to start from the previous scheduler run.
      */
-    public static void queue() {
-        Asynchronous.Job asyncJob = Asynchronous.createJob(
-                QueueNext.class,
-                null,
-                0,
-                0,
-                new Map<String, String> {}
-        );
+    public static void queue(final Set<String> jobsLeftToStart) {
+        final Asynchronous.Job asyncJob;
 
-        AsynchronousHelper.queueJob(AsynchronousJob.toSObject(asyncJob));
+        if (!jobsLeftToStart.isEmpty()) {
+            asyncJob = Asynchronous.createJob(
+                    QueueNext.class,
+                    null,
+                    0,
+                    0,
+                    new Map<String, String> { AsynchronousFinalizer.JOBS_TO_START => JSON.serialize(jobsLeftToStart) }
+            );
+
+        } else {
+            final Set<String> newJobsToStart = getJobIdsToStart(CONFIGURATION.get(MAXIMUM_JOBS_TO_START_PROPERTY));
+            if (newJobsToStart.isEmpty() && (AsynchronousDAO.countSchedulableObjects() == 0)) {
+                return;
+            }
+
+            asyncJob = Asynchronous.createJob(
+                    QueueNext.class,
+                    null,
+                    0,
+                    0,
+                    new Map<String, String> { AsynchronousFinalizer.JOBS_TO_START => JSON.serialize(newJobsToStart) }
+            );
+        }
+
+        // More than one running Scheduler would cause the synchronisation to fail.
+        if (AsynchronousDAO.countActiveObjects(new AsynchronousJob__c(Runnable__c = QueueNext.class.getName())) < 1) {
+            AsynchronousJob__c asyncObject = AsynchronousJob.toSObject(asyncJob);
+            AsynchronousDAO.persistObjects(
+                    new List<AsynchronousJob__c> { asyncObject},
+                    new List<Map<String, String>> { asyncJob.getState() }
+            );
+            AsynchronousHelper.queueJob(asyncObject);
+        }
+    }
+
+    /**
+     * @description
+     * Returns the ids of all the jobs that can be started.
+     *
+     * The concurrency of the jobs is used to determine whether the job can be started.
+     *
+     * @param maxToStart The maximum number of jobs to return.
+     *
+     * @return The ids of the jobs that can be started.
+     */
+    private static Set<String> getJobIdsToStart(final Integer maxToStart) {
+        final Set<String> jobIds = new Set<String>();
+        final Map<String, Integer> activeCountCache = new Map<String, Integer>();
+        final Map<String, Integer> activeCache = new Map<String, Integer>();
+
+        for (AsynchronousJob__c asyncObject : AsynchronousDAO.getScheduledObjects(maxToStart)) {
+            final String runnable = asyncObject.Runnable__c;
+            final Integer maxActive;
+            final Integer active;
+
+            if (activeCountCache.containsKey(runnable)) {
+                maxActive = activeCountCache.get(runnable);
+
+            } else {
+                maxActive =
+                        ((Asynchronous.Runnable) Types.newInstance(Types.load(asyncObject.Runnable__c)))
+                                .getMaximumActive();
+
+                activeCountCache.put(runnable, maxActive);
+            }
+
+            if (activeCache.containsKey(runnable)) {
+                active = activeCache.get(runnable);
+
+            } else {
+                active = AsynchronousDAO.countActiveObjects(asyncObject);
+                activeCache.put(runnable, active);
+            }
+
+            if (active < maxActive) {
+                jobIds.add(asyncObject.Id);
+                activeCache.put(runnable, active+1);
+            }
+        }
+
+        return jobIds;
     }
 
     /**
      * @description
      * Default Scheduler configuration to be injected.
      */
-    public with sharing class Configuration implements TypeHelper.Factory {
+    public with sharing class Configuration implements Types.Factory {
         public Object newInstance() {
             return new Map<String, Integer> {
-                    MAX_SCHEDULERS_PROPERTY => 1,
-                    NO_JOBS_TO_RUN_DELAY_PROPERTY => 2000
+                    NO_JOBS_TO_RUN_DELAY_PROPERTY => 2000,
+                    MAXIMUM_JOBS_TO_START_PROPERTY => 1
             };
         }
     }
@@ -237,15 +311,9 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
      *
      * This allows the Scheduler class to be inaccessible from outside this class.
      */
-    public with sharing class QueueNext implements TypeHelper.Factory {
+    public with sharing class QueueNext implements Types.Factory {
         public Object newInstance() {
             return new AsynchronousScheduler();
         }
-    }
-
-    // Initialise the registry to use the default configuration.
-    static {
-        Dependency.bind(Map<String, Integer>.class, CONFIG_ACTION, Configuration.class);
-        Dependency.reload();
     }
 }

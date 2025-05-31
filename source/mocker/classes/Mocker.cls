@@ -13,6 +13,27 @@ public with sharing virtual class Mocker extends WhenArguments {
 
     /**
      * @description
+     * An implementation of the Modifier interface can be added to a Method to make changes to the method arguments
+     * when a match for the arguments is found and the registered method is called.
+     *
+     * An example use case for this would be to add an Id to objects inserted through a call to a mocked method.
+     *
+     */
+    public interface Modifier {
+
+        /**
+         * @description
+         * Called to make changes to the return value using the arguments passed into the Method.
+         *
+         * @param arguments The arguments passed to the Method.
+         *
+         * @return The return value.
+         */
+        Object process(List<Object> arguments);
+    }
+
+    /**
+     * @description
      * Map from the objects that have been stubbed to their arguments list.
      */
     private final static Map<Object, List<Arguments>> STUBBED_OBJECTS = new Map<Object, List<Arguments>>();
@@ -122,7 +143,7 @@ public with sharing virtual class Mocker extends WhenArguments {
                 if (argument.matches(arguments)) {
                     for (Method method : argument.methods) {
                         if (method.isMatch(stubbedMethodName)) {
-                            return method.call();
+                            return method.call(arguments);
                         }
                     }
                 }
@@ -238,6 +259,7 @@ public with sharing virtual class Mocker extends WhenArguments {
      */
     public with sharing class Method extends WhenArguments {
         private final Arguments arguments;
+        private Modifier modifier;
         private final String methodName;
         private Integer expectedCount;
         private Integer actualCount = 0;
@@ -286,6 +308,7 @@ public with sharing virtual class Mocker extends WhenArguments {
          * @return The object instance so it can be chained.
          */
         public Method returns(final Object returnValue) {
+            Assertion.isTrue(this.returnValue == null, 'Return value can only be set once');
             this.returnValue = returnValue;
             return this;
         }
@@ -345,16 +368,22 @@ public with sharing virtual class Mocker extends WhenArguments {
          *
          * The call count is incremented to track that the method has been called.
          *
+         * @param arguments The arguments passed to the mocked method.
+         *
          * @return The return value or an Exception.
          */
-        private Object call() {
+        private Object call(final List<Object> arguments) {
             actualCount++;
 
             if (this.throws != null) {
                 throw throws;
             }
 
-            return returnValue;
+            if (returnValue instanceof Modifier) {
+                return ((Modifier) returnValue).process(arguments);
+            } else {
+                return returnValue;
+            }
         }
 
         /**

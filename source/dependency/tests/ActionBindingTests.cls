@@ -62,7 +62,10 @@ public with sharing class ActionBindingTests {
                 Dependency.inject(BindingTestHelper.TestInterface.class, 'NotTest');
                 Assert.fail();
             } catch (Dependency.APIException ae) {
-                Assert.areEqual('Binding for BindingTestHelper.TestInterface with action NotTest not found in registry', ae.getMessage());
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Binding for BindingTestHelper.TestInterface with action NotTest not found in registry', ae),
+                        'Unexpected exception: ' + ae
+                );
             }
         }
     }
@@ -182,55 +185,55 @@ public with sharing class ActionBindingTests {
                 BindingTestHelper.PROTOTYPE_INSTANCE = 0;
     }
 
-    public with sharing class StringFactory implements TypeHelper.Factory {
+    public with sharing class StringFactory implements Types.Factory {
         public Object newInstance() {
             return '123';
         }
     }
 
-    public with sharing class IntegerFactory implements TypeHelper.Factory {
+    public with sharing class IntegerFactory implements Types.Factory {
         public Object newInstance() {
             return 123;
         }
     }
 
-    public with sharing class LongFactory implements TypeHelper.Factory {
+    public with sharing class LongFactory implements TypeS.Factory {
         public Object newInstance() {
             return 123L;
         }
     }
 
-    public with sharing class DoubleFactory implements TypeHelper.Factory {
+    public with sharing class DoubleFactory implements Types.Factory {
         public Object newInstance() {
             return 123.123;
         }
     }
     
-    public with sharing class DecimalFactory implements TypeHelper.Factory {
+    public with sharing class DecimalFactory implements Types.Factory {
         public Object newInstance() {
             return 123.123;
         }
     }
 
-    public with sharing class MapStringObjectFactory implements TypeHelper.Factory {
+    public with sharing class MapStringObjectFactory implements Types.Factory {
         public Object newInstance() {
             return new Map<String, Object>();
         }
     }
 
-    public with sharing class MapStringStringFactory implements TypeHelper.Factory {
+    public with sharing class MapStringStringFactory implements Types.Factory {
         public Object newInstance() {
             return new Map<String, String>();
         }
     }
 
-    public with sharing class MapStringIntegerFactory implements TypeHelper.Factory {
+    public with sharing class MapStringIntegerFactory implements Types.Factory {
         public Object newInstance() {
             return new Map<String, Integer>();
         }
     }
 
-    public with sharing class MapStringListIntegerFactory implements TypeHelper.Factory {
+    public with sharing class MapStringListIntegerFactory implements Types.Factory {
         public Object newInstance() {
             return new Map<String, List<Integer>>();
         }
