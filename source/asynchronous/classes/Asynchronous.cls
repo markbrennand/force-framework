@@ -584,7 +584,7 @@ global with sharing virtual class Asynchronous implements API {
      * @description
      * Active API instance.
      *
-     * The instance is wired in from the Registry.
+     * The instance is injected from the Registry.
      *
      * The instance is test visible so it can be mocked.
      */

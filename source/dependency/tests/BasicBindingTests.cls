@@ -109,7 +109,7 @@ public with sharing class BasicBindingTests {
         BindingTestHelper.SINGLETON_INSTANCE =
         BindingTestHelper.PROTOTYPE_INSTANCE = 0;
 
-        // The first wire() call adds the 2 custom bindings, which will instantiate the implementation. Hence use
+        // The first inject call adds the 2 custom bindings, which will instantiate the implementation. Hence use
         // CUSTOM3 and CUSTOM4.
         System.runAs(BindingTestHelper.getUser()) {
             Assert.areEqual('CUSTOM1', ((BindingTestHelper.TestInterface) Dependency.inject(BindingTestHelper.TestInterface.class)).getValue());

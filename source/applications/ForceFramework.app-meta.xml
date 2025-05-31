@@ -4,14 +4,14 @@
         <headerColor>#0070D2</headerColor>
         <shouldOverrideOrgTheme>false</shouldOverrideOrgTheme>
     </brand>
-    <description>Framework for Salesforce development</description>
+    <description>Frameworks for Salesforce development</description>
     <formFactors>Small</formFactors>
     <formFactors>Large</formFactors>
     <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
     <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
     <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
     <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
-    <label>Force Framework</label>
+    <label>Force Frameworks</label>
     <navType>Standard</navType>
     <tabs>Binding__c</tabs>
     <tabs>AsynchronousJob__c</tabs>

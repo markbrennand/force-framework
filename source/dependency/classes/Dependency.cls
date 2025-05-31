@@ -2,9 +2,9 @@
  * @description
  * Class providing dependency injection.
  * <br><br>
- * Dependencies can be wired into an application by their interface or abstract class.
+ * Dependencies can be injected into an application by their interface or abstract class.
  * <br><br>
- * Variable and member variable values can also be wired into a class using the variable's class and an action.
+ * Variable and member variable values can also be injected into a class using the variable's class and an action.
  * <br><br>
  * An optional action argument is supported to allow for the binding of the same interface or class with different
  * implementations.
@@ -453,7 +453,7 @@ global with sharing virtual class Dependency {
      * @description
      * Selects all the custom bindings and adds them to the registry.
      *
-     * This method need only be called on the first call to wire a binding.
+     * This method need only be called on the first call to inject a binding.
      */
     private void addCustomBindings() {
         if (!customBindingsAdded) {

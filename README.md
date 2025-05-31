@@ -1,12 +1,12 @@
-# SF-Frameworks
-A suite of frameworks that have been developed to aid in APEX development.
+# Force-Frameworks
+A suite of frameworks that have been developed to aid in Apex development.
 
 Built with SOLID principles and clean code in mind.
 
 ## Dependency Injection
-The D of SOLID is Dependency Injection. This is not something supported natively by APEX. The framework developed
+The D of SOLID is Dependency Injection. This is not something supported natively by Apex. The framework developed
 allows the initialisation of a registry either programmatically or from a custom object. Once initialised, dependencies
-can be wired into APEX code.
+can be wired into Apex code.
 
 See [Dependency Injection](source/dependency/README.md)
 
