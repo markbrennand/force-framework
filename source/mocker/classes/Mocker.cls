@@ -1,25 +1,173 @@
 /**
  * @description
- * Classes providing an arguments based mocking solution.
- *
+ * Classes providing the Mocker API.
+ * <br><br>
  * Rather than defining fixed lists of functions and arguments to be mocked, this solution defines the arguments
  * first and then list all the methods that expect those arguments from the class or interface being mocked.
- *
- * See [Mocking](https://github.com/markbrennand/sf-frameworks/blob/main/source/mocker/README.md)
+ * <br><br>
+ * Arguments are checked for matches using comparators. A default set of comparators are provided. Custom comparators
+ * may be added for arguments to be matched.
+ * <br><br>
+ * The default comparator for a custom object or collection of custom objects requires that only the fields set in the
+ * object to be matched are set identically in the custom object(s) passed to the mocked method call.
+ * <br><br>
+ * The Modifier interface may be used to return a value from a mocked method based on the arguments to the call.
+ * For example, this could be used to add a fake Id to custom objects being inserted.
+ * <br><br>
+ * See <a href=../README.md target="_blank">README</a> for full details of the Mocker API.
  *
  * @author Mark Brennand
  */
-public with sharing virtual class Mocker extends WhenArguments {
+global with sharing virtual class Mocker extends Chainable {
 
     /**
      * @description
-     * An implementation of the Modifier interface can be added to a Method to make changes to the method arguments
-     * when a match for the arguments is found and the registered method is called.
-     *
+     * Argument setting class.
+     * <br><br>
+     * It is designed to be callable from both the Mocker, Arguments and Method classes. This is so all three can
+     * perform chaining of calls.
+     */
+    global with sharing virtual class Chainable {
+        protected Mocker parent;
+
+        /**
+         * @description
+         * Sets the parent Mocker object.
+         *
+         * @param parent The owning Mocker.
+         */
+        private void setParent(final Mocker parent) {
+            Assertion.isNotNull(parent, 'argument: Mocker.WhenArguments.setParent.parent');
+
+            this.parent = parent;
+        }
+
+        /**
+         * @description
+         * Creates an argument grouping which has no values.
+         * <br><br>
+         * This would represent a method with no arguments.
+         *
+         * @return The object instance so it can be chained.
+         */
+        global Mocker.Arguments whenNoArguments() {
+            return whenListOfArguments(new List<Object>());
+        }
+
+        /**
+         * @description
+         * Creates an argument grouping which has a single argument.
+         * <br><br>
+         * This would represent a mocked method which has one parameter.
+         *
+         * @param argument The expected parameter value.
+         *
+         * @return The object instance so it can be chained.
+         */
+        global Mocker.Arguments whenArgument(final Object argument) {
+            return whenListOfArguments(new List<Object> { argument });
+        }
+
+        /**
+         * @description
+         * Creates an argument grouping which has two arguments.
+         * <br><br>
+         * This would represent a mocked method which has two parameters.
+         *
+         * @param argument1 The expected value of the first parameter.
+         * @param argument2 The expected value of the second parameter.
+         *
+         * @return The object instance so it can be chained.
+         */
+        global Mocker.Arguments whenArguments(final Object argument1, final Object argument2) {
+            return whenListOfArguments(new List<Object> { argument1, argument2  });
+        }
+
+        /**
+         * @description
+         * Creates an argument grouping which has three arguments.
+         * <br><br>
+         * This would represent a mocked method which has three parameters.
+         *
+         * @param argument1 The expected value of the first parameter.
+         * @param argument2 The expected value of the second parameter.
+         * @param argument3 The expected value of the third parameter.
+         *
+         * @return The object instance so it can be chained.
+         */
+        global Mocker.Arguments whenArguments(final Object argument1, final Object argument2, final Object argument3) {
+            return whenListOfArguments(new List<Object> { argument1, argument2, argument3  });
+        }
+
+        /**
+         * @description
+         * Creates an argument grouping which has four arguments.
+         * <br><br>
+         * This would represent a mocked method which has four parameters.
+         *
+         * @param argument1 The expected value of the first parameter.
+         * @param argument2 The expected value of the second parameter.
+         * @param argument3 The expected value of the third parameter.
+         * @param argument4 The expected value of the fourth parameter.
+         *
+         * @return The object instance so it can be chained.
+         */
+        global Mocker.Arguments whenArguments(final Object argument1, final Object argument2, final Object argument3, final Object argument4) {
+            return whenListOfArguments(new List<Object> { argument1, argument2, argument3, argument4  });
+        }
+
+        /**
+         * @description
+         * Creates an argument grouping which has five arguments.
+         * <br><br>
+         * This would represent a mocked method which has five parameters.
+         *
+         * @param argument1 The expected value of the first parameter.
+         * @param argument2 The expected value of the second parameter.
+         * @param argument3 The expected value of the third parameter.
+         * @param argument4 The expected value of the fourth parameter.
+         * @param argument5 The expected value of the fifth parameter.
+         *
+         * @return The object instance so it can be chained.
+         */
+        global Mocker.Arguments whenArguments(final Object argument1, final Object argument2, final Object argument3, final Object argument4, final Object argument5) {
+            return whenListOfArguments(new List<Object> { argument1, argument2, argument3, argument4, argument5  });
+        }
+
+        /**
+         * @description
+         * Creates an argument grouping which has the given arguments.
+         *
+         * @param expectedArguments The arguments to be matched.
+         *
+         * @return The object instance so it can be chained.
+         */
+        global Mocker.Arguments whenListOfArguments(final List<Object> expectedArguments) {
+            Assertion.isNotNull(expectedArguments, 'argument: Mocker.WhenArguments.whenListOfArguments.expectedArguments');
+
+            return new Arguments(parent, expectedArguments);
+        }
+
+        /**
+         * @description
+         * Gets the mocked object for the class being mocked.
+         *
+         * @return The mocked object.
+         */
+        global Object mock(){
+            return parent.mockedObject;
+        }
+    }
+
+    /**
+     * @description
+     * An implementation of the Modifier interface can be added as argument to Method.returns to make changes to the
+     * method arguments when a match for the arguments is found and the registered method is called.
+     * <br><br>
      * An example use case for this would be to add an Id to objects inserted through a call to a mocked method.
      *
      */
-    public interface Modifier {
+    global interface Modifier {
 
         /**
          * @description
@@ -34,7 +182,7 @@ public with sharing virtual class Mocker extends WhenArguments {
 
     /**
      * @description
-     * Map from the objects that have been stubbed to their arguments list.
+     * Map from the objects that have been mocked to their arguments list.
      */
     private final static Map<Object, List<Arguments>> STUBBED_OBJECTS = new Map<Object, List<Arguments>>();
 
@@ -46,24 +194,24 @@ public with sharing virtual class Mocker extends WhenArguments {
 
     /**
      * @description
-     * The stubbed object created by this instance of the Mocker.
+     * The mocked object created by this instance of the Mocker.
      */
-    private final Object stubbedObject;
+    private final Object mockedObject;
 
     /**
      * @description
      * Creates an instance of this class.
-     *
+     * <br><br>
      * The method is protected so the class can be mocked in the unit tests. It is not public, to prevent re-use
      * outside this class.
      *
-     * @param stubbedObject The mocked object.
+     * @param mockedObject The mocked object.
      */
-    protected Mocker(final Object stubbedObject) {
-        Assertion.isNotNull(stubbedObject, 'argument: Mocker.stubbedObject');
+    protected Mocker(final Object mockedObject) {
+        Assertion.isNotNull(mockedObject, 'argument: Mocker.mockedObject');
 
         setParent(this);
-        this.stubbedObject = stubbedObject;
+        this.mockedObject = mockedObject;
     }
 
     /**
@@ -74,7 +222,7 @@ public with sharing virtual class Mocker extends WhenArguments {
      *
      * @return A Mocker which may be used to define a mocking scenario.
      */
-    public static Mocker of(final Type forType) {
+    global static Mocker of(final Type forType) {
         Assertion.isNotNull(forType, 'argument: Mocker.of.forType');
 
         final Mocker mocked = new Mocker(Test.createStub(forType, MATCHER));
@@ -83,12 +231,13 @@ public with sharing virtual class Mocker extends WhenArguments {
 
     /**
      * @description
-     * Validates that all the methods in the stubbed objects have been called the required number of times.
-     *
-     * If a method that has not been called the correct number of times, an Assertion.AssertionException is thrown.
+     * Validates that all the methods in the mocked objects have been called the required number of times.
+     * <br><br>
+     * If a method has not been called the correct number of times, an Assertion.AssertionException is thrown.
+     * <br><br>
      * If the method has not set a called count value, it is not validated.
      */
-    public static void validate() {
+    global static void validate() {
         for (Object mocked : STUBBED_OBJECTS.keySet()) {
             for (Arguments arguments : STUBBED_OBJECTS.get(mocked)) {
                 for (Method method : arguments.methods) {
@@ -107,9 +256,9 @@ public with sharing virtual class Mocker extends WhenArguments {
         /**
          * @description
          * Method responsible for calling the methods assigned to mocked object.
-         *
-         * The arguments are checked against all the registered arguments for the stubbed object.
-         *
+         * <br><br>
+         * The arguments are checked against all the registered arguments for the mocked objects.
+         * <br><br>
          * If a match is found, the methods registered for the arguments are checked. If a method is found with
          * a name matching the stubbedMethodName, the method is called.
          *
@@ -159,107 +308,13 @@ public with sharing virtual class Mocker extends WhenArguments {
         }
     }
 
-    /**
-     * @description
-     * Class representing a list of arguments for which mocked methods are to be registered.
-     */
-    public with sharing class Arguments extends WhenArguments {
-        final List<Object> expectedArguments;
-        final List<Method> methods = new List<Method>();
-
-        /**
-         * @description
-         * Additional comparators to use when checking the arguments for equivalence to those passed to the method call
-         * on the stubbed objet.
-         */
-        List<Comparator<Object>> comparators = new List<Comparator<Object>>();
-
-        /**
-         * @description
-         * Constructs an instance of the Arguments class.
-         *
-         * The class represents the grouping of argument values for which a sequence of methods can be registered.
-         *
-         * @param parent The owning class.
-         * @param expectedArguments The arguments that are expected.
-         */
-        private Arguments(final Mocker parent, final List<Object> expectedArguments) {
-            Assertion.isNotNull(parent, 'argument: Mocker.Arguments.parent');
-            Assertion.isNotNull(expectedArguments, 'argument: Mocker.Arguments.expectedArguments');
-
-            setParent(parent);
-            this.expectedArguments = expectedArguments;
-
-            if (STUBBED_OBJECTS.containsKey(parent.stubbedObject)) {
-                STUBBED_OBJECTS.get(parent.stubbedObject).add(this);
-            } else {
-                STUBBED_OBJECTS.put(parent.stubbedObject, new List<Arguments> { this });
-            }
-        }
-
-        /**
-         * @description
-         * Adds comparators to the default comparatros used when checking the arguments for equivalence.
-         *
-         * Any additional comparators will be called before the default ones.
-         *
-         * @param comparators The additional comparators to be used when checking the expected arguments for equivalence.
-         *
-         * @return The object instance so it can be chained.
-         */
-        public Arguments withComparators(final List<Comparator<Object>> comparators) {
-            this.comparators = comparators;
-            return this;
-        }
-
-        /**
-         * @description
-         * Registers a new method for the expected arguments.
-         *
-         * The method will be called when the arguments are matched.
-         *
-         * @param methodName The name of the method expected.
-         *
-         * @return The method instance so it can be chained.
-         */
-        public Method expectMethod(final String methodName) {
-            Method method = new Method(this, methodName);
-            methods.add(method);
-            return method;
-        }
-
-        /**
-         * @description
-         * Checks whether the arguments passed to a stubbed class's method match the expected arguments.
-         *
-         * @param actualArguments The arguments to be checked.
-         *
-         * @return True if the arguments match the expected arguments, or false if not.
-         */
-        private Boolean matches(final List<Object> actualArguments) {
-            Assertion.isNotNull(actualArguments, 'argument: Mocker.Arguments.matches.actualArguments');
-
-            if (expectedArguments.size() != actualArguments.size()) {
-                return false;
-            }
-
-            for (Integer i = 0; i < expectedArguments.size(); i++) {
-                if (!ComparisonHelper.compare(comparators, expectedArguments[i], actualArguments[i])) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-    }
 
     /**
      * @description
      * Method definition associated with an Argument.
      */
-    public with sharing class Method extends WhenArguments {
+    global with sharing class Method extends Chainable {
         private final Arguments arguments;
-        private Modifier modifier;
         private final String methodName;
         private Integer expectedCount;
         private Integer actualCount = 0;
@@ -284,15 +339,15 @@ public with sharing virtual class Mocker extends WhenArguments {
 
         /**
          * @description
-         * Sets the number of times he mocked object is expected to be called.
-         *
+         * Sets the number of times the mocked object is expected to be called.
+         * <br><br>
          * The check is performed when the Mocker.validate method is called.
          *
          * @param expectedCount The number of times the method is expected to be called.
          *
          * @return The object instance so it can be chained.
          */
-        public Method called(final Integer expectedCount) {
+        global Mocker.Method called(final Integer expectedCount) {
             Assertion.isNotNull(expectedCount, 'argument: Mocker.Method.called.expectedCount');
 
             this.expectedCount = expectedCount;
@@ -302,12 +357,15 @@ public with sharing virtual class Mocker extends WhenArguments {
         /**
          * @description
          * Sets the return value from the method if the arguments are matched and it is called.
+         * <br><br>
+         * The return value may be set to an instance of Modifier to return a value based on the arguments passed
+         * to the mocked method call.
          *
          * @param returnValue The value to be returned if the arguments are matched and this method is called.
          *
          * @return The object instance so it can be chained.
          */
-        public Method returns(final Object returnValue) {
+        global Mocker.Method returns(final Object returnValue) {
             Assertion.isTrue(this.returnValue == null, 'Return value can only be set once');
             this.returnValue = returnValue;
             return this;
@@ -321,7 +379,7 @@ public with sharing virtual class Mocker extends WhenArguments {
          *
          * @return The object instance so it can be chained.
          */
-        public Method throws(final Exception throws) {
+        global Mocker.Method throws(final Exception throws) {
             Assertion.isNotNull(throws, 'argument: Mocker.Method.whichThrows.throws');
 
             this.throws = throws;
@@ -331,23 +389,23 @@ public with sharing virtual class Mocker extends WhenArguments {
         /**
          * @description
          * Registers a new method for the parent's arguments.
-         *
+         * <br><br>
          * The method will be called when the arguments are matched.
          *
          * @param methodName The name of the method expected.
          *
          * @return The mew method instance so it can be chained.
          */
-        public Method expectMethod(final String methodName) {
+        global Mocker.Method expectMethod(final String methodName) {
             return arguments.expectMethod(methodName);
         }
 
         /**
          * @description
          * Checks whether the method name in this object matches the method name in the argument.
-         *
+         * <br><br>
          * If the arguments match, the methods for the arguments are iterated. Each method is checked against
-         * the method name of the method being called in the stubbed object.
+         * the method name of the method being called in the mocked object.
          *
          * @param methodName The name of the method being called.
          *
@@ -362,10 +420,10 @@ public with sharing virtual class Mocker extends WhenArguments {
         /**
          * @description
          * Called to take the action defined for the method.
-         *
-         * The arguments and method name must match from the stubbed method call. If an Exception has been set
+         * <br><br>
+         * The arguments and method name must match from the mocked method call. If an Exception has been set
          * for the method, it is thrown. Otherwise, the return value set for the method is returned.
-         *
+         * <br><br>
          * The call count is incremented to track that the method has been called.
          *
          * @param arguments The arguments passed to the mocked method.
@@ -389,156 +447,112 @@ public with sharing virtual class Mocker extends WhenArguments {
         /**
          * @description
          * Called to check that the method has been called the correct number of times.
-         *
-         * If the expectedCount is null, the method has not had an expected call count set, sp the check is ignored.
+         * <br><br>
+         * If the expectedCount is null, the method has not had an expected call count set, the check is ignored.
          */
         private void validate() {
             if (expectedCount != null) {
                 Assertion.areEqual(
                         expectedCount,
                         actualCount,
-                        'Incorrect number of calls to ' + parent.stubbedObject.toString().split(':')[0].split('__sfdc')[0] + '.' + methodName
+                        'Incorrect number of calls to ' + parent.mockedObject.toString().split(':')[0].split('__sfdc')[0] + '.' + methodName
                 );
             }
         }
     }
 
+
     /**
      * @description
-     * Argument setting class.
-     *
-     * It is designed to be accessible from both the Arguments and Method classes. This is so both can perform
-     * chaining of calls.
+     * Class representing a list of arguments for which mocked methods are to be registered.
      */
-    private with sharing virtual class WhenArguments {
-        protected Mocker parent;
+    global with sharing class Arguments extends Chainable {
+        final List<Object> expectedArguments;
+        final List<Method> methods = new List<Method>();
 
         /**
          * @description
-         * Sets the parent Mocker object.
-         *
-         * @param parent The owning Mocker.
+         * Additional comparators to use when checking the arguments for equivalence to those passed to the method call
+         * on the mocked objet.
          */
-        private void setParent(final Mocker parent) {
-            Assertion.isNotNull(parent, 'argument: Mocker.WhenArguments.setParent.parent');
+        private List<Comparator<Object>> comparators = new List<Comparator<Object>>();
 
-            this.parent = parent;
+        /**
+         * @description
+         * Constructs an instance of the Arguments class.
+         * <br><br>
+         * The class represents the grouping of argument values for which a sequence of methods can be registered.
+         *
+         * @param parent The owning class.
+         * @param expectedArguments The arguments that are expected.
+         */
+        private Arguments(final Mocker parent, final List<Object> expectedArguments) {
+            Assertion.isNotNull(parent, 'argument: Mocker.Arguments.parent');
+            Assertion.isNotNull(expectedArguments, 'argument: Mocker.Arguments.expectedArguments');
+
+            setParent(parent);
+            this.expectedArguments = expectedArguments;
+
+            if (STUBBED_OBJECTS.containsKey(parent.mockedObject)) {
+                STUBBED_OBJECTS.get(parent.mockedObject).add(this);
+            } else {
+                STUBBED_OBJECTS.put(parent.mockedObject, new List<Arguments> { this });
+            }
         }
 
         /**
          * @description
-         * Creates an argument grouping which has no values.
+         * Adds comparators to the default comparatros used when checking the arguments for equivalence.
+         * <br><br>
+         * Any additional comparators will be called before the default ones.
          *
-         * This would represent a method with no arguments.
+         * @param comparators The additional comparators to be used when checking the expected arguments for equivalence.
          *
          * @return The object instance so it can be chained.
          */
-        public Arguments whenNoArguments() {
-            return whenListOfArguments(new List<Object>());
+        global Mocker.Arguments withComparators(final List<Comparator<Object>> comparators) {
+            this.comparators = comparators;
+            return this;
         }
 
         /**
          * @description
-         * Creates an argument grouping which has a single argument.
+         * Registers a new method for the expected arguments.
+         * <br><br>
+         * The method will be called when the arguments are matched.
          *
-         * This would represent a stubbed method which has one parameter.
+         * @param methodName The name of the method expected.
          *
-         * @param argument The expected parameter value.
-         *
-         * @return The object instance so it can be chained.
+         * @return The method instance so it can be chained.
          */
-        public Arguments whenArgument(final Object argument) {
-            return whenListOfArguments(new List<Object> { argument });
+        global Mocker.Method expectMethod(final String methodName) {
+            Method method = new Method(this, methodName);
+            methods.add(method);
+            return method;
         }
 
         /**
          * @description
-         * Creates an argument grouping which has two arguments.
+         * Checks whether the arguments passed to a mocked class's method match the expected arguments.
          *
-         * This would represent a stubbed method which has two parameters.
+         * @param actualArguments The arguments to be checked.
          *
-         * @param argument1 The expected value of the first parameter.
-         * @param argument2 The expected value of the second parameter.
-         *
-         * @return The object instance so it can be chained.
+         * @return True if the arguments match the expected arguments, or false if not.
          */
-        public Arguments whenArguments(final Object argument1, final Object argument2) {
-            return whenListOfArguments(new List<Object> { argument1, argument2  });
-        }
+        private Boolean matches(final List<Object> actualArguments) {
+            Assertion.isNotNull(actualArguments, 'argument: Mocker.Arguments.matches.actualArguments');
 
-        /**
-         * @description
-         * Creates an argument grouping which has three arguments.
-         *
-         * This would represent a stubbed method which has three parameters.
-         *
-         * @param argument1 The expected value of the first parameter.
-         * @param argument2 The expected value of the second parameter.
-         * @param argument3 The expected value of the third parameter.
-         *
-         * @return The object instance so it can be chained.
-         */
-        public Arguments whenArguments(final Object argument1, final Object argument2, final Object argument3) {
-            return whenListOfArguments(new List<Object> { argument1, argument2, argument3  });
-        }
+            if (expectedArguments.size() != actualArguments.size()) {
+                return false;
+            }
 
-        /**
-         * @description
-         * Creates an argument grouping which has four arguments.
-         *
-         * This would represent a stubbed method which has four parameters.
-         *
-         * @param argument1 The expected value of the first parameter.
-         * @param argument2 The expected value of the second parameter.
-         * @param argument3 The expected value of the third parameter.
-         * @param argument4 The expected value of the fourth parameter.
-         *
-         * @return The object instance so it can be chained.
-         */
-        public Arguments whenArguments(final Object argument1, final Object argument2, final Object argument3, final Object argument4) {
-            return whenListOfArguments(new List<Object> { argument1, argument2, argument3, argument4  });
-        }
+            for (Integer i = 0; i < expectedArguments.size(); i++) {
+                if (!ComparisonHelper.compare(comparators, expectedArguments[i], actualArguments[i])) {
+                    return false;
+                }
+            }
 
-        /**
-         * @description
-         * Creates an argument grouping which has five arguments.
-         *
-         * This would represent a stubbed method which has five parameters.
-         *
-         * @param argument1 The expected value of the first parameter.
-         * @param argument2 The expected value of the second parameter.
-         * @param argument3 The expected value of the third parameter.
-         * @param argument4 The expected value of the fourth parameter.
-         * @param argument5 The expected value of the fifth parameter.
-         *
-         * @return The object instance so it can be chained.
-         */
-        public Arguments whenArguments(final Object argument1, final Object argument2, final Object argument3, final Object argument4, final Object argument5) {
-            return whenListOfArguments(new List<Object> { argument1, argument2, argument3, argument4, argument5  });
-        }
-
-        /**
-         * @description
-         * Creates an argument grouping which has the given arguments.
-         *
-         * @param expectedArguments The arguments to be matched.
-         *
-         * @return The object instance so it can be chained.
-         */
-        public Arguments whenListOfArguments(final List<Object> expectedArguments) {
-            Assertion.isNotNull(expectedArguments, 'argument: Mocker.WhenArguments.whenListOfArguments.expectedArguments');
-
-            return new Arguments(parent, expectedArguments);
-        }
-
-        /**
-         * @description
-         * Gets the stubbed object for the class being mocked.
-         *
-         * @return The stubbed object.
-         */
-        public Object mock(){
-            return parent.stubbedObject;
+            return true;
         }
     }
 }

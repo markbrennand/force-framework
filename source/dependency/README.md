@@ -20,7 +20,7 @@ not have state that may change in use.
 If an implementation class is required to have state, then the class must implement the _Dependency.Prototype_
 interface.
 
-The Apex docs for the Dependency Injection API can be viewed [here](DependencyApexDocs/dependency.html).
+The Apex docs for the Dependency Injection API can be viewed [here](SfApexDocs/dependency.html).
 
 ## Bindings
 A binding is the mapping from a property or abstract entity to its concrete implementation. The bindings are stored in

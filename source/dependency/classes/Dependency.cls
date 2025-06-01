@@ -1,6 +1,6 @@
 /**
  * @description
- * Class providing dependency injection.
+ * Class providing the Dependency Injection API.
  * <br><br>
  * Dependencies can be injected into an application by their interface or abstract class.
  * <br><br>
@@ -13,19 +13,7 @@
  * a new implementation for each use an application, the implementing class should implement the Prototype
  * interface.
  * <br><br>
- * For a detailed description of the dependency injection provided by this class, copy the url below into a browser.
- * <br><br>
- * https://github.com/markbrennand/force-frameworks/blob/main/source/dependency/README.md
- * <br><br>
- * Examples
- * <br>
- * <code>
- * // Inject a variable into your application.
- * Map<String, Integer> configuration = (Map<String, Integer>) Dependency.inject(Map<String, Integer>.class, 'Configuration');
- *
- * // Inject an interface implementation into your application.
- * PersistenceDAO = (PersistenceDAO) Dependency.inject(PersistenceDAO.class);
- * </code>
+ * See <a href=../README.md target="_blank">README</a> for full details of the Dependency Injection API.
  *
  * @author Mark Brennand
  */

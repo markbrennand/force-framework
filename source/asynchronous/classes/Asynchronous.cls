@@ -1,37 +1,43 @@
 /**
  * @description
  * Class providing the Asynchronous framework.
- *
+ * <br><br>
  * All access to the framework must be through this class.
- *
+ * <br><br>
  * The API interface defines the contract that implementations must provide to the methods of this class to create
- * and run jobs asynchronously. The implementation may be overridden using a Dependency Binding.
- *
+ * and run jobs asynchronously. The implementation may be overridden using a Dependency Injection Binding.
+ * <br><br>
  * The default implementation of the API in this class uses the AsynchronousJob__c object to represent a job. The object
  * may be queried to find all the information about the job.
- *
+ * <br><br>
  * See [Asynchronous](https://github.com/markbrennand/sf-frameworks/blob/main/source/asynchronous/README.md)
  *
  * @author Mark Brennand
  */
 global with sharing virtual class Asynchronous implements API {
 
+    // Set the default implementation of the API. This can be overridden using a Dependency
+    // Injection Binding.
+    static {
+        Dependency.bind(API.class, Asynchronous.Factory.class);
+    }
+
     /**
      * @description
      * Defines the status of an AsynchronousJob__c object under the control of this framework.
-     *
+     * <br><br>
      * A job can only be in a single state at any one time.
-     *
+     * <br><br>
      * PENDING - The job has been created but a job has not been queued for it.
-     *
+     * <br><br>
      * QUEUED - The job has been queued for processing.
-     *
+     * <br><br>
      * RUNNING - The job is running.
-     *
+     * <br><br>
      * SUCCEEDED - The job ran to completion successfully.
-     *
+     * <br><br>
      * FAILED - The last job failed to run and the maximum number of retries has been exceeded.
-     *
+     * <br><br>
      * CANCELLED - The job has been cancelled.
      */
     global enum Status {
@@ -46,8 +52,12 @@ global with sharing virtual class Asynchronous implements API {
     /**
      * @description
      * Interface defining the actions required for Asynchronous job management.
-     *
-     * All implementations must also use their own implementation of the Job interface.
+     * <br><br>
+     * A new implementation of the Asynchronous framework must implement all the methods of this
+     * interface. It can then add a Dependency Injection Binding and it will be injected in the
+     * static methods of this class which provide the application access to create and queue jobs.
+     * <br><br>
+     * Any new implementations must also use their own implementation of the Job interface.
      */
     global interface API {
 
@@ -64,12 +74,12 @@ global with sharing virtual class Asynchronous implements API {
          * @param type The Apex class of the job to be run.
          * @param reference The user's reference for the job.
          * @param maximumRetries The maximum number of retries to make before failing the job.
-         * @param retryInterval The number of milliseconds between each re-try event.
+         * @param retryInterval The number of milliseconds between each re-try after failure.
          * @param state Job specific data.
          *
          * @return The job specific to the implementation.
          */
-        Job apiCreateJob(
+        Asynchronous.Job apiCreateJob(
                 Type type,
                 String reference,
                 Integer maximumRetries,
@@ -87,20 +97,20 @@ global with sharing virtual class Asynchronous implements API {
          *
          * @return The jobs queued for processing.
          */
-        List<Job> apiQueueJobs(List<Job> asyncJobs);
+        List<Asynchronous.Job> apiQueueJobs(List<Asynchronous.Job> asyncJobs);
     }
 
     /**
      * @description
      * Interface defining the logic specific to a job run by the framework.
-     *
+     * <br><br>
      * When the job is run by the framework, the job specific implementation of this interface is created and
      * its run method is called. As a new Runnable instance is created each time the job is run, implementations
      * of this interface cannot preserve state in member variables. The Job's state can be used for that.
-     *
+     * <br><br>
      * Concurrency is controlled by the maximum active value. Any implementation of the API must guarantee that
      * no more than this number of instances of the Runnable may be active at any one time.
-     *
+     * <br><br>
      * The AsynchronousRunnable class provides a full implementation of this interface. If possible you should
      * use this class and only override the methods you need behaviour other than the default for.
      */
@@ -109,7 +119,7 @@ global with sharing virtual class Asynchronous implements API {
         /**
          * @description
          * The class of the Runnable's implementation.
-         *
+         * <br><br>
          * The class can either be a Runnable or Types.Factory implementation. In the case of the latter,
          * the class returned by the newInstance method must implement Runnable.
          *
@@ -120,7 +130,7 @@ global with sharing virtual class Asynchronous implements API {
         /**
          * @description
          * Concurrency is controlled by the Runnable's implementation.
-         *
+         * <br><br>
          * The maximum active value defines how many instances of the Runnable's implementation may be active
          * concurrently. Any implementation of the API interface must guarantee that this value is enforced.
          *
@@ -131,7 +141,7 @@ global with sharing virtual class Asynchronous implements API {
         /**
          * @description
          * Called when the job is run by the framework.
-         *
+         * <br><br>
          * Any job specific data set in the state when the job was created can be accessed from the state in the job
          * argument.
          *
@@ -143,7 +153,7 @@ global with sharing virtual class Asynchronous implements API {
         /**
          * @description
          * Called when a job has run to completion successfully in the framework.
-         *
+         * <br><br>
          * The return value indicates whether the API implementation is to keep a record of the job or delete it.
          *
          * @param asyncJob The job that ran to completion.
@@ -155,7 +165,7 @@ global with sharing virtual class Asynchronous implements API {
         /**
          * @description
          * Called when a job has failed to run and all is re-tries have been exhausted.
-         *
+         * <br><br>
          * The return value indicates whether the API implementation is to keep a record of the job or delete it.
          *
          * @param asyncJob The job that failed.
@@ -168,7 +178,7 @@ global with sharing virtual class Asynchronous implements API {
         /**
          * @description
          * Called when a job has been cancelled.
-         *
+         * <br><br>
          * The return value indicates whether the API implementation is to keep a record of the job or delete it.
          *
          * @param asyncJob The job that has been cancelled.
@@ -180,12 +190,12 @@ global with sharing virtual class Asynchronous implements API {
         /**
          * @description
          * An API implementation must call this method each time an Exception is caught when running a job.
-         *
+         * <br><br>
          * The Exception will be thrown from the Runnable.run method. A Status of QUEUED should be returned in
          * most circumstances to re-try the job. Say, for example though, that a particular type of Exception was
          * thrown that meant the job would always fail, a Status of CANCELLED could be returned to indicate no
          * further re-tries are to be performed.
-         *
+         * <br><br>
          * The return value indicates new Status value to assign to the job.
          *
          * @param asyncJob The job that has been cancelled.
@@ -199,7 +209,7 @@ global with sharing virtual class Asynchronous implements API {
     /**
      * @description
      * Information about a job being managed by the framework.
-     *
+     * <br><br>
      * The implementation will be specific to the API implementation.
      */
     global interface Job {
@@ -231,7 +241,7 @@ global with sharing virtual class Asynchronous implements API {
         /**
          * @description
          * Returns the state information assigned to the job on creation by the API implementation.
-         *
+         * <br><br>
          * The state may be updated by the call to Runnable.run for the job, though only when no Exception is thrown
          * by the method.
          *
@@ -242,7 +252,7 @@ global with sharing virtual class Asynchronous implements API {
         /**
          * @description
          * Sets a new state for the job managed by the API implementation
-         *
+         * <br><br>
          * New state will only be preserved if the Apex request it is set within does not throw an Exception.
          *
          * @param state The new state.
@@ -251,7 +261,7 @@ global with sharing virtual class Asynchronous implements API {
 
         /**
          * @description
-         * Reurns the user's reference assigned to the job on creation by the API implementation.
+         * Returns the user's reference assigned to the job on creation by the API implementation.
          *
          * @return The reference.
          */
@@ -261,7 +271,7 @@ global with sharing virtual class Asynchronous implements API {
          * @description
          * Returns the maximum number of re-tries to be made to process the job by the API implementation if it fails
          * to run.
-         *
+         * <br><br>
          * Each re-try will be made if the Runnable.run method throws an Exception.
          *
          * @return The maximum number.
@@ -271,7 +281,7 @@ global with sharing virtual class Asynchronous implements API {
         /**
          * @description
          * The current number of re-tries made by the API implementation for the job.
-         *
+         * <br><br>
          * Re-try number 0 is the first attempt to run it.
          *
          * @return The current re-try number.
@@ -320,7 +330,7 @@ global with sharing virtual class Asynchronous implements API {
     /**
      * @description
      * Allow extension but not construction.
-     *
+     * <br><br>
      * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
      */
     protected Asynchronous() {}
@@ -328,10 +338,10 @@ global with sharing virtual class Asynchronous implements API {
     /**
      * @description
      * Creates a new instance of a job to be managed by the default API implementation.
-     *
+     * <br><br>
      * The Apex class must implement the Runnable interface. If it doesn't, the implementation will throw an
      * exception.
-     *
+     * <br><br>
      * The state is data specific to the job. It is passed to the Runnable for the job when it is invoked. It
      * can contain any data an application chooses. For example, it may include arguments specific to the job.
      *
@@ -343,7 +353,7 @@ global with sharing virtual class Asynchronous implements API {
      *
      * @return The job.
      */
-    public Job apiCreateJob(
+    public Asynchronous.Job apiCreateJob(
             final Type type,
             final String reference,
             final Integer maximumRetries,
@@ -370,10 +380,10 @@ global with sharing virtual class Asynchronous implements API {
     /**
      * @description
      * Schedules the given job for processing by the default API implementation.
-     *
+     * <br><br>
      * Each job will have an AsynchronousJob__c object created for it. The job's state will be saved in the
      * AsynchronousState__c object.
-     *
+     * <br><br>
      * The trigger on AsynchronousJob__c will validate the job. If the job is valid, the trigger will change the
      * Status to QUEUED and start an Asynchronous Scheduler to run the job.
      *
@@ -411,9 +421,9 @@ global with sharing virtual class Asynchronous implements API {
     /**
      * @description
      * Creates a new instance of a job to be managed by the framework.
-     *
+     * <br><br>
      * All job creation by an application must be solely through this method.
-     *
+     * <br><br>
      * The job, once created, can be started by calling the queue method.
      *
      * @param type The Apex class of the job to be run.
@@ -437,7 +447,7 @@ global with sharing virtual class Asynchronous implements API {
      *     new Map<String, String> { 'argument' => 'Example' }
      * );
      */
-    global static Job createJob(
+    global static Asynchronous.Job createJob(
             final Type type,
             final String reference,
             final Integer maximumRetries,
@@ -450,7 +460,7 @@ global with sharing virtual class Asynchronous implements API {
     /**
      * @description
      * Schedules the given job for processing by the framework.
-     *
+     * <br><br>
      * All job scheduling by an application must be solely through this method.
      *
      * @param asyncJobs The jobs to schedule for processing.
@@ -476,7 +486,7 @@ global with sharing virtual class Asynchronous implements API {
     /**
      * @description
      * Creates the default API implementation.
-     *
+     * <br><br>
      * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
@@ -489,9 +499,9 @@ global with sharing virtual class Asynchronous implements API {
     /**
      * @description
      * Processes any persisted AsynchronousJob__c objects before they are added to the database.
-     *
+     * <br><br>
      * Validation is performed on the objects.
-     *
+     * <br><br>
      * If all objects are valid, their status is set to QUEUED and an Asynchronous Scheduler is started to run them.
      *
      * @param asyncObjects The persisted objects.
@@ -521,7 +531,7 @@ global with sharing virtual class Asynchronous implements API {
     /**
      * @description
      * Processes any persisted AsynchronousJob__c objects after they have been added to the database.
-     *
+     * <br><br>
      * Any new cancellations are processed.
      *
      * @param asyncObjects The persisted objects.
@@ -583,9 +593,9 @@ global with sharing virtual class Asynchronous implements API {
     /**
      * @description
      * Active API instance.
-     *
+     * <br><br>
      * The instance is injected from the Registry.
-     *
+     * <br><br>
      * The instance is test visible so it can be mocked.
      */
     @TestVisible
@@ -597,10 +607,5 @@ global with sharing virtual class Asynchronous implements API {
             return INSTANCE;
         }
         private set;
-    }
-
-    // Set the default implementation of the API. This can be overridden using a Dpendency Binding.
-    static {
-        Dependency.bind(API.class, Asynchronous.Factory.class);
     }
 }
