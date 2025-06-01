@@ -1,6 +1,6 @@
 /**
  * @description
- * Class providing dependency injection.
+ * Class providing the Dependency Injection API.
  * <br><br>
  * Dependencies can be injected into an application by their interface or abstract class.
  * <br><br>
@@ -13,19 +13,7 @@
  * a new implementation for each use an application, the implementing class should implement the Prototype
  * interface.
  * <br><br>
- * For a detailed description of the dependency injection provided by this class, copy the url below into a browser.
- * <br><br>
- * https://github.com/markbrennand/force-frameworks/blob/main/source/dependency/README.md
- * <br><br>
- * Examples
- * <br>
- * <code>
- * // Inject a variable into your application.
- * Map<String, Integer> configuration = (Map<String, Integer>) Dependency.inject(Map<String, Integer>.class, 'Configuration');
- *
- * // Inject an interface implementation into your application.
- * PersistenceDAO = (PersistenceDAO) Dependency.inject(PersistenceDAO.class);
- * </code>
+ * See <a href=../README.md target="_blank">README</a> for full details of the Dependency Injection API.
  *
  * @author Mark Brennand
  */
@@ -33,8 +21,8 @@ global with sharing virtual class Dependency {
 
     /**
      * @description
-     * Interface to be implemented to check a binding in the registry.<br><br>
-     *
+     * Interface to be implemented to check a binding in the registry.
+     * <br><br>
      * Each checker must be defined in a record in the Binding Check custom metadata.
      */
     global interface BindingCheck {
@@ -42,14 +30,14 @@ global with sharing virtual class Dependency {
         /**
          * @description
          * Given a type to be bound, a class implementing this method must check that the given implementation class
-         * can be bound to it.<br><br>
-         *
+         * can be bound to it.
+         * <br><br>
          * If the for type is an interface then an implementation of this method must check that the implementation
-         * class implements the interface.<br><br>
-         *
+         * class implements the interface.
+         * <br><br>
          * If the for type is an abstract class then an implementation of this method must check that the implementation
-         * class extends the abstract class.<br><br>
-         *
+         * class extends the abstract class.
+         * <br><br>
          * If the for type is a class then an implementation of this method must check that the implementation
          * class is of the same class or a super class of it.
          *
@@ -63,7 +51,7 @@ global with sharing virtual class Dependency {
 
     /**
      * @description
-     * Class representing result of a binding validation check.<br><br>
+     * Class representing result of a binding validation check.
      */
     global with sharing class ValidationResult {
         public final Boolean isValid { public get; private set; }
@@ -115,17 +103,19 @@ global with sharing virtual class Dependency {
     global with sharing class APIException extends Exception {}
 
     /**
-     * @description A class implementing this interface will have a new instance of itself created each time it is in
-     * injected into an application.
+     * @description
+     * A class implementing this interface will have a new instance of itself created each time it is in injected into
+     * an application.
      */
     global interface Prototype {}
 
     /**
      * @description
      * Class that creates instances of the implementation class for the binding.
-     *
-     * By default, a singleton instance is created on the first call to the new instance method. If the class
-     * implements the Prototype interface then a new instance is created for each wiring of the binding.
+     * <br><br>
+     * By default, a singleton instance is created on the first call to the new instance method.
+     * <br><br>
+     * If the class  implements the Prototype interface then a new instance is created for each wiring of the binding.
      */
     private with sharing class Factory {
         private final Type type;
@@ -156,7 +146,7 @@ global with sharing virtual class Dependency {
     /**
      * @description
      * Allow extension but not construction.
-     *
+     * <br><br>
      * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
      */
     protected Dependency() {}
@@ -164,7 +154,7 @@ global with sharing virtual class Dependency {
     /**
      * @description
      * If the registry contains a binding for the given type, its implementation is returned.
-     *
+     * <br><br>
      * Should no binding exist, an exception is thrown.
      *
      * @param forType The type to be bound.
@@ -185,7 +175,7 @@ global with sharing virtual class Dependency {
     /**
      * @description
      * If the registry contains a binding for the given type and action, its implementation is returned.
-     *
+     * <br><br>
      * Should no binding exist, an exception is thrown.
      *
      * @param forType The type to be bound.
@@ -265,7 +255,9 @@ global with sharing virtual class Dependency {
     }
 
     /**
-     * @description If the registry contains a binding for the given type, its implementation is returned.
+     * @description
+     * If the registry contains a binding for the given type, its implementation is returned.
+     * <br><br>
      * Should no binding exist, an exception is thrown.
      *
      * @param forType The type to be bound.
@@ -279,7 +271,7 @@ global with sharing virtual class Dependency {
     /**
      * @description
      * If the registry contains a binding for the given type and action, its implementation is returned.
-     *
+     * <br><br>
      * Should no binding exist, an exception is thrown.
      *
      * @param forType The type to be bound.
@@ -319,7 +311,7 @@ global with sharing virtual class Dependency {
     /**
     * @description
     * Adds a binding to the registry.
-    *
+    * <br><br>
     * This method can be called when creating a default registry for an application.
     *
     * @param forType The type to be bound. Must be either an interface or abstract class.
@@ -332,7 +324,7 @@ global with sharing virtual class Dependency {
     /**
      * @description
      * Adds a binding to the registry.
-     *
+     * <br><br>
      * This method can be called when creating a default registry for an application.
      *
      * @param forType The type to be bound. Must be either an interface or abstract class.
@@ -346,7 +338,7 @@ global with sharing virtual class Dependency {
     /**
      * @description
      * Forces the custom bindings to be reloaded.
-     *
+     * <br><br>
      * When running Apex jobs they can be chained by Salesforce. When using the registry, this method must be called
      * for each job execution, to force any changes made to the custom bindings to be included in the registry.
      */
@@ -357,9 +349,11 @@ global with sharing virtual class Dependency {
     /**
      * @description
      * Checks the custom bindings to see if there are any duplicates.
-     *
+     * <br><br>
      * A duplicate is;
+     * <br>
      * - A type without an action that is bound to more than one implementation.
+     * <br>
      * - A type with an action that is bound to more than one implementation.
      */
     public static void checkForDuplicates() {
@@ -408,9 +402,9 @@ global with sharing virtual class Dependency {
     /**
      * @description
      * Performs basic checks on the type and implementation being bound.
-     *
+     * <br><br>
      * The type must be an interface or abstract class. The check is that it cannot be instantiated.
-     *
+     * <br><br>
      * The implementation must be a concrete class with a no-op constructor. The check is that it can be instantiated.
      *
      * @param forType The type to be validated.
@@ -452,7 +446,7 @@ global with sharing virtual class Dependency {
     /**
      * @description
      * Selects all the custom bindings and adds them to the registry.
-     *
+     * <br><br>
      * This method need only be called on the first call to inject a binding.
      */
     private void addCustomBindings() {
@@ -464,7 +458,7 @@ global with sharing virtual class Dependency {
 
     /**
      * @description
-     * Builds a Map from the Type set in a binding to a Binding Check that can be called to validat its
+     * Builds a Map from the Type set in a binding to a Binding Check that can be called to validate its
      * assignment.
      *
      * @return  The Map of Types to Bind Check.
@@ -517,7 +511,7 @@ global with sharing virtual class Dependency {
     /**
      * @description
      * Class used as the basic key to the registry map.
-     *
+     * <br><br>
      * To ensure a balanced Map, the action is not included in the hash code. This may need to be re-considered
      * if many actions are keyed for the same type.
      */
@@ -588,7 +582,7 @@ global with sharing virtual class Dependency {
     /**
      * @description
      * Active API instance.
-     *
+     * <br><br>
      * The instance is test visible so it can be mocked.
      */
     @TestVisible
