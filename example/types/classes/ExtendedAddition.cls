@@ -7,7 +7,12 @@
 
 // Note: we cannot override the add() method in the base class, as it is not declared virtual.
 // This makes the classes truly O(open/closed). The base class can be extended but not modified.
-public with sharing class ExtendedAddition extends SimpleAddition implements ExtendedAdditionAPI {
+public with sharing class ExtendedAddition extends SimpleAddition implements API {
+
+    // The extended API offered by this class.
+    public interface API extends SimpleAddition.API {
+        Integer fibonacci(Integer count);
+    }
 
     // For this example, we're not going to hide the class from unwanted access.
     public ExtendedAddition() {

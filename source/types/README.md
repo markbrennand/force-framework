@@ -75,7 +75,12 @@ own instances of the class and would be able to bypass any Dependency Injection 
 
 As the class's constructor is protected and the class is virtual, a new class can be written which extends it.
 
-There is an example of this pattern in [Open Closed Example](../../example/types/classes).
+### Example Code
+To see an example of the pattern used for an extensible class, deploy the code from the following URL.
+
+https://github.com/markbrennand/force-frameworks/tree/gh-pages/example/types
+
+The _Si
 
 After deploying the code to an org, you can run the following Anonymous Apex to test it.
 ```

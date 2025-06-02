@@ -12,6 +12,6 @@
     </values>
     <values>
         <field>Type__c</field>
-        <value xsi:type="xsd:string">SimpleAdditionAPI</value>
+        <value xsi:type="xsd:string">SimpleAddition.API</value>
     </values>
 </CustomMetadata>
