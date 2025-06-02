@@ -13,7 +13,7 @@ The Apex docs for the Types API can be viewed [here](SfApexDocs/types.html).
 What are the use cases for _Factory_?
 ### Class Globality
 If you're using the Force Frameworks package, the code for that package is in the _forcefw_ namespace. Taking
-_Dependency Injection_ as an example, you would need to make any implementation classes global, otherwise
+Dependency Injection as an example, you would need to make any implementation classes global, otherwise
 the _Dependency_ class in the _forcefw_ namespace would not be able to construct your class. Making classes global
 results in several issues including not being able to make any changes to global methods after they've been released
 in a package.
@@ -51,4 +51,37 @@ global class ExampleFactory implements Types.Factory {
         return new ExampleImpl();
     }
 }
+```
 ### Open/Closed Classes
+The pattern for API classes developed in the Framework is for the class to contain an interface which defines
+the functionality offered by the class. The class must ensure it only has public methods for the interface
+methods. If there were other public methods, an application could cast the interface to the class and use
+functionality in the class that is not part of the interface. This would break the Separation of Concern requirement.
+
+The class itself implements the interface defined in the class. Why is this necessary? The reason is mocking.
+Apex will not allow you to stub an inner class, and in this case, the interface is an inner class.
+So, making the class implement the interface means the class can be stubbed to provide a mock version of it.
+
+The class must be declared as virtual. This allows it to be extended. As the public methods implementing
+the interface are not virtual, they cannot be changed. Hence, meeting the Open for extension, closed for modification
+of SOLID.
+
+The class must have a _Type.Factory_ inner class that returns a new instance of the class from its _getInstance_
+method.
+
+The class's constructor must be protected. This is to prevent the class being constructed from anywhere other than the
+_Type.Factory_ inner class. If the class had a public constructor, the application would be able to construct its
+own instances of the class and would be able to bypass any Dependency Injection required for the class.
+
+As the class's constructor is protected and the class is virtual, a new class can be written which extends it.
+
+There is an example of this pattern in [Open Closed Example](../../example/types/classes).
+
+After deploying the code to an org, you can run the following Anonymous Apex to test it.
+```
+System.debug(SimpleAddition.getInstance().add(1, 2));
+System.debug(new ExtendedAddition().add(3, 4));
+System.debug(new ExtendedAddition().fibonacci(5));
+```
+
+
