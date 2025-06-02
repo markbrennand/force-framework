@@ -32,7 +32,7 @@ public with sharing class PropertyWiring {
      * @description
      * Default configuration values.
      */
-    public class DefaultConfiguration implements TypeHelper.Factory {
+    public class DefaultConfiguration implements Types.Factory {
         public Object newInstance() {
             return new Map<String, Integer> { 'sheep' => 100, 'cows' => 50, 'hens' => 2000 };
         }
@@ -42,7 +42,7 @@ public with sharing class PropertyWiring {
      * @description
      * New configuration values.
      */
-    public class NewConfiguration implements TypeHelper.Factory {
+    public class NewConfiguration implements Types.Factory {
         public Object newInstance() {
             return new Map<String, Integer> { 'sheep' => 1, 'cows' => 2, 'hens' => 3 };
         }

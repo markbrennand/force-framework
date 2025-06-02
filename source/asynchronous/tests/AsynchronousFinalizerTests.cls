@@ -16,7 +16,7 @@ public with sharing class AsynchronousFinalizerTests {
     private static void testJobKeptOnSuccess() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = Asynchronous.Status.RUNNING.name(),
                     OwnerId = UserInfo.getUserId(),
                     MaximumRetries__c = 0, // Makes TestRunnable.onSuccess return true.
@@ -36,7 +36,7 @@ public with sharing class AsynchronousFinalizerTests {
     private static void testJobDeletedOnSuccess() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = Asynchronous.Status.RUNNING.name(),
                     OwnerId = UserInfo.getUserId(),
                     MaximumRetries__c = 1, // Makes TestRunnable.onSuccess return false.
@@ -56,7 +56,7 @@ public with sharing class AsynchronousFinalizerTests {
     private static void testExceptionInOnSuccess() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = Asynchronous.Status.RUNNING.name(),
                     OwnerId = UserInfo.getUserId(),
                     MaximumRetries__c = 0,
@@ -76,7 +76,7 @@ public with sharing class AsynchronousFinalizerTests {
     private static void testJobKeptOnFailure() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = Asynchronous.Status.RUNNING.name(),
                     OwnerId = UserInfo.getUserId(),
                     MaximumRetries__c = 0, // Makes TestRunnable.onFailure return true.
@@ -98,7 +98,7 @@ public with sharing class AsynchronousFinalizerTests {
     private static void testJobDeletedOnFailure() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = Asynchronous.Status.RUNNING.name(),
                     OwnerId = UserInfo.getUserId(),
                     MaximumRetries__c = 1, // Makes TestRunnable.onFailure return false.
@@ -120,7 +120,7 @@ public with sharing class AsynchronousFinalizerTests {
     private static void testExceptionInOnFailure() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = Asynchronous.Status.RUNNING.name(),
                     OwnerId = UserInfo.getUserId(),
                     MaximumRetries__c = 0,
@@ -142,7 +142,7 @@ public with sharing class AsynchronousFinalizerTests {
     private static void testRequeue() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = Asynchronous.Status.RUNNING.name(),
                     OwnerId = UserInfo.getUserId(),
                     MaximumRetries__c = 4,
@@ -164,7 +164,7 @@ public with sharing class AsynchronousFinalizerTests {
     private static void testSchedulerQueued() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = Asynchronous.Status.RUNNING.name(),
                     OwnerId = UserInfo.getUserId(),
                     MaximumRetries__c = 0,
@@ -201,7 +201,7 @@ public with sharing class AsynchronousFinalizerTests {
     private static void testCancellationFromOnError() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = Asynchronous.Status.RUNNING.name(),
                     OwnerId = UserInfo.getUserId(),
                     MaximumRetries__c = 4,

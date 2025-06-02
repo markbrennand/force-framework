@@ -177,9 +177,7 @@ public with sharing class ComparisonHelper {
      * Comparator for two collections of SObjects.
      */
     public with sharing class SObjectCollectionComparator implements Comparator<Object> {
-
         public Integer compare(final Object param1, final Object param2) {
-
             return (param1 instanceof List<SObject> || param1 instanceof Set<SObject>)
                     && (param2 instanceof List<SObject> || param2 instanceof Set<SObject>)
                     && compareSObjects((Iterable<SObject>) param1, (Iterable<SObject>) param2) ? 0 : -1;
@@ -191,7 +189,6 @@ public with sharing class ComparisonHelper {
      * Default Comparator for two Objects.
      */
     private with sharing class ObjectComparator implements Comparator<Object> {
-
         public Integer compare(final Object param1, final Object param2) {
             try {
                 return param1 == param2 ? 0 : -1;

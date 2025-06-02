@@ -217,7 +217,7 @@ public with sharing class AsynchronousTests {
     private with sharing class AddIdModifier implements Mocker.Modifier {
         public Object process(List<Object> arguments) {
             for (AsynchronousJob__c asyncObject : (List<AsynchronousJob__c>) arguments[0]) {
-                asyncObject.Id = TestHelper.nextId(AsynchronousJob__c.SObjectType);
+                asyncObject.Id = Mocker.fakeId(AsynchronousJob__c.SObjectType);
             }
             return arguments[0];
         }

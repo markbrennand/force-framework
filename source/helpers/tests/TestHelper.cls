@@ -7,26 +7,9 @@
 @IsTest
 public with sharing class TestHelper {
     private final static String NAMESPACE = [SELECT NamespacePrefix FROM Organization LIMIT 1].NamespacePrefix;
-    private static Integer nextId = 0;
-
-    @TestVisible
-    private static String nextId(final SObjectType objectType) {
-        final String id = String.valueOf(++nextId);
-        final Integer length = id.length();
-
-        return String.join(
-                new List<String> {
-                        objectType.getDescribe().keyPrefix,
-                        '0'.repeat(15 - length),
-                        id
-                },
-                ''
-        );
-    }
 
     @TestVisible
     private with sharing class ExceptionComparator implements Comparator<Object> {
-
         public Integer compare(final Object param1, final Object param2) {
             return param1 instanceof Exception
                     && param2 instanceof Exception

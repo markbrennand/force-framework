@@ -18,7 +18,12 @@
  *
  * @author Mark Brennand
  */
-global with sharing virtual class Mocker extends Chainable {
+global with sharing virtual class Mocker extends Mocker.Chainable {
+    /**
+     * @description
+     * Map containing the next Id number to use for each object type.
+     */
+    private final static Map<String, Integer> IDS = new Map<String, Integer>();
 
     /**
      * @description
@@ -249,6 +254,37 @@ global with sharing virtual class Mocker extends Chainable {
 
     /**
      * @description
+     * Generates a fake id for the given object type.
+     *
+     * @param objectType The object type to have a fake Id generated for.
+     *
+     * @return The fake id.
+     */
+    global static String fakeId(final SObjectType objectType) {
+        final String prefix = objectType.getDescribe().keyPrefix;
+
+        if (!IDS.containsKey(prefix)) {
+            IDS.put(prefix, 0);
+        }
+
+        final Integer nextId = (IDS.get(prefix) + 1);
+        IDS.put(prefix, nextId);
+
+        final String id = String.valueOf(nextId);
+        final Integer length = id.length();
+
+        return String.join(
+                new List<String> {
+                        prefix,
+                        '0'.repeat(15 - length),
+                        id
+                },
+                ''
+        );
+    }
+
+    /**
+     * @description
      * Class that calls the methods of the mocked classes.
      */
     private with sharing class Matcher implements StubProvider {
@@ -308,12 +344,11 @@ global with sharing virtual class Mocker extends Chainable {
         }
     }
 
-
     /**
      * @description
      * Method definition associated with an Argument.
      */
-    global with sharing class Method extends Chainable {
+    global with sharing class Method extends Mocker.Chainable {
         private final Arguments arguments;
         private final String methodName;
         private Integer expectedCount;
@@ -466,7 +501,7 @@ global with sharing virtual class Mocker extends Chainable {
      * @description
      * Class representing a list of arguments for which mocked methods are to be registered.
      */
-    global with sharing class Arguments extends Chainable {
+    global with sharing class Arguments extends Mocker.Chainable {
         final List<Object> expectedArguments;
         final List<Method> methods = new List<Method>();
 

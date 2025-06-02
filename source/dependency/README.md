@@ -40,7 +40,7 @@ action.
 Each implementation class must have a public or global no-op constructor. An exception will be thrown if an attempt
 is made to bind an abstract entity to a class that doesn't.
 
-To allow a class to be bound that has a private or protected no-op constructor, the _TypeHelper.Factory_
+To allow a class to be bound that has a private or protected no-op constructor, the _Types.Factory_
 interface can be used. Create an inner class in the class to be registered that implements the interface;
 ```
 global interface Factory {
@@ -105,39 +105,15 @@ public static void custom() {
         insert new Binding__c(Type__c = 'QueryClasses.AbstractQuery', Action__c = 'SYSTEM', Implementation__c = 'QueryClasses.SystemAbstractQueryImpl');
 ```
 ## Binding Validation
-Validation of the implementation bound to a property or abstract entity class can be performed by adding a class that
-implements the _BindingCheck_ interface;
+All _Types_ to be bound to an implementation will be validated as they are bound. Any new _Type_ to be bound must have
+a validator registered for the _Type_. To do this, a new _BindingCheck_ metadata record must be added which defines the
+validator used to validate the _Type_.
 
-```
-global interface BindingCheck {
+Validation of the implementation bound to a _Type_ is performed by adding a class that implements the
+[Dependency.BindingCheck](SfApexDocs/dependency.html#BindingCheck) interface and registering in the custom metadata
+record.
 
-    /**
-     * @description
-     * Given a type to be bound, a class implementing this method must check that the given implementation class
-     * can be bound to it.
-     *
-     * If the for type is an interface then an implementation of this method must check that the implementation
-     * class implements the interface.
-     *
-     * If the for type is an abstract class then an implementation of this method must check that the implementation
-     * class extends the abstract class.
-     * 
-     * If the for type is a class then an implementation of this method must check that the implementation
-     * class is of the same class or a super class of it.
-     *
-     * @param forType The type to be bound.
-     * @param withImpl The implementation to bind to the type.
-     *
-     * @return The result of the validation.
-     */
-    ValidationResult validate(Type forType, Type withImpl);
-}
-```
-
-The _BindingCheck__mdt_ custom metadata object holds a mapping from the property or abstract entity to its
-_BindingCheck_ validator.
-
-The fields of the metadata object are;
+The _BindingCheck__mdt_ custom metadata object has the following fields;
 
 | Field |Type | Description                                                                                             |
 |-------|-----|---------------------------------------------------------------------------------------------------------|
@@ -155,7 +131,7 @@ class that implements it.
 ```
  public class QueryInterfaceValidator implements Dependency.BindingCheck {
         public Dependency.ValidationResult validate(Type forType, Type withImpl) {
-            if (TypeHelper.newInstance(withImpl) instanceof QueryClasses.QueryInterface) {
+            if (Types.newInstance(withImpl) instanceof QueryClasses.QueryInterface) {
                 return new Dependency.ValidationResult(true, null);
             } else {
                 return new Dependency.ValidationResult(

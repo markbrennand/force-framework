@@ -1,19 +1,47 @@
 # Overview
-A suite of APIs that have been developed to aid in Apex development.
+A set of APIs that have been developed to aid in Apex development.
 
-Built with SOLID principles and clean code in mind.
+Built with SOLID Principles, Separation of Concerns and Clean code in mind.
+
+#### SOLID Principles
+SOLID is a set of five design principles in object-oriented programming that helps developers create more maintainable,
+extensible, and understandable software. These principles are: Single Responsibility Principle, Open/Closed Principle,
+Liskov Substitution Principle, Interface Segregation Principle, and Dependency Inversion Principle.
+
+#### Separation of Concerns
+Separation of Concerns (SoC) is a design principle in software development that encourages breaking down a complex
+program into distinct, independent, and manageable parts. Each part, or "concern," focuses on a specific aspect of the
+program, reducing overlap and making the code more maintainable and easier to understand.
+
+#### Clean Code
+Clean code, in essence, is software that is written in a way that is easy to read, understand, and maintain. It's about
+prioritizing readability and maintainability, making it easier for other developers (or even yourself in the future) to
+modify or extend the code. Clean code follows established conventions, standards, and practices to ensure it's simple,
+concise, and expressive.
+
+# Framework APIs
+The Force Framework comprises the following APIs. 
 
 ## Dependency Injection
-The D of SOLID is Dependency Injection. This is not something supported natively by Apex. The API developed
+The D of SOLID is Dependency Inversion. This requires that functionality is abstracted into interfaces or abstract
+classes. An application must then only use the interface rather than its concrete implementation. To aid in this,
+frameworks such as Spring fpr Java, support Dependency Injection. This allows the implementation of the interface to be
+bound into the application at run time. This is not something supported natively by Apex. This API
 allows the initialisation of a registry either programmatically or from a custom object. Once initialised, dependencies
-can be wired into Apex code.
+can be injected into an Apex application from the Apex _Type_ of the interface the application wants to use.
 
 See [Dependency Injection](source/dependency/README.md)
 
 ## Types
-The S of SOLID is Single Use Only. The API developed for access to Apex types allows classes to
+The S of SOLID is Single Use Only. The API for access to Apex types allows classes to
 be developed which are not publicly accessible and allow only the use of the methods defined in the
-interface they implement by an application.
+interface they implement. This provides Separation of Concern, as an application will
+be limited to calling ony the methods of the interface. An application will be unable to construct an instance of the
+concrete class providing the interface. This helps to prevent the use of the class for something other than its
+single use.
+
+The O of SOLID is Open Closed. A class is Open for extension and Closed for modification. The pattern used in classes
+using this API meets this requirement.
 
 See [Types](source/types/README.md)
 

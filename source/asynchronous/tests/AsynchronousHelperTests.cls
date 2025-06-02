@@ -16,7 +16,7 @@ public with sharing class AsynchronousHelperTests {
     private static void testRecordException() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = Asynchronous.Status.RUNNING.name(),
                     RetryNumber__c = 1
             );
@@ -33,7 +33,7 @@ public with sharing class AsynchronousHelperTests {
     private static void testInternalFailure() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = Asynchronous.Status.RUNNING.name(),
                     RetryNumber__c = 3
             );
@@ -58,7 +58,7 @@ public with sharing class AsynchronousHelperTests {
             };
 
             // Repeat the encode/decode test for different chunk sizes.
-            AsynchronousJob__c asynchronousObject = new AsynchronousJob__c(Id = TestHelper.nextId(AsynchronousJob__c.SObjectType));
+            AsynchronousJob__c asynchronousObject = new AsynchronousJob__c(Id = Mocker.fakeId(AsynchronousJob__c.SObjectType));
             for (Integer size : new List<Integer>{
                     AsynchronousHelper.MAX_CHUNK_SIZE, 1, 2, 4, 8, 16, 32, 62, 128, 256
             }) {
@@ -72,7 +72,7 @@ public with sharing class AsynchronousHelperTests {
     @IsTest
     private static void testMocking() {
         System.runAs(AsynchronousTestHelper.getUser()) {
-            final AsynchronousJob__c asyncObject = new AsynchronousJob__c(Id = TestHelper.nextId(AsynchronousJob__c.SObjectType));
+            final AsynchronousJob__c asyncObject = new AsynchronousJob__c(Id = Mocker.fakeId(AsynchronousJob__c.SObjectType));
             final Exception exc = new DMLException('Test');
 
             AsynchronousHelper.INSTANCE = (AsynchronousHelper) Mocker.of(AsynchronousHelper.class)

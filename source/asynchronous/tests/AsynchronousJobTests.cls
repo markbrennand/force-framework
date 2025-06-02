@@ -138,7 +138,7 @@ public with sharing class AsynchronousJobTests {
 
             Datetime now = Datetime.now();
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                     OwnerId = UserInfo.getUserId(),
                     Status__c = Asynchronous.Status.PENDING.name(),
                     Runnable__c = AsynchronousJobTests.Runnable.class.getName(),

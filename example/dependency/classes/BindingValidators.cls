@@ -15,7 +15,7 @@ public with sharing class BindingValidators {
     public class QueryValidator implements Dependency.BindingCheck {
         public Dependency.ValidationResult validate(Type forType, Type withImpl) {
             if (forType == QueryClasses.QueryInterface.class) {
-                if (TypeHelper.newInstance(withImpl) instanceof QueryClasses.QueryInterface) {
+                if (Types.newInstance(withImpl) instanceof QueryClasses.QueryInterface) {
                     return new Dependency.ValidationResult(true, null);
                 } else {
                     return new Dependency.ValidationResult(
@@ -24,7 +24,7 @@ public with sharing class BindingValidators {
                     );
                 }
             } else if (forType == QueryClasses.AbstractQuery.class) {
-                if (TypeHelper.newInstance(withImpl) instanceof QueryClasses.AbstractQuery) {
+                if (Types.newInstance(withImpl) instanceof QueryClasses.AbstractQuery) {
                     return new Dependency.ValidationResult(true, null);
                 } else {
                     return new Dependency.ValidationResult(
@@ -49,7 +49,7 @@ public with sharing class BindingValidators {
      */
     public with sharing class MapValidator implements Dependency.BindingCheck {
         public Dependency.ValidationResult validate(Type forType, Type withImpl) {
-            Object impl = TypeHelper.newInstance(withImpl);
+            Object impl = Types.newInstance(withImpl);
 
             switch on forType.getName() {
                 when 'Map<String,Integer>' {
@@ -80,7 +80,7 @@ public with sharing class BindingValidators {
     */
     public with sharing class AccountManagerValidator implements Dependency.BindingCheck {
         public Dependency.ValidationResult validate(Type forType, Type withImpl) {
-            if (TypeHelper.newInstance(withImpl) instanceof AccountClasses.AccountManager) {
+            if (Types.newInstance(withImpl) instanceof AccountClasses.AccountManager) {
                 return new Dependency.ValidationResult(true, null);
             } else {
                 return new Dependency.ValidationResult(

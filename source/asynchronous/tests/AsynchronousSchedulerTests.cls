@@ -52,8 +52,8 @@ public with sharing class AsynchronousSchedulerTests {
     @IsTest
     private static void testJobToRun() {
         System.runAs(AsynchronousTestHelper.getUser()) {
-            Id asyncJobId1 = TestHelper.nextId(AsynchronousJob__c.SObjectType);
-            Id asyncJobId2 = TestHelper.nextId(AsynchronousJob__c.SObjectType);
+            Id asyncJobId1 = Mocker.fakeId(AsynchronousJob__c.SObjectType);
+            Id asyncJobId2 = Mocker.fakeId(AsynchronousJob__c.SObjectType);
 
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(Id = asyncJobId1);
 
@@ -107,7 +107,7 @@ public with sharing class AsynchronousSchedulerTests {
         System.runAs(AsynchronousTestHelper.getUser()) {
             List<AsynchronousJob__c> asyncObjects = new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(
-                            Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = SingleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-10))
             };
@@ -121,11 +121,11 @@ public with sharing class AsynchronousSchedulerTests {
 
             asyncObjects = new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(
-                            Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = SingleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-10)),
                     new AsynchronousJob__c(
-                            Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = SingleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-5))
             };
@@ -144,7 +144,7 @@ public with sharing class AsynchronousSchedulerTests {
         System.runAs(AsynchronousTestHelper.getUser()) {
             List<AsynchronousJob__c> asyncObjects = new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(
-                            Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-10))
             };
@@ -158,11 +158,11 @@ public with sharing class AsynchronousSchedulerTests {
 
             asyncObjects = new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(
-                            Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-10)),
                     new AsynchronousJob__c(
-                            Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-5))
             };
@@ -176,15 +176,15 @@ public with sharing class AsynchronousSchedulerTests {
 
             asyncObjects = new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(
-                            Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-10)),
                     new AsynchronousJob__c(
-                            Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-5)),
                     new AsynchronousJob__c(
-                            Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-1))
             };
@@ -203,15 +203,15 @@ public with sharing class AsynchronousSchedulerTests {
         System.runAs(AsynchronousTestHelper.getUser()) {
             List<AsynchronousJob__c> asyncObjects = new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(
-                            Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = SingleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-10)),
                     new AsynchronousJob__c(
-                            Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-5)),
                     new AsynchronousJob__c(
-                            Id = TestHelper.nextId(AsynchronousJob__c.SObjectType),
+                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-4))
             };
@@ -240,7 +240,7 @@ public with sharing class AsynchronousSchedulerTests {
     private static void testMoreThanOneSchedulerCannotBeRun() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             Set<String> jobsToStart = new Set<String>{
-                    TestHelper.nextId(AsynchronousJob__c.SObjectType)
+                    Mocker.fakeId(AsynchronousJob__c.SObjectType)
             };
 
             Asynchronous.INSTANCE = (Asynchronous) Mocker.of(Asynchronous.class)

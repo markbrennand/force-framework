@@ -3,7 +3,7 @@
  * @author Mark Brennand
  */
 @IsTest
-public with sharing class MockerUnitTests {
+public with sharing class MockerTests {
 
     @IsTest
     private static void testThrows() {
@@ -85,7 +85,7 @@ public with sharing class MockerUnitTests {
 
     @IsTest
     private static void testSObjectMatching() {
-        Account a1 = new Account(Id = TestHelper.nextId(Account.SObjectType), Name='Bill');
+        Account a1 = new Account(Id = Mocker.fakeId(Account.SObjectType), Name='Bill');
         Account a2 = new Account(Id = a1.Id, Name='Bill', AccountNumber = '123');
         Account a3 = new Account(Id = a1.Id, Name='Ted');
 
@@ -127,7 +127,7 @@ public with sharing class MockerUnitTests {
 
     @IsTest
     private static void testChaining() {
-        Account a1 = new Account(Id = TestHelper.nextId(Account.SObjectType), Name='Bill');
+        Account a1 = new Account(Id = Mocker.fakeId(Account.SObjectType), Name='Bill');
         Account a2 = new Account(Id = a1.Id, Name='Ted', AccountNumber = '123');
 
         Mocker mocked = (Mocker) Mocker.of(Mocker.class)
@@ -154,7 +154,7 @@ public with sharing class MockerUnitTests {
 
     @IsTest
     private static void testComparator() {
-        Account a1 = new Account(Id = TestHelper.nextId(Account.SObjectType), Name = 'Bill');
+        Account a1 = new Account(Id = Mocker.fakeId(Account.SObjectType), Name = 'Bill');
 
         Mocker mocked = (Mocker) Mocker.of(Mocker.class)
                 .whenArgument(a1)
@@ -173,6 +173,15 @@ public with sharing class MockerUnitTests {
             mocked.whenArgument(new Account(Name = 'Bill'));
 
         } catch(Assertion.AssertionException ae) {}
+    }
+
+    @IsTest
+    private static void testFakeId() {
+        Assert.isTrue(Mocker.fakeId(User.SObjectType).endsWith('001'));
+        Assert.isTrue(Mocker.fakeId(Account.SObjectType).endsWith('001'));
+        Assert.isTrue(Mocker.fakeId(Account.SObjectType).endsWith('002'));
+        Assert.isTrue(Mocker.fakeId(User.SObjectType).endsWith('002'));
+        Assert.isTrue(Mocker.fakeId(Account.SObjectType).endsWith('003'));
     }
 
     private with sharing class TestModifier implements Mocker.Modifier {

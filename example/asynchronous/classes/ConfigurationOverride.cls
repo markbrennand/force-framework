@@ -2,7 +2,7 @@
  * @description
  * @author Mark Brennand
  */
-public with sharing class ConfigurationOverride implements TypeHelper.Factory {
+public with sharing class ConfigurationOverride implements Types.Factory {
     public Object newInstance() {
         return new Map<String, Integer> {
                 'maxSchedulers' => 1,

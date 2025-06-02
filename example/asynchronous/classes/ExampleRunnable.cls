@@ -50,14 +50,14 @@ public with sharing class ExampleRunnable extends AsynchronousRunnable {
         return true;
     }
 
-    public class Executor implements TypeHelper.Factory {
+    public class Executor implements Types.Factory {
 
         public Object newInstance() {
             return new ExampleRunnable();
         }
     }
 
-    public class Configuration implements TypeHelper.Factory {
+    public class Configuration implements Types.Factory {
         public Object newInstance() {
             return new Map<String, Integer> { 'maximumActive' => 1 };
         }
