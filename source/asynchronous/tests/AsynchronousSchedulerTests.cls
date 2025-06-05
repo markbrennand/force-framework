@@ -63,14 +63,14 @@ public with sharing class AsynchronousSchedulerTests {
                     })
             };
 
-            AsynchronousDAO.INSTANCE = (AsynchronousDAO) Mocker.of(AsynchronousDAO.class)
+            AsynchronousDAO.INJECT = (AsynchronousDAO) Mocker.of(AsynchronousDAO.class)
                     .whenArgument(asyncJobId1)
-                        .expectMethod('apiGetObject').called(1).returns(asyncObject)
+                        .expectMethod('getObject').called(1).returns(asyncObject)
                     .mock();
 
-            AsynchronousHelper.INSTANCE = (AsynchronousHelper) Mocker.of(AsynchronousHelper.class)
+            AsynchronousHelper.INJECT = (AsynchronousHelper.API) Mocker.of(AsynchronousHelper.class)
                     .whenArgument(asyncObject)
-                        .expectMethod('apiQueueJob').called(1)
+                        .expectMethod('queueJob').called(1)
                     .mock();
 
             Asynchronous.Job asyncJob = (Asynchronous.Job) Mocker.of(AsynchronousJob.class)
@@ -243,7 +243,7 @@ public with sharing class AsynchronousSchedulerTests {
                     Mocker.fakeId(AsynchronousJob__c.SObjectType)
             };
 
-            Asynchronous.INSTANCE = (Asynchronous) Mocker.of(Asynchronous.class)
+            AsynchronousImpl.INJECT = (AsynchronousImpl) Mocker.of(AsynchronousImpl.class)
                     .whenArguments(
                             AsynchronousScheduler.QueueNext.class,
                             null,
@@ -253,12 +253,12 @@ public with sharing class AsynchronousSchedulerTests {
                                     AsynchronousFinalizer.JOBS_TO_START => JSON.serialize(jobsToStart)
                             }
                     )
-                        .expectMethod('apiCreateJob').called(1)
+                        .expectMethod('createJob').called(1)
                     .mock();
 
-            AsynchronousDAO.INSTANCE = (AsynchronousDAO) Mocker.of(AsynchronousDAO.class)
+            AsynchronousDAO.INJECT = (AsynchronousDAO) Mocker.of(AsynchronousDAO.class)
                     .whenArgument(new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName()))
-                        .expectMethod('apiCountActiveObjects').called(1).returns(1)
+                        .expectMethod('countActiveObjects').called(1).returns(1)
                     .mock();
 
             AsynchronousScheduler.queue(jobsToStart);
@@ -285,12 +285,12 @@ public with sharing class AsynchronousSchedulerTests {
     }
 
     private static void mockForRun(List<AsynchronousJob__c> asyncObjects, Integer maxJobsToStart, Set<Id> jobsThatShouldBeStarted) {
-        AsynchronousHelper.INSTANCE = (AsynchronousHelper) Mocker.of(AsynchronousHelper.class)
+        AsynchronousHelper.INJECT = (AsynchronousHelper) Mocker.of(AsynchronousHelper.class)
                 .whenArgument(new AsynchronousJob__c(
                         Runnable__c = AsynchronousScheduler.QueueNext.class.getName(),
                         Status__c = Asynchronous.Status.PENDING.name()
                 ))
-                    .expectMethod('apiQueueJob').called(1)
+                    .expectMethod('queueJob').called(1)
                 .mock();
 
         Map<String, Integer> maxCount = new Map<String, Integer>();
@@ -316,12 +316,12 @@ public with sharing class AsynchronousSchedulerTests {
 
         Mocker.Method mocked = Mocker.of(AsynchronousDAO.class)
                 .whenNoArguments()
-                    .expectMethod('apiCountSchedulableObjects').called(jobsThatShouldBeStarted.isEmpty() ? 1 : 0).returns(1)
+                    .expectMethod('countSchedulableObjects').called(jobsThatShouldBeStarted.isEmpty() ? 1 : 0).returns(1)
                 .whenArgument(maxJobsToStart)
-                    .expectMethod('apiGetScheduledObjects').called(1)
+                    .expectMethod('getScheduledObjects').called(1)
                         .returns(scheduledObjects)
                 .whenArgument(new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName()))
-                    .expectMethod('apiCountActiveObjects').called(1).returns(0)
+                    .expectMethod('countActiveObjects').called(1).returns(0)
                 .whenArguments(
                         new List<AsynchronousJob__c> {
                                 new AsynchronousJob__c(
@@ -335,15 +335,15 @@ public with sharing class AsynchronousSchedulerTests {
                                 }
                         }
                 )
-                    .expectMethod('apiPersistObjects').called(1);
+                    .expectMethod('persistObjects').called(1);
 
         for (String runnable : maxCount.keySet()) {
             mocked
                     .whenArgument(new AsynchronousJob__c(Runnable__c = runnable))
-                        .expectMethod('apiCountActiveObjects').called(1).returns(0);
+                        .expectMethod('countActiveObjects').called(1).returns(0);
         }
 
-        AsynchronousDAO.INSTANCE = (AsynchronousDAO) mocked.mock();
+        AsynchronousDAO.INJECT = (AsynchronousDAO) mocked.mock();
 
         AsynchronousScheduler.CONFIGURATION = new Map<String, Integer> {
                 AsynchronousScheduler.MAXIMUM_JOBS_TO_START_PROPERTY => maxJobsToStart,

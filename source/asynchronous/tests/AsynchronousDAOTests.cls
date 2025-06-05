@@ -72,13 +72,13 @@ public with sharing class AsynchronousDAOTests {
     @IsTest
     private static void testBindingCheck() {
         System.runAs(AsynchronousTestHelper.getUser()) {
-            Dependency.bind(AsynchronousDAO.API.class, AsynchronousDAO.Factory.class);
+            Dependency.bind(Asynchronous.DAO.class, AsynchronousDAO.Factory.class);
             try {
-                Dependency.bind(AsynchronousDAO.API.class, AsynchronousScheduler.QueueNext.class);
+                Dependency.bind(Asynchronous.DAO.class, AsynchronousScheduler.QueueNext.class);
                 Assert.fail();
             } catch (Dependency.APIException ae) {
                 Assert.isTrue(
-                        TestHelper.exceptionContains('Class AsynchronousScheduler.QueueNext does not implement AsynchronousDAO.API', ae),
+                        TestHelper.exceptionContains('Class AsynchronousScheduler.QueueNext does not implement Asynchronous.DAO', ae),
                         'Unexpected exception: ' + ae
                 );
             }

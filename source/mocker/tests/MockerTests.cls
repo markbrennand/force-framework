@@ -153,6 +153,33 @@ public with sharing class MockerTests {
     }
 
     @IsTest
+    private static void testFactory() {
+        Account a1 = new Account(Id = Mocker.fakeId(Account.SObjectType), Name='Bill');
+        Account a2 = new Account(Id = a1.Id, Name='Ted', AccountNumber = '123');
+
+        Mocker mocked = (Mocker) Mocker.of(new TestFactory())
+                .whenArgument(a1)
+                .expectMethod('whenArgument').called(1)
+                .expectMethod('whenArguments').called(0)
+                .whenArgument(a2)
+                .expectMethod('whenArgument').called(1)
+                .whenNoArguments()
+                .expectMethod('mock').called(2).returns(123)
+                .whenArguments(1, 2)
+                .whenArguments(1, 2, 3)
+                .whenArguments(1, 2, 3, 4)
+                .whenArguments(1, 2, 3, 4, 5)
+                .mock();
+
+        mocked.whenArgument(a1);
+        mocked.whenArgument(a2);
+        Assert.areEqual(123, mocked.mock());
+        Assert.areEqual(123, mocked.mock());
+
+        Mocker.validate();
+    }
+
+    @IsTest
     private static void testComparator() {
         Account a1 = new Account(Id = Mocker.fakeId(Account.SObjectType), Name = 'Bill');
 
@@ -193,6 +220,12 @@ public with sharing class MockerTests {
     private with sharing class TestComparator implements Comparator<Object> {
         public Integer compare(Object param1, Object param2) {
             return ((Account) param1).Name == ((Account) param2).Name ? 0 : -1;
+        }
+    }
+
+    private with sharing class TestFactory implements Mocker.Factory {
+        public Object stub(StubProvider provider) {
+            return Test.createStub(Mocker.class, provider);
         }
     }
 }

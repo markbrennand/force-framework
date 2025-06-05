@@ -156,7 +156,7 @@ public with sharing class BindingTestHelper {
         }
     }
 
-    public with sharing class AbstractTestChecker implements Dependency.BindingCheck {
+    public with sharing class AbstractTestBindingCheck implements Dependency.BindingCheck {
         public Dependency.ValidationResult validate(Type forType, Type withImpl) {
             Object instance = Types.newInstance(withImpl);
             SINGLETON_INSTANCE =
@@ -173,7 +173,7 @@ public with sharing class BindingTestHelper {
         }
     }
 
-    public with sharing class TestInterfaceChecker implements Dependency.BindingCheck {
+    public with sharing class TestInterfaceBindingCheck implements Dependency.BindingCheck {
         public Dependency.ValidationResult validate(Type forType, Type withImpl) {
             Object instance = Types.newInstance(withImpl);
             SINGLETON_INSTANCE =

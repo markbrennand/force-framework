@@ -26,7 +26,7 @@ public with sharing class AsynchronousFinalizerTests {
                     ScheduledRunTime__c = Datetime.now()
             );
 
-            AsynchronousDAO.INSTANCE = (AsynchronousDAO) mockForSuccess(asyncObject, false).mock();
+            AsynchronousDAO.INJECT = (AsynchronousDAO) mockForSuccess(asyncObject, false).mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
             Mocker.validate();
         }
@@ -46,7 +46,7 @@ public with sharing class AsynchronousFinalizerTests {
                     ScheduledRunTime__c = Datetime.now()
             );
 
-            AsynchronousDAO.INSTANCE = (AsynchronousDAO) mockForSuccess(asyncObject, true).mock();
+            AsynchronousDAO.INJECT = (AsynchronousDAO) mockForSuccess(asyncObject, true).mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
             Mocker.validate();
         }
@@ -66,7 +66,7 @@ public with sharing class AsynchronousFinalizerTests {
                     ScheduledRunTime__c = Datetime.now()
             );
 
-            AsynchronousDAO.INSTANCE = (AsynchronousDAO) mockForException(asyncObject, false, 'onSuccess failed').mock();
+            AsynchronousDAO.INJECT = (AsynchronousDAO) mockForException(asyncObject, false, 'onSuccess failed').mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
             Mocker.validate();
         }
@@ -88,7 +88,7 @@ public with sharing class AsynchronousFinalizerTests {
 
             Exception exc = new Asynchronous.APIException('Test');
 
-            AsynchronousDAO.INSTANCE = (AsynchronousDAO) mockForFailure(asyncObject, Asynchronous.Status.FAILED, exc, false).mock();
+            AsynchronousDAO.INJECT = (AsynchronousDAO) mockForFailure(asyncObject, Asynchronous.Status.FAILED, exc, false).mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
             Mocker.validate();
         }
@@ -110,7 +110,7 @@ public with sharing class AsynchronousFinalizerTests {
 
             Exception exc = new Asynchronous.APIException('Test');
 
-            AsynchronousDAO.INSTANCE = (AsynchronousDAO) mockForFailure(asyncObject, Asynchronous.Status.FAILED, exc, true).mock();
+            AsynchronousDAO.INJECT = (AsynchronousDAO) mockForFailure(asyncObject, Asynchronous.Status.FAILED, exc, true).mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
             Mocker.validate();
         }
@@ -132,7 +132,7 @@ public with sharing class AsynchronousFinalizerTests {
 
             Exception exc = new Asynchronous.APIException('Test');
 
-            AsynchronousDAO.INSTANCE = (AsynchronousDAO) mockForException(asyncObject, true, 'onFailure failed').mock();
+            AsynchronousDAO.INJECT = (AsynchronousDAO) mockForException(asyncObject, true, 'onFailure failed').mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
             Mocker.validate();
         }
@@ -154,7 +154,7 @@ public with sharing class AsynchronousFinalizerTests {
 
             Exception exc = new Asynchronous.APIException('Test');
 
-            AsynchronousDAO.INSTANCE = (AsynchronousDAO) mockForFailure(asyncObject, Asynchronous.Status.QUEUED, exc, false).mock();
+            AsynchronousDAO.INJECT = (AsynchronousDAO) mockForFailure(asyncObject, Asynchronous.Status.QUEUED, exc, false).mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
             Mocker.validate();
         }
@@ -185,13 +185,13 @@ public with sharing class AsynchronousFinalizerTests {
                             ExceptionType__c = 'System.NullPointerException',
                             ExceptionMessage__c = 'null input to JSON parser'
                     ))
-                        .expectMethod('apiPersistException').called(1)
+                        .expectMethod('persistException').called(1)
                     .whenArgument(new List<AsynchronousJob__c>{
                             new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.FAILED.name())
                     })
-                        .expectMethod('apiPersistObjects').called(1);
+                        .expectMethod('persistObjects').called(1);
 
-            AsynchronousDAO.INSTANCE = (AsynchronousDAO) mocked.mock();
+            AsynchronousDAO.INJECT = (AsynchronousDAO) mocked.mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
             Mocker.validate();
         }
@@ -213,7 +213,7 @@ public with sharing class AsynchronousFinalizerTests {
 
             Exception exc = new Asynchronous.APIException('Test');
 
-            AsynchronousDAO.INSTANCE = (AsynchronousDAO) mockForFailure(asyncObject, Asynchronous.Status.CANCELLED, exc, false).mock();
+            AsynchronousDAO.INJECT = (AsynchronousDAO) mockForFailure(asyncObject, Asynchronous.Status.CANCELLED, exc, false).mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
             Mocker.validate();
         }
@@ -226,18 +226,18 @@ public with sharing class AsynchronousFinalizerTests {
         Mocker mocked = Mocker.of(AsynchronousDAO.class);
         mocked
                 .whenArgument(asyncObject.Id)
-                    .expectMethod('apiGetObject').called(1).returns(asyncObject);
+                    .expectMethod('getObject').called(1).returns(asyncObject);
 
         if (jobToBeDeleted) {
             mocked
                     // The Runnable's onFailure method will have asked for the job to be deleted.
                     .whenArgument(new List<AsynchronousJob__c>{ asyncObject })
-                        .expectMethod('apiRemoveObjects').called(1);
+                        .expectMethod('removeObjects').called(1);
         } else {
             mocked
                     // After a successful call to Runnable.onSuccess, the job should be marked as SUCCEEDED.
                     .whenArgument(new List<AsynchronousJob__c> { new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.SUCCEEDED.name()) })
-                        .expectMethod('apiPersistObjects').called(1);
+                        .expectMethod('persistObjects').called(1);
         }
 
         return mocked;
@@ -253,7 +253,7 @@ public with sharing class AsynchronousFinalizerTests {
         mocked
                 // Finalizer must get the job once.
                 .whenArgument(asyncObject.Id)
-                    .expectMethod('apiGetObject').called(1).returns(asyncObject)
+                    .expectMethod('getObject').called(1).returns(asyncObject)
 
                 // An Exception should be recorded.
                 .whenArgument(new AsynchronousJobException__c(
@@ -264,7 +264,7 @@ public with sharing class AsynchronousFinalizerTests {
                         ExceptionMessage__c = exc.getMessage(),
                         ExceptionStackTrace__c = exc.getStackTraceString()
                 ))
-                    .expectMethod('apiPersistException').called(1);
+                    .expectMethod('persistException').called(1);
 
         if (expectedStatus == Asynchronous.Status.QUEUED) {
             mocked
@@ -272,7 +272,7 @@ public with sharing class AsynchronousFinalizerTests {
                     .whenArgument(new List<AsynchronousJob__c> {
                             new AsynchronousJob__c(Id = asyncObject.Id, Status__c = expectedStatus.name(), RetryNumber__c = asyncObject.RetryNumber__c+1)
                     })
-                        .expectMethod('apiPersistObjects').called(1);
+                        .expectMethod('persistObjects').called(1);
 
         } else if (jobToBeDeleted) {
             mocked
@@ -280,14 +280,14 @@ public with sharing class AsynchronousFinalizerTests {
                     .whenArgument(new List<AsynchronousJob__c> {
                             new AsynchronousJob__c(Id = asyncObject.Id)
                     })
-                        .expectMethod('apiRemoveObjects').called(1);
+                        .expectMethod('removeObjects').called(1);
         } else {
             mocked
                     // After a successful call to Runnable.onFailed, the job should be marked as FAILED.
                     .whenArgument(new List<AsynchronousJob__c> {
                             new AsynchronousJob__c(Id = asyncObject.Id, Status__c = expectedStatus.name())
                     })
-                        .expectMethod('apiPersistObjects').called(1);
+                        .expectMethod('persistObjects').called(1);
         }
 
         return mocked;
@@ -303,7 +303,7 @@ public with sharing class AsynchronousFinalizerTests {
         mocked
                 // Finalizer must get the job once.
                 .whenArgument(asyncObject.Id)
-                    .expectMethod('apiGetObject').called(1).returns(asyncObject)
+                    .expectMethod('getObject').called(1).returns(asyncObject)
 
                 // And the error from the on method must be persisted.
                 .whenArgument(new AsynchronousJobException__c(
@@ -313,11 +313,11 @@ public with sharing class AsynchronousFinalizerTests {
                         ExceptionType__c = Asynchronous.APIException.class.getName(),
                         ExceptionMessage__c = exceptionMessage
                 ))
-                    .expectMethod('apiPersistException').called(1)
+                    .expectMethod('persistException').called(1)
 
                 // The job status will be changed to FAILED.
                 .whenArgument(new List<AsynchronousJob__c> { new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.FAILED.name()) } )
-                    .expectMethod('apiPersistObjects').called(1);
+                    .expectMethod('persistObjects').called(1);
 
         if (isJobFailed) {
             mocked
@@ -329,7 +329,7 @@ public with sharing class AsynchronousFinalizerTests {
                             ExceptionType__c = Asynchronous.APIException.class.getName(),
                             ExceptionMessage__c = 'Test'
                     ))
-                        .expectMethod('apiPersistException').called(1);
+                        .expectMethod('persistException').called(1);
         }
 
         return mocked;

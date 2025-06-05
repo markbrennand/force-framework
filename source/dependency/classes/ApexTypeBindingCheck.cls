@@ -1,14 +1,14 @@
 /**
  * @description
  * Class providing check on Binding made to an Apex language type.
- *
+ * <br><br>
  * In addition to the primitive types, some Map types are validated too.
- *
- * See [Binding Validation](https://github.com/markbrennand/sf-frameworks/blob/main/source/dependency/README.md#Binding-Validation)
+ *<br><br>
+ * See <a href=../README.md target="_blank">README</a> for full details of Dependency.BindingCheck API.
  *
  * @author Mark Brennand
  */
-public with sharing class BindingCheck implements Dependency.BindingCheck {
+public with sharing class ApexTypeBindingCheck implements Dependency.BindingCheck {
 
     /**
      * @description

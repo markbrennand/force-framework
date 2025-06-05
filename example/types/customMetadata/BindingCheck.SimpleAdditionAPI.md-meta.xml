@@ -3,8 +3,8 @@
     <label>SimpleAdditionAPI</label>
     <protected>false</protected>
     <values>
-        <field>Checker__c</field>
-        <value xsi:type="xsd:string">SimpleAddition.Validator</value>
+        <field>BindingCheck__c</field>
+        <value xsi:type="xsd:string">SimpleAddition.BindingCheck</value>
     </values>
     <values>
         <field>IsUnitTest__c</field>

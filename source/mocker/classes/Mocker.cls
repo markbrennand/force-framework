@@ -19,6 +19,29 @@
  * @author Mark Brennand
  */
 global with sharing virtual class Mocker extends Mocker.Chainable {
+
+    /**
+     * @description
+     * Interface allowing a user of the Mocker.of method to be called back to create the stubbed object.
+     * <br><br>
+     * As stubbed objects cannot be created by the Mocker if they are in a different namespace, this interface
+     * can be used to create the stubbed object in the caller's namespace.
+     */
+    global interface Factory {
+
+        /**
+         * @description
+         * Crates an instance of a stubbed object.
+         *
+         * The implementation will be responsible for deciding the class of the object to stub.
+         *
+         * @param provider The provider to use for the new stubbed object.
+         *
+         * @return The stubbed object.
+         */
+        Object stub(StubProvider provider);
+    }
+
     /**
      * @description
      * Map containing the next Id number to use for each object type.
@@ -231,6 +254,23 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
         Assertion.isNotNull(forType, 'argument: Mocker.of.forType');
 
         final Mocker mocked = new Mocker(Test.createStub(forType, MATCHER));
+        return mocked;
+    }
+
+    /**
+     * @description
+     * Creates a new Mocker that may be used to define a mocking scenario.
+     *
+     * The Factory argument will be called to create the stubbed object.
+     *
+     * @param factory Factory that will create the stubbed object.
+     *
+     * @return A Mocker which may be used to define a mocking scenario.
+     */
+    global static Mocker of(final Factory factory) {
+        Assertion.isNotNull(factory, 'argument: Mocker.of.factory');
+
+        final Mocker mocked = new Mocker(factory.stub(MATCHER));
         return mocked;
     }
 

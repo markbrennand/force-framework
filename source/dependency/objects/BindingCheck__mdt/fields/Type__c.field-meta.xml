@@ -4,7 +4,7 @@
     <description>The type that is to be checked.</description>
     <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
-    <inlineHelpText>The name of the interface or abstract class that the associated Checker class will validate.</inlineHelpText>
+    <inlineHelpText>The name of the interface or abstract class that the associated BindingCheck class will validate.</inlineHelpText>
     <label>Type</label>
     <length>255</length>
     <required>true</required>

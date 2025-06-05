@@ -23,8 +23,8 @@ public with sharing class AsynchronousHelperTests {
 
             Exception exc = new Asynchronous.APIException('Test');
 
-            AsynchronousDAO.INSTANCE = mockForRecordException(asyncObject, exc);
-            AsynchronousHelper.recordException(asyncObject, exc);
+            AsynchronousDAO.INJECT = mockForRecordException(asyncObject, exc);
+            AsynchronousHelper.INJECT.recordException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
             Mocker.validate();
         }
     }
@@ -40,8 +40,8 @@ public with sharing class AsynchronousHelperTests {
 
             Exception exc = new Asynchronous.APIException('Test');
 
-            AsynchronousDAO.INSTANCE = mockForInternalFailure(asyncObject, exc);
-            AsynchronousHelper.recordInternalException(asyncObject, exc);
+            AsynchronousDAO.INJECT = mockForInternalFailure(asyncObject, exc);
+            AsynchronousHelper.INJECT.recordInternalException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
             Mocker.validate();
         }
     }
@@ -63,8 +63,8 @@ public with sharing class AsynchronousHelperTests {
                     AsynchronousHelper.MAX_CHUNK_SIZE, 1, 2, 4, 8, 16, 32, 62, 128, 256
             }) {
                 AsynchronousHelper.MAX_CHUNK_SIZE = size;
-                List<AsynchronousJobState__c> chunks = AsynchronousHelper.encodeState(asynchronousObject, state);
-                Assert.areEqual(state, AsynchronousHelper.decodeState(chunks));
+                List<AsynchronousJobState__c> chunks = AsynchronousHelper.INJECT.encodeState(asynchronousObject, state);
+                Assert.areEqual(state, AsynchronousHelper.INJECT.decodeState(chunks));
             }
         }
     }
@@ -75,22 +75,22 @@ public with sharing class AsynchronousHelperTests {
             final AsynchronousJob__c asyncObject = new AsynchronousJob__c(Id = Mocker.fakeId(AsynchronousJob__c.SObjectType));
             final Exception exc = new DMLException('Test');
 
-            AsynchronousHelper.INSTANCE = (AsynchronousHelper) Mocker.of(AsynchronousHelper.class)
+            AsynchronousHelper.INJECT = (AsynchronousHelper) Mocker.of(AsynchronousHelper.class)
                     .whenArguments(asyncObject, new Asynchronous.APIException('Wrapper', exc))
                         .withComparators(new List<Comparator<Object>>{
                                 new TestHelper.ExceptionComparator()
                         })
-                        .expectMethod('apiRecordException').called(1)
-                        .expectMethod('apiRecordInternalException').called(1)
+                        .expectMethod('recordException').called(1)
+                        .expectMethod('recordInternalException').called(1)
                     .whenArgument(asyncObject)
-                        .expectMethod('apiQueueJob').called(1).throws(exc)
+                        .expectMethod('queueJob').called(1).throws(exc)
                     .mock();
 
-            AsynchronousHelper.recordException(asyncObject, exc);
-            AsynchronousHelper.recordInternalException(asyncObject, exc);
+            AsynchronousHelper.INJECT.recordException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
+            AsynchronousHelper.INJECT.recordInternalException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
 
             try {
-                AsynchronousHelper.queueJob(asyncObject);
+                AsynchronousHelper.INJECT.queueJob(asyncObject);
                 Assert.fail();
             } catch (DmlException de) {
                 Assert.areEqual(de, exc, 'Unexpected exception thrown');
@@ -110,7 +110,7 @@ public with sharing class AsynchronousHelperTests {
                         ExceptionStackTrace__c = exc.getStackTraceString()
 
                 ))
-                    .expectMethod('apiPersistException').called(1)
+                    .expectMethod('persistException').called(1)
                 .mock();
     }
 
@@ -126,13 +126,13 @@ public with sharing class AsynchronousHelperTests {
                         ExceptionStackTrace__c = exc.getStackTraceString()
 
                 ))
-                    .expectMethod('apiPersistException').called(1)
+                    .expectMethod('persistException').called(1)
 
                 // And the status of the Asynchronous object set to FAILED.
                 .whenArgument(new List<AsynchronousJob__c> {
                         new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.FAILED.name())
                 })
-                    .expectMethod('apiPersistObjects').called(1)
+                    .expectMethod('persistObjects').called(1)
                 .mock();
     }
 }

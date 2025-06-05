@@ -116,7 +116,7 @@ public with sharing class BindingInitialisation {
      * initialised programmatically.
      */
     public static void programmaticValidationFailure() {
-        // User class does not implement the QueryInterface interface. The QueryValidator class will identify this.
+        // User class does not implement the QueryInterface interface. The QueryBindingCheck class will identify this.
         Dependency.bind(QueryClasses.QueryInterface.class, 'SYSTEM', User.class);
     }
 
@@ -128,7 +128,7 @@ public with sharing class BindingInitialisation {
     public static void customValidationFailure() {
         clean();
 
-        // User class does not implement the QueryInterface interface. The QueryValidator class will identify this.
+        // User class does not implement the QueryInterface interface. The QueryBindingCheck class will identify this.
         insert new Binding__c(Type__c = 'QueryClasses.QueryInterface', Action__c = 'SYSTEM', Implementation__c = 'User');
     }
 

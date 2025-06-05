@@ -183,6 +183,38 @@ public with sharing class MockerAPITests {
 
         // Check that the mocked method has been called the correct number of times.
         Mocker.validate();
+
+        mockedAPI = (MockerTestApi) Mocker.of(MockerTestAPI.class)
+
+                // The method being mocked takes a List of Accounts as argument.
+                // In this case Accounts matching a BillingCountry of UK will be matched in the arguments to the method.
+                // Partial SObject matching only checks the fields in the List of Arguments against those in the
+                // arguments to the method call. The Name and AccountNumber fields will be ignored.
+                .whenArgument(new List<Account> {
+                        new Account(BillingCountry = 'UK')
+                })
+
+                    // The method to match is addAccounts.
+                    .expectMethod('addAccounts')
+
+                    // It will be called once.
+                    .called(1)
+
+                    // And it will return a result determined from a Modifier.
+                    .returns(new AccountModifier())
+
+                    // Build the mock for the class.
+                    .mock();
+
+        result = mockedAPI.addAccounts(new List<Account> { a1, a2 });
+        Assert.areEqual(2, result.size());
+
+        // The Modifier will have added a fake Id to the matching Accounts.
+        Assert.isNotNull(result[0].Id);
+        Assert.isNotNull(result[1].Id);
+
+        // Check that the mocked method has been called the correct number of times.
+        forcefw.Mocker.validate();
     }
 
     private class ExceptionComparator implements Comparator<Object> {

@@ -18,7 +18,7 @@ public with sharing class AsynchronousTests {
                     'Key1' => 'Value1', 'Key2' => 'Value2'
             };
 
-            Asynchronous.Job job = Asynchronous.createJob(
+            Asynchronous.Job job = AsynchronousImpl.INJECT.createJob(
                     AsynchronousScheduler.QueueNext.class,
                     'TEST',
                     1,
@@ -34,7 +34,7 @@ public with sharing class AsynchronousTests {
             Assert.areEqual(state, job.getState());
             Assert.areEqual(Asynchronous.Status.PENDING, job.getStatus());
 
-            AsynchronousDAO.INSTANCE = (AsynchronousDAO) Mocker.of(AsynchronousDAO.class)
+            AsynchronousDAO.INJECT = (AsynchronousDAO) Mocker.of(AsynchronousDAO.class)
                     .whenArguments(
                             new List<AsynchronousJob__c>{
                                     new AsynchronousJob__c(Status__c = Asynchronous.Status.PENDING.name())
@@ -43,10 +43,10 @@ public with sharing class AsynchronousTests {
                                     state
                             }
                     )
-                        .expectMethod('apiPersistObjects').called(1).returns(new AddIdModifier())
+                        .expectMethod('persistObjects').called(1).returns(new AddIdModifier())
                     .mock();
 
-            for (Asynchronous.Job queuedJob : Asynchronous.queueJobs(new List<Asynchronous.Job>{
+            for (Asynchronous.Job queuedJob : AsynchronousImpl.INJECT.queueJobs(new List<Asynchronous.Job>{
                     job
             })) {
                 Assert.isNotNull(((AsynchronousJob) queuedJob).asyncObjectId);
@@ -59,9 +59,9 @@ public with sharing class AsynchronousTests {
     @IsTest
     private static void testMocking() {
         System.runAs(AsynchronousTestHelper.getUser()) {
-            Asynchronous.INSTANCE = createMock();
+            AsynchronousImpl.INJECT = createMock();
 
-            Asynchronous.Job job = Asynchronous.createJob(
+            Asynchronous.Job job = AsynchronousImpl.INJECT.createJob(
                     AsynchronousTests.class,
                     null,
                     1,
@@ -72,9 +72,7 @@ public with sharing class AsynchronousTests {
             Assert.areEqual(Asynchronous.Status.CANCELLED, job.getStatus());
             Assert.areEqual('MOCKED', job.getReference());
 
-            Asynchronous.queueJobs(new List<Asynchronous.Job>{
-                    job
-            });
+            AsynchronousImpl.INJECT.queueJobs(new List<Asynchronous.Job>{ job });
             Mocker.validate();
         }
     }
@@ -82,7 +80,7 @@ public with sharing class AsynchronousTests {
     @IsTest
     private static void testBindingCheck() {
         System.runAs(AsynchronousTestHelper.getUser()) {
-            Dependency.bind(Asynchronous.API.class, Asynchronous.Factory.class);
+            Dependency.bind(Asynchronous.API.class, AsynchronousImpl.Factory.class);
             try {
                 Dependency.bind(Asynchronous.API.class, AsynchronousScheduler.QueueNext.class);
                 Assert.fail();
@@ -136,17 +134,17 @@ public with sharing class AsynchronousTests {
             insert asyncObject;
             Assert.areEqual(0, [SELECT COUNT() FROM AsynchronousJob__c WHERE Id = :asyncObject.Id]);
 
-            AsynchronousHelper.INSTANCE = (AsynchronousHelper) Mocker.of(AsynchronousHelper.class)
+            AsynchronousHelper.INJECT = (AsynchronousHelper) Mocker.of(AsynchronousHelper.class)
                     .whenArgument(
                             new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName())
                     )
-                        .expectMethod('apiQueueJob').called(1)
+                        .expectMethod('queueJob').called(1)
                     .whenArguments(
                             new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName()),
                             new Map<String, String>()
                     )
                         .withComparators(new List<Comparator<Object>> { new MapComparator() })
-                        .expectMethod('apiEncodeState')
+                        .expectMethod('encodeState')
                             .called(1)
                             .returns(new List<AsynchronousJobState__c>())
                     .mock();
@@ -183,14 +181,14 @@ public with sharing class AsynchronousTests {
         }
     }
 
-    private static Asynchronous createMock() {
+    private static AsynchronousImpl createMock() {
         Asynchronous.Job job = (Asynchronous.Job) Mocker.of(AsynchronousJob.class)
                 .whenNoArguments()
                     .expectMethod('getReference').called(1).returns('MOCKED')
                     .expectMethod('getStatus').called(1).returns(Asynchronous.Status.CANCELLED)
                 .mock();
 
-        return (Asynchronous) Mocker.of(Asynchronous.class)
+        return (AsynchronousImpl) Mocker.of(AsynchronousImpl.class)
                 .whenArguments(
                         AsynchronousTests.class,
                         null,
@@ -198,9 +196,9 @@ public with sharing class AsynchronousTests {
                         1000,
                         new Map<String, String>()
                 )
-                    .expectMethod('apiCreateJob').returns(job)
+                    .expectMethod('createJob').returns(job)
                 .whenArgument(new List<Asynchronous.Job> { job })
-                    .expectMethod('apiQueueJobs').called(1)
+                    .expectMethod('queueJobs').called(1)
                 .mock();
     }
 

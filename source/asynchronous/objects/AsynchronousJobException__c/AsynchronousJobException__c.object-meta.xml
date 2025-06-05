@@ -154,13 +154,13 @@
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <externalSharingModel>ControlledByParent</externalSharingModel>
-    <label>Exception</label>
+    <label>Asynchronous Job Exception</label>
     <nameField>
         <displayFormat>ASYNC-JOB-EXC-{0000000000}</displayFormat>
         <label>Name</label>
         <type>AutoNumber</type>
     </nameField>
-    <pluralLabel>Exceptions</pluralLabel>
+    <pluralLabel>Asynchronous Job Exceptions</pluralLabel>
     <searchLayouts></searchLayouts>
     <sharingModel>ControlledByParent</sharingModel>
     <visibility>Public</visibility>

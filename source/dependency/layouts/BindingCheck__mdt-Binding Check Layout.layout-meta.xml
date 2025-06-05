@@ -24,7 +24,7 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
-                <field>Checker__c</field>
+                <field>BindingCheck__c</field>
             </layoutItems>
         </layoutColumns>
         <layoutColumns>

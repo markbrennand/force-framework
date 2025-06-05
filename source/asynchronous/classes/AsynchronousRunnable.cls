@@ -58,7 +58,7 @@ global with sharing virtual class AsynchronousRunnable implements Asynchronous.R
         System.attachFinalizer(AsynchronousFinalizer.createFinalizer(asynchronousJob.Id));
         run(asyncJob, context.getJobId());
 
-        AsynchronousDAO.persistObjects(
+        AsynchronousDAO.INJECT.persistObjects(
                 new List<AsynchronousJob__c> { asynchronousJob },
                 new List<Map<String, String>> { asyncJob.getState() }
         );

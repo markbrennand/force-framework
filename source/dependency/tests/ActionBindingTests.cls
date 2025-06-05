@@ -41,7 +41,7 @@ public with sharing class ActionBindingTests {
             insert new Binding__c(Type__c = Integer.class.getName(), Action__c = 'Test', Implementation__c = BindingTestHelper.IntegerFactory.class.getName());
             insert new Binding__c(Type__c = (Map<String, Integer>.class).getName(), Action__c = 'Test', Implementation__c = BindingTestHelper.MapFactory.class.getName());
 
-            // Complete testing of BindChecker;
+            // Complete testing of BindingCheck;
             Dependency.bind(String.class, 'Test', StringFactory.class);
             Dependency.bind(Integer.class, 'Test', IntegerFactory.class);
             Dependency.bind(Long.class, 'Test', LongFactory.class);

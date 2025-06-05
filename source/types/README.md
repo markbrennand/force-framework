@@ -19,7 +19,7 @@ results in several issues including not being able to make any changes to global
 in a package.
 
 A better solution is for your implementation class to implement an interface with public methods and then have a
-global _Factory_ class that returns an instance of your public implementation class from its _getInstance_ method.
+global _Factory_ class that returns an instance of your public implementation class from its _newInstance_ method.
 
 In the following example, you can see that the _Types_ API can be used to create an implementation class for an
 interface that can be injected into an application using the Force Frameworks package without having to make the
@@ -27,14 +27,14 @@ class global.
 ```
 // The interface needs to be global, so it can be accessed by the forcefw namespace when creating the binding.
 //
-global interface Example {
+global interface ExampleInterface {
     void doSomething();
 }
 
 // Public class implementation of the interface. It doesn't need to be global as it will be constructed from the
 // global ExampleFactory class which is in the same namespace as this class.
 //
-public class ExampleImpl implements Example {
+public class ExampleInterfaceImpl implements ExampleInterface {
     public void doSomething() {
         System.debug('Did something');
     }
@@ -42,13 +42,15 @@ public class ExampleImpl implements Example {
 
 // Making the class global means it can be constructed in the forecew namespace.
 //
-global class ExampleFactory implements Types.Factory {
-    global Object getInstance() {
+global class ExampleInterfaceFactory implements forcefw.Types.Factory {
+
+    // Note that as the interface is being used, we don't have to make the method global.
+    public Object newInstance() {
     
         // A new instance of the public class is returned. All the interface methods coded in this class are
         // accessible in any namespace.
         //
-        return new ExampleImpl();
+        return new ExampleInterfaceImpl();
     }
 }
 ```
@@ -66,7 +68,7 @@ The class must be declared as virtual. This allows it to be extended. As the pub
 the interface are not virtual, they cannot be changed. Hence, meeting the Open for extension, closed for modification
 of SOLID.
 
-The class must have a _Type.Factory_ inner class that returns a new instance of the class from its _getInstance_
+The class must have a _Type.Factory_ inner class that returns a new instance of the class from its _newInstance_
 method.
 
 The class's constructor must be protected. This is to prevent the class being constructed from anywhere other than the
@@ -76,11 +78,12 @@ own instances of the class and would be able to bypass any Dependency Injection 
 As the class's constructor is protected and the class is virtual, a new class can be written which extends it.
 
 ### Example Code
-To see an example of the pattern used for an extensible class, deploy the code from the following URL.
+To see an example of the pattern used for an extensible class, deploy the code at the following URL.
 
 https://github.com/markbrennand/force-frameworks/tree/gh-pages/example/types
 
-The _Si
+The _SimpleAddition_ class illustrates the pattern used for classes in the Framework. The _ExtendedAddition_
+class shows how the class can be extended to offer additional functionality.
 
 After deploying the code to an org, you can run the following Anonymous Apex to test it.
 ```

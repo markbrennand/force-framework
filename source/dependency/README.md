@@ -58,7 +58,7 @@ global interface Factory {
 ```
 The _newInstance()_ method must return a new instance of the class to be bound to the property or abstract entity.
 ## Example Code
-Please deploy the example code in the _example/injection_ directory to your org.
+Please deploy the example code in the _example/dependency_ directory to your org.
 
 You must also assign the _BindingManager_ permission set to the user you will run the example code as in
 Anonymous Apex.
@@ -69,7 +69,7 @@ The registry may be initialised either programmatically or through the _Binding_
 The _Dependency.bind()_ methods can be called to add a binding to the registry. If an application requires a default
 registry to be setup, the application must call these methods to add the bindings.
 
-The following snippet taken from _example/injection/classes/BindingInitalisation.cls_ shows the initialisation of
+The following snippet taken from _example/dependency/classes/BindingInitalisation.cls_ shows the initialisation of
 a default registry.
 ```
  public static void programmatic() {
@@ -92,7 +92,7 @@ The fields of the custom object are;
 | Implementation__c | Mandatory | The class name of the concrete class that implements the abstract entity.            |
 | Action__c         | Optional  | The action to be used in combination with the Type__c field to identity the binding. |
 
-The following snippet taken from _example/injection/classes/BindingInitalisation.cls_ shows the initialisation of a
+The following snippet taken from _example/dependency/classes/BindingInitalisation.cls_ shows the initialisation of a
 custom registry.
 ```
 public static void custom() {
@@ -115,21 +115,21 @@ record.
 
 The _BindingCheck__mdt_ custom metadata object has the following fields;
 
-| Field |Type | Description                                                                                             |
-|-------|-----|---------------------------------------------------------------------------------------------------------|
-| Type__c | Mandatory | The class name of the property or abstract entity to be validated.                                      |                                               
-| Checker__c | Mandatory | The class name of the _BindingCheck_ implementation to validate the binding. |
-| IsUnitTest__c | Mandatory | If true, the _BindingCheck_ is for unit test use only.                                              |
+| Field           |Type | Description                                                                                             |
+|-----------------|-----|---------------------------------------------------------------------------------------------------------|
+| Type__c         | Mandatory | The class name of the property or abstract entity to be validated.                                      |                                               
+| BindingCheck__c | Mandatory | The class name of the _BindingCheck_ implementation to validate the binding. |
+| IsUnitTest__c   | Mandatory | If true, the _BindingCheck_ is for unit test use only.                                              |
 
 The _BindingCheck.validate()_ method returns an _Dependency.ValidationResult_ object which notifies the caller
 of the result of the validation. If a failure notification is returned, an _Dependency.APIException_ is thrown
 with the message set to the value recorded in the _ValidationResult.errorMessage_ field.
 
-The following snippet taken from _example/injection/classes/BindingValidators.cls_ shows the _BindingCheck_
+The following snippet taken from _example/dependency/classes/BindingChecks.cls_ shows the _BindingCheck_
 implementation used to validate that the _QueryClasses.QueryInterface_ interface has been assigned to a concrete
 class that implements it.
 ```
- public class QueryInterfaceValidator implements Dependency.BindingCheck {
+ public class QueryInterfaceBindingCheck implements Dependency.BindingCheck {
         public Dependency.ValidationResult validate(Type forType, Type withImpl) {
             if (Types.newInstance(withImpl) instanceof QueryClasses.QueryInterface) {
                 return new Dependency.ValidationResult(true, null);
@@ -152,7 +152,7 @@ class (abstract entity binding) or to a variable or member variable (property bi
 Implementations of interfaces and abstract classes defined in the registry can be injected into an application. The
 abstract entity will provide logic which can be invoked by the application, such as creating an _Account_.
 
-The code snippet taken from _examples/injection/classes/AbstractEntityWiring_ class shows how to inject an interface
+The code snippet taken from _examples/dependency/classes/AbstractEntityWiring_ class shows how to inject an interface
 providing simple _Account_ management into an application.
 ```
 // Application injects the active AccountManager for the org.
@@ -210,7 +210,7 @@ that by simply adding a _Binding_ to their org. **No application logic needs to 
 ### Property Wiring
 Values can be injected into an application as assignments to variables, including member variables.
 
-This code snippet taken from _examples/injection/classes/PropertyWiring_ shows how to inject a member variable
+This code snippet taken from _examples/dependency/classes/PropertyWiring_ shows how to inject a member variable
 into a class.
 ```
 // The member variable 'properties' value is injected into the class on construction.
@@ -261,7 +261,7 @@ new Apex class and add a binding to the registry.
 Trying to inject a _Type_ into an application for which there is no binding in the registry will throw an exception.
 The _Dependency.isBound()_ methods can be used to check if a binding exists.
 
-The _examples/injection/classes/HasWiring_ class shows how to check whether a binding exists before wiring it
+The _examples/dependency/classes/HasWiring_ class shows how to check whether a binding exists before wiring it
 into an application.
 
 Before running any of the example code, run _HasWiring.reset()_ from Anonymous Apex. This will clear all the

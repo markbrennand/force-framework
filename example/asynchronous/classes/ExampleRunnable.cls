@@ -17,7 +17,7 @@ public with sharing class ExampleRunnable extends AsynchronousRunnable {
         super(Executor.class);
     }
 
-    public override void run(Asynchronous.Job job, String apexJobId) {
+    public override void run(AsynchronousImpl.Job job, String apexJobId) {
         Assert.isNotNull(job.getRetryNumber());
         Assert.isNotNull(apexJobId);
 
@@ -42,11 +42,11 @@ public with sharing class ExampleRunnable extends AsynchronousRunnable {
         return configuration.get('maximumActive');
     }
 
-    public override Asynchronous.Status onError(Asynchronous.job job, Exception exc) {
-        return Asynchronous.Status.QUEUED;
+    public override AsynchronousImpl.Status onError(AsynchronousImpl.job job, Exception exc) {
+        return AsynchronousImpl.Status.QUEUED;
     }
 
-    public override Boolean onCancellation(Asynchronous.Job asyncJob) {
+    public override Boolean onCancellation(AsynchronousImpl.Job asyncJob) {
         return true;
     }
 

@@ -1,5 +1,5 @@
 # Overview
-A set of APIs that have been developed to aid in Apex development.
+A suite of APIs that have been developed to aid in Apex development.
 
 Built with SOLID Principles, Separation of Concerns and Clean code in mind.
 
@@ -22,16 +22,6 @@ concise, and expressive.
 # Framework APIs
 The Force Framework comprises the following APIs. 
 
-## Dependency Injection
-The D of SOLID is Dependency Inversion. This requires that functionality is abstracted into interfaces or abstract
-classes. An application must then only use the interface rather than its concrete implementation. To aid in this,
-frameworks such as Spring fpr Java, support Dependency Injection. This allows the implementation of the interface to be
-bound into the application at run time. This is not something supported natively by Apex. This API
-allows the initialisation of a registry either programmatically or from a custom object. Once initialised, dependencies
-can be injected into an Apex application from the Apex _Type_ of the interface the application wants to use.
-
-See [Dependency Injection](source/dependency/README.md)
-
 ## Types
 The S of SOLID is Single Use Only. The API for access to Apex types allows classes to
 be developed which are not publicly accessible and allow only the use of the methods defined in the
@@ -44,6 +34,16 @@ The O of SOLID is Open Closed. A class is Open for extension and Closed for modi
 using this API meets this requirement.
 
 See [Types](source/types/README.md)
+
+## Dependency Injection
+The D of SOLID is Dependency Inversion. This requires that functionality is abstracted into interfaces or abstract
+classes. An application must then only use the interface rather than its concrete implementation. To aid in this,
+frameworks such as Spring for Java, support Dependency Injection. This allows the implementation of the interface to be
+bound into the application at run time. This is not something supported natively by Apex. This API
+allows the initialisation of a registry either programmatically or from a custom object. Once initialised, dependencies
+can be injected into an Apex application from the Apex _Type_ of the interface the application wants to use.
+
+See [Dependency Injection](source/dependency/README.md)
 
 ## Asynchronous
 Apex provides the ability to run code asynchronously using the _Queueable_ interface and _System.enqueueJob_.

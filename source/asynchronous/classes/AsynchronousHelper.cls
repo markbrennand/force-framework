@@ -1,21 +1,21 @@
 /**
  * @description
  * Class containing helper methods for the Asynchronous framework.
- *
+ * <br><br>
  * The methods herein are intended for the sole use of the framework.
+ * <br><br>
+ * The implementation of the API is hidden in the private Implementation class. The class is hidden so an application
+ * cannot access the class to mis-use it.
+ * <br><br>
+ * All application access is restricted to the API instance variable INJECT. This ensures the application can only
+ * ever call the methods of the API interface.
+ * <br><br>
+ * The outer class implements the API only to allow it to be mocked. Any calls to the API method implementations
+ * in the outer class will throw an Exception.
  *
  * @author Mark Brennand
  */
 public with sharing virtual class AsynchronousHelper implements API {
-
-    /**
-     * @description
-     * Maximum amount of data that can be stored in a chunk.
-     *
-     * The variable is not declared as final so it can be overridden by a unit test.
-     */
-    @TestVisible
-    private static Integer MAX_CHUNK_SIZE = 131072;
 
     /**
      * @description
@@ -32,7 +32,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          * @param asyncObject The Asynchronous object to record the Exception against.
          * @param exc The exception to be recorded.
          */
-        void apiRecordException(AsynchronousJob__c asyncObject, Asynchronous.APIException exc);
+        void recordException(AsynchronousJob__c asyncObject, Asynchronous.APIException exc);
 
         /**
          * @description
@@ -43,7 +43,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          * @param asyncObject The Asynchronous object to record the Exception against.
          * @param exc The exception to be recorded.
          */
-        void apiRecordInternalException(AsynchronousJob__c asyncObject, Asynchronous.APIException exc);
+        void recordInternalException(AsynchronousJob__c asyncObject, Asynchronous.APIException exc);
 
         /**
          * @description
@@ -53,7 +53,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          *
          * @return The decoded state.
          */
-        Map<String, String> apiDecodeState(final List<AsynchronousJobState__c> asyncStateObjects);
+        Map<String, String> decodeState(final List<AsynchronousJobState__c> asyncStateObjects);
 
         /**
          * @description
@@ -64,7 +64,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          *
          * @return The state objects representing the internal state.
          */
-        List<AsynchronousJobState__c> apiEncodeState(AsynchronousJob__c asyncObject, Map<String, String> state);
+        List<AsynchronousJobState__c> encodeState(AsynchronousJob__c asyncObject, Map<String, String> state);
 
         /**
          * @description
@@ -72,8 +72,33 @@ public with sharing virtual class AsynchronousHelper implements API {
          *
          * @param asyncObject The job to be queued for processing.
          */
-        void apiQueueJob(AsynchronousJob__c asyncObject);
+        void queueJob(AsynchronousJob__c asyncObject);
     }
+
+    /**
+     * @description
+     * Active API instance.
+     */
+    @TestVisible
+    public static API INJECT {
+        public get {
+            if (Test.isRunningTest() && INJECT != null) { // INJECT has been mocked.
+                return INJECT;
+            } else {
+                return (API) Dependency.inject(API.class);
+            }
+        }
+        private set;
+    }
+
+    /**
+     * @description
+     * Maximum amount of data that can be stored in a chunk.
+     *
+     * The variable is not declared as final so it can be overridden by a unit test.
+     */
+    @TestVisible
+    private static Integer MAX_CHUNK_SIZE = 131072;
 
     /**
      * @description
@@ -85,189 +110,221 @@ public with sharing virtual class AsynchronousHelper implements API {
 
     /**
      * @description
-     * Records the detail of an Exception in an Asynchronous Exception object.
-     *
-     * A new record is created and persisted for each Exception recorded.
-     *
-     * @param asyncObject The Asynchronous object to record the Exception against.
-     * @param exc The wrapped exception to be recorded.
+     * Creates the default API implementation.
+     * <br><br>
+     * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
+     * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
-    public void apiRecordException(final AsynchronousJob__c asyncObject, final Asynchronous.APIException exc) {
-        Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.apiRecordException.asynchronousObject');
-        Assertion.isNotNull(exc, 'argument: AsynchronousHelper.apiRecordException.exc');
-
-        final AsynchronousJobException__c asyncError = new AsynchronousJobException__c(
-                AsynchronousJob__c = asyncObject.Id,
-                RetryNumber__c = asyncObject.RetryNumber__c,
-                StatusOnError__c = asyncObject.Status__c,
-                ApexJobId__c = asyncObject.ApexJobId__c,
-                ExceptionType__c = exc.getCause().getTypeName(),
-                ExceptionMessage__c = exc.getCause().getMessage(),
-                ExceptionStackTrace__c = exc.getCause().getStackTraceString()
-        );
-
-        AsynchronousDAO.persistException(asyncError);
+    public with sharing class Factory implements Types.Factory {
+        public Object newInstance() {
+            return new Implementation();
+        }
     }
+
 
     /**
      * @description
-     * Records a new internal error encountered in the framework.
-     *
-     * Exceptions thrown from the Runnable for an Apex job are not recorded using this method.
-     *
-     * A new Asynchronous Exception is created to record the Exception and the Status of the Asynchronous job
-     * is changed to indicate it failed. No further processing will be performed on the job.
-     *
-     * @param asyncObject The Asynchronous object to record the Exception against.
-     * @param exc The wrapped exception to be recorded.
+     * Class providing check on Binding made to AsynchronousDAO.API.
      */
-    public void apiRecordInternalException(final AsynchronousJob__c asyncObject, final Asynchronous.APIException exc) {
-        apiRecordException(asyncObject, exc);
-        asyncObject.Status__c = Asynchronous.Status.FAILED.name();
-        AsynchronousDAO.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+    public with sharing class BindingCheck implements Dependency.BindingCheck {
+
+        /**
+         * @description
+         * Checks that a valid binding has been made to AsynchronousDAO.API.
+         *
+         * @param forType The type being bound to, AsynchronousDAO.API.
+         * @param withImpl The implementation being bound to AsynchronousDAO.API.
+         *
+         * @return The result of the validation.
+         */
+        public Dependency.ValidationResult validate(Type forType, Type withImpl) {
+            if (Types.newInstance(withImpl) instanceof AsynchronousHelper.API) {
+                return new Dependency.ValidationResult(true, null);
+            } else {
+                return new Dependency.ValidationResult(
+                        false,
+                        'Class ' + withImpl.getName() + ' does not implement ' + forType.getName()
+                );
+            }
+        }
     }
+
 
     /**
      * @description
-     * Given the state objects retrieved from backing store, turns them into their internal representation.
-     *
-     * @param asyncStateObjects The state objects.
-     *
-     * @return The decoded state.
+     * Class providing the implementation of the API.
      */
-    public Map<String, String> apiDecodeState(final List<AsynchronousJobState__c> asyncStateObjects) {
-        Assertion.isNotNull(asyncStateObjects, 'argument: AsynchronousHelper.apiDecodeState.asyncStateObjects');
+    private with sharing class Implementation implements API {
 
-        final List<String> chunks = new List<String>();
+        /**
+         * @description
+         * Records the detail of an Exception in an Asynchronous Exception object.
+         *
+         * A new record is created and persisted for each Exception recorded.
+         *
+         * @param asyncObject The Asynchronous object to record the Exception against.
+         * @param exc The wrapped exception to be recorded.
+         */
+        public void recordException(final AsynchronousJob__c asyncObject, final Asynchronous.APIException exc) {
+            Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.apiRecordException.asynchronousObject');
+            Assertion.isNotNull(exc, 'argument: AsynchronousHelper.apiRecordException.exc');
 
-        for (AsynchronousJobState__c chunk : asyncStateObjects) {
-            chunks.add(chunk.Content__c);
+            final AsynchronousJobException__c asyncError = new AsynchronousJobException__c(
+                    AsynchronousJob__c = asyncObject.Id,
+                    RetryNumber__c = asyncObject.RetryNumber__c,
+                    StatusOnError__c = asyncObject.Status__c,
+                    ApexJobId__c = asyncObject.ApexJobId__c,
+                    ExceptionType__c = exc.getCause().getTypeName(),
+                    ExceptionMessage__c = exc.getCause().getMessage(),
+                    ExceptionStackTrace__c = exc.getCause().getStackTraceString()
+            );
+
+            AsynchronousDAO.INJECT.persistException(asyncError);
         }
 
-        Assert.isFalse(chunks.isEmpty(), 'No asynchronous state chunks found for job');
+        /**
+         * @description
+         * Records a new internal error encountered in the framework.
+         *
+         * Exceptions thrown from the Runnable for an Apex job are not recorded using this method.
+         *
+         * A new Asynchronous Exception is created to record the Exception and the Status of the Asynchronous job
+         * is changed to indicate it failed. No further processing will be performed on the job.
+         *
+         * @param asyncObject The Asynchronous object to record the Exception against.
+         * @param exc The wrapped exception to be recorded.
+         */
+        public void recordInternalException(final AsynchronousJob__c asyncObject, final Asynchronous.APIException exc) {
+            recordException(asyncObject, exc);
+            asyncObject.Status__c = Asynchronous.Status.FAILED.name();
+            AsynchronousDAO.INJECT.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+        }
 
-        return (Map<String, String>) JSON.deserialize(String.join(chunks, ''), Map<String, String>.class);
+        /**
+         * @description
+         * Given the state objects retrieved from backing store, turns them into their internal representation.
+         *
+         * @param asyncStateObjects The state objects.
+         *
+         * @return The decoded state.
+         */
+        public Map<String, String> decodeState(final List<AsynchronousJobState__c> asyncStateObjects) {
+            Assertion.isNotNull(asyncStateObjects, 'argument: AsynchronousHelper.apiDecodeState.asyncStateObjects');
+
+            final List<String> chunks = new List<String>();
+
+            for (AsynchronousJobState__c chunk : asyncStateObjects) {
+                chunks.add(chunk.Content__c);
+            }
+
+            Assert.isFalse(chunks.isEmpty(), 'No asynchronous state chunks found for job');
+
+            return (Map<String, String>) JSON.deserialize(String.join(chunks, ''), Map<String, String>.class);
+        }
+
+        /**
+         * @description
+         * Given the internal state, turns it into a series of state objects representing it.
+         *
+         * @param asyncObject The Asynchronous object the state will be stored against.
+         * @param state The internal state.
+         *
+         * @return The state objects representing the internal state.
+         */
+        public List<AsynchronousJobState__c> encodeState(
+                final AsynchronousJob__c asyncObject,
+                final Map<String, String> state
+        ) {
+            Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.apiEncodeState.asyncObject');
+            Assertion.isNotNull(state, 'argument: AsynchronousHelper.apiEncodeState.state');
+
+            final List<AsynchronousJobState__c> chunks = new List<AsynchronousJobState__c>();
+            String stateJson = JSON.serialize(state);
+            Integer size = stateJson.length();
+            Integer chunkNumber = 0;
+
+            while (size > MAX_CHUNK_SIZE) {
+                chunks.add(new AsynchronousJobState__c(
+                        AsynchronousJob__c = asyncObject.Id,
+                        ChunkNumber__c = ++chunkNumber,
+                        Content__c = stateJSON.substring(0, MAX_CHUNK_SIZE)
+                ));
+
+                stateJson = stateJson.substring(MAX_CHUNK_SIZE);
+                size -= MAX_CHUNK_SIZE;
+            }
+
+            if (size > 0) {
+                chunks.add(new AsynchronousJobState__c(
+                        AsynchronousJob__c = asyncObject.Id,
+                        ChunkNumber__c = ++chunkNumber,
+                        Content__c = stateJSON
+                ));
+            }
+
+            return chunks;
+        }
+
+        /**
+         * @description
+         * Schedules an Apex job for the given Asynchronous object.
+         *
+         * If an Exception occurs during the queueing, a future job is started to run the job.
+         *
+         * @param asyncObject The job to be queued.
+         */
+        public void queueJob(final AsynchronousJob__c asyncObject) {
+            Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.apiQueueJob.asyncObject');
+
+            try {
+                enqueueApexJob(asyncObject);
+            } catch(Exception exc) {
+                startAsynchronousJob(asyncObject.Id);
+            }
+        }
     }
 
     /**
      * @description
-     * Given the internal state, turns it into a series of state objects representing it.
-     *
-     * @param asyncObject The Asynchronous object the state will be stored against.
-     * @param state The internal state.
-     *
-     * @return The state objects representing the internal state.
+     * Method is solely for mocking use.
      */
-    public List<AsynchronousJobState__c> apiEncodeState(
+    public void recordException(final AsynchronousJob__c asyncObject, final Asynchronous.APIException exc) {
+        throw new Asynchronous.APIException('Access denied');
+    }
+
+    /**
+     * @description
+     * Method is solely for mocking use.
+     */
+    public void recordInternalException(final AsynchronousJob__c asyncObject, final Asynchronous.APIException exc) {
+        throw new Asynchronous.APIException('Access denied');
+    }
+
+    /**
+     * @description
+     * Method is solely for mocking use.
+     */
+    public Map<String, String> decodeState(final List<AsynchronousJobState__c> asyncStateObjects) {
+        throw new Asynchronous.APIException('Access denied');
+    }
+
+    /**
+     * @description
+     * Method is solely for mocking use.
+     */
+    public List<AsynchronousJobState__c> encodeState(
             final AsynchronousJob__c asyncObject,
             final Map<String, String> state
     ) {
-        Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.apiEncodeState.asyncObject');
-        Assertion.isNotNull(state, 'argument: AsynchronousHelper.apiEncodeState.state');
-
-        final List<AsynchronousJobState__c> chunks = new List<AsynchronousJobState__c>();
-        String stateJson = JSON.serialize(state);
-        Integer size = stateJson.length();
-        Integer chunkNumber = 0;
-
-        while (size > MAX_CHUNK_SIZE) {
-            chunks.add(new AsynchronousJobState__c(
-                    AsynchronousJob__c = asyncObject.Id,
-                    ChunkNumber__c = ++chunkNumber,
-                    Content__c = stateJSON.substring(0, MAX_CHUNK_SIZE)
-            ));
-
-            stateJson = stateJson.substring(MAX_CHUNK_SIZE);
-            size -= MAX_CHUNK_SIZE;
-        }
-
-        if (size > 0) {
-            chunks.add(new AsynchronousJobState__c(
-                    AsynchronousJob__c = asyncObject.Id,
-                    ChunkNumber__c = ++chunkNumber,
-                    Content__c = stateJSON
-            ));
-        }
-
-        return chunks;
+        throw new Asynchronous.APIException('Access denied');
     }
 
     /**
      * @description
-     * Schedules an Apex job for the given Asynchronous object.
-     *
-     * If an Exception occurs during the queueing, a future job is started to run the job.
-     *
-     * @param asyncObject The job to be queued.
+     * Method is solely for mocking use.
      */
-    public void apiQueueJob(final AsynchronousJob__c asyncObject) {
-        Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.apiQueueJob.asyncObject');
-
-        try {
-            enqueueApexJob(asyncObject);
-        } catch(Exception exc) {
-            startAsynchronousJob(asyncObject.Id);
-        }
-    }
-
-    /**
-     * @description
-     * Records the detail of an Exception.
-     *
-     * @param asyncObject The Asynchronous object to record the Exception against.
-     * @param exc The exception to be recorded.
-     */
-    public static void recordException(final AsynchronousJob__c asyncObject, final Exception exc) {
-        INSTANCE.apiRecordException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
-    }
-
-    /**
-     * @description
-     * Records a new internal error encountered in the framework.
-     *
-     * @param asyncObject The Asynchronous object to record the Exception against.
-     * @param exc The exception to be recorded.
-     */
-    public static void recordInternalException(final AsynchronousJob__c asyncObject, final Exception exc) {
-        INSTANCE.apiRecordInternalException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
-    }
-
-    /**
-     * @description
-     * Given the state objects retrieved from backing store, turns them into their internal representation.
-     *
-     * @param asyncStateObjects The state objects.
-     *
-     * @return The decoded state.
-     */
-    public static Map<String, String> decodeState(final List<AsynchronousJobState__c> asyncStateObjects) {
-        return INSTANCE.apiDecodeState(asyncStateObjects);
-    }
-
-    /**
-     * @description
-     * Given the internal state, turns it into a series of state objects representing it.
-     *
-     * @param asyncObject The Asynchronous object the state will be stored against.
-     * @param state The internal state.
-     *
-     * @return The state objects representing the internal state.
-     */
-    public static List<AsynchronousJobState__c> encodeState(
-            final AsynchronousJob__c asyncObject,
-            final Map<String, String> state
-    ) {
-        return INSTANCE.apiEncodeState(asyncObject, state);
-    }
-
-    /**
-     * @description
-     * Queues the given job for processing.
-     *
-     * @param asyncObject The job to be queued for processing.
-     */
-    public static void queueJob(final AsynchronousJob__c asyncObject) {
-        INSTANCE.apiQueueJob(asyncObject);
+    public void queueJob(final AsynchronousJob__c asyncObject) {
+        throw new Asynchronous.APIException('Access denied');
     }
 
     /**
@@ -281,12 +338,12 @@ public with sharing virtual class AsynchronousHelper implements API {
     @Future
     private static void startAsynchronousJob(final String asyncObjectId) {
         Assertion.isNotNull(asyncObjectId, 'argument: AsynchronousHelper.startAsynchronousJob.asyncObjectId');
-        final AsynchronousJob__c asyncObject = AsynchronousDAO.getObject(asyncObjectId);
+        final AsynchronousJob__c asyncObject = AsynchronousDAO.INJECT.getObject(asyncObjectId);
 
         try {
             enqueueApexJob(asyncObject);
         } catch(Exception exc) {
-            AsynchronousHelper.recordInternalException(asyncObject, exc);
+            AsynchronousHelper.INJECT.recordInternalException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
         }
     }
 
@@ -304,29 +361,17 @@ public with sharing virtual class AsynchronousHelper implements API {
 
         asyncObject.Status__c = Asynchronous.Status.RUNNING.name();
         asyncObject.LastRunTime__c = Datetime.now();
-        AsynchronousDAO.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+        AsynchronousDAO.INJECT.persistObjects(new List<AsynchronousJob__c> { asyncObject });
 
         asyncObject.ApexJobId__c = System.enqueueJob(
-                runnable.forJob(AsynchronousJob.fromSObject(AsynchronousDAO.getObject(asyncObject.Id)))
+                runnable.forJob(AsynchronousJob.fromSObject(AsynchronousDAO.INJECT.getObject(asyncObject.Id)))
         );
 
-        AsynchronousDAO.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+        AsynchronousDAO.INJECT.persistObjects(new List<AsynchronousJob__c> { asyncObject });
     }
 
-    /**
-     * @description
-     * Active API instance.
-     *
-     * The instance is test visible so it can be mocked.
-     */
-    @TestVisible
-    private static API INSTANCE {
-        private get {
-            if (INSTANCE == null) {
-                INSTANCE = new AsynchronousHelper();
-            }
-            return INSTANCE;
-        }
-        private set;
+    // Set the default implementation of the API. This can be overridden using a Dependency Injection Binding.
+    static {
+        Dependency.bind(API.class, Factory.class);
     }
 }

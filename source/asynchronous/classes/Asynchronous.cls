@@ -1,26 +1,24 @@
 /**
  * @description
- * Class providing the Asynchronous framework.
+ * Class defining the Asynchronous API.
  * <br><br>
- * All access to the framework must be through this class.
+ * All access to the API must be through this class.
+ * <br><br>
+ * Asynchronous jobs should first be created using the createJob method. They can then be run by calling the
+ * queueJobs method.
  * <br><br>
  * The API interface defines the contract that implementations must provide to the methods of this class to create
- * and run jobs asynchronously. The implementation may be overridden using a Dependency Injection Binding.
+ * and run jobs asynchronously. The implementation may be overridden using a Dependency Injection Binding to use
+ * a bespoke implementation.
  * <br><br>
- * The default implementation of the API in this class uses the AsynchronousJob__c object to represent a job. The object
- * may be queried to find all the information about the job.
+ * The DAO interface defines the SOQL and DML actions performed by the default Asynchronous API implementation.
+ * It may be overridden using a Dependency Injection Binding to use a bespoke implementation.
  * <br><br>
- * See [Asynchronous](https://github.com/markbrennand/sf-frameworks/blob/main/source/asynchronous/README.md)
+ * See <a href=../README.md target="_blank">README</a> for full details of the Asynchronous API.
  *
  * @author Mark Brennand
  */
-global with sharing virtual class Asynchronous implements API {
-
-    // Set the default implementation of the API. This can be overridden using a Dependency
-    // Injection Binding.
-    static {
-        Dependency.bind(API.class, Asynchronous.Factory.class);
-    }
+global with sharing class Asynchronous {
 
     /**
      * @description
@@ -47,57 +45,6 @@ global with sharing virtual class Asynchronous implements API {
         SUCCEEDED,
         FAILED,
         CANCELLED
-    }
-
-    /**
-     * @description
-     * Interface defining the actions required for Asynchronous job management.
-     * <br><br>
-     * A new implementation of the Asynchronous framework must implement all the methods of this
-     * interface. It can then add a Dependency Injection Binding and it will be injected in the
-     * static methods of this class which provide the application access to create and queue jobs.
-     * <br><br>
-     * Any new implementations must also use their own implementation of the Job interface.
-     */
-    global interface API {
-
-        /**
-         * @description
-         * Creates a new instance of a job to be managed by the framework.
-         *
-         * The Apex class must implement the Runnable interface. If it doesn't, the implementation must throw an
-         * exception.
-         *
-         * The state is data specific to the job. It is passed to the Runnable for the job when it is invoked. It
-         * can contain any data an application chooses. For example, it may include arguments specific to the job.
-         *
-         * @param type The Apex class of the job to be run.
-         * @param reference The user's reference for the job.
-         * @param maximumRetries The maximum number of retries to make before failing the job.
-         * @param retryInterval The number of milliseconds between each re-try after failure.
-         * @param state Job specific data.
-         *
-         * @return The job specific to the implementation.
-         */
-        Asynchronous.Job apiCreateJob(
-                Type type,
-                String reference,
-                Integer maximumRetries,
-                Integer retryInterval,
-                Map<String, String> state
-        );
-
-        /**
-         * @description
-         * Schedules the given job for processing.
-         *
-         * The implementation should consider the jobs as available to run and take the appropriate action.
-         *
-         * @param asyncJobs The jobs to schedule for processing.
-         *
-         * @return The jobs queued for processing.
-         */
-        List<Asynchronous.Job> apiQueueJobs(List<Asynchronous.Job> asyncJobs);
     }
 
     /**
@@ -323,21 +270,153 @@ global with sharing virtual class Asynchronous implements API {
 
     /**
      * @description
+     * Interface defining the actions required for Asynchronous job management.
+     * <br><br>
+     * A new implementation of the Asynchronous framework must implement all the methods of this
+     * interface. It can then add a Dependency Injection Binding and it will be injected in the
+     * static methods of this class which provide the application access to create and queue jobs.
+     * <br><br>
+     * Any new implementations must also use their own implementation of the Job interface.
+     */
+    global interface API {
+
+        /**
+         * @description
+         * Creates a new instance of a job to be managed by the framework.
+         *<br><br>
+         * The Apex class must implement the Runnable interface. If it doesn't, the implementation must throw an
+         * exception.
+         *<br><br>
+         * The state is data specific to the job. It is passed to the Runnable for the job when it is invoked. It
+         * can contain any data an application chooses. For example, it may include arguments specific to the job.
+         *
+         * @param type The Apex class of the job to be run.
+         * @param reference The user's reference for the job.
+         * @param maximumRetries The maximum number of retries to make before failing the job.
+         * @param retryInterval The number of milliseconds between each re-try after failure.
+         * @param state Job specific data.
+         *
+         * @return The job specific to the implementation.
+         */
+        Job createJob(
+                Type type,
+                String reference,
+                Integer maximumRetries,
+                Integer retryInterval,
+                Map<String, String> state
+        );
+
+        /**
+         * @description
+         * Schedules the given job for processing.
+         *<br><br>
+         * The implementation should consider the jobs as available to run and take the appropriate action.
+         *
+         * @param asyncJobs The jobs to schedule for processing.
+         *
+         * @return The jobs queued for processing.
+         */
+        List<Job> queueJobs(List<Job> asyncJobs);
+    }
+
+    /**
+     * @description
+     * Interface defining the SOQL and DML operations.
+     */
+    public interface DAO {
+
+        /**
+         * @description
+         * Given the Id of an object, the object is retrieved.
+         *
+         * @param asyncObjectId The Id of the object to retrieve.
+         *
+         * @return The object.
+         */
+        AsynchronousJob__c getObject(Id asyncObjectId);
+
+        /**
+         * @description
+         * Builds a List of the objects that are scheduled to run.
+         * <br><br>
+         * The List returned must be ordered chronologically, with the first entry being the job that has been
+         * waiting the longest to run.
+         *
+         * @param maxJobsToReturn The maximum number of objects to return.
+         *
+         * @return The objects.
+         */
+        Set<AsynchronousJob__c> getScheduledObjects(Integer maxJobsToReturn);
+
+        /**
+         * @description
+         * Determines the number os objects that remain to be run.
+         * <br><br>
+         * The remaining objects must includes all those that are in QUEUED or RUNNING state. The RUNNING must
+         * be included as their job may fail and they will be scheduled to re-run if they have re-tries left.
+         *
+         * @return The number of objects that are scheduled or are running.
+         */
+        Integer countSchedulableObjects();
+
+        /**
+         * @description
+         * Determines the number of active instances of the given object.
+         * <br><br>
+         * The Runnable in for the object determines the number of active instances.
+         *
+         * @param asyncObject The object to have its concurrency determined.
+         *
+         * @return The concurrency for the object.
+         */
+        Integer countActiveObjects(final AsynchronousJob__c asyncObject);
+
+        /**
+         * @description
+         * Inserts or updates the given objects.
+         *
+         * @param asyncObjects The objects to persist.
+         */
+        void persistObjects(List<AsynchronousJob__c> asyncObjects);
+
+        /**
+         * @description
+         * Inserts or updates the given objects and states.
+         * <br><br>
+         * The objects must be persisted first and then each state linked to its associated object before
+         * persisting.
+         *
+         * @param asyncObjects The objects to persist.
+         * @param states The states to persist.
+         */
+        void persistObjects(List<AsynchronousJob__c> asyncObjects, List<Map<String, String>> states);
+
+        /**
+         * @description
+         * Deletes the given objects.
+         *
+         * @param asyncObjects The objects to remove.
+         */
+        void removeObjects(List<AsynchronousJob__c> asyncObjects);
+
+        /**
+         * @description
+         * Inserts the given exception object.
+         *
+         * @param asyncErrorObject The exception object to persist.
+         */
+        void persistException(AsynchronousJobException__c asyncErrorObject);
+    }
+
+    /**
+     * @description
      * Exception thrown when an operation in the Asynchronous framework fails.
      */
     global with sharing class APIException extends Exception {}
 
     /**
      * @description
-     * Allow extension but not construction.
-     * <br><br>
-     * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
-     */
-    protected Asynchronous() {}
-
-    /**
-     * @description
-     * Creates a new instance of a job to be managed by the default API implementation.
+     * Creates a new instance of a job to be managed by the injected API implementation.
      * <br><br>
      * The Apex class must implement the Runnable interface. If it doesn't, the implementation will throw an
      * exception.
@@ -353,214 +432,26 @@ global with sharing virtual class Asynchronous implements API {
      *
      * @return The job.
      */
-    public Asynchronous.Job apiCreateJob(
+    global static Job createJob(
             final Type type,
             final String reference,
             final Integer maximumRetries,
             final Integer retryInterval,
             final Map<String, String> state
     ) {
-        final AsynchronousJob__c asynchronousObject = new AsynchronousJob__c(
-                Status__c = Status.PENDING.name(),
-                OwnerId = UserInfo.getUserId(),
-                Runnable__c = type.getName(),
-                Reference__c = reference,
-                MaximumRetries__c = maximumRetries,
-                RetryInterval__c = retryInterval,
-                ScheduledRunTime__c = Datetime.now(),
-                RetryNumber__c = 0
-        );
-
-        final Job job = AsynchronousJob.fromSObject(asynchronousObject);
-        job.setState(state);
-
-        return job;
+        return AsynchronousImpl.INJECT.createJob(type, reference, maximumRetries, retryInterval, state);
     }
 
     /**
      * @description
-     * Schedules the given job for processing by the default API implementation.
-     * <br><br>
-     * Each job will have an AsynchronousJob__c object created for it. The job's state will be saved in the
-     * AsynchronousState__c object.
-     * <br><br>
-     * The trigger on AsynchronousJob__c will validate the job. If the job is valid, the trigger will change the
-     * Status to QUEUED and start an Asynchronous Scheduler to run the job.
+     * Schedules the given job for processing by the injected API implementation.
      *
      * @param asyncJobs The jobs to schedule for processing.
      *
      * @return The jobs queued for processing.
-     */
-    public List<Job> apiQueueJobs(final List<Asynchronous.Job> asyncJobs) {
-        Assertion.isNotNull(asyncJobs, 'argument: Asynchronous.queueJobs.asyncJobs');
-
-        final List<AsynchronousJob__c> asyncObjects = new List<AsynchronousJob__c>();
-        final List<Map<String, String>> states = new List<Map<String, String>>();
-
-        for (Asynchronous.Job job : asyncJobs) {
-            asyncObjects.add(AsynchronousJob.toSObject(job));
-            states.add(job.getState());
-        }
-
-        AsynchronousDAO.persistObjects(asyncObjects, states);
-
-        final List<Job> returnList = new List<Job>();
-        Integer i = 0;
-
-        for (AsynchronousJob__c asyncObject : asyncObjects) {
-            Assertion.isNotNull(asyncObject.Id, 'Asynchronous Job object has not been assigned an Id');
-
-            final Job updatedJob = AsynchronousJob.fromSObject(asyncObject);
-            updatedJob.setState(states[i++]);
-            returnList.add(updatedJob);
-        }
-
-        return returnList;
-    }
-
-    /**
-     * @description
-     * Creates a new instance of a job to be managed by the framework.
-     * <br><br>
-     * All job creation by an application must be solely through this method.
-     * <br><br>
-     * The job, once created, can be started by calling the queue method.
-     *
-     * @param type The Apex class of the job to be run.
-     * @param reference The user's reference for the job.
-     * @param maximumRetries The maximum number of retries to make before failing the job.
-     * @param retryInterval The number of milliseconds between each re-try event.
-     * @param state Job specific data.
-     *
-     * @return The job.
-     *
-     * @example
-     * // Creates a job with reference 'Test'.
-     * // The Runnable implementation class it MyTest.
-     * // The maximum number of re-tries is 4 with an interval of 10 seconds between each.
-     * // The 'argument' for the job can be obtained by MyTest.run(asyncJob) from AsyncJob.getState().get('argument').
-     * Asynchronous.Job example = Asynchronous.create(
-     *     MyJob.class,
-     *     'Test',
-     *     4,
-     *     10000,
-     *     new Map<String, String> { 'argument' => 'Example' }
-     * );
-     */
-    global static Asynchronous.Job createJob(
-            final Type type,
-            final String reference,
-            final Integer maximumRetries,
-            final Integer retryInterval,
-            final Map<String, String> state
-    ) {
-        return INSTANCE.apiCreateJob(type, reference, maximumRetries, retryInterval, state);
-    }
-
-    /**
-     * @description
-     * Schedules the given job for processing by the framework.
-     * <br><br>
-     * All job scheduling by an application must be solely through this method.
-     *
-     * @param asyncJobs The jobs to schedule for processing.
-     *
-     * @return The jobs queued for processing.
-     *
-     * @example
-     * // Queues a job for processing.
-     * Asynchronous.Job example = Asynchronous.create(
-     *     MyJob.class,
-     *     'Test',
-     *     4,
-     *     10000,
-     *     new Map<String, String> { 'argument' => 'Example' }
-     * );
-     *
-     * Asynchronous.queue(new List<Asynchronous.Job> { example });
      */
     global static List<Job> queueJobs(final List<Job> asyncJobs) {
-        return INSTANCE.apiQueueJobs(asyncJobs);
-    }
-
-    /**
-     * @description
-     * Creates the default API implementation.
-     * <br><br>
-     * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
-     * We use the factory to defer the construction by injection to this class, which is able to construct it.
-     */
-    public with sharing class Factory implements Types.Factory {
-        public Object newInstance() {
-            return new Asynchronous();
-        }
-    }
-
-    /**
-     * @description
-     * Processes any persisted AsynchronousJob__c objects before they are added to the database.
-     * <br><br>
-     * Validation is performed on the objects.
-     * <br><br>
-     * If all objects are valid, their status is set to QUEUED and an Asynchronous Scheduler is started to run them.
-     *
-     * @param asyncObjects The persisted objects.
-     */
-    public static void onTriggerBefore(final List<AsynchronousJob__c> asyncObjects) {
-        Boolean hasErrors = false;
-
-        for (AsynchronousJob__c asyncObject : asyncObjects) {
-            try {
-                final Object runnable = Types.newInstance(Types.load(asyncObject.Runnable__c));
-                if (! (runnable instanceof Asynchronous.Runnable)) {
-                    asyncObject.addError('Class ' + asyncObject.Runnable__c + ' does not implement Asynchronous.Runnable');
-                    hasErrors = true;
-
-                } else if (asyncObject.Status__c == Asynchronous.Status.PENDING.name()) {
-                    asyncObject.Status__c = Asynchronous.Status.QUEUED.name();
-                    asyncObject.RetryNumber__c = 0;
-                }
-
-            } catch(Exception e) {
-                asyncObject.addError(e.getMessage());
-                hasErrors = true;
-            }
-        }
-    }
-
-    /**
-     * @description
-     * Processes any persisted AsynchronousJob__c objects after they have been added to the database.
-     * <br><br>
-     * Any new cancellations are processed.
-     *
-     * @param asyncObjects The persisted objects.
-     * @param previousAsyncObjects The previous values of the persisted objects.
-     */
-    public static void onTriggerAfter(final List<AsynchronousJob__c> asyncObjects, final Map<Id, AsynchronousJob__c> previousAsyncObjects) {
-        final List<AsynchronousJob__c> toDelete = new List<AsynchronousJob__c>();
-        Boolean startScheduler = false;
-
-        for (AsynchronousJob__c asyncObject : asyncObjects) {
-            final Boolean isScheduler = AsynchronousJob.fromSObject(asyncObject).getRunnable() instanceof AsynchronousScheduler;
-
-            if (asyncObject.Status__c == Asynchronous.Status.CANCELLED.name() &&
-                    asyncObject.Status__c != previousAsyncObjects?.get(asyncObject.Id)?.Status__c
-            ) {
-                final Asynchronous.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
-                if (!asyncJob.getRunnable().onCancellation(asyncJob)) {
-                    toDelete.add(new AsynchronousJob__c(Id = asyncObject.Id));
-                }
-            } else if (!isScheduler) {
-                startScheduler = true;
-            }
-        }
-
-        AsynchronousDAO.removeObjects(toDelete);
-
-        if (startScheduler) {
-            AsynchronousScheduler.queue(new Set<String>());
-        }
+        return AsynchronousImpl.INJECT.queueJobs(asyncJobs);
     }
 
     /**
@@ -588,24 +479,5 @@ global with sharing virtual class Asynchronous implements API {
                 );
             }
         }
-    }
-
-    /**
-     * @description
-     * Active API instance.
-     * <br><br>
-     * The instance is injected from the Registry.
-     * <br><br>
-     * The instance is test visible so it can be mocked.
-     */
-    @TestVisible
-    private static API INSTANCE {
-        private get {
-            if (INSTANCE == null) {
-                INSTANCE = (API) Dependency.inject(API.class);
-            }
-            return INSTANCE;
-        }
-        private set;
     }
 }

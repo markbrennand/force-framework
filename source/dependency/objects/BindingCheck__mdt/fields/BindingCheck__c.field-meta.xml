@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Checker__c</fullName>
+    <fullName>BindingCheck__c</fullName>
     <description>The class that will validate the Type.</description>
     <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
-    <inlineHelpText>The classname of a BindingChecker instance that will validate the object associated with the Type.</inlineHelpText>
-    <label>Checker</label>
+    <inlineHelpText>The classname of a BindingCheck instance that will validate the object associated with the Type.</inlineHelpText>
+    <label>Binding Check</label>
     <length>255</length>
     <required>true</required>
     <type>Text</type>

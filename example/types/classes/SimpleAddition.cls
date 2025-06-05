@@ -1,19 +1,15 @@
 /**
  * @description
- * Class showing how the SimpleAdditionAPI can be used to make a class O(pen/closed).
+ * Class showing how the API interface can be used to make a class O(pen/closed).
+ *
+ * The top level class implements the API so it can be mocked. And is virtual so it can be extended to add new methods.
+ *
+ * It must only have public methods that implement the API. The methods are there solely to allow the API
+ * interface to be mocked. Apex will not let you mock an inner class.
  *
  * @author Mark Brennand
  */
-
-// The top level class implements the API so it can be mocked.
-// And is virtual so it can be extended to add new methods.
-// It must only have public methods that implement the API. This prevents an application casting the class instance
-// to gain access to methods it shouldn't.
 public with sharing virtual class SimpleAddition implements API {
-    static {
-        // Use the Factory to create the class so direct construction of the class can be prevented.
-        Dependency.bind(API.class, SimpleAdditionFactory.class);
-    }
 
     // The interface defining the methods that form the class's API.
     public interface API {
@@ -22,7 +18,7 @@ public with sharing virtual class SimpleAddition implements API {
 
     // TestVisible and not final so it can be overridden from a unit test to mock it.
     @TestVisible
-    private static API INSTANCE = (API) Dependency.inject(API.class);
+    private static API INJECT = (API) Dependency.inject(API.class);
 
     // Hide the actual implementation from any access outside this class.
     private final Implementation impl = new Implementation();
@@ -55,18 +51,23 @@ public with sharing virtual class SimpleAddition implements API {
     }
 
     // Accessor method for the API imeplmentation.
-    public static API getInstance() {
-        return INSTANCE;
+    public static API getInject() {
+        return INJECT;
     }
 
-    // Called on registry initialisation to check bindings to SimpleAdditionAPI are valid.
-    public with sharing class Validator implements Dependency.BindingCheck {
+    // Called on registry initialisation to check bindings to SimpleAddition.API are valid.
+    public with sharing class BindingCheck implements Dependency.BindingCheck {
         public Dependency.ValidationResult validate(final Type forType, final Type withImpl) {
             if (Types.newInstance(withImpl) instanceof API) {
                 return new Dependency.ValidationResult(true, null);
             } else {
-                return new Dependency.ValidationResult(false, 'Type ' + forType.getName() + ' does not implement SimpleAdditionAPI');
+                return new Dependency.ValidationResult(false, 'Type ' + forType.getName() + ' does not implement SimpleAddition.API');
             }
         }
+    }
+
+    static {
+        // Use the Factory to create the class so direct construction of the class can be prevented.
+        Dependency.bind(API.class, SimpleAdditionFactory.class);
     }
 }

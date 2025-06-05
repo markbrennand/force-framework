@@ -154,13 +154,13 @@
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <externalSharingModel>Private</externalSharingModel>
-    <label>Binding</label>
+    <label>Dependency Binding</label>
     <nameField>
         <displayFormat>BINDING-{000000}</displayFormat>
         <label>Binding Name</label>
         <type>AutoNumber</type>
     </nameField>
-    <pluralLabel>Bindings</pluralLabel>
+    <pluralLabel>Dependency Bindings</pluralLabel>
     <searchLayouts></searchLayouts>
     <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>
