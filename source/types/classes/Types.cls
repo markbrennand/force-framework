@@ -56,7 +56,7 @@ global with sharing class Types {
 
         Type type = Type.forName(typeName);
         if (type == null) {
-            throw new TypeException('Class ' + typeName + ' does not exist');
+            throw new APIException('Class ' + typeName + ' does not exist');
         } else {
             return type;
         }
@@ -82,7 +82,7 @@ global with sharing class Types {
                 return instance;
             }
         } catch(Exception e) {
-            throw new TypeException('Class ' + type.getName() + ' could not be constructed' ,e);
+            throw new APIException('Class ' + type.getName() + ' could not be constructed', e);
         }
     }
 
@@ -90,5 +90,5 @@ global with sharing class Types {
      * @description
      * Exception thrown when a type related operation fails.
      */
-    global with sharing class TypeException extends Exception {}
+    global with sharing class APIException extends Exception {}
 }

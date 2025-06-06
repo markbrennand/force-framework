@@ -18,7 +18,7 @@ public with sharing class TypesTests {
         try {
             Type t = Types.load('TypeHelperTests.NoSuchClass');
             Assert.fail();
-        } catch(Types.TypeException te) {
+        } catch(Types.APIException te) {
             Assert.areEqual('Class TypeHelperTests.NoSuchClass does not exist', te.getMessage());
         }
     }
@@ -34,21 +34,21 @@ public with sharing class TypesTests {
         try {
             Types.newInstance(Integer.class);
             Assert.fail();
-        } catch(Types.TypeException te) {
+        } catch(Types.APIException te) {
             Assert.isTrue(te.getMessage().endsWith('Integer could not be constructed'));
         }
 
         try {
             Types.newInstance(TestInterface.class);
             Assert.fail();
-        } catch(Types.TypeException te) {
+        } catch(Types.APIException te) {
             Assert.isTrue(te.getMessage().endsWith('TypesTests.TestInterface could not be constructed'));
         }
 
         try {
             Types.newInstance(AbstractTestClass.class);
             Assert.fail();
-        } catch(Types.TypeException te) {
+        } catch(Types.APIException te) {
             Assert.isTrue(te.getMessage().endsWith('TypesTests.AbstractTestClass could not be constructed'));
         }
     }
