@@ -12,7 +12,7 @@ See the reference [Apex docs](SfApexDocs/types.html) for the API. It is suggeste
 loaded for your reference whilst reading this page.
 
 If you wish to try the example code in an org. Deploy the code in the 
-example](https://github.com/markbrennand/force-frameworks/tree/gh-pages/example/types) directory to  your org if the
+[example](https://github.com/markbrennand/force-frameworks/tree/gh-pages/example/types) directory to  your org if the
 org has the Force Frameworks code deployed. If your org has the Force Frameworks package deployed, deploy the code in
 the [example.pkg](https://github.com/markbrennand/force-frameworks/tree/gh-pages/example.pkg/types) directory.
 
