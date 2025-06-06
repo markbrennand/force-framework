@@ -11,12 +11,11 @@ it will call the _newInstance_ method of the _Factory_ implementation to create 
 See the reference [Apex docs](SfApexDocs/types.html) for the API. It is suggested that you keep a page open with the Apex docs
 loaded for your reference whilst reading this page.
 
-If you wish to try the example code in an org. Deploy the code in the _example/types_ directory to your org if you
-have an org with the Force Frameworks code deployed. If your org has the Force Frameworks package deployed, deploy
-the code in the _example.pkg/types_ directory.
+If you wish to try the example code in an org. Deploy the code in the [example](../../example/types) directory to
+your org if the org has the Force Frameworks code deployed. If your org has the Force Frameworks package deployed,
+deploy the code in the [example.pkg](../../example.pkg/types) directory.
 
-The two common use cases for the _Types_ API are.
-### Class Globality
+### Use Case - Reduce Need For Global Classes
 If you're using the Force Frameworks package, the code for that package is in the _forcefw_ namespace. Taking
 Dependency Injection as an example, you would need to make any implementation classes global, otherwise
 the _Dependency_ class in the _forcefw_ namespace would not be able to construct your class. Making classes global

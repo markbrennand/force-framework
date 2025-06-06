@@ -30,9 +30,6 @@ be limited to calling ony the methods of the interface. An application will be u
 concrete class providing the interface. This helps to prevent the use of the class for something other than its
 single use.
 
-The O of SOLID is Open Closed. A class is Open for extension and Closed for modification. The pattern used in classes
-using this API meets this requirement.
-
 See [Types](source/types/README.md)
 
 ## Dependency Injection
