@@ -1,15 +1,15 @@
 /**
  * @description
- * Examples of use of wiring of an abstract entity.
+ * Examples of use of injection of an abstract entity.
  *
  * @author Mark Brennand
  */
-public with sharing class AbstractEntityWiring {
+public with sharing class AbstractEntityInjection {
 
     // Setup a default registry. The default registry will configure the creation of the Account to be performed
     // synchronously.
     static {
-        forcefw.Dependency.bind(AccountClasses.AccountManager.class, AccountClasses.SyncAccountManager.class);
+        Dependency.bind(AccountClasses.AccountManager.class, AccountClasses.SyncAccountManager.class);
     }
 
     public static void example(String name) {
@@ -17,7 +17,7 @@ public with sharing class AbstractEntityWiring {
 
         // Application injects in the active AccountManager for the org.
         AccountClasses.AccountManager manager =
-                (AccountClasses.AccountManager) forcefw.Dependency.inject(AccountClasses.AccountManager.class);
+                (AccountClasses.AccountManager) Dependency.inject(AccountClasses.AccountManager.class);
 
         // Then creates the account.
         System.debug(manager.newAccount(name));
@@ -31,7 +31,7 @@ public with sharing class AbstractEntityWiring {
      * Clears any Bindings of the AccountManager interface.
      */
     public static void reset() {
-        delete [SELECT Id FROM forcefw__Binding__c WHERE forcefw__Type__c = 'AccountClasses.AccountManager'];
+        delete [SELECT Id FROM Binding__c WHERE Type__c = 'AccountClasses.AccountManager'];
     }
 
     /**

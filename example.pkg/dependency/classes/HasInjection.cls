@@ -4,41 +4,41 @@
  *
  * @author Mark Brennand
  */
-public with sharing class HasWiring {
+public with sharing class HasInjection {
 
     /**
      * @description
-     * Example of checking existence of a Binding before wiring.
+     * Example of checking existence of a Binding before injecting.
      *
      * @param name Name of Account to create.
      */
     public static void has(String name) {
 
         // Check if a Binding exists for the AccountManager interface.
-        if (Dependency.isBound(AccountClasses.AccountManager.class)) {
+        if (forcefw.Dependency.isBound(AccountClasses.AccountManager.class)) {
 
             // The Binding exists, it can be injected and called.
-            ((AccountClasses.AccountManager) Dependency.inject(AccountClasses.AccountManager.class)).newAccount(name);
+            ((AccountClasses.AccountManager) forcefw.Dependency.inject(AccountClasses.AccountManager.class)).newAccount(name);
         } else {
-            System.debug('Wiring for AccountClasses.AccountManager does not exist');
+            System.debug('Injection for AccountClasses.AccountManager does not exist');
         }
     }
 
     /**
      * @description
-     * Example of checking existence of a Binding before wiring.
+     * Example of checking existence of a Binding before injecting.
      *
      * @param name Name of Account to create.
      */
     public static void action(String name) {
 
         // Check if a Binding exists for the AccountManager interface with action ASYNC.
-        if (Dependency.isBound(AccountClasses.AccountManager.class, 'ASYNC')) {
+        if (forcefw.Dependency.isBound(AccountClasses.AccountManager.class, 'ASYNC')) {
 
             // The Binding exists, it can be injected and called.
-            ((AccountClasses.AccountManager) Dependency.inject(AccountClasses.AccountManager.class, 'ASYNC')).newAccount(name);
+            ((AccountClasses.AccountManager) forcefw.Dependency.inject(AccountClasses.AccountManager.class, 'ASYNC')).newAccount(name);
         } else {
-            System.debug('Wiring for AccountClasses.AccountManager with action ASYNC does not exist');
+            System.debug('Injection for AccountClasses.AccountManager with action ASYNC does not exist');
         }
     }
 
@@ -47,7 +47,7 @@ public with sharing class HasWiring {
      * Clears any Bindings of the AccountManager interface.
      */
     public static void reset() {
-        delete [SELECT Id FROM Binding__c WHERE Type__c = 'AccountClasses.AccountManager'];
+        delete [SELECT Id FROM forcefw__Binding__c WHERE forcefw__Type__c = 'AccountClasses.AccountManager'];
     }
 
     /**

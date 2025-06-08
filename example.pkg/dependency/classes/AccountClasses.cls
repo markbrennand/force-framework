@@ -1,6 +1,6 @@
 /**
  * @description
- * Classes used in the abstract entity wiring example which uses the Account record.
+ * Classes used in the abstract entity injection example which uses the Account record.
  *
  * @author Mark Brennand
  */

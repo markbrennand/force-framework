@@ -54,10 +54,13 @@ the job on its creation.
 
 See [Asynchronous](source/asynchronous/README.md)
 
-## Mocking
-An API for a new way of mocking. In most mocking solutions, methods and their expected arguments are defined.
-There is redundancy in that solution as many methods in a class may take the same arguments. In the solution in
-this API, first the arguments are defined and then the methods expecting those arguments are listed.
+## Mocker
+In a unit test, mock objects can simulate the behavior of complex, real objects and are therefore useful when a real
+object is impractical or impossible to incorporate into a unit test. Force Frameworks includes an API for a 
+mocking. In most mocking solutions, methods and their expected arguments are defined one by one. There is redundancy
+in that solution as methods in a class may take the same arguments. The Mocker API first defines the arguments
+and then the methods expecting those arguments are assigned to them. The solution is defined to be chained allowing
+a full mocking for a class to be defined in a single statement.
 
-See [Mocking](source/mocker/README.md)
+See [Mocker](source/mocker/README.md)
 

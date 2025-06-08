@@ -13,21 +13,14 @@ global with sharing class MockerAPITests {
      */
     @IsTest
     private static void testGetCurrentTime() {
+
+        // Create a mocked API for the getCurrentTime method that will return the current date and time when called.
+        // The method must be called once.
         MockerTestAPI mockedAPI = (MockerTestApi) forcefw.Mocker.of(new MockerFactory())
-
-                // The method being mocked has no arguments.
                 .whenNoArguments()
-
-                    // Its name is getCurrentTime.
                     .expectMethod('getCurrentTime')
-
-                        // It will be called once.
                         .called(1)
-
-                        // And will return the current time when called.
-                        .returns(Datetime.now())
-
-                // Build the mock for the class.
+                    .returns(Datetime.now())
                 .mock();
 
         Assert.isTrue(Datetime.now() >= mockedAPI.getCurrentTime());
@@ -44,21 +37,13 @@ global with sharing class MockerAPITests {
     private static void testExceptionThrown() {
         Exception exc = new DmlException('Test');
 
+        // Create a mocked API for the getCurrentTime method that throws an Exception when called.
+        // The method must be called once.
         MockerTestAPI mockedAPI = (MockerTestApi) forcefw.Mocker.of(new MockerFactory())
-
-                // The method being mocked has no arguments.
                 .whenNoArguments()
-
-                    // Its name is getCurrentTime.
                     .expectMethod('getCurrentTime')
-
-                        // It will be called once.
                         .called(1)
-
-                        // And will throw an Exception when called.
                         .throws(exc)
-
-                // Build the mock for the class.
                 .mock();
 
         try {
@@ -72,32 +57,23 @@ global with sharing class MockerAPITests {
         forcefw.Mocker.validate();
     }
 
+    /**
+     * @description
+     * This test shows how the same arguments can be used to mock two methods.
+     */
     @IsTest
     private static void testTwoMethodsWithSameArguments() {
+
+        // Create a mocked API for the getCurrentTime and getOrganizationId methods.
+        // Both methods should be called once.
         MockerTestAPI mockedAPI = (MockerTestApi) forcefw.Mocker.of(new MockerFactory())
-
-                // The methods being mocked have no arguments.
                 .whenNoArguments()
-
-                    // The first method is getCurrentTime.
                     .expectMethod('getCurrentTime')
-
-                        // It will be called once.
                         .called(1)
-
-                        // And will return the current time when called.
                         .returns(Datetime.now())
-
-                    // The first method is getOrganizationId
                     .expectMethod('getOrganizationId')
-
-                        // It will be called once.
                         .called(1)
-
-                        // And will return a mocked Id for the Organization when called.
                         .returns(forcefw.Mocker.fakeId(Organization.SObjectType))
-
-                // Build the mock for the class.
                 .mock();
 
 
@@ -117,27 +93,47 @@ global with sharing class MockerAPITests {
     private static void testUserDefinedComparator() {
         Exception exc = new DmlException('Test');
 
+        // Create a mocked API for the processError method.
+        // The default Exception comparator would fail tgo match the Exception as their messages differ.
+        // An Exception comparator is registered for the arguments which checks that only the Type of the Exceptions match.
+        // The method must be called once.
         MockerTestAPI mockedAPI = (MockerTestApi) forcefw.Mocker.of(new MockerFactory())
-
-                // The method being mocked takes an Exception as argument.
                 .whenArgument(exc)
-
-                    // Add a Comparator that will match any exception of type DMLException.
-                    // The default Comparator for Exception would check that the type of Exception and its message
-                    // match those in the argument passed to a mocked method. The default Comparator would fail
-                    // to match the Exception passed as argument to the call as their message differs.
                     .withComparators(new List<Comparator<Object>> { new ExceptionComparator() })
-
-                    // The method to match is processError.
-                    .expectMethod('processError')
-
-                        // It will be called once.
+                        .expectMethod('processError')
                         .called(1)
-
-                // Build the mock for the class.
                 .mock();
 
         mockedAPI.processError(new DMLException('Another Test'));
+
+        // Check that the mocked method has been called the correct number of times.
+        forcefw.Mocker.validate();
+    }
+
+    /**
+     * @description
+     * This test shows how to use a Mocker.Modifier to change the return value from a mocked method based on the
+     * arguments passed to the method.
+     */
+    @IsTest
+    private static void testModifier() {
+        Account a1 = new Account(Name = 'Bill', AccountNumber = '1', BillingCountry = 'UK');
+
+        // Create a mocked API for the addAccounts method.
+        // Set the return value to a Modifier which will create a fake object Id for the Account objects passed to the method.
+        // The method must be called once.
+        MockerTestAPI mockedAPI = (MockerTestApi) forcefw.Mocker.of(new MockerFactory())
+                .whenArgument(new List<Account> { new Account(Name = 'Bill') })
+                    .expectMethod('addAccounts')
+                    .called(1)
+                    .returns(new AccountModifier())
+            .mock();
+
+        List<Account> result = mockedAPI.addAccounts(new List<Account> { a1 });
+        Assert.areEqual(1, result.size());
+
+        // The Modifier will have added a fake Id to the matching Account.
+        Assert.isNotNull(result[0].Id);
 
         // Check that the mocked method has been called the correct number of times.
         forcefw.Mocker.validate();
@@ -153,63 +149,42 @@ global with sharing class MockerAPITests {
         Account a1 = new Account(Name = 'Bill', AccountNumber = '1', BillingCountry = 'UK');
         Account a2 = new Account(Name = 'Ted', AccountNumber = '2', BillingCountry = 'UK');
 
+        // Create a mocked API for the addAccounts method.
+        // Set the arguments to match only Accounts with a Name of Bill. The partial matching of the SObjects
+        // in the whenArguments call will result in other fields of the actual arguments passed to the method
+        // not being included when matching the arguments.
+        // The method must be called once.
         MockerTestAPI mockedAPI = (MockerTestApi) forcefw.Mocker.of(new MockerFactory())
-
-                // The method being mocked takes a List of Accounts as argument.
-                // In this case only Accounts matching a Name of Bill will be matched in the arguments to the method.
-                // Partial SObject matching only checks the fields in the List of Arguments against those in the
-                // arguments to the method call. The AccountNumber and BillingCountry fields will be ignored.
-                .whenArgument(new List<Account> {
-                        new Account(Name = 'Bill')
-                })
-
-                    // The method to match is addAccounts.
+                .whenArgument(new List<Account> { new Account(Name = 'Bill') })
                     .expectMethod('addAccounts')
-
-                    // It will be called once.
                     .called(1)
-
-                    // And it will return a result determined from a Modifier.
                     .returns(new AccountModifier())
-
-                // Build the mock for the class.
                 .mock();
 
         List<Account> result = mockedAPI.addAccounts(new List<Account> { a1 });
         Assert.areEqual(1, result.size());
-
-        // The Modifier will have added a fake Id to the matching Account.
         Assert.isNotNull(result[0].Id);
 
         // Check that the mocked method has been called the correct number of times.
         forcefw.Mocker.validate();
 
+        // Create a mocked API for the addAccounts method.
+        // Set the arguments to match Accounts with a BillingCountry of UK. The partial matching of the SObjects
+        // in the whenArguments call will result in other fields of the actual arguments passed to the method
+        // not being included when matching the arguments.
+        // The method must be called once.
         mockedAPI = (MockerTestApi) forcefw.Mocker.of(new MockerFactory())
-
-                // The method being mocked takes a List of Accounts as argument.
-                // In this case Accounts matching a BillingCountry of UK will be matched in the arguments to the method.
-                // Partial SObject matching only checks the fields in the List of Arguments against those in the
-                // arguments to the method call. The Name and AccountNumber fields will be ignored.
                 .whenArgument(new List<Account> {
+                        new Account(BillingCountry = 'UK'),
                         new Account(BillingCountry = 'UK')
                 })
-
-                    // The method to match is addAccounts.
                     .expectMethod('addAccounts')
-
-                    // It will be called once.
                     .called(1)
-
-                    // And it will return a result determined from a Modifier.
                     .returns(new AccountModifier())
-
-                    // Build the mock for the class.
-                    .mock();
+                .mock();
 
         result = mockedAPI.addAccounts(new List<Account> { a1, a2 });
         Assert.areEqual(2, result.size());
-
-        // The Modifier will have added a fake Id to the matching Accounts.
         Assert.isNotNull(result[0].Id);
         Assert.isNotNull(result[1].Id);
 
@@ -217,13 +192,60 @@ global with sharing class MockerAPITests {
         forcefw.Mocker.validate();
     }
 
-    private class ExceptionComparator implements Comparator<Object> {
+    /**
+     * @description
+     * Test showing the mocked API can be used by a service class as if it were the live implementation.
+     */
+    @IsTest
+    private static void testWhenUsedByService() {
+        Account a1 = new Account(Name = 'Bill', AccountNumber = '1', BillingCountry = 'UK');
+        Account a2 = new Account(Name = 'Ted', AccountNumber = '2', BillingCountry = 'UK');
+
+        // Create a mocked API for the addAccounts method.
+        MockerTestAPI mockedAPI = (MockerTestApi) forcefw.Mocker.of(new MockerFactory())
+                .whenArgument(new List<Account> { new Account(Name = 'Bill') })
+                    .expectMethod('addAccounts')
+                    .called(1)
+                    .returns(new AccountModifier())
+                .whenArgument(new List<Account> {
+                        new Account(BillingCountry = 'UK'),
+                        new Account(BillingCountry = 'UK')
+                })
+                    .expectMethod('addAccounts')
+                    .called(2)
+                    .returns(new AccountModifier())
+                .whenNoArguments()
+                    .expectMethod('getCurrentTime')
+                        .called(5)
+                        .returns(Datetime.now())
+                .mock();
+
+        ExampleService service = new ExampleService(mockedAPI);
+        List<Account> result = service.addAccounts(new List<Account> { a1 });
+        Assert.areEqual(1, result.size());
+        Assert.isNotNull(result[0].Id);
+
+        result = service.addAccounts(new List<Account> { a1, a2 });
+        Assert.areEqual(2, result.size());
+        Assert.isNotNull(result[0].Id);
+        Assert.isNotNull(result[1].Id);
+
+        result = service.addAccounts(new List<Account> { a1, a2 });
+        Assert.areEqual(2, result.size());
+        Assert.isNotNull(result[0].Id);
+        Assert.isNotNull(result[1].Id);
+
+        // Check that the mocked method has been called the correct number of times.
+        forcefw.Mocker.validate();
+    }
+
+    private with sharing class ExceptionComparator implements Comparator<Object> {
         public Integer compare(Object param1, Object param2) {
             return (param1 instanceof DmlException && param2 instanceof DmlException) ? 0 : -1;
         }
     }
 
-    private class AccountModifier implements forcefw.Mocker.Modifier {
+    private with sharing class AccountModifier implements forcefw.Mocker.Modifier {
         public Object process(List<Object> arguments) {
             List<Account> returnList = new List<Account>();
             for (Account acc : (List<Account>) arguments[0]) {
@@ -236,7 +258,22 @@ global with sharing class MockerAPITests {
         }
     }
 
-    global class MockerFactory implements forcefw.Mocker.Factory {
+    private with sharing class ExampleService {
+        private final MockerTestAPI api;
+
+        public ExampleService(MockerTestAPI api) {
+            this.api = api;
+        }
+
+        public List<Account> addAccounts(List<Account> accounts) {
+            for (Account account : accounts) {
+                account.AccountSource = String.valueOf(api.getCurrentTime());
+            }
+            return api.addAccounts(accounts);
+        }
+    }
+
+    global with sharing class MockerFactory implements forcefw.Mocker.Factory {
         global Object stub(final StubProvider provider) {
             return Test.createStub(MockerTestApi.class, provider);
         }

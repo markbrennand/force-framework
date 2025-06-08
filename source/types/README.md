@@ -8,13 +8,16 @@ It supports a feature not available in the Apex _Type.newInstance_ method. This 
 _Types.Factory_ interface. If the _Type_ passed to the _Types.newInstance_ method is an instance of _Factory_,
 it will call the _newInstance_ method of the _Factory_ implementation to create the instance.
 
-See the reference [Apex docs](SfApexDocs/types.html) for the API. It is suggested that you keep a page open with the Apex docs
-loaded for your reference whilst reading this page.
+See the reference [Apex docs](SfApexDocs/types.html) for the API. It is suggested that you keep a page open with
+the Apex docs  loaded for your reference whilst reading this page.
 
 If you wish to try the example code in an org. Deploy the code in the 
 [example](https://github.com/markbrennand/force-frameworks/tree/gh-pages/example/types) directory to  your org if the
 org has the Force Frameworks code deployed. If your org has the Force Frameworks package deployed, deploy the code in
 the [example.pkg](https://github.com/markbrennand/force-frameworks/tree/gh-pages/example.pkg/types) directory.
+
+You must assign the _Force Framework Manager_ permission set to the user you will run the example code as in
+using Anonymous Apex.
 
 ### Use Case - Reduce Need For Global Classes
 If you're using the Force Frameworks package, the code for that package is in the _forcefw_ namespace. Taking
