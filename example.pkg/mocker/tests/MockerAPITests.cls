@@ -18,9 +18,9 @@ global with sharing class MockerAPITests {
         // The method must be called once.
         MockerTestAPI mockedAPI = (MockerTestApi) forcefw.Mocker.of(new MockerFactory())
                 .whenNoArguments()
-                    .expectMethod('getCurrentTime')
+                    .forMethod('getCurrentTime')
                         .called(1)
-                    .returns(Datetime.now())
+                        .returns(Datetime.now())
                 .mock();
 
         Assert.isTrue(Datetime.now() >= mockedAPI.getCurrentTime());
@@ -41,7 +41,7 @@ global with sharing class MockerAPITests {
         // The method must be called once.
         MockerTestAPI mockedAPI = (MockerTestApi) forcefw.Mocker.of(new MockerFactory())
                 .whenNoArguments()
-                    .expectMethod('getCurrentTime')
+                    .forMethod('getCurrentTime')
                         .called(1)
                         .throws(exc)
                 .mock();
@@ -68,10 +68,10 @@ global with sharing class MockerAPITests {
         // Both methods should be called once.
         MockerTestAPI mockedAPI = (MockerTestApi) forcefw.Mocker.of(new MockerFactory())
                 .whenNoArguments()
-                    .expectMethod('getCurrentTime')
+                    .forMethod('getCurrentTime')
                         .called(1)
                         .returns(Datetime.now())
-                    .expectMethod('getOrganizationId')
+                    .forMethod('getOrganizationId')
                         .called(1)
                         .returns(forcefw.Mocker.fakeId(Organization.SObjectType))
                 .mock();
@@ -100,8 +100,8 @@ global with sharing class MockerAPITests {
         MockerTestAPI mockedAPI = (MockerTestApi) forcefw.Mocker.of(new MockerFactory())
                 .whenArgument(exc)
                     .withComparators(new List<Comparator<Object>> { new ExceptionComparator() })
-                        .expectMethod('processError')
-                        .called(1)
+                        .forMethod('processError')
+                            .called(1)
                 .mock();
 
         mockedAPI.processError(new DMLException('Another Test'));
@@ -124,9 +124,9 @@ global with sharing class MockerAPITests {
         // The method must be called once.
         MockerTestAPI mockedAPI = (MockerTestApi) forcefw.Mocker.of(new MockerFactory())
                 .whenArgument(new List<Account> { new Account(Name = 'Bill') })
-                    .expectMethod('addAccounts')
-                    .called(1)
-                    .returns(new AccountModifier())
+                    .forMethod('addAccounts')
+                        .called(1)
+                        .returns(new AccountModifier())
             .mock();
 
         List<Account> result = mockedAPI.addAccounts(new List<Account> { a1 });
@@ -156,9 +156,9 @@ global with sharing class MockerAPITests {
         // The method must be called once.
         MockerTestAPI mockedAPI = (MockerTestApi) forcefw.Mocker.of(new MockerFactory())
                 .whenArgument(new List<Account> { new Account(Name = 'Bill') })
-                    .expectMethod('addAccounts')
-                    .called(1)
-                    .returns(new AccountModifier())
+                    .forMethod('addAccounts')
+                        .called(1)
+                        .returns(new AccountModifier())
                 .mock();
 
         List<Account> result = mockedAPI.addAccounts(new List<Account> { a1 });
@@ -178,9 +178,9 @@ global with sharing class MockerAPITests {
                         new Account(BillingCountry = 'UK'),
                         new Account(BillingCountry = 'UK')
                 })
-                    .expectMethod('addAccounts')
-                    .called(1)
-                    .returns(new AccountModifier())
+                    .forMethod('addAccounts')
+                        .called(1)
+                        .returns(new AccountModifier())
                 .mock();
 
         result = mockedAPI.addAccounts(new List<Account> { a1, a2 });
@@ -204,18 +204,18 @@ global with sharing class MockerAPITests {
         // Create a mocked API for the addAccounts method.
         MockerTestAPI mockedAPI = (MockerTestApi) forcefw.Mocker.of(new MockerFactory())
                 .whenArgument(new List<Account> { new Account(Name = 'Bill') })
-                    .expectMethod('addAccounts')
-                    .called(1)
-                    .returns(new AccountModifier())
+                    .forMethod('addAccounts')
+                        .called(1)
+                        .returns(new AccountModifier())
                 .whenArgument(new List<Account> {
                         new Account(BillingCountry = 'UK'),
                         new Account(BillingCountry = 'UK')
                 })
-                    .expectMethod('addAccounts')
-                    .called(2)
-                    .returns(new AccountModifier())
+                    .forMethod('addAccounts')
+                        .called(2)
+                        .returns(new AccountModifier())
                 .whenNoArguments()
-                    .expectMethod('getCurrentTime')
+                    .forMethod('getCurrentTime')
                         .called(5)
                         .returns(Datetime.now())
                 .mock();

@@ -10,7 +10,7 @@ public with sharing class MockerTests {
         try {
             Mocker mocked = (Mocker) Mocker.of(Mocker.class)
                     .whenNoArguments()
-                    .expectMethod('mock').throws(new DMLException('Test'))
+                    .forMethod('mock').throws(new DMLException('Test'))
                     .mock();
 
             mocked.mock();
@@ -24,7 +24,7 @@ public with sharing class MockerTests {
     private static void testReturns() {
         Mocker mocked = (Mocker) Mocker.of(Mocker.class)
                 .whenNoArguments()
-                .expectMethod('mock').returns(123)
+                .forMethod('mock').returns(123)
                 .mock();
 
         Assert.areEqual(123, mocked.mock());
@@ -32,7 +32,7 @@ public with sharing class MockerTests {
 
         mocked = (Mocker) Mocker.of(Mocker.class)
                 .whenNoArguments()
-                .expectMethod('mock').returns(new TestModifier())
+                .forMethod('mock').returns(new TestModifier())
                 .mock();
 
         Assert.areEqual(456, mocked.mock());
@@ -41,7 +41,7 @@ public with sharing class MockerTests {
         try {
             Mocker.of(Mocker.class)
                     .whenNoArguments()
-                    .expectMethod('mock').returns(123).returns(new TestModifier())
+                    .forMethod('mock').returns(123).returns(new TestModifier())
                     .mock();
 
             Assert.fail();
@@ -53,7 +53,7 @@ public with sharing class MockerTests {
     private static void testUnboundedCalls() {
         Mocker mocked = (Mocker) Mocker.of(Mocker.class)
                 .whenNoArguments()
-                    .expectMethod('mock').returns(123)
+                    .forMethod('mock').returns(123)
                 .mock();
 
         Assert.areEqual(123, mocked.mock());
@@ -66,7 +66,7 @@ public with sharing class MockerTests {
     private static void testBoundedCalls() {
         Mocker mocked = (Mocker) Mocker.of(Mocker.class)
                 .whenNoArguments()
-                    .expectMethod('mock').called(2).returns(123)
+                    .forMethod('mock').called(2).returns(123)
                 .mock();
 
         Assert.areEqual(123, mocked.mock());
@@ -91,7 +91,7 @@ public with sharing class MockerTests {
 
         Mocker mocked = (Mocker) Mocker.of(Mocker.class)
                 .whenArgument(a1)
-                    .expectMethod('whenArgument')
+                    .forMethod('whenArgument')
                 .mock();
 
         mocked.whenArgument(a1);
@@ -103,7 +103,7 @@ public with sharing class MockerTests {
 
         mocked = (Mocker) Mocker.of(Mocker.class)
                 .whenArgument(new List<Account> { a1, a3})
-                    .expectMethod('whenArgument')
+                    .forMethod('whenArgument')
                 .mock();
 
         mocked.whenArgument(new List<Account> { a1, a3 });
@@ -115,7 +115,7 @@ public with sharing class MockerTests {
 
         mocked = (Mocker) Mocker.of(Mocker.class)
                 .whenArgument(new List<Account> { a2, a3})
-                    .expectMethod('whenArgument')
+                    .forMethod('whenArgument')
                 .mock();
 
         mocked.whenArgument(new List<Account> { a2, a3 });
@@ -132,12 +132,12 @@ public with sharing class MockerTests {
 
         Mocker mocked = (Mocker) Mocker.of(Mocker.class)
                 .whenArgument(a1)
-                    .expectMethod('whenArgument').called(1)
-                    .expectMethod('whenArguments').called(0)
+                    .forMethod('whenArgument').called(1)
+                    .forMethod('whenArguments').called(0)
                 .whenArgument(a2)
-                    .expectMethod('whenArgument').called(1)
+                    .forMethod('whenArgument').called(1)
                 .whenNoArguments()
-                    .expectMethod('mock').called(2).returns(123)
+                    .forMethod('mock').called(2).returns(123)
                 .whenArguments(1, 2)
                 .whenArguments(1, 2, 3)
                 .whenArguments(1, 2, 3, 4)
@@ -159,12 +159,12 @@ public with sharing class MockerTests {
 
         Mocker mocked = (Mocker) Mocker.of(new TestFactory())
                 .whenArgument(a1)
-                .expectMethod('whenArgument').called(1)
-                .expectMethod('whenArguments').called(0)
+                .forMethod('whenArgument').called(1)
+                .forMethod('whenArguments').called(0)
                 .whenArgument(a2)
-                .expectMethod('whenArgument').called(1)
+                .forMethod('whenArgument').called(1)
                 .whenNoArguments()
-                .expectMethod('mock').called(2).returns(123)
+                .forMethod('mock').called(2).returns(123)
                 .whenArguments(1, 2)
                 .whenArguments(1, 2, 3)
                 .whenArguments(1, 2, 3, 4)
@@ -186,7 +186,7 @@ public with sharing class MockerTests {
         Mocker mocked = (Mocker) Mocker.of(Mocker.class)
                 .whenArgument(a1)
                 .withComparators(new List<Comparator<Object>> { new TestComparator() })
-                .expectMethod('whenArgument').called(1)
+                .forMethod('whenArgument').called(1)
                 .mock();
 
         mocked.whenArgument(new Account(Name = 'Bill'));
@@ -194,7 +194,7 @@ public with sharing class MockerTests {
         try {
             mocked = (Mocker) Mocker.of(Mocker.class)
                     .whenArgument(a1)
-                    .expectMethod('whenArgument').called(1)
+                    .forMethod('whenArgument').called(1)
                     .mock();
 
             mocked.whenArgument(new Account(Name = 'Bill'));

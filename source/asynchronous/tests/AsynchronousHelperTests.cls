@@ -80,10 +80,10 @@ public with sharing class AsynchronousHelperTests {
                         .withComparators(new List<Comparator<Object>>{
                                 new TestHelper.ExceptionComparator()
                         })
-                        .expectMethod('recordException').called(1)
-                        .expectMethod('recordInternalException').called(1)
+                        .forMethod('recordException').called(1)
+                        .forMethod('recordInternalException').called(1)
                     .whenArgument(asyncObject)
-                        .expectMethod('queueJob').called(1).throws(exc)
+                        .forMethod('queueJob').called(1).throws(exc)
                     .mock();
 
             AsynchronousHelper.INJECT.recordException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
@@ -110,7 +110,7 @@ public with sharing class AsynchronousHelperTests {
                         ExceptionStackTrace__c = exc.getStackTraceString()
 
                 ))
-                    .expectMethod('persistException').called(1)
+                    .forMethod('persistException').called(1)
                 .mock();
     }
 
@@ -126,13 +126,13 @@ public with sharing class AsynchronousHelperTests {
                         ExceptionStackTrace__c = exc.getStackTraceString()
 
                 ))
-                    .expectMethod('persistException').called(1)
+                    .forMethod('persistException').called(1)
 
                 // And the status of the Asynchronous object set to FAILED.
                 .whenArgument(new List<AsynchronousJob__c> {
                         new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.FAILED.name())
                 })
-                    .expectMethod('persistObjects').called(1)
+                    .forMethod('persistObjects').called(1)
                 .mock();
     }
 }

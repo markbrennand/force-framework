@@ -43,7 +43,7 @@ public with sharing class AsynchronousTests {
                                     state
                             }
                     )
-                        .expectMethod('persistObjects').called(1).returns(new AddIdModifier())
+                        .forMethod('persistObjects').called(1).returns(new AddIdModifier())
                     .mock();
 
             for (Asynchronous.Job queuedJob : AsynchronousImpl.INJECT.queueJobs(new List<Asynchronous.Job>{
@@ -138,13 +138,13 @@ public with sharing class AsynchronousTests {
                     .whenArgument(
                             new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName())
                     )
-                        .expectMethod('queueJob').called(1)
+                        .forMethod('queueJob').called(1)
                     .whenArguments(
                             new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName()),
                             new Map<String, String>()
                     )
                         .withComparators(new List<Comparator<Object>> { new MapComparator() })
-                        .expectMethod('encodeState')
+                        .forMethod('encodeState')
                             .called(1)
                             .returns(new List<AsynchronousJobState__c>())
                     .mock();
@@ -184,8 +184,8 @@ public with sharing class AsynchronousTests {
     private static AsynchronousImpl createMock() {
         Asynchronous.Job job = (Asynchronous.Job) Mocker.of(AsynchronousJob.class)
                 .whenNoArguments()
-                    .expectMethod('getReference').called(1).returns('MOCKED')
-                    .expectMethod('getStatus').called(1).returns(Asynchronous.Status.CANCELLED)
+                    .forMethod('getReference').called(1).returns('MOCKED')
+                    .forMethod('getStatus').called(1).returns(Asynchronous.Status.CANCELLED)
                 .mock();
 
         return (AsynchronousImpl) Mocker.of(AsynchronousImpl.class)
@@ -196,9 +196,9 @@ public with sharing class AsynchronousTests {
                         1000,
                         new Map<String, String>()
                 )
-                    .expectMethod('createJob').returns(job)
+                    .forMethod('createJob').returns(job)
                 .whenArgument(new List<Asynchronous.Job> { job })
-                    .expectMethod('queueJobs').called(1)
+                    .forMethod('queueJobs').called(1)
                 .mock();
     }
 

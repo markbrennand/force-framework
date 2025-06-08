@@ -185,11 +185,11 @@ public with sharing class AsynchronousFinalizerTests {
                             ExceptionType__c = 'System.NullPointerException',
                             ExceptionMessage__c = 'null input to JSON parser'
                     ))
-                        .expectMethod('persistException').called(1)
+                        .forMethod('persistException').called(1)
                     .whenArgument(new List<AsynchronousJob__c>{
                             new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.FAILED.name())
                     })
-                        .expectMethod('persistObjects').called(1);
+                        .forMethod('persistObjects').called(1);
 
             AsynchronousDAO.INJECT = (AsynchronousDAO) mocked.mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
@@ -226,18 +226,18 @@ public with sharing class AsynchronousFinalizerTests {
         Mocker mocked = Mocker.of(AsynchronousDAO.class);
         mocked
                 .whenArgument(asyncObject.Id)
-                    .expectMethod('getObject').called(1).returns(asyncObject);
+                    .forMethod('getObject').called(1).returns(asyncObject);
 
         if (jobToBeDeleted) {
             mocked
                     // The Runnable's onFailure method will have asked for the job to be deleted.
                     .whenArgument(new List<AsynchronousJob__c>{ asyncObject })
-                        .expectMethod('removeObjects').called(1);
+                        .forMethod('removeObjects').called(1);
         } else {
             mocked
                     // After a successful call to Runnable.onSuccess, the job should be marked as SUCCEEDED.
                     .whenArgument(new List<AsynchronousJob__c> { new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.SUCCEEDED.name()) })
-                        .expectMethod('persistObjects').called(1);
+                        .forMethod('persistObjects').called(1);
         }
 
         return mocked;
@@ -253,7 +253,7 @@ public with sharing class AsynchronousFinalizerTests {
         mocked
                 // Finalizer must get the job once.
                 .whenArgument(asyncObject.Id)
-                    .expectMethod('getObject').called(1).returns(asyncObject)
+                    .forMethod('getObject').called(1).returns(asyncObject)
 
                 // An Exception should be recorded.
                 .whenArgument(new AsynchronousJobException__c(
@@ -264,7 +264,7 @@ public with sharing class AsynchronousFinalizerTests {
                         ExceptionMessage__c = exc.getMessage(),
                         ExceptionStackTrace__c = exc.getStackTraceString()
                 ))
-                    .expectMethod('persistException').called(1);
+                    .forMethod('persistException').called(1);
 
         if (expectedStatus == Asynchronous.Status.QUEUED) {
             mocked
@@ -272,7 +272,7 @@ public with sharing class AsynchronousFinalizerTests {
                     .whenArgument(new List<AsynchronousJob__c> {
                             new AsynchronousJob__c(Id = asyncObject.Id, Status__c = expectedStatus.name(), RetryNumber__c = asyncObject.RetryNumber__c+1)
                     })
-                        .expectMethod('persistObjects').called(1);
+                        .forMethod('persistObjects').called(1);
 
         } else if (jobToBeDeleted) {
             mocked
@@ -280,14 +280,14 @@ public with sharing class AsynchronousFinalizerTests {
                     .whenArgument(new List<AsynchronousJob__c> {
                             new AsynchronousJob__c(Id = asyncObject.Id)
                     })
-                        .expectMethod('removeObjects').called(1);
+                        .forMethod('removeObjects').called(1);
         } else {
             mocked
                     // After a successful call to Runnable.onFailed, the job should be marked as FAILED.
                     .whenArgument(new List<AsynchronousJob__c> {
                             new AsynchronousJob__c(Id = asyncObject.Id, Status__c = expectedStatus.name())
                     })
-                        .expectMethod('persistObjects').called(1);
+                        .forMethod('persistObjects').called(1);
         }
 
         return mocked;
@@ -303,7 +303,7 @@ public with sharing class AsynchronousFinalizerTests {
         mocked
                 // Finalizer must get the job once.
                 .whenArgument(asyncObject.Id)
-                    .expectMethod('getObject').called(1).returns(asyncObject)
+                    .forMethod('getObject').called(1).returns(asyncObject)
 
                 // And the error from the on method must be persisted.
                 .whenArgument(new AsynchronousJobException__c(
@@ -313,11 +313,11 @@ public with sharing class AsynchronousFinalizerTests {
                         ExceptionType__c = Asynchronous.APIException.class.getName(),
                         ExceptionMessage__c = exceptionMessage
                 ))
-                    .expectMethod('persistException').called(1)
+                    .forMethod('persistException').called(1)
 
                 // The job status will be changed to FAILED.
                 .whenArgument(new List<AsynchronousJob__c> { new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.FAILED.name()) } )
-                    .expectMethod('persistObjects').called(1);
+                    .forMethod('persistObjects').called(1);
 
         if (isJobFailed) {
             mocked
@@ -329,7 +329,7 @@ public with sharing class AsynchronousFinalizerTests {
                             ExceptionType__c = Asynchronous.APIException.class.getName(),
                             ExceptionMessage__c = 'Test'
                     ))
-                        .expectMethod('persistException').called(1);
+                        .forMethod('persistException').called(1);
         }
 
         return mocked;

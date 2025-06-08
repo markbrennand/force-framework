@@ -18,7 +18,7 @@ public with sharing class AsynchronousDAOTests {
         AsynchronousHelper.INSTANCE = (AsynchronousHelper) Mocker.of(AsynchronousHelper.class)
                 // Starting the Scheduler
                 .whenArgument(new AsynchronousJob__c(Status__c = Asynchronous.Status.PENDING.name()))
-                    .expectMethod('apiQueueJob').called(1)
+                    .forMethod('apiQueueJob').called(1)
                 .mock();
 
         AsynchronousJob__c job1 = new AsynchronousJob__c(

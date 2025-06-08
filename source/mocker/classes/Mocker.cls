@@ -448,7 +448,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
 
         /**
          * @description
-         * Sets the Execption to be thrown from the method if the arguments are matched and it is called.
+         * Sets the Exception to be thrown from the method if the arguments are matched and it is called.
          *
          * @param throws The Exception to throw if the arguments are matched and this method is called.
          *
@@ -471,8 +471,8 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
          *
          * @return The mew method instance so it can be chained.
          */
-        global Mocker.Method expectMethod(final String methodName) {
-            return arguments.expectMethod(methodName);
+        global Mocker.Method forMethod(final String methodName) {
+            return arguments.forMethod(methodName);
         }
 
         /**
@@ -600,7 +600,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
          *
          * @return The method instance so it can be chained.
          */
-        global Mocker.Method expectMethod(final String methodName) {
+        global Mocker.Method forMethod(final String methodName) {
             Method method = new Method(this, methodName);
             methods.add(method);
             return method;
