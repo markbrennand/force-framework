@@ -13,7 +13,7 @@ global with sharing class SimpleAddition {
      * @description
      * The interface defining the methods that form the class's API.
      *
-     * The interface has to be global so it can be injected when the Force Frameworks package is in use and the
+     * The interface has to be global so it can be injected when the Force Framework package is in use and the
      * Dependency class is in a different namespace.
      */
     global interface API {
@@ -42,7 +42,7 @@ global with sharing class SimpleAddition {
      * @description
      * Called on registry initialisation to check bindings to SimpleAddition.API are valid.
      *
-     * It is global as when called from Dependency class in Force Frameworks package, this class will be in a
+     * It is global as when called from Dependency class in Force Framework package, this class will be in a
      * different namespace.
      */
     global with sharing class BindingCheck implements Dependency.BindingCheck {

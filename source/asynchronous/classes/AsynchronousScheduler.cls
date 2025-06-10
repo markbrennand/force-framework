@@ -27,7 +27,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
      * @description
      * The action in the Registry for the configuration Dependency injection.
      */
-    private final static String CONFIG_ACTION = 'AsynchronousConfiguration';
+    private final static String CONFIG_ACTION = 'AsynchronousScheduler';
 
     /*
      * Initialise the registry.

@@ -13,14 +13,14 @@ the Apex docs  loaded for your reference whilst reading this page.
 
 If you wish to try the example code in an org. Deploy the code in the 
 [example](https://github.com/markbrennand/force-frameworks/tree/gh-pages/example/types) directory to  your org if the
-org has the Force Frameworks code deployed. If your org has the Force Frameworks package deployed, deploy the code in
+org has the Force Framework code deployed. If your org has the Force Framework package deployed, deploy the code in
 the [example.pkg](https://github.com/markbrennand/force-frameworks/tree/gh-pages/example.pkg/types) directory.
 
 You must assign the _Force Framework Manager_ permission set to the user you will run the example code as in
 using Anonymous Apex.
 
 ### Use Case - Reduce Need For Global Classes
-If you're using the Force Frameworks package, the code for that package is in the _forcefw_ namespace. Taking
+If you're using the Force Framework package, the code for that package is in the _forcefw_ namespace. Taking
 Dependency Injection as an example, you would need to make any implementation classes global, otherwise
 the _Dependency_ class in the _forcefw_ namespace would not be able to construct your class. Making classes global
 results in several issues including not being able to make any changes to global methods after they've been released
@@ -33,7 +33,7 @@ is injected into an application, the _Factory_ class's _newInstance_ method is c
 is injected.
 
 In the following example, you can see that the _Types_ API can be used to create an implementation class for an
-interface that can be injected into an application using the Force Frameworks package without having to make the
+interface that can be injected into an application using the Force Framework package without having to make the
 class global.
 ```
 // The interface needs to be global, so it can be accessed by the forcefw namespace when creating the binding.

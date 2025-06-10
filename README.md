@@ -56,7 +56,7 @@ See [Asynchronous](source/asynchronous/README.md)
 
 ## Mocker
 In a unit test, mock objects can simulate the behavior of complex, real objects and are therefore useful when a real
-object is impractical or impossible to incorporate into a unit test. Force Frameworks includes an API for a 
+object is impractical or impossible to incorporate into a unit test. The Force Framework suite includes an API for a 
 mocking. In most mocking solutions, methods and their expected arguments are defined one by one. There is redundancy
 in that solution as methods in a class may take the same arguments. The Mocker API first defines the arguments
 and then the methods expecting those arguments are assigned to them. The solution is defined to be chained allowing

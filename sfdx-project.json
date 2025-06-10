@@ -6,7 +6,7 @@
       "path": "source",
       "default": true,
       "package": "force-fw",
-      "versionDescription": "Frameworks for Salesforce development"
+      "versionDescription": "A set of APIs for Salesforce development"
     }
   ],
   "namespace": "forcefw",
@@ -29,6 +29,7 @@
     "force-fw@0.1.0-12": "04tgL0000002X1VQAU",
     "force-fw@0.1.0-13": "04tgL0000002YK9QAM",
     "force-fw@0.1.0-14": "04tgL0000002a93QAA",
-    "force-fw@0.1.0-15": "04tgL0000002aAfQAI"
+    "force-fw@0.1.0-15": "04tgL0000002aAfQAI",
+    "force-fw@0.1.0-16": "04tgL0000002eUPQAY"
   }
 }

@@ -25,7 +25,7 @@ Apex docs loaded for your reference whilst reading this page.
 
 If you wish to try the example code in an org. Deploy the code in the
 [example](https://github.com/markbrennand/force-frameworks/tree/gh-pages/example/dependency) directory to  your org if the
-org has the Force Frameworks code deployed. If your org has the Force Frameworks package deployed, deploy the code in
+org has the Force Framework code deployed. If your org has the Force Framework package deployed, deploy the code in
 the [example.pkg](https://github.com/markbrennand/force-frameworks/tree/gh-pages/example.pkg/dependency) directory.
 
 You must assign the _Force Framework Manager_ permission set to the user you will run the example code as in
@@ -136,7 +136,7 @@ Add an Apex Job to create the _Account_ and the job will be run when the current
 Salesforce.
 
 To try this out, add the binding to enable the creation of the _Account_ asynchronously. Log on to your org. From the
-_App Launcher_ select _Force Frameworks_. Select the _Dependency Bindings_ tab. Create a new record. Assign it the
+_App Launcher_ select _Force Framework_. Select the _Dependency Bindings_ tab. Create a new record. Assign it the
 following values.
 
 | Field | Value                              |
@@ -174,7 +174,7 @@ DEBUG|The farm has 2000 hens
 There is an inner class named _NewConfiguration_ in the _PropertyInjection_ class. This can be used to override the base
 registry binding for the _Map_ setup in the test.
 
-Run the following DML in Anonymous Apex. If using the Force Frameworks package, you will need to add the package
+Run the following DML in Anonymous Apex. If using the Force Framework package, you will need to add the package
 namespace, forcefw__, to the object and the fields.
 ```
 insert new Binding__c(Type__c = (Map<String, Integer>.class).getName(), Action__c = 'animals', Implementation__c = PropertyInjection.NewConfiguration.class.getName());```
@@ -187,7 +187,7 @@ DEBUG|The farm has 3 hens
 ```
 The new values have been successfully injected into the application.
 
-Log on to your org. From the _App Launcher_ select _Force Frameworks_. Select the _Dependency Bindings_ tab. If you
+Log on to your org. From the _App Launcher_ select _Force Framework_. Select the _Dependency Bindings_ tab. If you
 choose _All_, you will see the binding that was  added to bind the class with the new configuration to the _animals_
 _Map_.
 
@@ -225,7 +225,7 @@ that no Binding exists for the _AccountClasses.AccountManager_ interface.
 DEBUG|Injection for AccountClasses.AccountManager does not exist
 ```
 
-Log on to your org. From the _App Launcher_ select _Force Frameworks_. Select the _Dependency Bindings_ tab. Create a
+Log on to your org. From the _App Launcher_ select _Force Framework_. Select the _Dependency Bindings_ tab. Create a
 new record. Assign it the following values;
 
 | Field | Value                             |
@@ -242,7 +242,7 @@ that no Binding exists for the _AccountClasses.AccountManager_ interface with an
 DEBUG|Injection for AccountClasses.AccountManager with action ASYNC does not exist
 ```
 
-Log on to your org. From the _App Launcher_ select _Force Frameworks_. Select the _Dependency Bindings_ tab. Create a
+Log on to your org. From the _App Launcher_ select _Force Framework_. Select the _Dependency Bindings_ tab. Create a
 new record. Assign it the following  values.
 
 | Field | Value                              |

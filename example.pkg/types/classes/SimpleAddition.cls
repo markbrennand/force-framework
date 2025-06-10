@@ -10,7 +10,7 @@ global with sharing class SimpleAddition {
      * @description
      * The interface defining the methods that form the class's API.
      *
-     * The interface has to be global so it can be injected when the Force Frameworks package is in use and the
+     * The interface has to be global so it can be injected when the Force Framework package is in use and the
      * Dependency class is in a different namespace.
      */
     global interface API {

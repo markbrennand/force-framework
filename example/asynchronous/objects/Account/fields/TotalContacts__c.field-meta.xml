@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>TotalContacts__c</fullName>
+    <description>The total number of contacts for the account.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>The total number of contacts for the account.</inlineHelpText>
+    <label>Total Contacts</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackFeedHistory>false</trackFeedHistory>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

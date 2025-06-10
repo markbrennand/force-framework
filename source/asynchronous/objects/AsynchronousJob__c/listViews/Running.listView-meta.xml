@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Running</fullName>
+    <columns>NAME</columns>
+    <columns>forcefw__Status__c</columns>
+    <columns>forcefw__Reference__c</columns>
+    <columns>forcefw__ScheduledRunTime__c</columns>
+    <columns>forcefw__Runnable__c</columns>
+    <columns>forcefw__RetryNumber__c</columns>
+    <columns>forcefw__MaximumRetries__c</columns>
+    <columns>forcefw__ApexJobId__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>forcefw__Status__c</field>
+        <operation>equals</operation>
+        <value>RUNNING</value>
+    </filters>
+    <label>Running</label>
+</ListView>
