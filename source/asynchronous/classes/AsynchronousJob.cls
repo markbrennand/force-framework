@@ -8,7 +8,7 @@
  * @author Mark Brennand
  */
 
-public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
+public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job {
 
     /**
      * @description
@@ -21,7 +21,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
      * @description
      * Current status of the job.
      */
-    private Asynchronous.Status status;
+    private AsynchronousV1.Status status;
 
     /**
      * @description
@@ -33,7 +33,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
      * @description
      * The runnable class providing the logic to be run asynchronously.
      */
-    private Asynchronous.Runnable runnable;
+    private AsynchronousV1.Runnable runnable;
 
     /**
      * @description
@@ -122,7 +122,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
      *
      * @return The job status.
      */
-    public Asynchronous.Status getStatus() {
+    public AsynchronousV1.Status getStatus() {
         return status;
     }
 
@@ -136,7 +136,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
      */
     private AsynchronousJob withStatus(final String status) {
         Assertion.isNotNull(status, 'argument: AsynchronousJob.withStatus.status');
-        this.status = Asynchronous.Status.valueOf(status);
+        this.status = AsynchronousV1.Status.valueOf(status);
         return this;
     }
 
@@ -169,7 +169,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
      *
      * @return The runnable class.
      */
-    public Asynchronous.Runnable getRunnable() {
+    public AsynchronousV1.Runnable getRunnable() {
         return runnable;
     }
 
@@ -184,13 +184,13 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
     private AsynchronousJob withRunnable(final String runnableTypeName) {
         Assertion.isNotNull(runnableTypeName, 'argument: AsynchronousJob.withRunnable.runnableTypeName');
 
-        final Object runnable = Types.newInstance(Types.load(runnableTypeName));
+        final Object runnable = TypesV1.newInstance(TypesV1.load(runnableTypeName));
         Assertion.isTrue(
-                 runnable instanceof Asynchronous.Runnable,
+                 runnable instanceof AsynchronousV1.Runnable,
                 'The class ' + runnableTypeName + ' does not implement Asynchronous.Runnable'
         );
 
-        this.runnable = (Asynchronous.Runnable) runnable;
+        this.runnable = (AsynchronousV1.Runnable) runnable;
         return this;
     }
 
@@ -379,7 +379,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
      *
      * @return The internal representation.
      */
-    public static Asynchronous.Job fromSObject(final AsynchronousJob__c asyncObject) {
+    public static AsynchronousV1.Job fromSObject(final AsynchronousJob__c asyncObject) {
         Assertion.isNotNull(asyncObject, 'argument: AsynchronousJob.fromSObject.asyncObject');
 
         final Map<String, String> state =
@@ -387,7 +387,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
                         ? new Map<String, String>()
                         : AsynchronousHelper.INJECT.decodeState(asyncObject.AsynchronousJobState__r);
 
-        final Asynchronous.Job asyncJob = new AsynchronousJob()
+        final AsynchronousV1.Job asyncJob = new AsynchronousJob()
                 .withAsyncObjectId(asyncObject.Id)
                 .withStatus(asyncObject.Status__c)
                 .withOwnerId(String.valueOf(asyncObject.OwnerId))
@@ -403,7 +403,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
         return asyncJob;
     }
 
-    public static AsynchronousJob__c toSObject(final Asynchronous.Job asyncJob) {
+    public static AsynchronousJob__c toSObject(final AsynchronousV1.Job asyncJob) {
         Assertion.isNotNull(asyncJob, 'argument: AsynchronousJob.toSObject.asyncJob');
         return new AsynchronousJob__c(
                 Id = ((AsynchronousJob) asyncJob).getAsyncObjectId(),

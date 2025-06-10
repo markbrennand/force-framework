@@ -15,7 +15,7 @@ global with sharing virtual class SimpleAdditionImpl implements SimpleAddition.A
         public get {
             // The injected class may be a Prototype, so leave it to the Dependency manager to determine whether
             // to use a singleton or a new instance on each use.
-            return (SimpleAddition.API) forcefw.Dependency.inject(SimpleAddition.API.class);
+            return (SimpleAddition.API) forcefw.DependencyV1.inject(SimpleAddition.API.class);
         }
         private set;
     }
@@ -51,7 +51,7 @@ global with sharing virtual class SimpleAdditionImpl implements SimpleAddition.A
      * Has to be global so can be created from the Types class, which when packaged will be in a different
      * namespace to this class.
      */
-    global class Factory implements forcefw.Types.Factory {
+    global class Factory implements forcefw.TypesV1.Factory {
         public Object newInstance() {
             return new Implementation();
         }
@@ -64,11 +64,11 @@ global with sharing virtual class SimpleAdditionImpl implements SimpleAddition.A
      * Must always throw an Exception if it is called.
      */
     public Integer sum(List<Integer> values) {
-        throw new forcefw.Types.APIException('Access denied');
+        throw new forcefw.TypesV1.APIException('Access denied');
     }
 
     static {
         // Set the default injection for the API.
-        forcefw.Dependency.bind(SimpleAddition.API.class, Factory.class);
+        forcefw.DependencyV1.bind(SimpleAddition.API.class, Factory.class);
     }
 }

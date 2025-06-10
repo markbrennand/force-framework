@@ -22,7 +22,7 @@
  *
  * @author Mark Brennand
  */
-global with sharing class Types {
+global with sharing class TypesV1 {
 
     /**
      * @description

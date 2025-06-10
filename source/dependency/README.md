@@ -17,10 +17,10 @@ concrete class.
 By default, the class injected into an application will be a singleton. For this reason, the implementation class must
 not have state that may change in use.
 
-If an implementation class is required to have state, then the class must implement the _Dependency.Prototype_
+If an implementation class is required to have state, then the class must implement the _DependencyV1.Prototype_
 interface.
 
-See the reference [Apex docs](SfApexDocs/dependency.html) for the API. It is suggested that you keep a page open with the
+See the reference [Apex docs](SfApexDocs/dependencyv1.html) for the API. It is suggested that you keep a page open with the
 Apex docs loaded for your reference whilst reading this page.
 
 If you wish to try the example code in an org. Deploy the code in the
@@ -60,7 +60,7 @@ See [BindingInitialisation.cls](https://github.com/markbrennand/force-frameworks
 for examples of programmatic and custom object binding initialisation.
 
 ### Programmatic Initialisation
-Programmatic initialisation can be performed using the _Dependency.bind_ method. If an application requires a
+Programmatic initialisation can be performed using the _DependencyV1.bind_ method. If an application requires a
 default registry to be setup, the application must call these methods to add the bindings.
 
 ### Custom Object Initialisation
@@ -81,7 +81,7 @@ a validator registered for the _Type_. To do this, a new _BindingCheck_ metadata
 validator used to validate the _Type_.
 
 Validation of the implementation bound to a _Type_ is performed by adding a class that implements the
-_Dependency.BindingCheck_ interface and registering it in a custom metadata for the _Type_.
+_DependencyV1.BindingCheck_ interface and registering it in a custom metadata for the _Type_.
 record.
 
 The _BindingCheck__mdt_ custom metadata object has the following fields;
@@ -92,8 +92,8 @@ The _BindingCheck__mdt_ custom metadata object has the following fields;
 | BindingCheck__c | Mandatory | The class name of the _BindingCheck_ implementation to validate the binding. |
 | IsUnitTest__c   | Mandatory | If true, the _BindingCheck_ is for unit test use only.                                              |
 
-The _BindingCheck.validate_ method returns a _Dependency.ValidationResult_ object which notifies the caller
-of the result of the validation. If a failure notification is returned, a _Dependency.APIException_ is thrown
+The _BindingCheck.validate_ method returns a _DependencyV1.ValidationResult_ object which notifies the caller
+of the result of the validation. If a failure notification is returned, a _DependencyV1.APIException_ is thrown
 with the message set to the value recorded in the _ValidationResult.errorMessage_ field.
 
 The _classes/BindingChecks.cls_ class and _customMetadata_ directory in the
@@ -210,7 +210,7 @@ new Apex class and add a binding to the registry.
 
 #### Checking an Injection Exists
 Trying to inject a _Type_ into an application for which there is no binding in the registry will throw an Exception.
-The _Dependency.isBound_ methods can be used to check if a binding exists.
+The _DependencyV1.isBound_ methods can be used to check if a binding exists.
 
 See [HasInjection.cls](https://github.com/markbrennand/force-frameworks/tree/gh-pages/example/dependency/classes/HasInjection.cls)
 for an example of checking for a binding's existence.

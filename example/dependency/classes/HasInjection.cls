@@ -15,10 +15,10 @@ public with sharing class HasInjection {
     public static void has(String name) {
 
         // Check if a Binding exists for the AccountManager interface.
-        if (Dependency.isBound(AccountClasses.AccountManager.class)) {
+        if (DependencyV1.isBound(AccountClasses.AccountManager.class)) {
 
             // The Binding exists, it can be injected and called.
-            ((AccountClasses.AccountManager) Dependency.inject(AccountClasses.AccountManager.class)).newAccount(name);
+            ((AccountClasses.AccountManager) DependencyV1.inject(AccountClasses.AccountManager.class)).newAccount(name);
         } else {
             System.debug('Injection for AccountClasses.AccountManager does not exist');
         }
@@ -33,10 +33,10 @@ public with sharing class HasInjection {
     public static void action(String name) {
 
         // Check if a Binding exists for the AccountManager interface with action ASYNC.
-        if (Dependency.isBound(AccountClasses.AccountManager.class, 'ASYNC')) {
+        if (DependencyV1.isBound(AccountClasses.AccountManager.class, 'ASYNC')) {
 
             // The Binding exists, it can be injected and called.
-            ((AccountClasses.AccountManager) Dependency.inject(AccountClasses.AccountManager.class, 'ASYNC')).newAccount(name);
+            ((AccountClasses.AccountManager) DependencyV1.inject(AccountClasses.AccountManager.class, 'ASYNC')).newAccount(name);
         } else {
             System.debug('Injection for AccountClasses.AccountManager with action ASYNC does not exist');
         }

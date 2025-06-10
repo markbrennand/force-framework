@@ -238,13 +238,13 @@ public with sharing class BindingTriggerTests {
                     Implementation__c = BindingTestHelper.SingletonTest.class.getName()
             );
 
-            Assert.isTrue(Dependency.inject(BindingTestHelper.TestInterface.class) instanceof BindingTestHelper.SingletonTest);
+            Assert.isTrue(DependencyV1.inject(BindingTestHelper.TestInterface.class) instanceof BindingTestHelper.SingletonTest);
 
-            Dependency.bind(BindingTestHelper.TestInterface.class, BindingTestHelper.SingletonCustomTest.class);
-            Assert.isTrue(Dependency.inject(BindingTestHelper.TestInterface.class) instanceof BindingTestHelper.SingletonCustomTest);
+            DependencyV1.bind(BindingTestHelper.TestInterface.class, BindingTestHelper.SingletonCustomTest.class);
+            Assert.isTrue(DependencyV1.inject(BindingTestHelper.TestInterface.class) instanceof BindingTestHelper.SingletonCustomTest);
 
-            Dependency.reload();
-            Assert.isTrue(Dependency.inject(BindingTestHelper.TestInterface.class) instanceof BindingTestHelper.SingletonTest);
+            DependencyV1.reload();
+            Assert.isTrue(DependencyV1.inject(BindingTestHelper.TestInterface.class) instanceof BindingTestHelper.SingletonTest);
         }
     }
 }

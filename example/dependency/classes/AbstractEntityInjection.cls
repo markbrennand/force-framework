@@ -9,7 +9,7 @@ public with sharing class AbstractEntityInjection {
     // Setup a default registry. The default registry will configure the creation of the Account to be performed
     // synchronously.
     static {
-        Dependency.bind(AccountClasses.AccountManager.class, AccountClasses.SyncAccountManager.class);
+        DependencyV1.bind(AccountClasses.AccountManager.class, AccountClasses.SyncAccountManager.class);
     }
 
     public static void example(String name) {
@@ -17,7 +17,7 @@ public with sharing class AbstractEntityInjection {
 
         // Application injects in the active AccountManager for the org.
         AccountClasses.AccountManager manager =
-                (AccountClasses.AccountManager) Dependency.inject(AccountClasses.AccountManager.class);
+                (AccountClasses.AccountManager) DependencyV1.inject(AccountClasses.AccountManager.class);
 
         // Then creates the account.
         System.debug(manager.newAccount(name));

@@ -18,7 +18,7 @@
  *
  * @author Mark Brennand
  */
-global with sharing virtual class Mocker extends Mocker.Chainable {
+global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
      * @description
@@ -56,7 +56,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
      * perform chaining of calls.
      */
     global with sharing virtual class Chainable {
-        protected Mocker parent;
+        protected MockerV1 parent;
 
         /**
          * @description
@@ -64,7 +64,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
          *
          * @param parent The owning Mocker.
          */
-        private void setParent(final Mocker parent) {
+        private void setParent(final MockerV1 parent) {
             Assertion.isNotNull(parent, 'argument: Mocker.WhenArguments.setParent.parent');
 
             this.parent = parent;
@@ -78,7 +78,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
          *
          * @return The object instance so it can be chained.
          */
-        global Mocker.Arguments whenNoArguments() {
+        global MockerV1.Arguments whenNoArguments() {
             return whenListOfArguments(new List<Object>());
         }
 
@@ -92,7 +92,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
          *
          * @return The object instance so it can be chained.
          */
-        global Mocker.Arguments whenArgument(final Object argument) {
+        global MockerV1.Arguments whenArgument(final Object argument) {
             return whenListOfArguments(new List<Object> { argument });
         }
 
@@ -107,7 +107,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
          *
          * @return The object instance so it can be chained.
          */
-        global Mocker.Arguments whenArguments(final Object argument1, final Object argument2) {
+        global MockerV1.Arguments whenArguments(final Object argument1, final Object argument2) {
             return whenListOfArguments(new List<Object> { argument1, argument2  });
         }
 
@@ -123,7 +123,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
          *
          * @return The object instance so it can be chained.
          */
-        global Mocker.Arguments whenArguments(final Object argument1, final Object argument2, final Object argument3) {
+        global MockerV1.Arguments whenArguments(final Object argument1, final Object argument2, final Object argument3) {
             return whenListOfArguments(new List<Object> { argument1, argument2, argument3  });
         }
 
@@ -140,7 +140,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
          *
          * @return The object instance so it can be chained.
          */
-        global Mocker.Arguments whenArguments(final Object argument1, final Object argument2, final Object argument3, final Object argument4) {
+        global MockerV1.Arguments whenArguments(final Object argument1, final Object argument2, final Object argument3, final Object argument4) {
             return whenListOfArguments(new List<Object> { argument1, argument2, argument3, argument4  });
         }
 
@@ -158,7 +158,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
          *
          * @return The object instance so it can be chained.
          */
-        global Mocker.Arguments whenArguments(final Object argument1, final Object argument2, final Object argument3, final Object argument4, final Object argument5) {
+        global MockerV1.Arguments whenArguments(final Object argument1, final Object argument2, final Object argument3, final Object argument4, final Object argument5) {
             return whenListOfArguments(new List<Object> { argument1, argument2, argument3, argument4, argument5  });
         }
 
@@ -170,7 +170,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
          *
          * @return The object instance so it can be chained.
          */
-        global Mocker.Arguments whenListOfArguments(final List<Object> expectedArguments) {
+        global MockerV1.Arguments whenListOfArguments(final List<Object> expectedArguments) {
             Assertion.isNotNull(expectedArguments, 'argument: Mocker.WhenArguments.whenListOfArguments.expectedArguments');
 
             return new Arguments(parent, expectedArguments);
@@ -235,7 +235,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
      *
      * @param mockedObject The mocked object.
      */
-    protected Mocker(final Object mockedObject) {
+    protected MockerV1(final Object mockedObject) {
         Assertion.isNotNull(mockedObject, 'argument: Mocker.mockedObject');
 
         setParent(this);
@@ -250,10 +250,10 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
      *
      * @return A Mocker which may be used to define a mocking scenario.
      */
-    global static Mocker of(final Type forType) {
+    global static MockerV1 of(final Type forType) {
         Assertion.isNotNull(forType, 'argument: Mocker.of.forType');
 
-        final Mocker mocked = new Mocker(Test.createStub(forType, MATCHER));
+        final MockerV1 mocked = new MockerV1(Test.createStub(forType, MATCHER));
         return mocked;
     }
 
@@ -267,10 +267,10 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
      *
      * @return A Mocker which may be used to define a mocking scenario.
      */
-    global static Mocker of(final Factory factory) {
+    global static MockerV1 of(final Factory factory) {
         Assertion.isNotNull(factory, 'argument: Mocker.of.factory');
 
-        final Mocker mocked = new Mocker(factory.stub(MATCHER));
+        final MockerV1 mocked = new MockerV1(factory.stub(MATCHER));
         return mocked;
     }
 
@@ -388,7 +388,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
      * @description
      * Method definition associated with an Argument.
      */
-    global with sharing class Method extends Mocker.Chainable {
+    global with sharing class Method extends MockerV1.Chainable {
         private final Arguments arguments;
         private final String methodName;
         private Integer expectedCount;
@@ -422,7 +422,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
          *
          * @return The object instance so it can be chained.
          */
-        global Mocker.Method called(final Integer expectedCount) {
+        global MockerV1.Method called(final Integer expectedCount) {
             Assertion.isNotNull(expectedCount, 'argument: Mocker.Method.called.expectedCount');
 
             this.expectedCount = expectedCount;
@@ -440,7 +440,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
          *
          * @return The object instance so it can be chained.
          */
-        global Mocker.Method returns(final Object returnValue) {
+        global MockerV1.Method returns(final Object returnValue) {
             Assertion.isTrue(this.returnValue == null, 'Return value can only be set once');
             this.returnValue = returnValue;
             return this;
@@ -454,7 +454,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
          *
          * @return The object instance so it can be chained.
          */
-        global Mocker.Method throws(final Exception throws) {
+        global MockerV1.Method throws(final Exception throws) {
             Assertion.isNotNull(throws, 'argument: Mocker.Method.whichThrows.throws');
 
             this.throws = throws;
@@ -471,7 +471,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
          *
          * @return The mew method instance so it can be chained.
          */
-        global Mocker.Method forMethod(final String methodName) {
+        global MockerV1.Method forMethod(final String methodName) {
             return arguments.forMethod(methodName);
         }
 
@@ -541,7 +541,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
      * @description
      * Class representing a list of arguments for which mocked methods are to be registered.
      */
-    global with sharing class Arguments extends Mocker.Chainable {
+    global with sharing class Arguments extends MockerV1.Chainable {
         final List<Object> expectedArguments;
         final List<Method> methods = new List<Method>();
 
@@ -561,7 +561,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
          * @param parent The owning class.
          * @param expectedArguments The arguments that are expected.
          */
-        private Arguments(final Mocker parent, final List<Object> expectedArguments) {
+        private Arguments(final MockerV1 parent, final List<Object> expectedArguments) {
             Assertion.isNotNull(parent, 'argument: Mocker.Arguments.parent');
             Assertion.isNotNull(expectedArguments, 'argument: Mocker.Arguments.expectedArguments');
 
@@ -585,7 +585,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
          *
          * @return The object instance so it can be chained.
          */
-        global Mocker.Arguments withComparators(final List<Comparator<Object>> comparators) {
+        global MockerV1.Arguments withComparators(final List<Comparator<Object>> comparators) {
             this.comparators = comparators;
             return this;
         }
@@ -600,7 +600,7 @@ global with sharing virtual class Mocker extends Mocker.Chainable {
          *
          * @return The method instance so it can be chained.
          */
-        global Mocker.Method forMethod(final String methodName) {
+        global MockerV1.Method forMethod(final String methodName) {
             Method method = new Method(this, methodName);
             methods.add(method);
             return method;

@@ -3,21 +3,21 @@
  * @author Mark Brennand
  */
 
-global with sharing class ExampleRunnable extends forcefw.AsynchronousRunnable {
+global with sharing class ExampleRunnable extends forcefw.AsynchronousRunnableV1 {
 
     static {
-        forcefw.Dependency.bind(Map<String, Integer>.class, 'ExampleRunnable', Configuration.class);
-        forcefw.Dependency.reload();
+        forcefw.DependencyV1.bind(Map<String, Integer>.class, 'ExampleRunnable', Configuration.class);
+        forcefw.DependencyV1.reload();
     }
 
     private final Map<String, Integer> configuration =
-            (Map<String, Integer>) forcefw.Dependency.inject(Map<String, Integer>.class, 'ExampleRunnable');
+            (Map<String, Integer>) forcefw.DependencyV1.inject(Map<String, Integer>.class, 'ExampleRunnable');
 
     public ExampleRunnable() {
         super(Executor.class);
     }
 
-    public override void run(forcefw.Asynchronous.Job job, String apexJobId) {
+    public override void run(forcefw.AsynchronousV1.Job job, String apexJobId) {
         Assert.isNotNull(job.getRetryNumber());
         Assert.isNotNull(apexJobId);
 
@@ -42,22 +42,22 @@ global with sharing class ExampleRunnable extends forcefw.AsynchronousRunnable {
         return configuration.get('maximumActive');
     }
 
-    public override forcefw.Asynchronous.Status onError(forcefw.Asynchronous.job job, Exception exc) {
-        return forcefw.Asynchronous.Status.QUEUED;
+    public override forcefw.AsynchronousV1.Status onError(forcefw.AsynchronousV1.job job, Exception exc) {
+        return forcefw.AsynchronousV1.Status.QUEUED;
     }
 
-    public override Boolean onCancellation(forcefw.Asynchronous.Job asyncJob) {
+    public override Boolean onCancellation(forcefw.AsynchronousV1.Job asyncJob) {
         return true;
     }
 
-    global class Executor implements forcefw.Types.Factory {
+    global class Executor implements forcefw.TypesV1.Factory {
 
         public Object newInstance() {
             return new ExampleRunnable();
         }
     }
 
-    public class Configuration implements forcefw.Types.Factory {
+    public class Configuration implements forcefw.TypesV1.Factory {
         public Object newInstance() {
             return new Map<String, Integer> { 'maximumActive' => 1 };
         }

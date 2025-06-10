@@ -18,7 +18,7 @@
  *
  * @author Mark Brennand
  */
-public with sharing virtual class AsynchronousImpl implements Asynchronous.API {
+public with sharing virtual class AsynchronousImpl implements AsynchronousV1.API {
 
     /**
      * @description
@@ -29,12 +29,12 @@ public with sharing virtual class AsynchronousImpl implements Asynchronous.API {
      * The instance is test visible so it can be mocked.
      */
     @TestVisible
-    public static Asynchronous.API INJECT {
+    public static AsynchronousV1.API INJECT {
         public get {
             if (Test.isRunningTest() && INJECT != null) { // INJECT has been mocked.
                 return INJECT;
             } else {
-                return (Asynchronous.API) Dependency.inject(Asynchronous.API.class);
+                return (AsynchronousV1.API) DependencyV1.inject(AsynchronousV1.API.class);
             }
         }
         private set;
@@ -55,7 +55,7 @@ public with sharing virtual class AsynchronousImpl implements Asynchronous.API {
      * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
-    public with sharing class Factory implements Types.Factory {
+    public with sharing class Factory implements TypesV1.Factory {
         public Object newInstance() {
             return new Implementation();
         }
@@ -65,7 +65,7 @@ public with sharing virtual class AsynchronousImpl implements Asynchronous.API {
      * @description
      * Class providing the implementation of the API.
      */
-    private with sharing class Implementation implements Asynchronous.API {
+    private with sharing class Implementation implements AsynchronousV1.API {
 
         /**
          * @description
@@ -85,7 +85,7 @@ public with sharing virtual class AsynchronousImpl implements Asynchronous.API {
          *
          * @return The job.
          */
-        public Asynchronous.Job createJob(
+        public AsynchronousV1.Job createJob(
                 final Type type,
                 final String reference,
                 final Integer maximumRetries,
@@ -93,7 +93,7 @@ public with sharing virtual class AsynchronousImpl implements Asynchronous.API {
                 final Map<String, String> state
         ) {
             final AsynchronousJob__c asynchronousObject = new AsynchronousJob__c(
-                    Status__c = Asynchronous.Status.PENDING.name(),
+                    Status__c = AsynchronousV1.Status.PENDING.name(),
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = type.getName(),
                     Reference__c = reference,
@@ -103,7 +103,7 @@ public with sharing virtual class AsynchronousImpl implements Asynchronous.API {
                     RetryNumber__c = 0
             );
 
-            final Asynchronous.Job job = AsynchronousJob.fromSObject(asynchronousObject);
+            final AsynchronousV1.Job job = AsynchronousJob.fromSObject(asynchronousObject);
             job.setState(state);
 
             return job;
@@ -123,26 +123,26 @@ public with sharing virtual class AsynchronousImpl implements Asynchronous.API {
          *
          * @return The jobs queued for processing.
          */
-        public List<Asynchronous.Job> queueJobs(final List<Asynchronous.Job> asyncJobs) {
+        public List<AsynchronousV1.Job> queueJobs(final List<AsynchronousV1.Job> asyncJobs) {
             Assertion.isNotNull(asyncJobs, 'argument: Asynchronous.queueJobs.asyncJobs');
 
             final List<AsynchronousJob__c> asyncObjects = new List<AsynchronousJob__c>();
             final List<Map<String, String>> states = new List<Map<String, String>>();
 
-            for (Asynchronous.Job job : asyncJobs) {
+            for (AsynchronousV1.Job job : asyncJobs) {
                 asyncObjects.add(AsynchronousJob.toSObject(job));
                 states.add(job.getState());
             }
 
             AsynchronousDAO.INJECT.persistObjects(asyncObjects, states);
 
-            final List<Asynchronous.Job> returnList = new List<Asynchronous.Job>();
+            final List<AsynchronousV1.Job> returnList = new List<AsynchronousV1.Job>();
             Integer i = 0;
 
             for (AsynchronousJob__c asyncObject : asyncObjects) {
                 Assertion.isNotNull(asyncObject.Id, 'Asynchronous.Job object has not been assigned an Id');
 
-                final Asynchronous.Job updatedJob = AsynchronousJob.fromSObject(asyncObject);
+                final AsynchronousV1.Job updatedJob = AsynchronousJob.fromSObject(asyncObject);
                 updatedJob.setState(states[i++]);
                 returnList.add(updatedJob);
             }
@@ -166,13 +166,13 @@ public with sharing virtual class AsynchronousImpl implements Asynchronous.API {
 
         for (AsynchronousJob__c asyncObject : asyncObjects) {
             try {
-                final Object runnable = Types.newInstance(Types.load(asyncObject.Runnable__c));
-                if (! (runnable instanceof Asynchronous.Runnable)) {
+                final Object runnable = TypesV1.newInstance(TypesV1.load(asyncObject.Runnable__c));
+                if (! (runnable instanceof AsynchronousV1.Runnable)) {
                     asyncObject.addError('Class ' + asyncObject.Runnable__c + ' does not implement Asynchronous.Runnable');
                     hasErrors = true;
 
-                } else if (asyncObject.Status__c == Asynchronous.Status.PENDING.name()) {
-                    asyncObject.Status__c = Asynchronous.Status.QUEUED.name();
+                } else if (asyncObject.Status__c == AsynchronousV1.Status.PENDING.name()) {
+                    asyncObject.Status__c = AsynchronousV1.Status.QUEUED.name();
                     asyncObject.RetryNumber__c = 0;
                 }
 
@@ -199,10 +199,10 @@ public with sharing virtual class AsynchronousImpl implements Asynchronous.API {
         for (AsynchronousJob__c asyncObject : asyncObjects) {
             final Boolean isScheduler = AsynchronousJob.fromSObject(asyncObject).getRunnable() instanceof AsynchronousScheduler;
 
-            if (asyncObject.Status__c == Asynchronous.Status.CANCELLED.name() &&
+            if (asyncObject.Status__c == AsynchronousV1.Status.CANCELLED.name() &&
                     asyncObject.Status__c != previousAsyncObjects?.get(asyncObject.Id)?.Status__c
             ) {
-                final Asynchronous.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
+                final AsynchronousV1.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
                 if (!asyncJob.getRunnable().onCancellation(asyncJob)) {
                     toDelete.add(new AsynchronousJob__c(Id = asyncObject.Id));
                 }
@@ -222,26 +222,26 @@ public with sharing virtual class AsynchronousImpl implements Asynchronous.API {
      * @description
      * Method is solely for mocking use.
      */
-    public Asynchronous.Job createJob(
+    public AsynchronousV1.Job createJob(
             final Type type,
             final String reference,
             final Integer maximumRetries,
             final Integer retryInterval,
             final Map<String, String> state
     ) {
-        throw new Asynchronous.APIException('Access denied');
+        throw new AsynchronousV1.APIException('Access denied');
     }
 
     /**
      * @description
      * Method is solely for mocking use.
      */
-    public List<Asynchronous.Job> queueJobs(final List<Asynchronous.Job> asyncJobs) {
-        throw new Asynchronous.APIException('Access denied');
+    public List<AsynchronousV1.Job> queueJobs(final List<AsynchronousV1.Job> asyncJobs) {
+        throw new AsynchronousV1.APIException('Access denied');
     }
 
     // Set the default implementation of the API. This can be overridden using a Dependency Injection Binding.
     static {
-        Dependency.bind(Asynchronous.API.class, Factory.class);
+        DependencyV1.bind(AsynchronousV1.API.class, Factory.class);
     }
 }

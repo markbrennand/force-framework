@@ -12,28 +12,28 @@ public with sharing class BindingChecks {
      *
      * A custom metadata record for the BindingCheck__mdt type is used to register the validator.
      */
-    public class QueryBindingCheck implements Dependency.BindingCheck {
-        public Dependency.ValidationResult validate(Type forType, Type withImpl) {
+    public class QueryBindingCheck implements DependencyV1.BindingCheck {
+        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
             if (forType == QueryClasses.QueryInterface.class) {
-                if (Types.newInstance(withImpl) instanceof QueryClasses.QueryInterface) {
-                    return new Dependency.ValidationResult(true, null);
+                if (TypesV1.newInstance(withImpl) instanceof QueryClasses.QueryInterface) {
+                    return new DependencyV1.ValidationResult(true, null);
                 } else {
-                    return new Dependency.ValidationResult(
+                    return new DependencyV1.ValidationResult(
                             false,
                             'Class "' + withImpl.getName() + '" does not implement "' + forType.getName() + '"'
                     );
                 }
             } else if (forType == QueryClasses.AbstractQuery.class) {
-                if (Types.newInstance(withImpl) instanceof QueryClasses.AbstractQuery) {
-                    return new Dependency.ValidationResult(true, null);
+                if (TypesV1.newInstance(withImpl) instanceof QueryClasses.AbstractQuery) {
+                    return new DependencyV1.ValidationResult(true, null);
                 } else {
-                    return new Dependency.ValidationResult(
+                    return new DependencyV1.ValidationResult(
                             false,
                             'Class "' + withImpl.getName() + '" does not extend "' + forType.getName() + '"'
                     );
                 }
             } else {
-                return new Dependency.ValidationResult(
+                return new DependencyV1.ValidationResult(
                         false,
                         'Type "' + forType.getName() + '" is not supported for validation'
                 );
@@ -47,25 +47,25 @@ public with sharing class BindingChecks {
      *
      * A custom metadata record for the BindingCheck__mdt type is used to register the validator.
      */
-    public with sharing class MapBindingCheck implements Dependency.BindingCheck {
-        public Dependency.ValidationResult validate(Type forType, Type withImpl) {
-            Object impl = Types.newInstance(withImpl);
+    public with sharing class MapBindingCheck implements DependencyV1.BindingCheck {
+        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
+            Object impl = TypesV1.newInstance(withImpl);
 
             switch on forType.getName() {
                 when 'Map<String,Integer>' {
                     if (impl instanceof Map<String, Integer>) {
-                        return new Dependency.ValidationResult(true, null);
+                        return new DependencyV1.ValidationResult(true, null);
                     }
                 }
                 when else {
-                    return new Dependency.ValidationResult(
+                    return new DependencyV1.ValidationResult(
                             false,
                             'Type "' + withImpl + '" can not be validated'
                     );
                 }
             }
 
-            return new Dependency.ValidationResult(
+            return new DependencyV1.ValidationResult(
                     false,
                     'Implementation "' + withImpl.getName() + '" is not an instance of "' + forType.getName() + '"'
             );
@@ -78,12 +78,12 @@ public with sharing class BindingChecks {
     *
     * A custom metadata record for the BindingCheck__mdt type is used to register the validator.
     */
-    public with sharing class AccountManagerBindingCheck implements Dependency.BindingCheck {
-        public Dependency.ValidationResult validate(Type forType, Type withImpl) {
-            if (Types.newInstance(withImpl) instanceof AccountClasses.AccountManager) {
-                return new Dependency.ValidationResult(true, null);
+    public with sharing class AccountManagerBindingCheck implements DependencyV1.BindingCheck {
+        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
+            if (TypesV1.newInstance(withImpl) instanceof AccountClasses.AccountManager) {
+                return new DependencyV1.ValidationResult(true, null);
             } else {
-                return new Dependency.ValidationResult(
+                return new DependencyV1.ValidationResult(
                         false,
                         'Implementation "' + withImpl.getName() + '" is not an instance of "' + forType.getName() + '"'
                 );

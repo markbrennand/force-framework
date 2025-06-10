@@ -14,44 +14,44 @@ public with sharing class BindingInitialisation {
     public static void programmatic() {
 
         // Add the bindings to the registry.
-        forcefw.Dependency.bind(QueryClasses.QueryInterface.class, QueryClasses.UserQueryInterfaceImpl.class);
-        forcefw.Dependency.bind(QueryClasses.AbstractQuery.class, QueryClasses.UserAbstractQueryImpl.class);
-        forcefw.Dependency.bind(QueryClasses.QueryInterface.class, 'SYSTEM', QueryClasses.SystemQueryInterfaceImpl.class);
-        forcefw.Dependency.bind(QueryClasses.AbstractQuery.class, 'SYSTEM', QueryClasses.SystemAbstractQueryImpl.class);
+        forcefw.DependencyV1.bind(QueryClasses.QueryInterface.class, QueryClasses.UserQueryInterfaceImpl.class);
+        forcefw.DependencyV1.bind(QueryClasses.AbstractQuery.class, QueryClasses.UserAbstractQueryImpl.class);
+        forcefw.DependencyV1.bind(QueryClasses.QueryInterface.class, 'SYSTEM', QueryClasses.SystemQueryInterfaceImpl.class);
+        forcefw.DependencyV1.bind(QueryClasses.AbstractQuery.class, 'SYSTEM', QueryClasses.SystemAbstractQueryImpl.class);
 
         // Check the bindings have been added.
-        Assert.isTrue(forcefw.Dependency.isBound(QueryClasses.QueryInterface.class));
-        Assert.isTrue(forcefw.Dependency.isBound(QueryClasses.AbstractQuery.class));
-        Assert.isTrue(forcefw.Dependency.isBound(QueryClasses.QueryInterface.class, 'SYSTEM'));
-        Assert.isTrue(forcefw.Dependency.isBound(QueryClasses.AbstractQuery.class, 'SYSTEM'));
+        Assert.isTrue(forcefw.DependencyV1.isBound(QueryClasses.QueryInterface.class));
+        Assert.isTrue(forcefw.DependencyV1.isBound(QueryClasses.AbstractQuery.class));
+        Assert.isTrue(forcefw.DependencyV1.isBound(QueryClasses.QueryInterface.class, 'SYSTEM'));
+        Assert.isTrue(forcefw.DependencyV1.isBound(QueryClasses.AbstractQuery.class, 'SYSTEM'));
 
         // Check the bindings have been bound correctly.
-        Assert.isTrue(forcefw.Dependency.inject(QueryClasses.QueryInterface.class) instanceof QueryClasses.UserQueryInterfaceImpl);
-        Assert.isTrue(forcefw.Dependency.inject(QueryClasses.AbstractQuery.class) instanceof QueryClasses.UserAbstractQueryImpl);
-        Assert.isTrue(forcefw.Dependency.inject(QueryClasses.QueryInterface.class, 'SYSTEM') instanceof QueryClasses.SystemQueryInterfaceImpl);
-        Assert.isTrue(forcefw.Dependency.inject(QueryClasses.AbstractQuery.class, 'SYSTEM') instanceof QueryClasses.SystemAbstractQueryImpl);
+        Assert.isTrue(forcefw.DependencyV1.inject(QueryClasses.QueryInterface.class) instanceof QueryClasses.UserQueryInterfaceImpl);
+        Assert.isTrue(forcefw.DependencyV1.inject(QueryClasses.AbstractQuery.class) instanceof QueryClasses.UserAbstractQueryImpl);
+        Assert.isTrue(forcefw.DependencyV1.inject(QueryClasses.QueryInterface.class, 'SYSTEM') instanceof QueryClasses.SystemQueryInterfaceImpl);
+        Assert.isTrue(forcefw.DependencyV1.inject(QueryClasses.AbstractQuery.class, 'SYSTEM') instanceof QueryClasses.SystemAbstractQueryImpl);
 
         // When this method is run, debug will record;
         // DEBUG|Querying in USER_MODE
         // DEBUG|Querying in USER_MODE
         // DEBUG|Querying in SYSTEM_MODE
         // DEBUG|Querying in SYSTEM_MODE
-        ((QueryClasses.QueryInterface) forcefw.Dependency.inject(QueryClasses.QueryInterface.class)).query(
+        ((QueryClasses.QueryInterface) forcefw.DependencyV1.inject(QueryClasses.QueryInterface.class)).query(
                 'SELECT Id FROM Account WHERE Name != :ignoreName',
                 new Map<String, Object> { 'ignoreName' => 'Fred Bloggs' }
         );
 
-        ((QueryClasses.AbstractQuery) forcefw.Dependency.inject(QueryClasses.AbstractQuery.class)).query(
+        ((QueryClasses.AbstractQuery) forcefw.DependencyV1.inject(QueryClasses.AbstractQuery.class)).query(
                 'SELECT Id FROM Account WHERE Name != :ignoreName',
                 new Map<String, Object> { 'ignoreName' => 'Fred Bloggs' }
         );
 
-        ((QueryClasses.QueryInterface) forcefw.Dependency.inject(QueryClasses.QueryInterface.class, 'SYSTEM')).query(
+        ((QueryClasses.QueryInterface) forcefw.DependencyV1.inject(QueryClasses.QueryInterface.class, 'SYSTEM')).query(
                 'SELECT Id FROM Account WHERE Name != :ignoreName',
                 new Map<String, Object> { 'ignoreName' => 'Fred Bloggs' }
         );
 
-        ((QueryClasses.AbstractQuery) forcefw.Dependency.inject(QueryClasses.AbstractQuery.class, 'SYSTEM')).query(
+        ((QueryClasses.AbstractQuery) forcefw.DependencyV1.inject(QueryClasses.AbstractQuery.class, 'SYSTEM')).query(
                 'SELECT Id FROM Account WHERE Name != :ignoreName',
                 new Map<String, Object> { 'ignoreName' => 'Fred Bloggs' }
         );
@@ -71,38 +71,38 @@ public with sharing class BindingInitialisation {
         insert new forcefw__Binding__c(forcefw__Type__c = 'QueryClasses.AbstractQuery', forcefw__Action__c = 'SYSTEM', forcefw__Implementation__c = 'QueryClasses.SystemAbstractQueryImpl');
 
         // Check the bindings have been added.
-        Assert.isTrue(forcefw.Dependency.isBound(QueryClasses.QueryInterface.class));
-        Assert.isTrue(forcefw.Dependency.isBound(QueryClasses.AbstractQuery.class));
-        Assert.isTrue(forcefw.Dependency.isBound(QueryClasses.QueryInterface.class, 'SYSTEM'));
-        Assert.isTrue(forcefw.Dependency.isBound(QueryClasses.AbstractQuery.class, 'SYSTEM'));
+        Assert.isTrue(forcefw.DependencyV1.isBound(QueryClasses.QueryInterface.class));
+        Assert.isTrue(forcefw.DependencyV1.isBound(QueryClasses.AbstractQuery.class));
+        Assert.isTrue(forcefw.DependencyV1.isBound(QueryClasses.QueryInterface.class, 'SYSTEM'));
+        Assert.isTrue(forcefw.DependencyV1.isBound(QueryClasses.AbstractQuery.class, 'SYSTEM'));
 
         // Check the bindings have been bound correctly.
-        Assert.isTrue(forcefw.Dependency.inject(QueryClasses.QueryInterface.class) instanceof QueryClasses.UserQueryInterfaceImpl);
-        Assert.isTrue(forcefw.Dependency.inject(QueryClasses.AbstractQuery.class) instanceof QueryClasses.UserAbstractQueryImpl);
-        Assert.isTrue(forcefw.Dependency.inject(QueryClasses.QueryInterface.class, 'SYSTEM') instanceof QueryClasses.SystemQueryInterfaceImpl);
-        Assert.isTrue(forcefw.Dependency.inject(QueryClasses.AbstractQuery.class, 'SYSTEM') instanceof QueryClasses.SystemAbstractQueryImpl);
+        Assert.isTrue(forcefw.DependencyV1.inject(QueryClasses.QueryInterface.class) instanceof QueryClasses.UserQueryInterfaceImpl);
+        Assert.isTrue(forcefw.DependencyV1.inject(QueryClasses.AbstractQuery.class) instanceof QueryClasses.UserAbstractQueryImpl);
+        Assert.isTrue(forcefw.DependencyV1.inject(QueryClasses.QueryInterface.class, 'SYSTEM') instanceof QueryClasses.SystemQueryInterfaceImpl);
+        Assert.isTrue(forcefw.DependencyV1.inject(QueryClasses.AbstractQuery.class, 'SYSTEM') instanceof QueryClasses.SystemAbstractQueryImpl);
 
         // When this method is run, debug will record;
         // DEBUG|Querying in USER_MODE
         // DEBUG|Querying in USER_MODE
         // DEBUG|Querying in SYSTEM_MODE
         // DEBUG|Querying in SYSTEM_MODE
-        ((QueryClasses.QueryInterface) forcefw.Dependency.inject(QueryClasses.QueryInterface.class)).query(
+        ((QueryClasses.QueryInterface) forcefw.DependencyV1.inject(QueryClasses.QueryInterface.class)).query(
                 'SELECT Id FROM Account WHERE Name != :ignoreName',
                 new Map<String, Object> { 'ignoreName' => 'Fred Bloggs' }
         );
 
-        ((QueryClasses.AbstractQuery) forcefw.Dependency.inject(QueryClasses.AbstractQuery.class)).query(
+        ((QueryClasses.AbstractQuery) forcefw.DependencyV1.inject(QueryClasses.AbstractQuery.class)).query(
                 'SELECT Id FROM Account WHERE Name != :ignoreName',
                 new Map<String, Object> { 'ignoreName' => 'Fred Bloggs' }
         );
 
-        ((QueryClasses.QueryInterface) forcefw.Dependency.inject(QueryClasses.QueryInterface.class, 'SYSTEM')).query(
+        ((QueryClasses.QueryInterface) forcefw.DependencyV1.inject(QueryClasses.QueryInterface.class, 'SYSTEM')).query(
                 'SELECT Id FROM Account WHERE Name != :ignoreName',
                 new Map<String, Object> { 'ignoreName' => 'Fred Bloggs' }
         );
 
-        ((QueryClasses.AbstractQuery) forcefw.Dependency.inject(QueryClasses.AbstractQuery.class, 'SYSTEM')).query(
+        ((QueryClasses.AbstractQuery) forcefw.DependencyV1.inject(QueryClasses.AbstractQuery.class, 'SYSTEM')).query(
                 'SELECT Id FROM Account WHERE Name != :ignoreName',
                 new Map<String, Object> { 'ignoreName' => 'Fred Bloggs' }
         );
@@ -117,7 +117,7 @@ public with sharing class BindingInitialisation {
      */
     public static void programmaticValidationFailure() {
         // User class does not implement the QueryInterface interface. The QueryBindingCheck class will identify this.
-        forcefw.Dependency.bind(QueryClasses.QueryInterface.class, 'SYSTEM', User.class);
+        forcefw.DependencyV1.bind(QueryClasses.QueryInterface.class, 'SYSTEM', User.class);
     }
 
     /**

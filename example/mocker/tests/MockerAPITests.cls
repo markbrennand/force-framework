@@ -16,7 +16,7 @@ global with sharing class MockerAPITests {
 
         // Create a mocked API for the getCurrentTime method that will return the current date and time when called.
         // The method must be called once.
-        MockerTestAPI mockedAPI = (MockerTestApi) forcefw.Mocker.of(MockerTestAPI.class)
+        MockerTestAPI mockedAPI = (MockerTestApi) forcefw.MockerV1.of(MockerTestAPI.class)
                 .whenNoArguments()
                     .forMethod('getCurrentTime')
                         .called(1)
@@ -26,7 +26,7 @@ global with sharing class MockerAPITests {
         Assert.isTrue(Datetime.now() >= mockedAPI.getCurrentTime());
 
         // Check that the mocked method has been called the correct number of times.
-        Mocker.validate();
+        MockerV1.validate();
     }
 
     /**
@@ -39,7 +39,7 @@ global with sharing class MockerAPITests {
 
         // Create a mocked API for the getCurrentTime method that throws an Exception when called.
         // The method must be called once.
-        MockerTestAPI mockedAPI = (MockerTestApi) Mocker.of(MockerTestAPI.class)
+        MockerTestAPI mockedAPI = (MockerTestApi) MockerV1.of(MockerTestAPI.class)
                 .whenNoArguments()
                     .forMethod('getCurrentTime')
                         .called(1)
@@ -54,7 +54,7 @@ global with sharing class MockerAPITests {
         }
 
         // Check that the mocked method has been called the correct number of times.
-        Mocker.validate();
+        MockerV1.validate();
     }
 
     /**
@@ -66,21 +66,21 @@ global with sharing class MockerAPITests {
 
         // Create a mocked API for the getCurrentTime and getOrganizationId methods.
         // Both methods should be called once.
-        MockerTestAPI mockedAPI = (MockerTestApi) Mocker.of(MockerTestAPI.class)
+        MockerTestAPI mockedAPI = (MockerTestApi) MockerV1.of(MockerTestAPI.class)
                 .whenNoArguments()
                     .forMethod('getCurrentTime')
                         .called(1)
                         .returns(Datetime.now())
                     .forMethod('getOrganizationId')
                         .called(1)
-                        .returns(Mocker.fakeId(Organization.SObjectType))
+                        .returns(MockerV1.fakeId(Organization.SObjectType))
                 .mock();
 
         Assert.isTrue(Datetime.now() >= mockedAPI.getCurrentTime());
         Assert.isTrue(mockedAPI.getOrganizationId().endsWith('01'));
 
         // Check that the mocked method has been called the correct number of times.
-        Mocker.validate();
+        MockerV1.validate();
     }
 
     /**
@@ -96,7 +96,7 @@ global with sharing class MockerAPITests {
         // The default Exception comparator would fail tgo match the Exception as their messages differ.
         // An Exception comparator is registered for the arguments which checks that only the Type of the Exceptions match.
         // The method must be called once.
-        MockerTestAPI mockedAPI = (MockerTestApi) Mocker.of(MockerTestAPI.class)
+        MockerTestAPI mockedAPI = (MockerTestApi) MockerV1.of(MockerTestAPI.class)
                 .whenArgument(exc)
                     .withComparators(new List<Comparator<Object>> { new ExceptionComparator() })
                         .forMethod('processError')
@@ -106,7 +106,7 @@ global with sharing class MockerAPITests {
         mockedAPI.processError(new DMLException('Another Test'));
 
         // Check that the mocked method has been called the correct number of times.
-        Mocker.validate();
+        MockerV1.validate();
     }
 
     /**
@@ -121,7 +121,7 @@ global with sharing class MockerAPITests {
         // Create a mocked API for the addAccounts method.
         // Set the return value to a Modifier which will create a fake object Id for the Account objects passed to the method.
         // The method must be called once.
-        MockerTestAPI mockedAPI = (MockerTestApi) Mocker.of(MockerTestAPI.class)
+        MockerTestAPI mockedAPI = (MockerTestApi) MockerV1.of(MockerTestAPI.class)
                 .whenArgument(new List<Account> { new Account(Name = 'Bill') })
                     .forMethod('addAccounts')
                         .called(1)
@@ -135,7 +135,7 @@ global with sharing class MockerAPITests {
         Assert.isNotNull(result[0].Id);
 
         // Check that the mocked method has been called the correct number of times.
-        Mocker.validate();
+        MockerV1.validate();
     }
 
     /**
@@ -153,7 +153,7 @@ global with sharing class MockerAPITests {
         // in the whenArguments call will result in other fields of the actual arguments passed to the method
         // not being included when matching the arguments.
         // The method must be called once.
-        MockerTestAPI mockedAPI = (MockerTestApi) Mocker.of(MockerTestAPI.class)
+        MockerTestAPI mockedAPI = (MockerTestApi) MockerV1.of(MockerTestAPI.class)
                 .whenArgument(new List<Account> { new Account(Name = 'Bill') })
                     .forMethod('addAccounts')
                         .called(1)
@@ -165,14 +165,14 @@ global with sharing class MockerAPITests {
         Assert.isNotNull(result[0].Id);
 
         // Check that the mocked method has been called the correct number of times.
-        Mocker.validate();
+        MockerV1.validate();
 
         // Create a mocked API for the addAccounts method.
         // Set the arguments to match Accounts with a BillingCountry of UK. The partial matching of the SObjects
         // in the whenArguments call will result in other fields of the actual arguments passed to the method
         // not being included when matching the arguments.
         // The method must be called once.
-        mockedAPI = (MockerTestApi) Mocker.of(MockerTestAPI.class)
+        mockedAPI = (MockerTestApi) MockerV1.of(MockerTestAPI.class)
                 .whenArgument(new List<Account> {
                         new Account(BillingCountry = 'UK'),
                         new Account(BillingCountry = 'UK')
@@ -188,7 +188,7 @@ global with sharing class MockerAPITests {
         Assert.isNotNull(result[1].Id);
 
         // Check that the mocked method has been called the correct number of times.
-        Mocker.validate();
+        MockerV1.validate();
     }
 
     /**
@@ -201,7 +201,7 @@ global with sharing class MockerAPITests {
         Account a2 = new Account(Name = 'Ted', AccountNumber = '2', BillingCountry = 'UK');
 
         // Create a mocked API for the addAccounts method.
-        MockerTestAPI mockedAPI = (MockerTestApi) Mocker.of(MockerTestAPI.class)
+        MockerTestAPI mockedAPI = (MockerTestApi) MockerV1.of(MockerTestAPI.class)
                 .whenArgument(new List<Account> { new Account(Name = 'Bill') })
                     .forMethod('addAccounts')
                         .called(1)
@@ -235,7 +235,7 @@ global with sharing class MockerAPITests {
         Assert.isNotNull(result[1].Id);
 
         // Check that the mocked method has been called the correct number of times.
-        Mocker.validate();
+        MockerV1.validate();
     }
 
     private with sharing class ExceptionComparator implements Comparator<Object> {
@@ -244,12 +244,12 @@ global with sharing class MockerAPITests {
         }
     }
 
-    private with sharing class AccountModifier implements Mocker.Modifier {
+    private with sharing class AccountModifier implements MockerV1.Modifier {
         public Object process(List<Object> arguments) {
             List<Account> returnList = new List<Account>();
             for (Account acc : (List<Account>) arguments[0]) {
                 Account copy = acc.clone();
-                copy.Id = Mocker.fakeId(Account.SObjectType);
+                copy.Id = MockerV1.fakeId(Account.SObjectType);
                 returnList.add(copy);
             }
 

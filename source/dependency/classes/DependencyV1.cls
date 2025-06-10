@@ -21,7 +21,7 @@
  *
  * @author Mark Brennand
  */
-global with sharing class Dependency {
+global with sharing class DependencyV1 {
 
     /**
      * @description

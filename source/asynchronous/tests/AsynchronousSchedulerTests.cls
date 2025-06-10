@@ -26,7 +26,7 @@ public with sharing class AsynchronousSchedulerTests {
     @IsTest
     private static void testDelayedWhenNoJobsToRun() {
         System.runAs(AsynchronousTestHelper.getUser()) {
-            Asynchronous.Job asyncJob = (Asynchronous.Job) Mocker.of(AsynchronousJob.class)
+            AsynchronousV1.Job asyncJob = (AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class)
                     .whenNoArguments()
                         .forMethod('getState')
                         .called(1)
@@ -45,15 +45,15 @@ public with sharing class AsynchronousSchedulerTests {
             scheduler.run(asyncJob, 'ApexJobId');
 
             Assert.isTrue((System.currentTimeMillis() - started) >= 5000);
-            Mocker.validate();
+            MockerV1.validate();
         }
     }
 
     @IsTest
     private static void testJobToRun() {
         System.runAs(AsynchronousTestHelper.getUser()) {
-            Id asyncJobId1 = Mocker.fakeId(AsynchronousJob__c.SObjectType);
-            Id asyncJobId2 = Mocker.fakeId(AsynchronousJob__c.SObjectType);
+            Id asyncJobId1 = MockerV1.fakeId(AsynchronousJob__c.SObjectType);
+            Id asyncJobId2 = MockerV1.fakeId(AsynchronousJob__c.SObjectType);
 
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(Id = asyncJobId1);
 
@@ -63,17 +63,17 @@ public with sharing class AsynchronousSchedulerTests {
                     })
             };
 
-            AsynchronousDAO.INJECT = (AsynchronousDAO) Mocker.of(AsynchronousDAO.class)
+            AsynchronousDAO.INJECT = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
                     .whenArgument(asyncJobId1)
                         .forMethod('getObject').called(1).returns(asyncObject)
                     .mock();
 
-            AsynchronousHelper.INJECT = (AsynchronousHelper.API) Mocker.of(AsynchronousHelper.class)
+            AsynchronousHelper.INJECT = (AsynchronousHelper.API) MockerV1.of(AsynchronousHelper.class)
                     .whenArgument(asyncObject)
                         .forMethod('queueJob').called(1)
                     .mock();
 
-            Asynchronous.Job asyncJob = (Asynchronous.Job) Mocker.of(AsynchronousJob.class)
+            AsynchronousV1.Job asyncJob = (AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class)
                     .whenNoArguments()
                         .forMethod('getState').called(1).returns(state)
 
@@ -89,7 +89,7 @@ public with sharing class AsynchronousSchedulerTests {
             AsynchronousScheduler scheduler = new AsynchronousScheduler();
             scheduler.run(asyncJob, 'ApexJobId');
             Assert.areEqual('ApexJobId', asyncObject.ApexJobId__c);
-            Mocker.validate();
+            MockerV1.validate();
         }
     }
 
@@ -98,7 +98,7 @@ public with sharing class AsynchronousSchedulerTests {
         System.runAs(AsynchronousTestHelper.getUser()) {
             mockForRun(new List<AsynchronousJob__c>(), 1, new Set<Id>());
             AsynchronousScheduler.queue(new Set<String>());
-            Mocker.validate();
+            MockerV1.validate();
         }
     }
 
@@ -107,7 +107,7 @@ public with sharing class AsynchronousSchedulerTests {
         System.runAs(AsynchronousTestHelper.getUser()) {
             List<AsynchronousJob__c> asyncObjects = new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(
-                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
+                            Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = SingleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-10))
             };
@@ -117,15 +117,15 @@ public with sharing class AsynchronousSchedulerTests {
             });
 
             AsynchronousScheduler.queue(new Set<String>());
-            Mocker.validate();
+            MockerV1.validate();
 
             asyncObjects = new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(
-                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
+                            Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = SingleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-10)),
                     new AsynchronousJob__c(
-                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
+                            Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = SingleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-5))
             };
@@ -135,7 +135,7 @@ public with sharing class AsynchronousSchedulerTests {
             });
 
             AsynchronousScheduler.queue(new Set<String>());
-            Mocker.validate();
+            MockerV1.validate();
         }
     }
 
@@ -144,7 +144,7 @@ public with sharing class AsynchronousSchedulerTests {
         System.runAs(AsynchronousTestHelper.getUser()) {
             List<AsynchronousJob__c> asyncObjects = new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(
-                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
+                            Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-10))
             };
@@ -154,15 +154,15 @@ public with sharing class AsynchronousSchedulerTests {
             });
 
             AsynchronousScheduler.queue(new Set<String>());
-            Mocker.validate();
+            MockerV1.validate();
 
             asyncObjects = new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(
-                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
+                            Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-10)),
                     new AsynchronousJob__c(
-                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
+                            Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-5))
             };
@@ -172,19 +172,19 @@ public with sharing class AsynchronousSchedulerTests {
             });
 
             AsynchronousScheduler.queue(new Set<String>());
-            Mocker.validate();
+            MockerV1.validate();
 
             asyncObjects = new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(
-                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
+                            Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-10)),
                     new AsynchronousJob__c(
-                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
+                            Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-5)),
                     new AsynchronousJob__c(
-                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
+                            Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-1))
             };
@@ -194,7 +194,7 @@ public with sharing class AsynchronousSchedulerTests {
             });
 
             AsynchronousScheduler.queue(new Set<String>());
-            Mocker.validate();
+            MockerV1.validate();
         }
     }
 
@@ -203,15 +203,15 @@ public with sharing class AsynchronousSchedulerTests {
         System.runAs(AsynchronousTestHelper.getUser()) {
             List<AsynchronousJob__c> asyncObjects = new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(
-                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
+                            Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = SingleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-10)),
                     new AsynchronousJob__c(
-                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
+                            Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-5)),
                     new AsynchronousJob__c(
-                            Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
+                            Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
                             ScheduledRunTime__c = DateTime.now().addSeconds(-4))
             };
@@ -220,19 +220,19 @@ public with sharing class AsynchronousSchedulerTests {
                     asyncObjects[0].Id
             });
             AsynchronousScheduler.queue(new Set<String>());
-            Mocker.validate();
+            MockerV1.validate();
 
             mockForRun(asyncObjects, 2, new Set<Id>{
                     asyncObjects[0].Id, asyncObjects[1].Id
             });
             AsynchronousScheduler.queue(new Set<String>());
-            Mocker.validate();
+            MockerV1.validate();
 
             mockForRun(asyncObjects, 3, new Set<Id>{
                     asyncObjects[0].Id, asyncObjects[1].Id, asyncObjects[2].Id
             });
             AsynchronousScheduler.queue(new Set<String>());
-            Mocker.validate();
+            MockerV1.validate();
         }
     }
 
@@ -240,10 +240,10 @@ public with sharing class AsynchronousSchedulerTests {
     private static void testMoreThanOneSchedulerCannotBeRun() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             Set<String> jobsToStart = new Set<String>{
-                    Mocker.fakeId(AsynchronousJob__c.SObjectType)
+                    MockerV1.fakeId(AsynchronousJob__c.SObjectType)
             };
 
-            AsynchronousImpl.INJECT = (AsynchronousImpl) Mocker.of(AsynchronousImpl.class)
+            AsynchronousImpl.INJECT = (AsynchronousImpl) MockerV1.of(AsynchronousImpl.class)
                     .whenArguments(
                             AsynchronousScheduler.QueueNext.class,
                             null,
@@ -256,13 +256,13 @@ public with sharing class AsynchronousSchedulerTests {
                         .forMethod('createJob').called(1)
                     .mock();
 
-            AsynchronousDAO.INJECT = (AsynchronousDAO) Mocker.of(AsynchronousDAO.class)
+            AsynchronousDAO.INJECT = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
                     .whenArgument(new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName()))
                         .forMethod('countActiveObjects').called(1).returns(1)
                     .mock();
 
             AsynchronousScheduler.queue(jobsToStart);
-            Mocker.validate();
+            MockerV1.validate();
         }
     }
 
@@ -278,17 +278,17 @@ public with sharing class AsynchronousSchedulerTests {
     private static void testRunnableReturnValues() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousScheduler scheduler = new AsynchronousScheduler();
-            Assert.isFalse(scheduler.onSuccess((Asynchronous.Job) Mocker.of(AsynchronousJob.class).mock()));
-            Assert.isTrue(scheduler.onFailure((Asynchronous.Job) Mocker.of(AsynchronousJob.class).mock(), new DMLException('Test')));
-            Assert.isFalse(scheduler.onCancellation((Asynchronous.Job) Mocker.of(AsynchronousJob.class).mock()));
+            Assert.isFalse(scheduler.onSuccess((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock()));
+            Assert.isTrue(scheduler.onFailure((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock(), new DMLException('Test')));
+            Assert.isFalse(scheduler.onCancellation((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock()));
         }
     }
 
     private static void mockForRun(List<AsynchronousJob__c> asyncObjects, Integer maxJobsToStart, Set<Id> jobsThatShouldBeStarted) {
-        AsynchronousHelper.INJECT = (AsynchronousHelper) Mocker.of(AsynchronousHelper.class)
+        AsynchronousHelper.INJECT = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
                 .whenArgument(new AsynchronousJob__c(
                         Runnable__c = AsynchronousScheduler.QueueNext.class.getName(),
-                        Status__c = Asynchronous.Status.PENDING.name()
+                        Status__c = AsynchronousV1.Status.PENDING.name()
                 ))
                     .forMethod('queueJob').called(1)
                 .mock();
@@ -300,7 +300,7 @@ public with sharing class AsynchronousSchedulerTests {
             if (!maxCount.containsKey(runnable)) {
                 maxCount.put(
                         runnable,
-                        ((Asynchronous.Runnable) Types.newInstance(Types.load(runnable))).getMaximumActive()
+                        ((AsynchronousV1.Runnable) TypesV1.newInstance(TypesV1.load(runnable))).getMaximumActive()
                 );
             }
 
@@ -314,7 +314,7 @@ public with sharing class AsynchronousSchedulerTests {
             scheduledObjects.add(asyncObjects[i]);
         }
 
-        Mocker.Method mocked = Mocker.of(AsynchronousDAO.class)
+        MockerV1.Method mocked = MockerV1.of(AsynchronousDAO.class)
                 .whenNoArguments()
                     .forMethod('countSchedulableObjects').called(jobsThatShouldBeStarted.isEmpty() ? 1 : 0).returns(1)
                 .whenArgument(maxJobsToStart)
@@ -325,7 +325,7 @@ public with sharing class AsynchronousSchedulerTests {
                 .whenArguments(
                         new List<AsynchronousJob__c> {
                                 new AsynchronousJob__c(
-                                        Status__c = Asynchronous.Status.PENDING.name(),
+                                        Status__c = AsynchronousV1.Status.PENDING.name(),
                                         Runnable__c = AsynchronousScheduler.QueueNext.class.getName()
                                 )
                         },
@@ -351,7 +351,7 @@ public with sharing class AsynchronousSchedulerTests {
         };
     }
 
-    public with sharing class SingleConcurrencyTestRunnable extends AsynchronousRunnable {
+    public with sharing class SingleConcurrencyTestRunnable extends AsynchronousRunnableV1 {
         public SingleConcurrencyTestRunnable() {
             super(SingleConcurrencyTestRunnable.class);
         }
@@ -361,7 +361,7 @@ public with sharing class AsynchronousSchedulerTests {
         }
     }
 
-    public with sharing class DoubleConcurrencyTestRunnable extends AsynchronousRunnable {
+    public with sharing class DoubleConcurrencyTestRunnable extends AsynchronousRunnableV1 {
         public DoubleConcurrencyTestRunnable() {
             super(DoubleConcurrencyTestRunnable.class);
         }

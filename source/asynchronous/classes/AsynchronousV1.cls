@@ -18,7 +18,7 @@
  *
  * @author Mark Brennand
  */
-global with sharing class Asynchronous {
+global with sharing class AsynchronousV1 {
 
     /**
      * @description
@@ -283,10 +283,10 @@ global with sharing class Asynchronous {
         /**
          * @description
          * Creates a new instance of a job to be managed by the framework.
-         *<br><br>
+         * <br><br>
          * The Apex class must implement the Runnable interface. If it doesn't, the implementation must throw an
          * exception.
-         *<br><br>
+         * <br><br>
          * The state is data specific to the job. It is passed to the Runnable for the job when it is invoked. It
          * can contain any data an application chooses. For example, it may include arguments specific to the job.
          *
@@ -309,7 +309,7 @@ global with sharing class Asynchronous {
         /**
          * @description
          * Schedules the given job for processing.
-         *<br><br>
+         * <br><br>
          * The implementation should consider the jobs as available to run and take the appropriate action.
          *
          * @param asyncJobs The jobs to schedule for processing.
@@ -456,24 +456,24 @@ global with sharing class Asynchronous {
 
     /**
      * @description
-     * Class providing check on Binding made to Asynchronous.API.
+     * Class providing check on Binding made to AsynchronousV1.API.
      */
-    public with sharing class BindingCheck implements Dependency.BindingCheck {
+    public with sharing class BindingCheck implements DependencyV1.BindingCheck {
 
         /**
          * @description
-         * Checks that a valid binding has been made to Asynchronous.API.
+         * Checks that a valid binding has been made to AsynchronousV1.API.
          *
-         * @param forType The type being bound to, Asynchronous.API.
-         * @param withImpl The implementation being bound to Asynchronous.API.
+         * @param forType The type being bound to, AsynchronousV1.API.
+         * @param withImpl The implementation being bound to AsynchronousV1.API.
          *
          * @return The result of the validation.
          */
-        public Dependency.ValidationResult validate(Type forType, Type withImpl) {
-            if (Types.newInstance(withImpl) instanceof Asynchronous.API) {
-                return new Dependency.ValidationResult(true, null);
+        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
+            if (TypesV1.newInstance(withImpl) instanceof AsynchronousV1.API) {
+                return new DependencyV1.ValidationResult(true, null);
             } else {
-                return new Dependency.ValidationResult(
+                return new DependencyV1.ValidationResult(
                         false,
                         'Class ' + withImpl.getName() + ' does not implement ' + forType.getName()
                 );

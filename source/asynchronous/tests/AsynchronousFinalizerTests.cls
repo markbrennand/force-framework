@@ -16,8 +16,8 @@ public with sharing class AsynchronousFinalizerTests {
     private static void testJobKeptOnSuccess() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     OwnerId = UserInfo.getUserId(),
                     MaximumRetries__c = 0, // Makes TestRunnable.onSuccess return true.
                     RetryInterval__c = 0,
@@ -28,7 +28,7 @@ public with sharing class AsynchronousFinalizerTests {
 
             AsynchronousDAO.INJECT = (AsynchronousDAO) mockForSuccess(asyncObject, false).mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
-            Mocker.validate();
+            MockerV1.validate();
         }
     }
 
@@ -36,8 +36,8 @@ public with sharing class AsynchronousFinalizerTests {
     private static void testJobDeletedOnSuccess() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     OwnerId = UserInfo.getUserId(),
                     MaximumRetries__c = 1, // Makes TestRunnable.onSuccess return false.
                     RetryInterval__c = 0,
@@ -48,7 +48,7 @@ public with sharing class AsynchronousFinalizerTests {
 
             AsynchronousDAO.INJECT = (AsynchronousDAO) mockForSuccess(asyncObject, true).mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
-            Mocker.validate();
+            MockerV1.validate();
         }
     }
 
@@ -56,8 +56,8 @@ public with sharing class AsynchronousFinalizerTests {
     private static void testExceptionInOnSuccess() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     OwnerId = UserInfo.getUserId(),
                     MaximumRetries__c = 0,
                     RetryInterval__c = 1, // Makes TestRunnable.onSuccess throw an Exception.
@@ -68,7 +68,7 @@ public with sharing class AsynchronousFinalizerTests {
 
             AsynchronousDAO.INJECT = (AsynchronousDAO) mockForException(asyncObject, false, 'onSuccess failed').mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
-            Mocker.validate();
+            MockerV1.validate();
         }
     }
 
@@ -76,8 +76,8 @@ public with sharing class AsynchronousFinalizerTests {
     private static void testJobKeptOnFailure() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     OwnerId = UserInfo.getUserId(),
                     MaximumRetries__c = 0, // Makes TestRunnable.onFailure return true.
                     RetryInterval__c = 0,
@@ -86,11 +86,11 @@ public with sharing class AsynchronousFinalizerTests {
                     ScheduledRunTime__c = Datetime.now()
             );
 
-            Exception exc = new Asynchronous.APIException('Test');
+            Exception exc = new AsynchronousV1.APIException('Test');
 
-            AsynchronousDAO.INJECT = (AsynchronousDAO) mockForFailure(asyncObject, Asynchronous.Status.FAILED, exc, false).mock();
+            AsynchronousDAO.INJECT = (AsynchronousDAO) mockForFailure(asyncObject, AsynchronousV1.Status.FAILED, exc, false).mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
-            Mocker.validate();
+            MockerV1.validate();
         }
     }
 
@@ -98,8 +98,8 @@ public with sharing class AsynchronousFinalizerTests {
     private static void testJobDeletedOnFailure() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     OwnerId = UserInfo.getUserId(),
                     MaximumRetries__c = 1, // Makes TestRunnable.onFailure return false.
                     RetryInterval__c = 0,
@@ -108,11 +108,11 @@ public with sharing class AsynchronousFinalizerTests {
                     ScheduledRunTime__c = Datetime.now()
             );
 
-            Exception exc = new Asynchronous.APIException('Test');
+            Exception exc = new AsynchronousV1.APIException('Test');
 
-            AsynchronousDAO.INJECT = (AsynchronousDAO) mockForFailure(asyncObject, Asynchronous.Status.FAILED, exc, true).mock();
+            AsynchronousDAO.INJECT = (AsynchronousDAO) mockForFailure(asyncObject, AsynchronousV1.Status.FAILED, exc, true).mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
-            Mocker.validate();
+            MockerV1.validate();
         }
     }
 
@@ -120,8 +120,8 @@ public with sharing class AsynchronousFinalizerTests {
     private static void testExceptionInOnFailure() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     OwnerId = UserInfo.getUserId(),
                     MaximumRetries__c = 0,
                     RetryInterval__c = 1, // Makes TestRunnable.onFailure throw an Exception.
@@ -130,11 +130,11 @@ public with sharing class AsynchronousFinalizerTests {
                     ScheduledRunTime__c = Datetime.now()
             );
 
-            Exception exc = new Asynchronous.APIException('Test');
+            Exception exc = new AsynchronousV1.APIException('Test');
 
             AsynchronousDAO.INJECT = (AsynchronousDAO) mockForException(asyncObject, true, 'onFailure failed').mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
-            Mocker.validate();
+            MockerV1.validate();
         }
     }
 
@@ -142,8 +142,8 @@ public with sharing class AsynchronousFinalizerTests {
     private static void testRequeue() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     OwnerId = UserInfo.getUserId(),
                     MaximumRetries__c = 4,
                     RetryInterval__c = 0,
@@ -152,11 +152,11 @@ public with sharing class AsynchronousFinalizerTests {
                     ScheduledRunTime__c = Datetime.now()
             );
 
-            Exception exc = new Asynchronous.APIException('Test');
+            Exception exc = new AsynchronousV1.APIException('Test');
 
-            AsynchronousDAO.INJECT = (AsynchronousDAO) mockForFailure(asyncObject, Asynchronous.Status.QUEUED, exc, false).mock();
+            AsynchronousDAO.INJECT = (AsynchronousDAO) mockForFailure(asyncObject, AsynchronousV1.Status.QUEUED, exc, false).mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
-            Mocker.validate();
+            MockerV1.validate();
         }
     }
 
@@ -164,8 +164,8 @@ public with sharing class AsynchronousFinalizerTests {
     private static void testSchedulerQueued() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     OwnerId = UserInfo.getUserId(),
                     MaximumRetries__c = 0,
                     RetryInterval__c = 0,
@@ -174,7 +174,7 @@ public with sharing class AsynchronousFinalizerTests {
                     ScheduledRunTime__c = Datetime.now()
             );
 
-            Mocker mocked = mockForSuccess(asyncObject, true);
+            MockerV1 mocked = mockForSuccess(asyncObject, true);
 
             // Not happy about this test. For now as it it's so hard to pass state without creating the
             // AsynchronousJob__c object, the test for the Scheduler being queued is the failure to parse the JSON
@@ -187,13 +187,13 @@ public with sharing class AsynchronousFinalizerTests {
                     ))
                         .forMethod('persistException').called(1)
                     .whenArgument(new List<AsynchronousJob__c>{
-                            new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.FAILED.name())
+                            new AsynchronousJob__c(Id = asyncObject.Id, Status__c = AsynchronousV1.Status.FAILED.name())
                     })
                         .forMethod('persistObjects').called(1);
 
             AsynchronousDAO.INJECT = (AsynchronousDAO) mocked.mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
-            Mocker.validate();
+            MockerV1.validate();
         }
     }
 
@@ -201,8 +201,8 @@ public with sharing class AsynchronousFinalizerTests {
     private static void testCancellationFromOnError() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Id = Mocker.fakeId(AsynchronousJob__c.SObjectType),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     OwnerId = UserInfo.getUserId(),
                     MaximumRetries__c = 4,
                     RetryInterval__c = 2, // Makes Runnable.onError return CANCELLED.
@@ -211,19 +211,19 @@ public with sharing class AsynchronousFinalizerTests {
                     ScheduledRunTime__c = Datetime.now()
             );
 
-            Exception exc = new Asynchronous.APIException('Test');
+            Exception exc = new AsynchronousV1.APIException('Test');
 
-            AsynchronousDAO.INJECT = (AsynchronousDAO) mockForFailure(asyncObject, Asynchronous.Status.CANCELLED, exc, false).mock();
+            AsynchronousDAO.INJECT = (AsynchronousDAO) mockForFailure(asyncObject, AsynchronousV1.Status.CANCELLED, exc, false).mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
-            Mocker.validate();
+            MockerV1.validate();
         }
     }
 
-    private static Mocker mockForSuccess(
+    private static MockerV1 mockForSuccess(
             AsynchronousJob__c asyncObject,
             Boolean jobToBeDeleted
     ) {
-        Mocker mocked = Mocker.of(AsynchronousDAO.class);
+        MockerV1 mocked = MockerV1.of(AsynchronousDAO.class);
         mocked
                 .whenArgument(asyncObject.Id)
                     .forMethod('getObject').called(1).returns(asyncObject);
@@ -236,20 +236,20 @@ public with sharing class AsynchronousFinalizerTests {
         } else {
             mocked
                     // After a successful call to Runnable.onSuccess, the job should be marked as SUCCEEDED.
-                    .whenArgument(new List<AsynchronousJob__c> { new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.SUCCEEDED.name()) })
+                    .whenArgument(new List<AsynchronousJob__c> { new AsynchronousJob__c(Id = asyncObject.Id, Status__c = AsynchronousV1.Status.SUCCEEDED.name()) })
                         .forMethod('persistObjects').called(1);
         }
 
         return mocked;
     }
 
-    private static Mocker mockForFailure(
+    private static MockerV1 mockForFailure(
             AsynchronousJob__c asyncObject,
-            Asynchronous.Status expectedStatus,
+            AsynchronousV1.Status expectedStatus,
             Exception exc,
             Boolean jobToBeDeleted
     ) {
-        Mocker mocked = Mocker.of(AsynchronousDAO.class);
+        MockerV1 mocked = MockerV1.of(AsynchronousDAO.class);
         mocked
                 // Finalizer must get the job once.
                 .whenArgument(asyncObject.Id)
@@ -266,7 +266,7 @@ public with sharing class AsynchronousFinalizerTests {
                 ))
                     .forMethod('persistException').called(1);
 
-        if (expectedStatus == Asynchronous.Status.QUEUED) {
+        if (expectedStatus == AsynchronousV1.Status.QUEUED) {
             mocked
                     // The retries have not been exhausted so the job should be queued.
                     .whenArgument(new List<AsynchronousJob__c> {
@@ -293,12 +293,12 @@ public with sharing class AsynchronousFinalizerTests {
         return mocked;
     }
 
-    private static Mocker mockForException(
+    private static MockerV1 mockForException(
             AsynchronousJob__c asyncObject,
             Boolean isJobFailed,
             String exceptionMessage
     ) {
-        Mocker mocked = Mocker.of(AsynchronousDAO.class);
+        MockerV1 mocked = MockerV1.of(AsynchronousDAO.class);
 
         mocked
                 // Finalizer must get the job once.
@@ -310,13 +310,13 @@ public with sharing class AsynchronousFinalizerTests {
                         AsynchronousJob__c = asyncObject.Id,
                         RetryNumber__c = asyncObject.RetryNumber__c,
                         StatusOnError__c = asyncObject.Status__c,
-                        ExceptionType__c = Asynchronous.APIException.class.getName(),
+                        ExceptionType__c = AsynchronousV1.APIException.class.getName(),
                         ExceptionMessage__c = exceptionMessage
                 ))
                     .forMethod('persistException').called(1)
 
                 // The job status will be changed to FAILED.
-                .whenArgument(new List<AsynchronousJob__c> { new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.FAILED.name()) } )
+                .whenArgument(new List<AsynchronousJob__c> { new AsynchronousJob__c(Id = asyncObject.Id, Status__c = AsynchronousV1.Status.FAILED.name()) } )
                     .forMethod('persistObjects').called(1);
 
         if (isJobFailed) {
@@ -326,7 +326,7 @@ public with sharing class AsynchronousFinalizerTests {
                             AsynchronousJob__c = asyncObject.Id,
                             RetryNumber__c = asyncObject.RetryNumber__c,
                             StatusOnError__c = asyncObject.Status__c,
-                            ExceptionType__c = Asynchronous.APIException.class.getName(),
+                            ExceptionType__c = AsynchronousV1.APIException.class.getName(),
                             ExceptionMessage__c = 'Test'
                     ))
                         .forMethod('persistException').called(1);
@@ -335,7 +335,7 @@ public with sharing class AsynchronousFinalizerTests {
         return mocked;
     }
 
-    public with sharing class TestRunnable extends AsynchronousRunnable {
+    public with sharing class TestRunnable extends AsynchronousRunnableV1 {
 
         public TestRunnable() {
             super(TestRunnable.class);
@@ -345,25 +345,25 @@ public with sharing class AsynchronousFinalizerTests {
             return 1;
         }
 
-        public override Boolean onSuccess(Asynchronous.Job job) {
+        public override Boolean onSuccess(AsynchronousV1.Job job) {
             return process(job, 'onSuccess');
         }
 
-        public override Boolean onFailure(Asynchronous.Job job, Exception exc) {
+        public override Boolean onFailure(AsynchronousV1.Job job, Exception exc) {
             return process(job, 'onFailure');
         }
 
-        public override Asynchronous.Status onError(Asynchronous.Job job, Exception exc) {
-            return job.getRetryInterval() == 2 ? Asynchronous.Status.CANCELLED : Asynchronous.Status.QUEUED;
+        public override AsynchronousV1.Status onError(AsynchronousV1.Job job, Exception exc) {
+            return job.getRetryInterval() == 2 ? AsynchronousV1.Status.CANCELLED : AsynchronousV1.Status.QUEUED;
         }
 
-        public override Boolean onCancellation(Asynchronous.Job job) {
+        public override Boolean onCancellation(AsynchronousV1.Job job) {
             return process(job, 'onCancellation');
         }
 
-        private Boolean process(Asynchronous.Job job, String method) {
+        private Boolean process(AsynchronousV1.Job job, String method) {
             if (job.getRetryInterval() == 1) {
-                throw new Asynchronous.APIException(method + ' failed');
+                throw new AsynchronousV1.APIException(method + ' failed');
             }
 
             return job.getMaximumRetries() == 0;

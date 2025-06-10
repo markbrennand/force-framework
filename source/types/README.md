@@ -5,10 +5,10 @@ The Types API is used to instantiate an instance of an Apex _Type_.
 The _Type_ constructed must have a no-op  constructor.
 
 It supports a feature not available in the Apex _Type.newInstance_ method. This new feature is the
-_Types.Factory_ interface. If the _Type_ passed to the _Types.newInstance_ method is an instance of _Factory_,
+_TypesV1.Factory_ interface. If the _Type_ passed to the _TypesV1.newInstance_ method is an instance of _Factory_,
 it will call the _newInstance_ method of the _Factory_ implementation to create the instance.
 
-See the reference [Apex docs](SfApexDocs/types.html) for the API. It is suggested that you keep a page open with
+See the reference [Apex docs](SfApexDocs/typesv1.html) for the API. It is suggested that you keep a page open with
 the Apex docs  loaded for your reference whilst reading this page.
 
 If you wish to try the example code in an org. Deploy the code in the 
@@ -53,7 +53,7 @@ public class ExampleInterfaceImpl implements ExampleInterface {
 
 // Making the class global means it can be constructed in the forecew namespace.
 //
-global class ExampleInterfaceFactory implements forcefw.Types.Factory {
+global class ExampleInterfaceFactory implements forcefw.TypesV1.Factory {
 
     // Note that as the interface is being used, we don't have to make the method global.
     public Object newInstance() {

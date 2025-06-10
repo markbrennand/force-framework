@@ -21,7 +21,7 @@
  *
  * @author Mark Brennand
  */
-public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
+public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
 
     /**
      * @description
@@ -35,8 +35,8 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
      * We have to do this before the property wiring of the CONFIGURATION.
      */
     static {
-        Dependency.bind(Map<String, Integer>.class, CONFIG_ACTION, Configuration.class);
-        Dependency.reload();
+        DependencyV1.bind(Map<String, Integer>.class, CONFIG_ACTION, Configuration.class);
+        DependencyV1.reload();
     }
 
     /**
@@ -63,7 +63,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
      */
     @TestVisible
     private static Map<String, Integer> CONFIGURATION =
-            (Map<String, Integer>) Dependency.inject(Map<String, Integer>.class, CONFIG_ACTION);
+            (Map<String, Integer>) DependencyV1.inject(Map<String, Integer>.class, CONFIG_ACTION);
 
     /**
      * @description
@@ -90,7 +90,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
      * @param asyncJob The Asynchronous job for the Scheduler.
      * @param apexJobId The Id of the Apex job for the Runnable.
      */
-    public override void run(final Asynchronous.Job asyncJob, final String apexJobId) {
+    public override void run(final AsynchronousV1.Job asyncJob, final String apexJobId) {
         Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.run.asyncJob');
 
         final Set<String> jobsToStart = (Set<String>)
@@ -165,7 +165,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
      *
      * @return False to indicate that the Asynchronous__c for the job is to be deleted.
      */
-    public override Boolean onSuccess(final Asynchronous.Job asyncJob) {
+    public override Boolean onSuccess(final AsynchronousV1.Job asyncJob) {
         Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onSuccess.asyncJob');
         return false;
     }
@@ -179,7 +179,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
      *
      * @return True to indicate that the Asynchronous__c for the job is to be kept.
      */
-    public override Boolean onFailure(final Asynchronous.Job asyncJob, final Exception exc) {
+    public override Boolean onFailure(final AsynchronousV1.Job asyncJob, final Exception exc) {
         Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onFailure.asyncJob');
         return true;
     }
@@ -192,7 +192,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
      *
      * @return False to indicate that the Asynchronous__c for the job is to be deleted.
      */
-    public override Boolean onCancellation(final Asynchronous.Job asyncJob) {
+    public override Boolean onCancellation(final AsynchronousV1.Job asyncJob) {
         Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onCancellation.asyncJob');
         return false;
     }
@@ -207,7 +207,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
      * @param jobsLeftToStart The jobs that are left to start from the previous scheduler run.
      */
     public static void queue(final Set<String> jobsLeftToStart) {
-        final Asynchronous.Job asyncJob;
+        final AsynchronousV1.Job asyncJob;
 
         if (!jobsLeftToStart.isEmpty()) {
             asyncJob = AsynchronousImpl.INJECT.createJob(
@@ -269,7 +269,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
 
             } else {
                 maxActive =
-                        ((Asynchronous.Runnable) Types.newInstance(Types.load(asyncObject.Runnable__c)))
+                        ((AsynchronousV1.Runnable) TypesV1.newInstance(TypesV1.load(asyncObject.Runnable__c)))
                                 .getMaximumActive();
 
                 activeCountCache.put(runnable, maxActive);
@@ -296,7 +296,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
      * @description
      * Default Scheduler configuration to be injected.
      */
-    public with sharing class Configuration implements Types.Factory {
+    public with sharing class Configuration implements TypesV1.Factory {
         public Object newInstance() {
             return new Map<String, Integer> {
                     NO_JOBS_TO_RUN_DELAY_PROPERTY => 2000,
@@ -311,7 +311,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnable {
      *
      * This allows the Scheduler class to be inaccessible from outside this class.
      */
-    public with sharing class QueueNext implements Types.Factory {
+    public with sharing class QueueNext implements TypesV1.Factory {
         public Object newInstance() {
             return new AsynchronousScheduler();
         }

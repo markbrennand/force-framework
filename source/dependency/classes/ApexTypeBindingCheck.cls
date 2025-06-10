@@ -8,7 +8,7 @@
  *
  * @author Mark Brennand
  */
-public with sharing class ApexTypeBindingCheck implements Dependency.BindingCheck {
+public with sharing class ApexTypeBindingCheck implements DependencyV1.BindingCheck {
 
     /**
      * @description
@@ -19,34 +19,34 @@ public with sharing class ApexTypeBindingCheck implements Dependency.BindingChec
      *
      * @return The result of the validation.
      */
-    public Dependency.ValidationResult validate(final Type forType, final Type withImpl) {
+    public DependencyV1.ValidationResult validate(final Type forType, final Type withImpl) {
         switch on forType.getName() {
             when 'String' {
-                return buildValidationResult(Types.newInstance(withImpl) instanceof String, forType, withImpl);
+                return buildValidationResult(TypesV1.newInstance(withImpl) instanceof String, forType, withImpl);
             }
             when 'Integer' {
-                return buildValidationResult(Types.newInstance(withImpl) instanceof Integer, forType, withImpl);
+                return buildValidationResult(TypesV1.newInstance(withImpl) instanceof Integer, forType, withImpl);
             }
             when 'Long' {
-                return buildValidationResult(Types.newInstance(withImpl) instanceof Long, forType, withImpl);
+                return buildValidationResult(TypesV1.newInstance(withImpl) instanceof Long, forType, withImpl);
             }
             when 'Decimal' {
-                return buildValidationResult(Types.newInstance(withImpl) instanceof Decimal, forType, withImpl);
+                return buildValidationResult(TypesV1.newInstance(withImpl) instanceof Decimal, forType, withImpl);
             }
             when 'Double' {
-                return buildValidationResult(Types.newInstance(withImpl) instanceof Double, forType, withImpl);
+                return buildValidationResult(TypesV1.newInstance(withImpl) instanceof Double, forType, withImpl);
             }
             when 'Map<String,String>' {
-                return buildValidationResult(Types.newInstance(withImpl) instanceof Map<String,String>, forType, withImpl);
+                return buildValidationResult(TypesV1.newInstance(withImpl) instanceof Map<String,String>, forType, withImpl);
             }
             when 'Map<String,Integer>' {
-                return buildValidationResult(Types.newInstance(withImpl) instanceof Map<String,Integer>, forType, withImpl);
+                return buildValidationResult(TypesV1.newInstance(withImpl) instanceof Map<String,Integer>, forType, withImpl);
             }
             when 'Map<String,ANY>' {
-                return buildValidationResult(Types.newInstance(withImpl) instanceof Map<String,Object>, forType, withImpl);
+                return buildValidationResult(TypesV1.newInstance(withImpl) instanceof Map<String,Object>, forType, withImpl);
             }
             when else {
-                return new Dependency.ValidationResult(
+                return new DependencyV1.ValidationResult(
                         false,
                         'Class ' + forType.getName() + ' is not registered for bind checking'
                 );
@@ -64,10 +64,10 @@ public with sharing class ApexTypeBindingCheck implements Dependency.BindingChec
      *
      * @return The validation result.
      */
-    private Dependency.ValidationResult buildValidationResult(final Boolean isValid, final Type forType, final Type withImpl) {
+    private DependencyV1.ValidationResult buildValidationResult(final Boolean isValid, final Type forType, final Type withImpl) {
         return isValid
-                ? new Dependency.ValidationResult(true, null)
-                : new Dependency.ValidationResult(
+                ? new DependencyV1.ValidationResult(true, null)
+                : new DependencyV1.ValidationResult(
                         false,
                         'Class ' + withImpl.getName() + ' cannot be assigned to an ' + forType.getName()
                 );

@@ -19,7 +19,7 @@ public with sharing virtual class Injection {
      * @return Deprecated.
      */
     public static Object wire(final Type forType) {
-        return Dependency.inject(forType);
+        return DependencyV1.inject(forType);
     }
 
     /**
@@ -35,7 +35,7 @@ public with sharing virtual class Injection {
      * @return Deprecated.
      */
     public static Object wire(final Type forType, final String action) {
-        return Dependency.inject(forType, action);
+        return DependencyV1.inject(forType, action);
     }
 
     /**
@@ -50,7 +50,7 @@ public with sharing virtual class Injection {
      * @return Deprecated.
      */
     public static Boolean has(final Type forType) {
-        return Dependency.isBound(forType);
+        return DependencyV1.isBound(forType);
     }
 
     /**
@@ -66,7 +66,7 @@ public with sharing virtual class Injection {
      * @return Deprecated.
      */
     public static Boolean has(final Type forType, final String action) {
-        return Dependency.isBound(forType, action);
+        return DependencyV1.isBound(forType, action);
     }
 
     /**
@@ -80,7 +80,7 @@ public with sharing virtual class Injection {
      * @param withImpl Deprecated.
      */
     public static void add(final Type forType, final Type withImpl) {
-        Dependency.bind(forType, withImpl);
+        DependencyV1.bind(forType, withImpl);
     }
 
     /**
@@ -95,6 +95,6 @@ public with sharing virtual class Injection {
      * @param withImpl Deprecated
      */
     public static void add(final Type forType, final String action, final Type withImpl) {
-        Dependency.bind(forType, action, withImpl);
+        DependencyV1.bind(forType, action, withImpl);
     }
 }

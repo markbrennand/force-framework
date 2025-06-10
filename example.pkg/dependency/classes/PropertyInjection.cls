@@ -9,12 +9,12 @@ public with sharing class PropertyInjection {
     // Setup a default registry. The default registry will take the Map to assign to the 'properties' member
     // variable from the DefaultConfiguration class.
     static {
-        forcefw.Dependency.bind(Map<String, Integer>.class, 'animals', DefaultConfiguration.class);
+        forcefw.DependencyV1.bind(Map<String, Integer>.class, 'animals', DefaultConfiguration.class);
     }
 
     // The member variable 'properties' value is injected into the class on construction.
     public final Map<String, Integer> properties =
-            (Map<String, Integer>) forcefw.Dependency.inject(Map<String, Integer>.class, 'animals');
+            (Map<String, Integer>) forcefw.DependencyV1.inject(Map<String, Integer>.class, 'animals');
 
 
     /**
@@ -32,7 +32,7 @@ public with sharing class PropertyInjection {
      * @description
      * Default configuration values.
      */
-    public class DefaultConfiguration implements forcefw.Types.Factory {
+    public class DefaultConfiguration implements forcefw.TypesV1.Factory {
         public Object newInstance() {
             return new Map<String, Integer> { 'sheep' => 100, 'cows' => 50, 'hens' => 2000 };
         }
@@ -42,7 +42,7 @@ public with sharing class PropertyInjection {
      * @description
      * New configuration values.
      */
-    public class NewConfiguration implements forcefw.Types.Factory {
+    public class NewConfiguration implements forcefw.TypesV1.Factory {
         public Object newInstance() {
             return new Map<String, Integer> { 'sheep' => 1, 'cows' => 2, 'hens' => 3 };
         }

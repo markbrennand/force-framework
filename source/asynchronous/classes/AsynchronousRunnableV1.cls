@@ -11,7 +11,7 @@
  *
  * @author Mark Brennand
  */
-global with sharing virtual class AsynchronousRunnable implements Asynchronous.Runnable, Queueable {
+global with sharing virtual class AsynchronousRunnableV1 implements AsynchronousV1.Runnable, Queueable {
 
     /**
      * @description
@@ -24,7 +24,7 @@ global with sharing virtual class AsynchronousRunnable implements Asynchronous.R
      * On execution, this field holds the Id of the Asynchronous__c object of the job being run.
      */
     @TestVisible
-    private Asynchronous.Job asyncJob;
+    private AsynchronousV1.Job asyncJob;
 
     /**
      * @description
@@ -32,7 +32,7 @@ global with sharing virtual class AsynchronousRunnable implements Asynchronous.R
      *
      * @param type The sub-class to be run.
      */
-    global AsynchronousRunnable(final Type type) {
+    global AsynchronousRunnableV1(final Type type) {
         this.type = type;
     }
 
@@ -75,7 +75,7 @@ global with sharing virtual class AsynchronousRunnable implements Asynchronous.R
      * @param asyncJob The job being run.
      * @param apexJobId The Id of the Apex job for the Runnable.
      */
-    global virtual void run(final Asynchronous.Job asyncJob, final String apexJobId) {}
+    global virtual void run(final AsynchronousV1.Job asyncJob, final String apexJobId) {}
 
     /**
      * @description
@@ -109,7 +109,7 @@ global with sharing virtual class AsynchronousRunnable implements Asynchronous.R
      *
      * @return True if the Asynchronous__c object is to be kept, false if not.
      */
-    global virtual Boolean onSuccess(final Asynchronous.Job asyncJob) {
+    global virtual Boolean onSuccess(final AsynchronousV1.Job asyncJob) {
         return true;
     }
 
@@ -124,7 +124,7 @@ global with sharing virtual class AsynchronousRunnable implements Asynchronous.R
      *
      * @return True if the Asynchronous__c object is to be kept, false if not.
      */
-    global virtual Boolean onFailure(final Asynchronous.Job asyncJob, final Exception exc) {
+    global virtual Boolean onFailure(final AsynchronousV1.Job asyncJob, final Exception exc) {
         return true;
     }
 
@@ -136,7 +136,7 @@ global with sharing virtual class AsynchronousRunnable implements Asynchronous.R
      *
      * @return True if the Asynchronous__c object is to be kept, false if not.
      */
-    global virtual Boolean onCancellation(final Asynchronous.Job asyncJob) {
+    global virtual Boolean onCancellation(final AsynchronousV1.Job asyncJob) {
         return true;
     }
 
@@ -154,8 +154,8 @@ global with sharing virtual class AsynchronousRunnable implements Asynchronous.R
      *
      * @return The new status for the job.
      */
-    global virtual Asynchronous.Status onError(final Asynchronous.Job asyncJob, final Exception exc) {
-        return Asynchronous.Status.QUEUED;
+    global virtual AsynchronousV1.Status onError(final AsynchronousV1.Job asyncJob, final Exception exc) {
+        return AsynchronousV1.Status.QUEUED;
     }
 
     /**
@@ -166,7 +166,7 @@ global with sharing virtual class AsynchronousRunnable implements Asynchronous.R
      *
      * @return The Runnable to be run in an Apex job.
      */
-    public Asynchronous.Runnable forJob(final Asynchronous.Job asyncJob) {
+    public AsynchronousV1.Runnable forJob(final AsynchronousV1.Job asyncJob) {
         this.asyncJob = asyncJob;
         return this;
     }

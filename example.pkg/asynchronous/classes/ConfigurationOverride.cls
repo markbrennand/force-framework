@@ -10,7 +10,7 @@
  *
  * @author Mark Brennand
  */
-global with sharing class ConfigurationOverride implements forcefw.Types.Factory {
+global with sharing class ConfigurationOverride implements forcefw.TypesV1.Factory {
     public Object newInstance() {
         return new Map<String, Integer> {
                 'maximumJobsToStart' => 64, // Configures AsynchronousScheduler.

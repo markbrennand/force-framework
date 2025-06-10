@@ -5,13 +5,13 @@
  * @author Mark Brennand
  */
 
-global with sharing class AccountContactTotals extends AsynchronousRunnable {
+global with sharing class AccountContactTotals extends AsynchronousRunnableV1 {
 
     // Setup a default registry entry for the configuration for the class.
     // The configuration can be overridden by adding a custom binding.
     static {
-        Dependency.bind(Map<String, Integer>.class, 'AccountContactTotals', Configuration.class);
-        Dependency.reload();
+        DependencyV1.bind(Map<String, Integer>.class, 'AccountContactTotals', Configuration.class);
+        DependencyV1.reload();
     }
 
     /**
@@ -19,7 +19,7 @@ global with sharing class AccountContactTotals extends AsynchronousRunnable {
      * Inject the configuration for the class.
      */
     private final Map<String, Integer> configuration =
-            (Map<String, Integer>) Dependency.inject(Map<String, Integer>.class, 'AccountContactTotals');
+            (Map<String, Integer>) DependencyV1.inject(Map<String, Integer>.class, 'AccountContactTotals');
 
     /**
      * @description
@@ -41,9 +41,9 @@ global with sharing class AccountContactTotals extends AsynchronousRunnable {
      * @param job The Asynchronous API job being run.
      * @param apexJobId The Id of the Apex Job that is running the job
      */
-    public override void run(final Asynchronous.Job job, final String apexJobId) {
+    public override void run(final AsynchronousV1.Job job, final String apexJobId) {
         if (job.getRetryNumber() < configuration.get('succeedOnRetryNumber')) {
-            throw new Asynchronous.APIException('Failed on retry ' + job.getRetryNumber());
+            throw new AsynchronousV1.APIException('Failed on retry ' + job.getRetryNumber());
         }
 
         final String accountId = job.getState().get('accountId');
@@ -98,7 +98,7 @@ global with sharing class AccountContactTotals extends AsynchronousRunnable {
      * The constructor does not need to be global as it is being called via the Types.Factory interface which is
      * global.
      */
-    global with sharing class Executor implements Types.Factory {
+    global with sharing class Executor implements TypesV1.Factory {
 
         public Object newInstance() {
             return new AccountContactTotals();
@@ -169,11 +169,11 @@ global with sharing class AccountContactTotals extends AsynchronousRunnable {
             accountIds.add(account.Id);
         }
 
-        final List<Asynchronous.Job> jobs = new List<Asynchronous.Job>();
+        final List<AsynchronousV1.Job> jobs = new List<AsynchronousV1.Job>();
 
         for (Id accountId : accountIds) {
             jobs.add(
-                    Asynchronous.createJob(
+                    AsynchronousV1.createJob(
                             Executor.class,
                             accountId,
                             10,
@@ -185,7 +185,7 @@ global with sharing class AccountContactTotals extends AsynchronousRunnable {
 
         for (Id orphanedContactId : orphanedContactIds) {
             jobs.add(
-                    Asynchronous.createJob(
+                    AsynchronousV1.createJob(
                             Executor.class,
                             orphanedContactId,
                             10,
@@ -195,14 +195,14 @@ global with sharing class AccountContactTotals extends AsynchronousRunnable {
             );
         }
 
-        Asynchronous.queueJobs(jobs);
+        AsynchronousV1.queueJobs(jobs);
     }
 
     /**
      * @description
      * Class providing base configuration.
      */
-    public class Configuration implements Types.Factory {
+    public class Configuration implements TypesV1.Factory {
         public Object newInstance() {
             return new Map<String, Integer> { 'succeedOnRetryNumber' => 0, 'maximumActive' => 1 };
         }

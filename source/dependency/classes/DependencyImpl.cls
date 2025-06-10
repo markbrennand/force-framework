@@ -24,13 +24,13 @@
  *
  * @author Mark Brennand
  */
-public with sharing virtual class DependencyImpl implements Dependency.API {
+public with sharing virtual class DependencyImpl implements DependencyV1.API {
 
     /**
      * @description
      * Mapping from a binding Type to the Binding Check class to validate it.
      */
-    private static final Map<Type, List<Dependency.BindingCheck>> CHECKS {
+    private static final Map<Type, List<DependencyV1.BindingCheck>> CHECKS {
         private get {
             if (CHECKS == null) {
                 CHECKS = loadBindingChecks();
@@ -48,7 +48,7 @@ public with sharing virtual class DependencyImpl implements Dependency.API {
      * The instance is test visible so it can be mocked.
      */
     @TestVisible
-    public static Dependency.API INSTANCE {
+    public static DependencyV1.API INSTANCE {
         public get {
             if (Test.isRunningTest() && INSTANCE != null) { // INSTANCE has been mocked.
                 return INSTANCE;
@@ -85,12 +85,12 @@ public with sharing virtual class DependencyImpl implements Dependency.API {
          * @return Either the singleton instance or a new instance if the class being constructed implements Prototype.
          */
         public Object newInstance() {
-            if (instance instanceof Dependency.Prototype) {
-                return Types.newInstance(type);
+            if (instance instanceof DependencyV1.Prototype) {
+                return TypesV1.newInstance(type);
             } else if (instance != null) {
                 return instance;
             } else {
-                instance = Types.newInstance(type);
+                instance = TypesV1.newInstance(type);
                 return instance;
             }
         }
@@ -108,7 +108,7 @@ public with sharing virtual class DependencyImpl implements Dependency.API {
      * @description
      * Class providing the implementation of the API.
      */
-    private class API implements Dependency.API {
+    private class API implements DependencyV1.API {
         /**
          * @description
          * Registry containing bindings from interfaces and abstract classes to implementations.
@@ -249,7 +249,7 @@ public with sharing virtual class DependencyImpl implements Dependency.API {
             if (action == null) {
                 Boolean instantiable = false;
                 try {
-                    Types.newInstance(forType);
+                    TypesV1.newInstance(forType);
                     instantiable = true;
                 } catch (Exception e) {
                 }
@@ -260,16 +260,16 @@ public with sharing virtual class DependencyImpl implements Dependency.API {
             }
 
             try {
-                Types.newInstance(withImpl);
+                TypesV1.newInstance(withImpl);
             } catch(Exception e) {
                 throw createException('Implementation', withImpl.getName(), 'must be instantiable');
             }
 
             if (CHECKS.containsKey(forType)) {
-                for (Dependency.BindingCheck check : CHECKS.get(forType)) {
-                    Dependency.ValidationResult result = check.validate(forType, withImpl);
+                for (DependencyV1.BindingCheck check : CHECKS.get(forType)) {
+                    DependencyV1.ValidationResult result = check.validate(forType, withImpl);
                     if (!result.isValid) {
-                        throw new Dependency.APIException(result.errorMessage);
+                        throw new DependencyV1.APIException(result.errorMessage);
                     }
                 }
             } else {
@@ -287,8 +287,8 @@ public with sharing virtual class DependencyImpl implements Dependency.API {
         public void build(List<Binding__c> bindings) {
             for (Binding__c binding : bindings) {
                 try {
-                    final Type type = Types.load(binding.Type__c);
-                    final Type implementation = Types.load(binding.Implementation__c);
+                    final Type type = TypesV1.load(binding.Type__c);
+                    final Type implementation = TypesV1.load(binding.Implementation__c);
 
                     if (binding.Action__c == null) {
                         bind(type, implementation);
@@ -344,8 +344,8 @@ public with sharing virtual class DependencyImpl implements Dependency.API {
 
         for (Binding__c binding : bindings) {
             try {
-                final Type type = Types.load(binding.Type__c);
-                final Type implementation = Types.load(binding.Implementation__c);
+                final Type type = TypesV1.load(binding.Type__c);
+                final Type implementation = TypesV1.load(binding.Implementation__c);
 
                 if (binding.Action__c == null) {
                     validationImpl.bind(type, implementation);
@@ -365,25 +365,25 @@ public with sharing virtual class DependencyImpl implements Dependency.API {
      *
      * @return  The Map of Types to Bind Check.
      */
-    private static Map<Type, List<Dependency.BindingCheck>> loadBindingChecks() {
+    private static Map<Type, List<DependencyV1.BindingCheck>> loadBindingChecks() {
         final Boolean isTest = Test.isRunningTest();
-        final Map<Type, List<Dependency.BindingCheck>> checks = new Map<Type, List<Dependency.BindingCheck>>();
+        final Map<Type, List<DependencyV1.BindingCheck>> checks = new Map<Type, List<DependencyV1.BindingCheck>>();
 
         for (BindingCheck__mdt check : BindingCheck__mdt.getAll().values()) {
             if (check.IsUnitTest__c == isTest) {
                 Assertion.isNotNull(check.Type__C, 'Binding Check Metadata record ' + check.Label + ' has no Type defined');
                 Assertion.isNotNull(check.BindingCheck__c, 'Binding Check Metadata record ' + check.Label + ' has no BindingCheck class');
-                final Type forType = Types.load(check.Type__c);
-                final Object checker = Types.newInstance(Types.load(check.BindingCheck__c));
+                final Type forType = TypesV1.load(check.Type__c);
+                final Object checker = TypesV1.newInstance(TypesV1.load(check.BindingCheck__c));
 
-                if (! (checker instanceof Dependency.BindingCheck)) {
+                if (! (checker instanceof DependencyV1.BindingCheck)) {
                     throw createException('Class', check.BindingCheck__c, 'does not implement Dependency.BindingCheck');
                 }
 
                 if (!checks.containsKey(forType)) {
-                    checks.put(forType, new List<Dependency.BindingCheck> { (Dependency.BindingCheck) checker });
+                    checks.put(forType, new List<DependencyV1.BindingCheck> { (DependencyV1.BindingCheck) checker });
                 } else {
-                    checks.get(forType).add((Dependency.BindingCheck) checker);
+                    checks.get(forType).add((DependencyV1.BindingCheck) checker);
                 }
             }
         }
@@ -444,8 +444,8 @@ public with sharing virtual class DependencyImpl implements Dependency.API {
      *
      * @return A new APIException with a formatted message.
      */
-    private static Dependency.APIException createException(String prefix, String typeName, String postfix) {
-        return new Dependency.APIException(String.join(
+    private static DependencyV1.APIException createException(String prefix, String typeName, String postfix) {
+        return new DependencyV1.APIException(String.join(
                 new List<String>{
                         prefix,
                         ' ',
@@ -468,8 +468,8 @@ public with sharing virtual class DependencyImpl implements Dependency.API {
      *
      * @return A new APIException with a formatted mesgsage.
      */
-    private static Dependency.APIException createException(String prefix, String typeName, String action, String postfix) {
-        return new Dependency.APIException(String.join(
+    private static DependencyV1.APIException createException(String prefix, String typeName, String action, String postfix) {
+        return new DependencyV1.APIException(String.join(
                 new List<String>{
                         prefix,
                         ' ',
@@ -488,7 +488,7 @@ public with sharing virtual class DependencyImpl implements Dependency.API {
      * Method is solely for mocking use.
      */
     public Object inject(final Type forType) {
-        throw new Dependency.APIException('Access denied');
+        throw new DependencyV1.APIException('Access denied');
     }
 
     /**
@@ -496,7 +496,7 @@ public with sharing virtual class DependencyImpl implements Dependency.API {
      * Method is solely for mocking use.
      */
     public Object inject(final Type forType, final String action) {
-        throw new Dependency.APIException('Access denied');
+        throw new DependencyV1.APIException('Access denied');
     }
 
     /**
@@ -504,7 +504,7 @@ public with sharing virtual class DependencyImpl implements Dependency.API {
      * Method is solely for mocking use.
      */
     public Boolean isBound(final Type forType) {
-        throw new Dependency.APIException('Access denied');
+        throw new DependencyV1.APIException('Access denied');
     }
 
     /**
@@ -512,7 +512,7 @@ public with sharing virtual class DependencyImpl implements Dependency.API {
      * Method is solely for mocking use.
      */
     public Boolean isBound(final Type forType, final String action) {
-        throw new Dependency.APIException('Access denied');
+        throw new DependencyV1.APIException('Access denied');
     }
 
     /**
@@ -520,7 +520,7 @@ public with sharing virtual class DependencyImpl implements Dependency.API {
     * Method is solely for mocking use.
     */
     public void bind(final Type forType, final Type withImpl) {
-        throw new Dependency.APIException('Access denied');
+        throw new DependencyV1.APIException('Access denied');
     }
 
     /**
@@ -528,7 +528,7 @@ public with sharing virtual class DependencyImpl implements Dependency.API {
      * Method is solely for mocking use.
      */
     public void bind(final Type forType, final String action, final Type withImpl) {
-        throw new Dependency.APIException('Access denied');
+        throw new DependencyV1.APIException('Access denied');
     }
 
     /**
@@ -536,6 +536,6 @@ public with sharing virtual class DependencyImpl implements Dependency.API {
      * Method is solely for mocking use.
      */
     public void reload() {
-        throw new Dependency.APIException('Access denied');
+        throw new DependencyV1.APIException('Access denied');
     }
 }

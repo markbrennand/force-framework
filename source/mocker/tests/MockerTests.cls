@@ -8,7 +8,7 @@ public with sharing class MockerTests {
     @IsTest
     private static void testThrows() {
         try {
-            Mocker mocked = (Mocker) Mocker.of(Mocker.class)
+            MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                     .whenNoArguments()
                     .forMethod('mock').throws(new DMLException('Test'))
                     .mock();
@@ -22,24 +22,24 @@ public with sharing class MockerTests {
 
     @IsTest
     private static void testReturns() {
-        Mocker mocked = (Mocker) Mocker.of(Mocker.class)
+        MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                 .whenNoArguments()
                 .forMethod('mock').returns(123)
                 .mock();
 
         Assert.areEqual(123, mocked.mock());
-        Mocker.validate();
+        MockerV1.validate();
 
-        mocked = (Mocker) Mocker.of(Mocker.class)
+        mocked = (MockerV1) MockerV1.of(MockerV1.class)
                 .whenNoArguments()
                 .forMethod('mock').returns(new TestModifier())
                 .mock();
 
         Assert.areEqual(456, mocked.mock());
-        Mocker.validate();
+        MockerV1.validate();
 
         try {
-            Mocker.of(Mocker.class)
+            MockerV1.of(MockerV1.class)
                     .whenNoArguments()
                     .forMethod('mock').returns(123).returns(new TestModifier())
                     .mock();
@@ -51,7 +51,7 @@ public with sharing class MockerTests {
 
     @IsTest
     private static void testUnboundedCalls() {
-        Mocker mocked = (Mocker) Mocker.of(Mocker.class)
+        MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                 .whenNoArguments()
                     .forMethod('mock').returns(123)
                 .mock();
@@ -59,37 +59,37 @@ public with sharing class MockerTests {
         Assert.areEqual(123, mocked.mock());
         Assert.areEqual(123, mocked.mock());
         Assert.areEqual(123, mocked.mock());
-        Mocker.validate();
+        MockerV1.validate();
     }
 
     @IsTest
     private static void testBoundedCalls() {
-        Mocker mocked = (Mocker) Mocker.of(Mocker.class)
+        MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                 .whenNoArguments()
                     .forMethod('mock').called(2).returns(123)
                 .mock();
 
         Assert.areEqual(123, mocked.mock());
         try {
-            Mocker.validate();
+            MockerV1.validate();
         } catch(Assertion.AssertionException ae) {}
 
         Assert.areEqual(123, mocked.mock());
-        Mocker.validate();
+        MockerV1.validate();
 
         Assert.areEqual(123, mocked.mock());
         try {
-            Mocker.validate();
+            MockerV1.validate();
         } catch(Assertion.AssertionException ae) {}
     }
 
     @IsTest
     private static void testSObjectMatching() {
-        Account a1 = new Account(Id = Mocker.fakeId(Account.SObjectType), Name='Bill');
+        Account a1 = new Account(Id = MockerV1.fakeId(Account.SObjectType), Name='Bill');
         Account a2 = new Account(Id = a1.Id, Name='Bill', AccountNumber = '123');
         Account a3 = new Account(Id = a1.Id, Name='Ted');
 
-        Mocker mocked = (Mocker) Mocker.of(Mocker.class)
+        MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                 .whenArgument(a1)
                     .forMethod('whenArgument')
                 .mock();
@@ -101,7 +101,7 @@ public with sharing class MockerTests {
             Assert.fail();
         } catch(Assertion.AssertionException ae) {}
 
-        mocked = (Mocker) Mocker.of(Mocker.class)
+        mocked = (MockerV1) MockerV1.of(MockerV1.class)
                 .whenArgument(new List<Account> { a1, a3})
                     .forMethod('whenArgument')
                 .mock();
@@ -113,7 +113,7 @@ public with sharing class MockerTests {
             Assert.fail();
         } catch(Assertion.AssertionException ae) {}
 
-        mocked = (Mocker) Mocker.of(Mocker.class)
+        mocked = (MockerV1) MockerV1.of(MockerV1.class)
                 .whenArgument(new List<Account> { a2, a3})
                     .forMethod('whenArgument')
                 .mock();
@@ -127,10 +127,10 @@ public with sharing class MockerTests {
 
     @IsTest
     private static void testChaining() {
-        Account a1 = new Account(Id = Mocker.fakeId(Account.SObjectType), Name='Bill');
+        Account a1 = new Account(Id = MockerV1.fakeId(Account.SObjectType), Name='Bill');
         Account a2 = new Account(Id = a1.Id, Name='Ted', AccountNumber = '123');
 
-        Mocker mocked = (Mocker) Mocker.of(Mocker.class)
+        MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                 .whenArgument(a1)
                     .forMethod('whenArgument').called(1)
                     .forMethod('whenArguments').called(0)
@@ -149,15 +149,15 @@ public with sharing class MockerTests {
         Assert.areEqual(123, mocked.mock());
         Assert.areEqual(123, mocked.mock());
 
-        Mocker.validate();
+        MockerV1.validate();
     }
 
     @IsTest
     private static void testFactory() {
-        Account a1 = new Account(Id = Mocker.fakeId(Account.SObjectType), Name='Bill');
+        Account a1 = new Account(Id = MockerV1.fakeId(Account.SObjectType), Name='Bill');
         Account a2 = new Account(Id = a1.Id, Name='Ted', AccountNumber = '123');
 
-        Mocker mocked = (Mocker) Mocker.of(new TestFactory())
+        MockerV1 mocked = (MockerV1) MockerV1.of(new TestFactory())
                 .whenArgument(a1)
                 .forMethod('whenArgument').called(1)
                 .forMethod('whenArguments').called(0)
@@ -176,14 +176,14 @@ public with sharing class MockerTests {
         Assert.areEqual(123, mocked.mock());
         Assert.areEqual(123, mocked.mock());
 
-        Mocker.validate();
+        MockerV1.validate();
     }
 
     @IsTest
     private static void testComparator() {
-        Account a1 = new Account(Id = Mocker.fakeId(Account.SObjectType), Name = 'Bill');
+        Account a1 = new Account(Id = MockerV1.fakeId(Account.SObjectType), Name = 'Bill');
 
-        Mocker mocked = (Mocker) Mocker.of(Mocker.class)
+        MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                 .whenArgument(a1)
                 .withComparators(new List<Comparator<Object>> { new TestComparator() })
                 .forMethod('whenArgument').called(1)
@@ -192,7 +192,7 @@ public with sharing class MockerTests {
         mocked.whenArgument(new Account(Name = 'Bill'));
 
         try {
-            mocked = (Mocker) Mocker.of(Mocker.class)
+            mocked = (MockerV1) MockerV1.of(MockerV1.class)
                     .whenArgument(a1)
                     .forMethod('whenArgument').called(1)
                     .mock();
@@ -204,14 +204,14 @@ public with sharing class MockerTests {
 
     @IsTest
     private static void testFakeId() {
-        Assert.isTrue(Mocker.fakeId(User.SObjectType).endsWith('001'));
-        Assert.isTrue(Mocker.fakeId(Account.SObjectType).endsWith('001'));
-        Assert.isTrue(Mocker.fakeId(Account.SObjectType).endsWith('002'));
-        Assert.isTrue(Mocker.fakeId(User.SObjectType).endsWith('002'));
-        Assert.isTrue(Mocker.fakeId(Account.SObjectType).endsWith('003'));
+        Assert.isTrue(MockerV1.fakeId(User.SObjectType).endsWith('001'));
+        Assert.isTrue(MockerV1.fakeId(Account.SObjectType).endsWith('001'));
+        Assert.isTrue(MockerV1.fakeId(Account.SObjectType).endsWith('002'));
+        Assert.isTrue(MockerV1.fakeId(User.SObjectType).endsWith('002'));
+        Assert.isTrue(MockerV1.fakeId(Account.SObjectType).endsWith('003'));
     }
 
-    private with sharing class TestModifier implements Mocker.Modifier {
+    private with sharing class TestModifier implements MockerV1.Modifier {
         public Object process(List<Object> arguments) {
             return 456;
         }
@@ -223,9 +223,9 @@ public with sharing class MockerTests {
         }
     }
 
-    private with sharing class TestFactory implements Mocker.Factory {
+    private with sharing class TestFactory implements MockerV1.Factory {
         public Object stub(StubProvider provider) {
-            return Test.createStub(Mocker.class, provider);
+            return Test.createStub(MockerV1.class, provider);
         }
     }
 }

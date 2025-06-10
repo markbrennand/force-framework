@@ -4,7 +4,7 @@
     <protected>false</protected>
     <values>
         <field>BindingCheck__c</field>
-        <value xsi:type="xsd:string">Asynchronous.BindingCheck</value>
+        <value xsi:type="xsd:string">AsynchronousV1.BindingCheck</value>
     </values>
     <values>
         <field>IsUnitTest__c</field>
@@ -12,6 +12,6 @@
     </values>
     <values>
         <field>Type__c</field>
-        <value xsi:type="xsd:string">Asynchronous.API</value>
+        <value xsi:type="xsd:string">AsynchronousV1.API</value>
     </values>
 </CustomMetadata>

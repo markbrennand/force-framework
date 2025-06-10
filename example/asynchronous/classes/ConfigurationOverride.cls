@@ -10,7 +10,7 @@
  *
  * @author Mark Brennand
  */
-public with sharing class ConfigurationOverride implements Types.Factory {
+public with sharing class ConfigurationOverride implements TypesV1.Factory {
     public Object newInstance() {
         return new Map<String, Integer> {
                 'maximumJobsToStart' => 1,  // Configures AsynchronousScheduler.

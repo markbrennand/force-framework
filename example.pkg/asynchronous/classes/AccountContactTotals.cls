@@ -5,13 +5,13 @@
  * @author Mark Brennand
  */
 
-global with sharing class AccountContactTotals extends forcefw.AsynchronousRunnable {
+global with sharing class AccountContactTotals extends forcefw.AsynchronousRunnableV1 {
 
     // Setup a default registry entry for the configuration for the class.
     // The configuration can be overridden by adding a custom binding.
     static {
-        forcefw.Dependency.bind(Map<String, Integer>.class, 'AccountContactTotals', Configuration.class);
-        forcefw.Dependency.reload();
+        forcefw.DependencyV1.bind(Map<String, Integer>.class, 'AccountContactTotals', Configuration.class);
+        forcefw.DependencyV1.reload();
     }
 
     /**
@@ -19,7 +19,7 @@ global with sharing class AccountContactTotals extends forcefw.AsynchronousRunna
      * Inject the configuration for the class.
      */
     private final Map<String, Integer> configuration =
-            (Map<String, Integer>) forcefw.Dependency.inject(Map<String, Integer>.class, 'AccountContactTotals');
+            (Map<String, Integer>) forcefw.DependencyV1.inject(Map<String, Integer>.class, 'AccountContactTotals');
 
     /**
      * @description
@@ -41,9 +41,9 @@ global with sharing class AccountContactTotals extends forcefw.AsynchronousRunna
      * @param job The Asynchronous API job being run.
      * @param apexJobId The Id of the Apex Job that is running the job
      */
-    public override void run(final forcefw.Asynchronous.Job job, final String apexJobId) {
+    public override void run(final forcefw.AsynchronousV1.Job job, final String apexJobId) {
         if (job.getRetryNumber() < configuration.get('succeedOnRetryNumber')) {
-            throw new forcefw.Asynchronous.APIException('Failed on retry ' + job.getRetryNumber());
+            throw new forcefw.AsynchronousV1.APIException('Failed on retry ' + job.getRetryNumber());
         }
 
         final String accountId = job.getState().get('accountId');
@@ -98,7 +98,7 @@ global with sharing class AccountContactTotals extends forcefw.AsynchronousRunna
      * The constructor does not need to be global as it is being called via the Types.Factory interface which is
      * global.
      */
-    global with sharing class Executor implements forcefw.Types.Factory {
+    global with sharing class Executor implements forcefw.TypesV1.Factory {
 
         public Object newInstance() {
             return new AccountContactTotals();
@@ -169,11 +169,11 @@ global with sharing class AccountContactTotals extends forcefw.AsynchronousRunna
             accountIds.add(account.Id);
         }
 
-        final List<forcefw.Asynchronous.Job> jobs = new List<forcefw.Asynchronous.Job>();
+        final List<forcefw.AsynchronousV1.Job> jobs = new List<forcefw.AsynchronousV1.Job>();
 
         for (Id accountId : accountIds) {
             jobs.add(
-                    forcefw.Asynchronous.createJob(
+                    forcefw.AsynchronousV1.createJob(
                             Executor.class,
                             accountId,
                             10,
@@ -185,7 +185,7 @@ global with sharing class AccountContactTotals extends forcefw.AsynchronousRunna
 
         for (Id orphanedContactId : orphanedContactIds) {
             jobs.add(
-                    forcefw.Asynchronous.createJob(
+                    forcefw.AsynchronousV1.createJob(
                             Executor.class,
                             orphanedContactId,
                             10,
@@ -195,14 +195,14 @@ global with sharing class AccountContactTotals extends forcefw.AsynchronousRunna
             );
         }
 
-        forcefw.Asynchronous.queueJobs(jobs);
+        forcefw.AsynchronousV1.queueJobs(jobs);
     }
 
     /**
      * @description
      * Class providing base configuration.
      */
-    public class Configuration implements forcefw.Types.Factory {
+    public class Configuration implements forcefw.TypesV1.Factory {
         public Object newInstance() {
             return new Map<String, Integer> { 'succeedOnRetryNumber' => 0, 'maximumActive' => 1 };
         }

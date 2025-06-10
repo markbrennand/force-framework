@@ -3,21 +3,21 @@
  * @author Mark Brennand
  */
 
-public with sharing class ExampleRunnable extends AsynchronousRunnable {
+public with sharing class ExampleRunnable extends AsynchronousRunnableV1 {
 
     static {
-        Dependency.bind(Map<String, Integer>.class, 'ExampleRunnable', Configuration.class);
-        Dependency.reload();
+        DependencyV1.bind(Map<String, Integer>.class, 'ExampleRunnable', Configuration.class);
+        DependencyV1.reload();
     }
 
     private final Map<String, Integer> configuration =
-            (Map<String, Integer>) Dependency.inject(Map<String, Integer>.class, 'ExampleRunnable');
+            (Map<String, Integer>) DependencyV1.inject(Map<String, Integer>.class, 'ExampleRunnable');
 
     public ExampleRunnable() {
         super(Executor.class);
     }
 
-    public override void run(Asynchronous.Job job, String apexJobId) {
+    public override void run(AsynchronousV1.Job job, String apexJobId) {
         Assert.isNotNull(job.getRetryNumber());
         Assert.isNotNull(apexJobId);
 
@@ -42,22 +42,22 @@ public with sharing class ExampleRunnable extends AsynchronousRunnable {
         return configuration.get('maximumActive');
     }
 
-    public override Asynchronous.Status onError(Asynchronous.job job, Exception exc) {
-        return Asynchronous.Status.QUEUED;
+    public override AsynchronousV1.Status onError(AsynchronousV1.job job, Exception exc) {
+        return AsynchronousV1.Status.QUEUED;
     }
 
-    public override Boolean onCancellation(Asynchronous.Job asyncJob) {
+    public override Boolean onCancellation(AsynchronousV1.Job asyncJob) {
         return true;
     }
 
-    public class Executor implements Types.Factory {
+    public class Executor implements TypesV1.Factory {
 
         public Object newInstance() {
             return new ExampleRunnable();
         }
     }
 
-    public class Configuration implements Types.Factory {
+    public class Configuration implements TypesV1.Factory {
         public Object newInstance() {
             return new Map<String, Integer> { 'maximumActive' => 1 };
         }

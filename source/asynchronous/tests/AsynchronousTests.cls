@@ -18,7 +18,7 @@ public with sharing class AsynchronousTests {
                     'Key1' => 'Value1', 'Key2' => 'Value2'
             };
 
-            Asynchronous.Job job = AsynchronousImpl.INJECT.createJob(
+            AsynchronousV1.Job job = AsynchronousImpl.INJECT.createJob(
                     AsynchronousScheduler.QueueNext.class,
                     'TEST',
                     1,
@@ -32,12 +32,12 @@ public with sharing class AsynchronousTests {
             Assert.areEqual(1000, job.getRetryInterval());
             Assert.areEqual(0, job.getRetryNumber());
             Assert.areEqual(state, job.getState());
-            Assert.areEqual(Asynchronous.Status.PENDING, job.getStatus());
+            Assert.areEqual(AsynchronousV1.Status.PENDING, job.getStatus());
 
-            AsynchronousDAO.INJECT = (AsynchronousDAO) Mocker.of(AsynchronousDAO.class)
+            AsynchronousDAO.INJECT = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
                     .whenArguments(
                             new List<AsynchronousJob__c>{
-                                    new AsynchronousJob__c(Status__c = Asynchronous.Status.PENDING.name())
+                                    new AsynchronousJob__c(Status__c = AsynchronousV1.Status.PENDING.name())
                             },
                             new List<Map<String, String>>{
                                     state
@@ -46,13 +46,13 @@ public with sharing class AsynchronousTests {
                         .forMethod('persistObjects').called(1).returns(new AddIdModifier())
                     .mock();
 
-            for (Asynchronous.Job queuedJob : AsynchronousImpl.INJECT.queueJobs(new List<Asynchronous.Job>{
+            for (AsynchronousV1.Job queuedJob : AsynchronousImpl.INJECT.queueJobs(new List<AsynchronousV1.Job>{
                     job
             })) {
                 Assert.isNotNull(((AsynchronousJob) queuedJob).asyncObjectId);
             }
 
-            Mocker.validate();
+            MockerV1.validate();
         }
     }
 
@@ -61,7 +61,7 @@ public with sharing class AsynchronousTests {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousImpl.INJECT = createMock();
 
-            Asynchronous.Job job = AsynchronousImpl.INJECT.createJob(
+            AsynchronousV1.Job job = AsynchronousImpl.INJECT.createJob(
                     AsynchronousTests.class,
                     null,
                     1,
@@ -69,24 +69,24 @@ public with sharing class AsynchronousTests {
                     new Map<String, String>()
             );
 
-            Assert.areEqual(Asynchronous.Status.CANCELLED, job.getStatus());
+            Assert.areEqual(AsynchronousV1.Status.CANCELLED, job.getStatus());
             Assert.areEqual('MOCKED', job.getReference());
 
-            AsynchronousImpl.INJECT.queueJobs(new List<Asynchronous.Job>{ job });
-            Mocker.validate();
+            AsynchronousImpl.INJECT.queueJobs(new List<AsynchronousV1.Job>{ job });
+            MockerV1.validate();
         }
     }
 
     @IsTest
     private static void testBindingCheck() {
         System.runAs(AsynchronousTestHelper.getUser()) {
-            Dependency.bind(Asynchronous.API.class, AsynchronousImpl.Factory.class);
+            DependencyV1.bind(AsynchronousV1.API.class, AsynchronousImpl.Factory.class);
             try {
-                Dependency.bind(Asynchronous.API.class, AsynchronousScheduler.QueueNext.class);
+                DependencyV1.bind(AsynchronousV1.API.class, AsynchronousScheduler.QueueNext.class);
                 Assert.fail();
-            } catch (Dependency.APIException ae) {
+            } catch (DependencyV1.APIException ae) {
                 Assert.isTrue(
-                        TestHelper.exceptionContains('Class AsynchronousScheduler.QueueNext does not implement Asynchronous.API', ae),
+                        TestHelper.exceptionContains('Class AsynchronousScheduler.QueueNext does not implement AsynchronousV1.API', ae),
                         'Unexpected exception: ' + ae
                 );
             }
@@ -97,7 +97,7 @@ public with sharing class AsynchronousTests {
     private static void testTriggers() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Status__c = Asynchronous.Status.PENDING.name(),
+                    Status__c = AsynchronousV1.Status.PENDING.name(),
                     Runnable__c = AsynchronousScheduler.QueueNext.class.getName(),
                     MaximumRetries__c = 0,
                     RetryNumber__c = 1,
@@ -107,11 +107,11 @@ public with sharing class AsynchronousTests {
 
             insert asyncObject;
             asyncObject = [SELECT Status__c, RetryNumber__c FROM AsynchronousJob__c WHERE Id = :asyncObject.Id];
-            Assert.areEqual(Asynchronous.Status.QUEUED.name(), asyncObject.Status__c);
+            Assert.areEqual(AsynchronousV1.Status.QUEUED.name(), asyncObject.Status__c);
             Assert.areEqual(0, asyncObject.RetryNumber__c);
 
             asyncObject = new AsynchronousJob__c(
-                    Status__c = Asynchronous.Status.CANCELLED.name(),
+                    Status__c = AsynchronousV1.Status.CANCELLED.name(),
                     Runnable__c = TestAsynchronousRunnable.class.getName(),
                     MaximumRetries__c = 0,
                     RetryNumber__c = 1,
@@ -123,7 +123,7 @@ public with sharing class AsynchronousTests {
             Assert.areEqual(1, [SELECT COUNT() FROM AsynchronousJob__c WHERE Id = :asyncObject.Id]);
 
             asyncObject = new AsynchronousJob__c(
-                    Status__c = Asynchronous.Status.CANCELLED.name(),
+                    Status__c = AsynchronousV1.Status.CANCELLED.name(),
                     Runnable__c = TestAsynchronousRunnable.class.getName(),
                     MaximumRetries__c = 1, // Causes runnable to request job deletion.
                     RetryNumber__c = 1,
@@ -134,7 +134,7 @@ public with sharing class AsynchronousTests {
             insert asyncObject;
             Assert.areEqual(0, [SELECT COUNT() FROM AsynchronousJob__c WHERE Id = :asyncObject.Id]);
 
-            AsynchronousHelper.INJECT = (AsynchronousHelper) Mocker.of(AsynchronousHelper.class)
+            AsynchronousHelper.INJECT = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
                     .whenArgument(
                             new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName())
                     )
@@ -150,7 +150,7 @@ public with sharing class AsynchronousTests {
                     .mock();
 
             asyncObject = new AsynchronousJob__c(
-                    Status__c = Asynchronous.Status.PENDING.name(),
+                    Status__c = AsynchronousV1.Status.PENDING.name(),
                     Runnable__c = TestAsynchronousRunnable.class.getName(),
                     MaximumRetries__c = 0,
                     RetryNumber__c = 0,
@@ -159,11 +159,11 @@ public with sharing class AsynchronousTests {
             );
 
             insert asyncObject;
-            Mocker.validate();
+            MockerV1.validate();
 
             try {
                 insert new AsynchronousJob__c(
-                        Status__c = Asynchronous.Status.PENDING.name(),
+                        Status__c = AsynchronousV1.Status.PENDING.name(),
                         Runnable__c = AsynchronousTests.class.getName(),
                         MaximumRetries__c = 0,
                         RetryNumber__c = 0,
@@ -182,13 +182,13 @@ public with sharing class AsynchronousTests {
     }
 
     private static AsynchronousImpl createMock() {
-        Asynchronous.Job job = (Asynchronous.Job) Mocker.of(AsynchronousJob.class)
+        AsynchronousV1.Job job = (AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class)
                 .whenNoArguments()
                     .forMethod('getReference').called(1).returns('MOCKED')
-                    .forMethod('getStatus').called(1).returns(Asynchronous.Status.CANCELLED)
+                    .forMethod('getStatus').called(1).returns(AsynchronousV1.Status.CANCELLED)
                 .mock();
 
-        return (AsynchronousImpl) Mocker.of(AsynchronousImpl.class)
+        return (AsynchronousImpl) MockerV1.of(AsynchronousImpl.class)
                 .whenArguments(
                         AsynchronousTests.class,
                         null,
@@ -197,25 +197,25 @@ public with sharing class AsynchronousTests {
                         new Map<String, String>()
                 )
                     .forMethod('createJob').returns(job)
-                .whenArgument(new List<Asynchronous.Job> { job })
+                .whenArgument(new List<AsynchronousV1.Job> { job })
                     .forMethod('queueJobs').called(1)
                 .mock();
     }
 
-    public with sharing class TestAsynchronousRunnable extends AsynchronousRunnable {
+    public with sharing class TestAsynchronousRunnable extends AsynchronousRunnableV1 {
         public TestAsynchronousRunnable() {
             super(TestAsynchronousRunnable.class);
         }
 
-        public override Boolean onCancellation(Asynchronous.Job job) {
+        public override Boolean onCancellation(AsynchronousV1.Job job) {
             return job.getMaximumRetries() == 0;
         }
     }
 
-    private with sharing class AddIdModifier implements Mocker.Modifier {
+    private with sharing class AddIdModifier implements MockerV1.Modifier {
         public Object process(List<Object> arguments) {
             for (AsynchronousJob__c asyncObject : (List<AsynchronousJob__c>) arguments[0]) {
-                asyncObject.Id = Mocker.fakeId(AsynchronousJob__c.SObjectType);
+                asyncObject.Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType);
             }
             return arguments[0];
         }

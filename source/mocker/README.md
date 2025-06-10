@@ -3,7 +3,7 @@
 
 Documentation coming soon.
 
-See the reference [Apex docs](SfApexDocs/mocker.html) for the API. It is suggested that you keep a page open
+See the reference [Apex docs](SfApexDocs/mockerv1.html) for the API. It is suggested that you keep a page open
 with the Apex docs loaded for your reference whilst reading this page.
 
 If you wish to try the example unit test using Mocker in an org. Deploy the code in the
