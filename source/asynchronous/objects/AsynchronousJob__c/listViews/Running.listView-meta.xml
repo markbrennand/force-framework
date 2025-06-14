@@ -2,16 +2,16 @@
 <ListView xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Running</fullName>
     <columns>NAME</columns>
-    <columns>forcefw__Status__c</columns>
-    <columns>forcefw__Reference__c</columns>
-    <columns>forcefw__ScheduledRunTime__c</columns>
-    <columns>forcefw__Runnable__c</columns>
-    <columns>forcefw__RetryNumber__c</columns>
-    <columns>forcefw__MaximumRetries__c</columns>
-    <columns>forcefw__ApexJobId__c</columns>
+    <columns>Status__c</columns>
+    <columns>Reference__c</columns>
+    <columns>ScheduledRunTime__c</columns>
+    <columns>Runnable__c</columns>
+    <columns>RetryNumber__c</columns>
+    <columns>MaximumRetries__c</columns>
+    <columns>ApexJobId__c</columns>
     <filterScope>Everything</filterScope>
     <filters>
-        <field>forcefw__Status__c</field>
+        <field>Status__c</field>
         <operation>equals</operation>
         <value>RUNNING</value>
     </filters>

@@ -3,6 +3,8 @@ A suite of APIs that have been developed to aid in Apex development.
 
 Built with SOLID Principles, Separation of Concerns and Clean code in mind.
 
+Click the [link](https://markbrennand.github.io/force-framework/) for the GitHub project documentation.
+
 #### SOLID Principles
 SOLID is a set of five design principles in object-oriented programming that helps developers create more maintainable,
 extensible, and understandable software. These principles are: Single Responsibility Principle, Open/Closed Principle,
@@ -18,6 +20,11 @@ Clean code, in essence, is software that is written in a way that is easy to rea
 prioritizing readability and maintainability, making it easier for other developers (or even yourself in the future) to
 modify or extend the code. Clean code follows established conventions, standards, and practices to ensure it's simple,
 concise, and expressive.
+
+# Getting Started
+
+See [Setup](SETUP.md) for information on how to deploy the code or package to an org and configure the org
+for _Force Framework_ use.
 
 # Framework APIs
 The Force Framework comprises the following APIs. 
@@ -56,11 +63,12 @@ See [Asynchronous](source/asynchronous/README.md)
 
 ## Mocker
 In a unit test, mock objects can simulate the behavior of complex, real objects and are therefore useful when a real
-object is impractical or impossible to incorporate into a unit test. The Force Framework suite includes an API for a 
-mocking. In most mocking solutions, methods and their expected arguments are defined one by one. There is redundancy
-in that solution as methods in a class may take the same arguments. The Mocker API first defines the arguments
-and then the methods expecting those arguments are assigned to them. The solution is defined to be chained allowing
-a full mocking for a class to be defined in a single statement.
+object is impractical or impossible to incorporate into a unit test. The Force Framework suite includes an API for 
+mocking. In most mocking solutions, methods and their expected arguments are defined individually. There is redundancy
+in that solution as methods in a class may take the same arguments. For example, a class may have several getter
+methods, all of which have no argument. The Mocker API first defines the arguments, including no arguments, and then
+the methods expecting those arguments are assigned to them. The solution is defined to be chained allowing  a full
+mocking for a class to be defined in a single statement.
 
 See [Mocker](source/mocker/README.md)
 

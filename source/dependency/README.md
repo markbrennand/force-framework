@@ -11,7 +11,7 @@ and abstract entity injection. An application can use  one of the _inject_ metho
 the same implementation class to be used in many places in the code base. It allows for the`implementation to be
 changed application wide easily.
 
-A custom object, _Binding__c_, may be used to configure the binding from the property or abstract entity to a
+The custom object, _Binding__c_, may be used to configure the binding from the property or abstract entity to a
 concrete class.
 
 By default, the class injected into an application will be a singleton. For this reason, the implementation class must
@@ -33,7 +33,7 @@ using Anonymous Apex.
 
 ## Bindings
 A binding is the mapping from a property or abstract entity to its concrete implementation. The bindings are stored in
-the _Dependency_ class as a _Map_ called the registry. The key to the registry is the _Type_ of the property or
+the _DependencyV1_ class as a _Map_ called the registry. The key to the registry is the _Type_ of the property or
 abstract entity.
 
 Two types of binding are supported.
@@ -48,7 +48,7 @@ action.
 ## Implementation Classes
 Each implementation class must have a public or global no-op constructor. An exception will be thrown if an attempt
 is made to bind an abstract entity to a class that doesn't. To allow a class to be bound that has a private or
-protected no-op constructor, the _Types.Factory_ interface can be used. Create an inner class in the class to be
+protected no-op constructor, the _TypesV1.Factory_ interface can be used. Create an inner class in the class to be
 registered that implements the interface.
 
 See [Types](../types/README.md) for more information.
@@ -100,7 +100,7 @@ The _classes/BindingChecks.cls_ class and _customMetadata_ directory in the
 [example](https://github.com/markbrennand/force-frameworks/tree/gh-pages/example/dependency) directory show how to
 register a _BindingCheck_ for each of the example classes.
 
-**Important: An Exception will be thrown on the first use of the _Dependency_ class if any of the bindings added to it
+**Important: An Exception will be thrown on the first use of the _DependencyV1_ class if any of the bindings added to it
 either programmatically, or from the custom object, do not have a _BindingCheck_ class to validate it.**
 
 ## Injection
@@ -194,7 +194,7 @@ _Map_.
 Delete the _Binding_. Then run _PropertyInjection.run_ in Anonymous Apex, you will see that the values displayed
 are now the default values.
 
-In the _Bindings_ tab, create a new record. Assign it the following values.
+In the _Dependency Bindings_ tab, create a new record. Assign it the following values.
 
 | Field | Value                              |
 | ----- |------------------------------------|

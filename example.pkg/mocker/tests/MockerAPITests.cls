@@ -5,7 +5,7 @@
  * @author Mark Brennand
  */
 @IsTest
-global with sharing class MockerAPITests {
+public with sharing class MockerAPITests {
 
     /**
      * @description
@@ -273,8 +273,8 @@ global with sharing class MockerAPITests {
         }
     }
 
-    global with sharing class MockerFactory implements forcefw.MockerV1.Factory {
-        global Object stub(final StubProvider provider) {
+    public with sharing class MockerFactory implements forcefw.MockerV1.Factory {
+        public Object stub(final StubProvider provider) {
             return Test.createStub(MockerTestApi.class, provider);
         }
     }
