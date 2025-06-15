@@ -22,7 +22,6 @@ modify or extend the code. Clean code follows established conventions, standards
 concise, and expressive.
 
 # Getting Started
-
 See [here](GETTINGSTARTED.md) for information on how to deploy the code or package to an org, configure the org
 for _Force Framework_ use, and set up the example code.
 

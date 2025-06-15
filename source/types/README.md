@@ -11,13 +11,7 @@ it will call the _newInstance_ method of the _Factory_ implementation to create 
 See the reference [Apex docs](SfApexDocs/typesv1.html) for the API. It is suggested that you keep a page open with
 the Apex docs  loaded for your reference whilst reading this page.
 
-If you wish to try the example code in an org. Deploy the code in the 
-[example](https://github.com/markbrennand/force-frameworks/tree/gh-pages/example/types) directory to  your org if the
-org has the Force Framework code deployed. If your org has the Force Framework package deployed, deploy the code in
-the [example.pkg](https://github.com/markbrennand/force-frameworks/tree/gh-pages/example.pkg/types) directory.
-
-You must assign the _Force Framework Manager_ permission set to the user you will run the example code as in
-using Anonymous Apex.
+If you wish to try the _Types_ example code , see [Geting Started](../../GETTINGSTARTED.md).
 
 ### Use Case - Reduce Need For Global Classes
 If you're using the Force Framework package, the code for that package is in the _forcefw_ namespace. Taking

@@ -6,7 +6,7 @@ maintain. Instead of a class creating its own dependencies, it receives them as 
 properties (setter injection), or through an interface (abstract entity injection).  The term "abstract entity" used
 in this document shall refer to either an interface or abstract class.
 
-Thg _Dependency_ class allows an abstract entity to be bound to a concrete implementation. It supports setter
+Thg _DependencyV1_ class allows an abstract entity to be bound to a concrete implementation. It supports setter
 and abstract entity injection. An application can use  one of the _inject_ methods to perform injection. This allows
 the same implementation class to be used in many places in the code base. It allows for the`implementation to be
 changed application wide easily.
@@ -23,13 +23,7 @@ interface.
 See the reference [Apex docs](SfApexDocs/dependencyv1.html) for the API. It is suggested that you keep a page open with the
 Apex docs loaded for your reference whilst reading this page.
 
-If you wish to try the example code in an org. Deploy the code in the
-[example](https://github.com/markbrennand/force-frameworks/tree/gh-pages/example/dependency) directory to  your org if the
-org has the Force Framework code deployed. If your org has the Force Framework package deployed, deploy the code in
-the [example.pkg](https://github.com/markbrennand/force-frameworks/tree/gh-pages/example.pkg/dependency) directory.
-
-You must assign the _Force Framework Manager_ permission set to the user you will run the example code as in
-using Anonymous Apex.
+If you wish to try the _Dependency Injection_ example code, see [Geting Started](../../GETTINGSTARTED.md).
 
 ## Bindings
 A binding is the mapping from a property or abstract entity to its concrete implementation. The bindings are stored in
