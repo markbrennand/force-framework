@@ -180,7 +180,7 @@ The following example shows how a fake object id can be added to a _List_ of _Ac
         new Account(BillingCountry = 'UK')
 })
     .forMethod('addAccounts')
-    .returns(new AccountModifier())
+        .returns(new AccountModifier())
 
 public with sharing class AccountModifier implements MockerV1.Modifier {
         public Object process(List<Object> arguments) {
@@ -194,4 +194,26 @@ public with sharing class AccountModifier implements MockerV1.Modifier {
             return returnList;
         }
     }
+```
+### Call Chaining
+The _MockerV1_ class is designed to allow the mocking of an object to be defined as a single
+statement. Taking the _MyBean_ interface used as an example in this page, the mocked
+object could be built like this.
+```
+MyBean mocked = (MyBean) MockerV1.of(MyBean.class)
+    .whenNoArguments()
+        .forMethod('getTime').returns(Datetime.now())
+        .forMethod('getCount').returns(12)
+        .forMethod('getAccount').returns (new Account(Name = 'Joe Bloggs'))
+    .whenArgument(Datetime.now())
+        .forMethod('setTime')
+            .withComparators(new List<Comparator<Object>> { new DatetimeComparator() })
+            .called(1)
+    .whenArgument(1)
+        .forMethod('setCount')
+    .whenArgument(new Account(Name = 'Joe Blogs'))
+        .forMethod('setAccount')
+    .whenArgument(new List<Account> { new Account(Name = 'Joe Blogs') })
+        .forMethod('addAccounts')
+            .returns(new AccountModifier())
 ```
