@@ -49,7 +49,7 @@ its own namespace.
 [Package Example](https://github.com/markbrennand/force-frameworks/tree/gh-pages/example.pkg/mocker/tests/MockerAPITests.cls)
 
 ### Mocking Methods
-After creating the _MockerV_, you can start adding the method arguments, your mocked object is expecting. Take a simple
+After creating the _MockerV1_, you can start adding the method arguments, your mocked object is expecting. Take a simple
 bean as an example.
 ```
 public interface MyBean {
@@ -57,21 +57,27 @@ public interface MyBean {
     void setTime(Datetime when);
     Integer getCount();
     void setCount(Integer count);
+    Account getAccount();
     void setAccount(Account acc);
     List<Account> addAccounts(List<Account> accs);
 ```
 
-Inspecting the bean, you will see there are three distinct method arguments. No arguments, Datetime and Integer.
-We can mock these methods as follows.
+Inspecting the bean, you will see there are five distinct method arguments. No arguments, _Datetime_, _Integer_,
+_Account_ and _List<Account>_. We can mock these methods as follows.
 ```
 mocker
     .whenNoArguments()
         .forMethod('getTime').returns(Datetime.now())
         .forMethod('getCount').returns(12)
+        .forMethod('getAccount').returns (new Account(Name = 'Joe Bloggs'))
     .whenArgument(Datetime.now())
         .forMethod('setTime')
     .whenArgument(1)
-        .forMethod('setCount');
+        .forMethod('setCount')
+    .whenArgument(new Account(Name = 'Joe Blogs'))
+        .forMethod('setAccount')
+    .whenArgument(new List<Account> { new Account(Name = 'Joe Blogs') })
+        .forMethod('addAccounts')
 ```
 
 The _returns_ method defines the return value from the mocked method.
