@@ -6,7 +6,7 @@
  */
 public interface MockerTestAPI {
     Datetime getCurrentTime();
+    void setCurrentTime(Datetime currentTime);
     String getOrganizationId();
     List<Account> addAccounts(List<Account> accounts);
-    void processError(DMLException de);
 }

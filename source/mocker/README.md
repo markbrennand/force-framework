@@ -9,7 +9,7 @@ dependencies should be mocked to provide the expected results for the test.
 See the reference [Apex docs](SfApexDocs/mockerv1.html) for the API. It is suggested that you keep a page open
 with the Apex docs loaded for your reference whilst reading this page.
 
-If you wish to try the _Mocker_ example code , see [Geting Started](../../GETTINGSTARTED.md).
+If you wish to try the _Mocker_ example codehttps://markbrennand.github.io/force-framework/source/mocker/, see [Geting Started](../../GETTINGSTARTED.md).
 
 For an example of a complete suite of unit tests written using _MockerV1_ that test their features in isolation, see
 [Asynhcronous Unit Tests](https://github.com/markbrennand/force-frameworks/tree/gh-pages/source/asynchronous/tests)
@@ -49,43 +49,42 @@ its own namespace.
 [Package Example](https://github.com/markbrennand/force-frameworks/tree/gh-pages/example.pkg/mocker/tests/MockerAPITests.cls)
 
 ### Mocking Methods
-After creating the _MockerV1_, you can start adding the method arguments, your mocked object is expecting. Take a simple
-bean as an example.
+After creating the _MockerV1_, you can start adding the method arguments, your mocked object is expecting. Take the
+interface from the example code.
 ```
-public interface MyBean {
-    Datetime getTime();
-    void setTime(Datetime when);
-    Integer getCount();
-    void setCount(Integer count);
-    Account getAccount();
-    void setAccount(Account acc);
-    List<Account> addAccounts(List<Account> accs);
+public interface MockerTestAPI {
+    Datetime getCurrentTime();
+    void setCurrentTime(Datetime currentTime);
+    String getOrganizationId();
+    List<Account> addAccounts(List<Account> accounts);
+}
 ```
 
-Inspecting the bean, you will see there are five distinct method arguments. No arguments, _Datetime_, _Integer_,
-_Account_ and _List<Account>_. We can mock these methods as follows.
+Inspecting the interface, you will see there are three distinct method arguments. No arguments, _Datetime_, and
+_List<Account>_. We can mock these methods as follows.
 ```
 mocker
     .whenNoArguments()
-        .forMethod('getTime').returns(Datetime.now())
-        .forMethod('getCount').returns(12)
-        .forMethod('getAccount').returns (new Account(Name = 'Joe Bloggs'))
+        .forMethod('getCurrentTime')
+            .returns(Datetime.now())
+        .forMethod('getOrganization')
+            .returns (new Organization(Id = MockerV1.fakeId(Organization.SObjectType)))
     .whenArgument(Datetime.now())
-        .forMethod('setTime')
-    .whenArgument(1)
-        .forMethod('setCount')
-    .whenArgument(new Account(Name = 'Joe Blogs'))
-        .forMethod('setAccount')
-    .whenArgument(new List<Account> { new Account(Name = 'Joe Blogs') })
+        .forMethod('setCurrentTime')
+    .whenArgument(new List<Account> { new Account(Name = 'Bill'), new Account(Name = 'Ted') })
         .forMethod('addAccounts')
 ```
+
+The arguments passed to the mocked method when called from a unit test, must exactly match those set as the expected
+arguments in the _whenArgument(s)_ call. If the arguments don't match, any methods linked to those arguments will not
+have their call count incremented or any of the additional logic associated with the method performed.
 
 The _returns_ method defines the return value from the mocked method.
 
 The mocked method can be made to throw an exception instead.
 ```
 .whenArgument(Datetime.now())
-    .forMethod('setTime')
+    .forMethod('setCurrentTime')
         .throws(new MockerV1.APIException('Example exception')
 ```
 
@@ -93,7 +92,8 @@ We can set the number of times the mocked method is expected to be called when t
 _called_ method after _forMethod_ to set the number of times the method should be called.
 ```
 .whenArgument(Datetime.now())
-    .forMethod('setTime').called(1)
+    .forMethod('setCurrentTime')
+        .called(1)
 ```
 
 At the end of the unit test call _MockerV1.validate_ to check that all the mocked methods have been called the
@@ -101,7 +101,7 @@ expected number of times. If the method has not had the expected number of calls
 times, including zero.
 
 ### Argument Matching
-By default, all argument matching, except for SObjects and Exceptions, is literal. From the previous example,
+By default, all argument matching, except for _SObjects_ and _Exceptions_, is literal. From the previous example,
 _whenArgument(Datetime.now())_ would not be matched unless the class using the mocked method passed exactly
 the same _Datetime_ value as when the argument was added to the mocked object. This is highly unlikely and
 argument comparators can be used to get round this issue.
@@ -115,42 +115,43 @@ the  stack trace to match too.
 #### SObject Matching
 The default argument comparator for _SObject_ checks that the argument passed to the mocked method is of the same object
 type as the expected argument for the mocked method. And that the expected argument has field values which are
-a sub-set of the argument passed to the mocked method. Take the following example.
+a sub-set of the argument passed to the mocked method. This matching logic is also applied to arguments which are
+_Lists_ and _Sets_ of _SObjects_.
 
-Account1 [ Name = 'Fred Bloggs', BillingCountry = 'UK' ]
+Take the following example.
 
-Account2 [ Name = 'Fred Bloggs', BillingCountry = 'US' ]
+Account1 ( Name = 'Bill', BillingCountry = 'UK' )
+Account2 ( Name = 'Ted', BillingCountry = 'UK' )
 
 Take the following _MockerV1_.
 ```
-.whenArgument(new Account[Name='Fred Bloggs'])
-    .forMethod('setAccount')
+.whenArgument(new List<Account> { new Account(BillingCountry ='UK'), new Account(BillingCountry = 'UK') })
+    .forMethod('addAccounts')
 ```
 
-As the expected argument contains only _Name_, both Account1 and Account2 would match if passed to the
-mocked _setAccount_ method.
+As the expected argument contains only _BillingCountry_, both Account1 and Account2 would match if passed as the _List_
+of _Accounts_ to the mocked method.
 
-And the following _MockerV1_.
+Now consider the following _MockerV1_.
 ```
-.whenArgument(new Account[Name='Fred Bloggs', BillingCountry = 'UK'])
-    .forMethod('setAccount')
+.whenArgument(new List<Account> { new Account(Name='Bill', BillingCountry = 'UK'), new Account(Name = 'Ted', BillingCountry = 'US') }))
+    .forMethod('addAccounts')
 ```
 
-As the expected argument contains both _Name_ and _BillingCountry_,  only Account1 would match if passed to the
-mocked _setAccount_ method.
-
-This matching logic is also applied to arguments which are _Lists_ and _Sets_ of _SObjects_.
+The expected argument has _Accounts_ with _Name_ and _BillingCountry_ set. If the _List_ of _Accounts_ passed to the
+mocked method  was Account1 and Account2, Account2 would not match as it has a _BillingCountry_ of US and the expected
+argument for the second _List_ entry has a _BillingCountry_ of US.
 
 #### Custom Argument Matching
-Returning to the _Datetime_ argument to the _setTime_ call on the bean. We can address the problem by adding
-a custom argument comparator for the argument. Any custom argument comparator will be called before the default 
-argument comparators, so if you wanted to add your own _Exception_ or _SObject_ argument comparator, you can.
+Returning to the _Datetime_ argument issue. We can address the problem by adding  a custom argument comparator for the
+argument. Any custom argument comparator will be called before the default  argument comparators, so if you wanted to
+add your own _Exception_ or _SObject_ argument comparator, you can.
 
-The first thing you need to do is write your own argument comparator implementation for the argument. Here's
-one we could use for _Datetime_.
+The first thing you need to do is write your own argument comparator implementation for the argument. Here's the
+one used in the example code.
 
 ```
-public with sharing class DatetimeComparator implements Comparator<Object> {
+private with sharing class DatetimeComparator implements Comparator<Object> {
     public Integer compare(Object param1, Object param2) {
         return (param1 instanceof Datetime && param2 instanceof Datetime) ? 0 : -1;
     }
@@ -163,7 +164,7 @@ expected argument are of the same _Type_. The value of the argument is ignored.
 The _MockerV1_ argument definition becomes.
 ```
 .whenArgument(Datetime.now())
-    .forMethod('setTime')
+    .forMethod('setCurrentTime')
         .withComparators(new List<Comparator<Object>> { new DatetimeComparator() })
             .called(1)
 ```
@@ -174,15 +175,15 @@ passed to the mocked method. _MockerV1_ supports this with the _MockerV1.Modifie
 _returns_ argument of a _forMethod_ definition, the modifier's _process_ method is called, with the arguments
 passed to the mocked method.
 
-The following example shows how a fake object id can be added to a _List_ of _Account_ objects using a _Modifier_.
+The following from the example code shows how a fake object id can be added to a _List_ of _Account_ objects using a
+_Modifier_.
 ```
-.whenArgument(new List<Account> {
-        new Account(BillingCountry = 'UK')
-})
+.whenArgument(new List<Account> { new Account(Name = 'Bill') })
     .forMethod('addAccounts')
+        .called(1)
         .returns(new AccountModifier())
 
-public with sharing class AccountModifier implements MockerV1.Modifier {
+private with sharing class AccountModifier implements MockerV1.Modifier {
         public Object process(List<Object> arguments) {
             List<Account> returnList = new List<Account>();
             for (Account acc : (List<Account>) arguments[0]) {
@@ -197,23 +198,21 @@ public with sharing class AccountModifier implements MockerV1.Modifier {
 ```
 ### Call Chaining
 The _MockerV1_ class is designed to allow the mocking of an object to be defined as a single
-statement. Taking the _MyBean_ interface used as an example in this page, the mocked
-object could be built like this.
+statement. The _MockerV1_ used to test the API when used by a service in the example code
+shows this.
 ```
-MyBean mocked = (MyBean) MockerV1.of(MyBean.class)
-    .whenNoArguments()
-        .forMethod('getTime').returns(Datetime.now())
-        .forMethod('getCount').returns(12)
-        .forMethod('getAccount').returns (new Account(Name = 'Joe Bloggs'))
-    .whenArgument(Datetime.now())
-        .forMethod('setTime')
-            .withComparators(new List<Comparator<Object>> { new DatetimeComparator() })
-            .called(1)
-    .whenArgument(1)
-        .forMethod('setCount')
-    .whenArgument(new Account(Name = 'Joe Blogs'))
-        .forMethod('setAccount')
-    .whenArgument(new List<Account> { new Account(Name = 'Joe Blogs') })
+MockerTestAPI mockedAPI = (MockerTestAPI) MockerV1.of(MockerTestAPI.class)
+    .whenArgument(new List<Account> { new Account(Name = 'Bill') })
         .forMethod('addAccounts')
+            .called(1)
             .returns(new AccountModifier())
+    .whenArgument(new List<Account> { new Account(BillingCountry = 'UK'), new Account(BillingCountry = 'UK') })
+        .forMethod('addAccounts')
+            .called(2)
+            .returns(new AccountModifier())
+        .whenNoArguments()
+            .forMethod('getCurrentTime')
+                .called(5)
+                .returns(Datetime.now())
+    .mock();
 ```

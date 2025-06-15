@@ -16,7 +16,7 @@ public with sharing class MockerAPITests {
 
         // Create a mocked API for the getCurrentTime method that will return the current date and time when called.
         // The method must be called once.
-        MockerTestAPI mockedAPI = (MockerTestApi) forcefw.MockerV1.of(new MockerFactory())
+        MockerTestAPI mockedAPI = (MockerTestAPI) forcefw.MockerV1.of(new MockerFactory())
                 .whenNoArguments()
                     .forMethod('getCurrentTime')
                         .called(1)
@@ -39,7 +39,7 @@ public with sharing class MockerAPITests {
 
         // Create a mocked API for the getCurrentTime method that throws an Exception when called.
         // The method must be called once.
-        MockerTestAPI mockedAPI = (MockerTestApi) forcefw.MockerV1.of(new MockerFactory())
+        MockerTestAPI mockedAPI = (MockerTestAPI) forcefw.MockerV1.of(new MockerFactory())
                 .whenNoArguments()
                     .forMethod('getCurrentTime')
                         .called(1)
@@ -66,7 +66,7 @@ public with sharing class MockerAPITests {
 
         // Create a mocked API for the getCurrentTime and getOrganizationId methods.
         // Both methods should be called once.
-        MockerTestAPI mockedAPI = (MockerTestApi) forcefw.MockerV1.of(new MockerFactory())
+        MockerTestAPI mockedAPI = (MockerTestAPI) forcefw.MockerV1.of(new MockerFactory())
                 .whenNoArguments()
                     .forMethod('getCurrentTime')
                         .called(1)
@@ -93,18 +93,18 @@ public with sharing class MockerAPITests {
     private static void testUserDefinedComparator() {
         Exception exc = new DmlException('Test');
 
-        // Create a mocked API for the processError method.
-        // The default Exception comparator would fail tgo match the Exception as their messages differ.
-        // An Exception comparator is registered for the arguments which checks that only the Type of the Exceptions match.
+        // Create a mocked API for the setCurrentTime method.
+        // A Datetime comparator is registered for the argument which checks that only the Type of the arguments match.
         // The method must be called once.
-        MockerTestAPI mockedAPI = (MockerTestApi) forcefw.MockerV1.of(new MockerFactory())
-                .whenArgument(exc)
-                    .withComparators(new List<Comparator<Object>> { new ExceptionComparator() })
-                        .forMethod('processError')
+        MockerTestAPI mockedAPI = (MockerTestAPI) forcefw.MockerV1.of(new MockerFactory())
+                .whenArgument(Datetime.now())
+                    .withComparators(new List<Comparator<Object>> { new DatetimeComparator() })
+                        .forMethod('setCurrentTime')
                             .called(1)
                 .mock();
 
-        mockedAPI.processError(new DMLException('Another Test'));
+        // Pass a date which cannot match that of the argument set for the mocked method.
+        mockedAPI.setCurrentTime(Datetime.now().addDays(1));
 
         // Check that the mocked method has been called the correct number of times.
         forcefw.MockerV1.validate();
@@ -122,7 +122,7 @@ public with sharing class MockerAPITests {
         // Create a mocked API for the addAccounts method.
         // Set the return value to a Modifier which will create a fake object Id for the Account objects passed to the method.
         // The method must be called once.
-        MockerTestAPI mockedAPI = (MockerTestApi) forcefw.MockerV1.of(new MockerFactory())
+        MockerTestAPI mockedAPI = (MockerTestAPI) forcefw.MockerV1.of(new MockerFactory())
                 .whenArgument(new List<Account> { new Account(Name = 'Bill') })
                     .forMethod('addAccounts')
                         .called(1)
@@ -154,7 +154,7 @@ public with sharing class MockerAPITests {
         // in the whenArguments call will result in other fields of the actual arguments passed to the method
         // not being included when matching the arguments.
         // The method must be called once.
-        MockerTestAPI mockedAPI = (MockerTestApi) forcefw.MockerV1.of(new MockerFactory())
+        MockerTestAPI mockedAPI = (MockerTestAPI) forcefw.MockerV1.of(new MockerFactory())
                 .whenArgument(new List<Account> { new Account(Name = 'Bill') })
                     .forMethod('addAccounts')
                         .called(1)
@@ -173,7 +173,7 @@ public with sharing class MockerAPITests {
         // in the whenArguments call will result in other fields of the actual arguments passed to the method
         // not being included when matching the arguments.
         // The method must be called once.
-        mockedAPI = (MockerTestApi) forcefw.MockerV1.of(new MockerFactory())
+        mockedAPI = (MockerTestAPI) forcefw.MockerV1.of(new MockerFactory())
                 .whenArgument(new List<Account> {
                         new Account(BillingCountry = 'UK'),
                         new Account(BillingCountry = 'UK')
@@ -202,7 +202,7 @@ public with sharing class MockerAPITests {
         Account a2 = new Account(Name = 'Ted', AccountNumber = '2', BillingCountry = 'UK');
 
         // Create a mocked API for the addAccounts method.
-        MockerTestAPI mockedAPI = (MockerTestApi) forcefw.MockerV1.of(new MockerFactory())
+        MockerTestAPI mockedAPI = (MockerTestAPI) forcefw.MockerV1.of(new MockerFactory())
                 .whenArgument(new List<Account> { new Account(Name = 'Bill') })
                     .forMethod('addAccounts')
                         .called(1)
@@ -239,9 +239,9 @@ public with sharing class MockerAPITests {
         forcefw.MockerV1.validate();
     }
 
-    private with sharing class ExceptionComparator implements Comparator<Object> {
+    private with sharing class DatetimeComparator implements Comparator<Object> {
         public Integer compare(Object param1, Object param2) {
-            return (param1 instanceof DmlException && param2 instanceof DmlException) ? 0 : -1;
+            return (param1 instanceof Datetime && param2 instanceof Datetime) ? 0 : -1;
         }
     }
 
@@ -275,7 +275,7 @@ public with sharing class MockerAPITests {
 
     public with sharing class MockerFactory implements forcefw.MockerV1.Factory {
         public Object stub(final StubProvider provider) {
-            return Test.createStub(MockerTestApi.class, provider);
+            return Test.createStub(MockerTestAPI.class, provider);
         }
     }
 }
