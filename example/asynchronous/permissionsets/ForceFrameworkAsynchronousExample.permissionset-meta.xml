@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Permissions required for example of Force Framework&apos;s Asynchronous API.</description>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Account.TotalContacts__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Contact.NumberOfPeers__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Force Framework Asynchronous Example</label>
+</PermissionSet>

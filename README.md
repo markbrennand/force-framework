@@ -3,7 +3,7 @@ A suite of APIs that have been developed to aid in Apex development.
 
 Built with SOLID Principles, Separation of Concerns and Clean code in mind.
 
-Click the [link](https://markbrennand.github.io/force-framework/) for the GitHub project documentation.
+See [Documentation](https://markbrennand.github.io/force-framework/) for navigable project documentation pages.
 
 #### SOLID Principles
 SOLID is a set of five design principles in object-oriented programming that helps developers create more maintainable,
@@ -23,8 +23,8 @@ concise, and expressive.
 
 # Getting Started
 
-See [Setup](SETUP.md) for information on how to deploy the code or package to an org and configure the org
-for _Force Framework_ use.
+See [here](GETTINGSTARTED.md) for information on how to deploy the code or package to an org, configure the org
+for _Force Framework_ use, and set up the example code.
 
 # Framework APIs
 The Force Framework comprises the following APIs. 
