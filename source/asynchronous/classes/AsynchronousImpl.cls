@@ -22,6 +22,16 @@ public with sharing virtual class AsynchronousImpl implements AsynchronousV1.API
 
     /**
      * @description
+     * Flag determining whether to run the triggers or not.
+     * <br><br>
+     * When persisting an AsynchronousJob__c object in all places other than job creation, the triggers should be
+     * disabled as they add a lot of overhead. And there is no need to try and start an Asynchronous Scheduler
+     * for the updates made to the object.
+     */
+    public static Boolean skipTriggers = false;
+
+    /**
+     * @description
      * Active API instance.
      * <br><br>
      * The instance is injected from the Registry.
@@ -57,7 +67,7 @@ public with sharing virtual class AsynchronousImpl implements AsynchronousV1.API
      */
     public with sharing class Factory implements TypesV1.Factory {
         public Object newInstance() {
-            return new Implementation();
+            return new APIImpl();
         }
     }
 
@@ -65,7 +75,7 @@ public with sharing virtual class AsynchronousImpl implements AsynchronousV1.API
      * @description
      * Class providing the implementation of the API.
      */
-    private with sharing class Implementation implements AsynchronousV1.API {
+    private with sharing class APIImpl implements AsynchronousV1.API {
 
         /**
          * @description
@@ -162,6 +172,10 @@ public with sharing virtual class AsynchronousImpl implements AsynchronousV1.API
      * @param asyncObjects The persisted objects.
      */
     public static void onTriggerBefore(final List<AsynchronousJob__c> asyncObjects) {
+        if (skipTriggers) {
+            return;
+        }
+
         Boolean hasErrors = false;
 
         for (AsynchronousJob__c asyncObject : asyncObjects) {
@@ -193,6 +207,10 @@ public with sharing virtual class AsynchronousImpl implements AsynchronousV1.API
      * @param previousAsyncObjects The previous values of the persisted objects.
      */
     public static void onTriggerAfter(final List<AsynchronousJob__c> asyncObjects, final Map<Id, AsynchronousJob__c> previousAsyncObjects) {
+        if (skipTriggers) {
+            return;
+        }
+
         final List<AsynchronousJob__c> toDelete = new List<AsynchronousJob__c>();
         Boolean startScheduler = false;
 
@@ -215,6 +233,34 @@ public with sharing virtual class AsynchronousImpl implements AsynchronousV1.API
 
         if (startScheduler) {
             AsynchronousScheduler.queue(new Set<String>());
+        }
+    }
+
+
+    /**
+     * @description
+     * Class providing check on Binding made to AsynchronousV1.API.
+     */
+    public with sharing class BindingCheck implements DependencyV1.BindingCheck {
+
+        /**
+         * @description
+         * Checks that a valid binding has been made to AsynchronousV1.API.
+         *
+         * @param forType The type being bound to, AsynchronousV1.API.
+         * @param withImpl The implementation being bound to AsynchronousV1.API.
+         *
+         * @return The result of the validation.
+         */
+        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
+            if (TypesV1.newInstance(withImpl) instanceof AsynchronousV1.API) {
+                return new DependencyV1.ValidationResult(true, null);
+            } else {
+                return new DependencyV1.ValidationResult(
+                        false,
+                        'Class ' + withImpl.getName() + ' does not implement ' + forType.getName()
+                );
+            }
         }
     }
 

@@ -79,7 +79,7 @@ public with sharing class BindingTriggerTests {
                         Type__c = BindingTestHelper.TestInterface.class.getName(),
                         Implementation__c = BindingTestHelper.SingletonTest.class.getName()
                 );
-                Assert.fail();
+                Assert.fail('Binding creation should fail');
             } catch (DmlException de) {
                 Assert.isTrue(
                         TestHelper.exceptionContains('Binding for BindingTestHelper.TestInterface already exists', de),

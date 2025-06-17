@@ -453,31 +453,4 @@ global with sharing class AsynchronousV1 {
     global static List<Job> queueJobs(final List<Job> asyncJobs) {
         return AsynchronousImpl.INJECT.queueJobs(asyncJobs);
     }
-
-    /**
-     * @description
-     * Class providing check on Binding made to AsynchronousV1.API.
-     */
-    public with sharing class BindingCheck implements DependencyV1.BindingCheck {
-
-        /**
-         * @description
-         * Checks that a valid binding has been made to AsynchronousV1.API.
-         *
-         * @param forType The type being bound to, AsynchronousV1.API.
-         * @param withImpl The implementation being bound to AsynchronousV1.API.
-         *
-         * @return The result of the validation.
-         */
-        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
-            if (TypesV1.newInstance(withImpl) instanceof AsynchronousV1.API) {
-                return new DependencyV1.ValidationResult(true, null);
-            } else {
-                return new DependencyV1.ValidationResult(
-                        false,
-                        'Class ' + withImpl.getName() + ' does not implement ' + forType.getName()
-                );
-            }
-        }
-    }
 }

@@ -293,6 +293,35 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
     }
 
     /**
+     * Returns an argument which can be used in a whenArgument call to represent a method parameter which must be
+     * of the given Type but whose value is not checked.
+     *
+     * The parameter may be null if the types match.
+     *
+     * @param type The Type the argument is for.
+     *
+     * @return The argument.
+     */
+    global static Object any(final Type type) {
+        return new AnyValue(type, true);
+    }
+
+    /**
+     * Returns an argument which can be used in a whenArgument call to represent a method parameter which must be
+     * of the given Type but whose value is not checked.
+     *
+     * The parameter must be non null if the types match.
+     *
+     * @param type The Type the argument is for.
+     *
+     * @return The argument.
+     */
+    global static Object anyNonNull(final Type type) {
+        return new AnyValue(type, false);
+    }
+
+
+    /**
      * @description
      * Generates a fake id for the given object type.
      *
@@ -365,7 +394,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
             Assertion.isNotNull(arguments, 'The are no arguments assigned to the stub ' + stubbedObject);
 
             for (Arguments argument : allArguments) {
-                if (argument.matches(arguments)) {
+                if (argument.matches(arguments, paramTypes)) {
                     for (Method method : argument.methods) {
                         if (method.isMatch(stubbedMethodName)) {
                             return method.call(arguments);
@@ -611,10 +640,11 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          * Checks whether the arguments passed to a mocked class's method match the expected arguments.
          *
          * @param actualArguments The arguments to be checked.
+         * @param actualTypes The types of the arguments to be checked.
          *
          * @return True if the arguments match the expected arguments, or false if not.
          */
-        private Boolean matches(final List<Object> actualArguments) {
+        private Boolean matches(final List<Object> actualArguments, final List<Type> actualTypes) {
             Assertion.isNotNull(actualArguments, 'argument: Mocker.Arguments.matches.actualArguments');
 
             if (expectedArguments.size() != actualArguments.size()) {
@@ -622,12 +652,31 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
             }
 
             for (Integer i = 0; i < expectedArguments.size(); i++) {
+                if (expectedArguments[i] instanceof AnyValue && (actualTypes[i] == ((AnyValue) expectedArguments[i]).type)) {
+                    if (((AnyValue) expectedArguments[i]).allowNull || actualArguments[i] != null) {
+                        continue;
+                    }
+                }
+
                 if (!ComparisonHelper.compare(comparators, expectedArguments[i], actualArguments[i])) {
                     return false;
                 }
             }
 
             return true;
+        }
+    }
+
+    /**
+     * Class representing an argument to be matched by Type only.
+     */
+    private with sharing class AnyValue {
+        public final Type type { public get; private set; }
+        public final Boolean allowNull { public get; private set; }
+
+        public AnyValue(final Type type, final Boolean allowNull) {
+            this.type = type;
+            this.allowNull = allowNull;
         }
     }
 }

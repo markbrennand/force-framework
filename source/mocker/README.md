@@ -9,7 +9,10 @@ dependencies should be mocked to provide the expected results for the test.
 See the reference [Apex docs](SfApexDocs/mockerv1.html) for the API. It is suggested that you keep a page open
 with the Apex docs loaded for your reference whilst reading this page.
 
-If you wish to try the _Mocker_ example codehttps://markbrennand.github.io/force-framework/source/mocker/, see [Geting Started](../../GETTINGSTARTED.md).
+If a failure occurs in the _MockerV1_ code, an _AssertionException_ is thrown. See
+[Apex docs](../assertion/SfApexDocs/assertion.html).
+
+If you wish to try the _Mocker_ example code, see [Geting Started](../../GETTINGSTARTED.md).
 
 For an example of a complete suite of unit tests written using _MockerV1_ that test their features in isolation, see
 [Asynhcronous Unit Tests](https://github.com/markbrennand/force-frameworks/tree/gh-pages/source/asynchronous/tests)
@@ -168,6 +171,21 @@ The _MockerV1_ argument definition becomes.
         .withComparators(new List<Comparator<Object>> { new DatetimeComparator() })
             .called(1)
 ```
+
+### Any Argument Matching
+Adding the argument comparator for _Datetime_ took some extra development effort. It's also not something you'd
+want to repeat for all the other arguments your methods may take that you don't care about the value of when
+mocking it.
+
+This is where _MockerV1.any_ can be used instead. The following _MockerV1_ argument definition will add a
+method argument of type _Datetime_ which can take any value, including null, when the mocked method is matched.
+```
+.whenArgument(MockerV1.any(Datetime.class))
+    .forMethod('setCurrentTime')
+        .called(1)
+```
+
+
 
 ### Conditional Return Values
 There may be times when you want your mocked object to return a value from a method based on the arguments

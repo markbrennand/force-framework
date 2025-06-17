@@ -147,6 +147,7 @@ public with sharing class AsynchronousFinalizer {
             if (retryNumber == maximumRetries) {
                 if (asyncJob.getRunnable().onFailure(asyncJob, exc)) {
                     asyncObject.Status__c = AsynchronousV1.Status.FAILED.name();
+                    AsynchronousImpl.skipTriggers = true;
                     AsynchronousDAO.INJECT.persistObjects(new List<AsynchronousJob__c> { asyncObject });
                 } else {
                     AsynchronousDAO.INJECT.removeObjects(new List<AsynchronousJob__c> { asyncObject });

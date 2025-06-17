@@ -44,7 +44,7 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
      */
     public with sharing class Factory implements TypesV1.Factory {
         public Object newInstance() {
-            return new Implementation();
+            return new APIImpl();
         }
     }
 
@@ -52,7 +52,7 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
      * @description
      * Class providing the implementation of the API.
      */
-    private with sharing class Implementation implements AsynchronousV1.DAO {
+    private with sharing class APIImpl implements AsynchronousV1.DAO {
 
         /**
          * @description
@@ -160,7 +160,12 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
          */
         public void persistObjects(final List<AsynchronousJob__c> asyncObjects) {
             Assertion.isNotNull(asyncObjects, 'argument: AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
+
+            final Boolean savedSkipTriggers = AsynchronousImpl.skipTriggers;
+
+            AsynchronousImpl.skipTriggers = true;
             Database.upsert(asyncObjects, AccessLevel.USER_MODE);
+            AsynchronousImpl.skipTriggers = savedSkipTriggers;
         }
 
         /**
@@ -180,6 +185,9 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
             Assertion.isNotNull(states, 'argument: AsynchronousDAO.apiPersistAsynchronous.states');
             Assertion.areEqual(asyncObjects.size(), states.size(), 'The number of Asynchronous objects does not match the number of states');
 
+            final Boolean savedSkipTriggers = AsynchronousImpl.skipTriggers;
+
+            AsynchronousImpl.skipTriggers = false;
             Database.upsert(asyncObjects, AccessLevel.USER_MODE);
 
             final Set<Id> allIds = new Set<Id>();
@@ -196,6 +204,8 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
             );
 
             Database.upsert(newStates, AccessLevel.USER_MODE);
+
+            AsynchronousImpl.skipTriggers = savedSkipTriggers;
         }
 
         /**

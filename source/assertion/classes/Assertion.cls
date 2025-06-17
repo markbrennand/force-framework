@@ -1,14 +1,19 @@
 /**
  * @description
  * Class providing programmatic Assertions.
- *
+ * <br><br>
  * The Salesforce Assert class is great, but it throws an Exception which cannot be caught. So, in reality, is only
- * useful for unit tests. All unit tests should use their class.
+ * useful for unit tests.
+ * <br><br>
+ * Ancestor methods should be able to catch assertion errors so they can be handled. For example, the Asynchronous
+ * API must be able to catch any assertion failures during the processing of a job so it can record the caught
+ * Exception. With the Salesforce assertion Exception, that is not possible.
+ * <br><<br>
+ * The APIs in the Force Framework all use this class to check assertions, allowing any Exception to be caught.
  *
  * @author Mark Brennand
  */
-
-public with sharing class Assertion {
+global with sharing class Assertion {
 
     /**
      * @description
@@ -43,6 +48,9 @@ public with sharing class Assertion {
     }
 
     /**
+     * @description
+     * Tests whether the given vales are identical.
+     *
      * @param expected The expected value.
      * @param actual The actual value.
      * @param errorMessage Text to display in Exception if expected and actual don't match.
@@ -66,12 +74,18 @@ public with sharing class Assertion {
     /**
      * @description
      * Records a failure.
+     *
+     * @param errorMessage The error message to be recorded.
      */
     public static void fail(final String errorMessage) {
         throw new AssertionException(buildMessage(errorMessage));
     }
 
-    public with sharing class AssertionException extends Exception {}
+    /**
+     * @description
+     * Exception thrown when an assertion fails.
+     */
+    global with sharing class AssertionException extends Exception {}
 
     private static String asString(Object value) {
         return value == null ? 'null' : String.valueOf(value);

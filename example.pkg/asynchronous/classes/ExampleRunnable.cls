@@ -18,8 +18,8 @@ global with sharing class ExampleRunnable extends forcefw.AsynchronousRunnableV1
     }
 
     public override void run(forcefw.AsynchronousV1.Job job, String apexJobId) {
-        Assert.isNotNull(job.getRetryNumber());
-        Assert.isNotNull(apexJobId);
+        Assert.isNotNull(job.getRetryNumber(), 'Job has no retry number');
+        Assert.isNotNull(apexJobId, 'No Apex Job id');
 
         String delay = job.getState().get('delay');
         if (!String.isEmpty(delay)) {

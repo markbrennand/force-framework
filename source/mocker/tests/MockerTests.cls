@@ -10,7 +10,8 @@ public with sharing class MockerTests {
         try {
             MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                     .whenNoArguments()
-                    .forMethod('mock').throws(new DMLException('Test'))
+                        .forMethod('mock')
+                            .throws(new DMLException('Test'))
                     .mock();
 
             mocked.mock();
@@ -24,7 +25,8 @@ public with sharing class MockerTests {
     private static void testReturns() {
         MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                 .whenNoArguments()
-                .forMethod('mock').returns(123)
+                    .forMethod('mock')
+                        .returns(123)
                 .mock();
 
         Assert.areEqual(123, mocked.mock());
@@ -32,7 +34,8 @@ public with sharing class MockerTests {
 
         mocked = (MockerV1) MockerV1.of(MockerV1.class)
                 .whenNoArguments()
-                .forMethod('mock').returns(new TestModifier())
+                    .forMethod('mock')
+                        .returns(new TestModifier())
                 .mock();
 
         Assert.areEqual(456, mocked.mock());
@@ -41,7 +44,9 @@ public with sharing class MockerTests {
         try {
             MockerV1.of(MockerV1.class)
                     .whenNoArguments()
-                    .forMethod('mock').returns(123).returns(new TestModifier())
+                        .forMethod('mock')
+                        .returns(123)
+                        .returns(new TestModifier())
                     .mock();
 
             Assert.fail();
@@ -53,7 +58,8 @@ public with sharing class MockerTests {
     private static void testUnboundedCalls() {
         MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                 .whenNoArguments()
-                    .forMethod('mock').returns(123)
+                    .forMethod('mock')
+                        .returns(123)
                 .mock();
 
         Assert.areEqual(123, mocked.mock());
@@ -66,7 +72,9 @@ public with sharing class MockerTests {
     private static void testBoundedCalls() {
         MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                 .whenNoArguments()
-                    .forMethod('mock').called(2).returns(123)
+                    .forMethod('mock')
+                        .called(2)
+                        .returns(123)
                 .mock();
 
         Assert.areEqual(123, mocked.mock());
@@ -126,6 +134,49 @@ public with sharing class MockerTests {
     }
 
     @IsTest
+    private static void testAnyMatching() {
+        Account a1 = new Account(Id = MockerV1.fakeId(Account.SObjectType), Name='Bill');
+        Account a2 = new Account(Id = a1.Id, Name='Bill', AccountNumber = '123');
+        Account a3 = new Account(Id = a1.Id, Name='Ted');
+
+        MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
+                .whenArgument(MockerV1.any(Object.class))
+                    .forMethod('whenArgument')
+                .mock();
+
+        mocked.whenArgument(a1);
+        mocked.whenArgument(a2);
+        mocked.whenArgument(a3);
+        mocked.whenArgument(null);
+
+        mocked = (MockerV1) MockerV1.of(MockerV1.class)
+                .whenArguments(MockerV1.any(Object.class), a3)
+                    .forMethod('whenArguments')
+                .mock();
+
+        mocked.whenArguments(a1, a3);
+        mocked.whenArguments(a2, a3);
+        mocked.whenArguments(a3, a3);
+
+        try {
+            mocked.whenArgument(new List<Account> { a1, a2 });
+            Assert.fail();
+        } catch(Assertion.AssertionException ae) {}
+
+        mocked = (MockerV1) MockerV1.of(MockerV1.class)
+                .whenArgument(MockerV1.anyNonNull(Object.class))
+                    .forMethod('whenArgument')
+                .mock();
+
+        mocked.whenArgument(a1);
+
+        try {
+            mocked.whenArgument(null);
+            Assert.fail();
+        } catch(Assertion.AssertionException ae) {}
+    }
+
+    @IsTest
     private static void testChaining() {
         Account a1 = new Account(Id = MockerV1.fakeId(Account.SObjectType), Name='Bill');
         Account a2 = new Account(Id = a1.Id, Name='Ted', AccountNumber = '123');
@@ -159,12 +210,16 @@ public with sharing class MockerTests {
 
         MockerV1 mocked = (MockerV1) MockerV1.of(new TestFactory())
                 .whenArgument(a1)
-                .forMethod('whenArgument').called(1)
-                .forMethod('whenArguments').called(0)
+                    .forMethod('whenArgument')
+                        .called(1)
+                    .forMethod('whenArguments')
+                        .called(0)
                 .whenArgument(a2)
-                .forMethod('whenArgument').called(1)
+                    .forMethod('whenArgument').called(1)
                 .whenNoArguments()
-                .forMethod('mock').called(2).returns(123)
+                    .forMethod('mock')
+                        .called(2)
+                        .returns(123)
                 .whenArguments(1, 2)
                 .whenArguments(1, 2, 3)
                 .whenArguments(1, 2, 3, 4)
@@ -185,8 +240,9 @@ public with sharing class MockerTests {
 
         MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                 .whenArgument(a1)
-                .withComparators(new List<Comparator<Object>> { new TestComparator() })
-                .forMethod('whenArgument').called(1)
+                    .withComparators(new List<Comparator<Object>> { new TestComparator() })
+                        .forMethod('whenArgument')
+                            .called(1)
                 .mock();
 
         mocked.whenArgument(new Account(Name = 'Bill'));
@@ -194,7 +250,8 @@ public with sharing class MockerTests {
         try {
             mocked = (MockerV1) MockerV1.of(MockerV1.class)
                     .whenArgument(a1)
-                    .forMethod('whenArgument').called(1)
+                        .forMethod('whenArgument')
+                            .called(1)
                     .mock();
 
             mocked.whenArgument(new Account(Name = 'Bill'));

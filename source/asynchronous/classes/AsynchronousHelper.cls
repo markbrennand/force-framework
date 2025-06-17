@@ -117,7 +117,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      */
     public with sharing class Factory implements TypesV1.Factory {
         public Object newInstance() {
-            return new Implementation();
+            return new APIImpl();
         }
     }
 
@@ -154,7 +154,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      * @description
      * Class providing the implementation of the API.
      */
-    private with sharing class Implementation implements API {
+    private with sharing class APIImpl implements API {
 
         /**
          * @description
@@ -217,7 +217,7 @@ public with sharing virtual class AsynchronousHelper implements API {
                 chunks.add(chunk.Content__c);
             }
 
-            Assert.isFalse(chunks.isEmpty(), 'No asynchronous state chunks found for job');
+            Assertion.isTrue(!chunks.isEmpty(), 'No asynchronous state chunks found for job');
 
             return (Map<String, String>) JSON.deserialize(String.join(chunks, ''), Map<String, String>.class);
         }
@@ -361,6 +361,7 @@ public with sharing virtual class AsynchronousHelper implements API {
 
         asyncObject.Status__c = AsynchronousV1.Status.RUNNING.name();
         asyncObject.LastRunTime__c = Datetime.now();
+
         AsynchronousDAO.INJECT.persistObjects(new List<AsynchronousJob__c> { asyncObject });
 
         asyncObject.ApexJobId__c = System.enqueueJob(

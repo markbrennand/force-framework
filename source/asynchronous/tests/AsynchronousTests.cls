@@ -12,13 +12,32 @@ public with sharing class AsynchronousTests {
     }
 
     @IsTest
+    private static void testExtendedClassIsInsert() {
+        ExtendedClass extended = new ExtendedClass();
+
+        try {
+            extended.createJob(null, null, null, null, null);
+            Assert.fail();
+        } catch (AsynchronousV1.APIException ae) {
+            Assert.areEqual('Access denied', ae.getMessage());
+        }
+
+        try {
+            extended.queueJobs(null);
+            Assert.fail();
+        } catch (AsynchronousV1.APIException ae) {
+            Assert.areEqual('Access denied', ae.getMessage());
+        }
+    }
+
+    @IsTest
     private static void testCreateAndQueue() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             Map<String, String> state = new Map<String, String>{
                     'Key1' => 'Value1', 'Key2' => 'Value2'
             };
 
-            AsynchronousV1.Job job = AsynchronousImpl.INJECT.createJob(
+            AsynchronousV1.Job job = AsynchronousV1.createJob(
                     AsynchronousScheduler.QueueNext.class,
                     'TEST',
                     1,
@@ -43,12 +62,12 @@ public with sharing class AsynchronousTests {
                                     state
                             }
                     )
-                        .forMethod('persistObjects').called(1).returns(new AddIdModifier())
+                        .forMethod('persistObjects')
+                            .called(1)
+                            .returns(new AddIdModifier())
                     .mock();
 
-            for (AsynchronousV1.Job queuedJob : AsynchronousImpl.INJECT.queueJobs(new List<AsynchronousV1.Job>{
-                    job
-            })) {
+            for (AsynchronousV1.Job queuedJob : AsynchronousV1.queueJobs(new List<AsynchronousV1.Job> { job })) {
                 Assert.isNotNull(((AsynchronousJob) queuedJob).asyncObjectId);
             }
 
@@ -138,12 +157,12 @@ public with sharing class AsynchronousTests {
                     .whenArgument(
                             new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName())
                     )
-                        .forMethod('queueJob').called(1)
+                        .forMethod('queueJob')
+                            .called(1)
                     .whenArguments(
                             new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName()),
-                            new Map<String, String>()
+                            MockerV1.anyNonNull(Map<String, String>.class)
                     )
-                        .withComparators(new List<Comparator<Object>> { new MapComparator() })
                         .forMethod('encodeState')
                             .called(1)
                             .returns(new List<AsynchronousJobState__c>())
@@ -181,11 +200,53 @@ public with sharing class AsynchronousTests {
         }
     }
 
+    @IsTest
+    private static void testOnlyAPICanBeUsed() {
+        System.runAs(AsynchronousTestHelper.getUser()) {
+            try {
+                AsynchronousHelper helper = (AsynchronousHelper) AsynchronousHelper.INJECT;
+                Assert.fail();
+
+            } catch (TypeException te) {
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Invalid conversion from runtime type AsynchronousHelper.APIImpl to AsynchronousHelper', te),
+                        'Unexpected exception: ' + te
+                );
+            }
+
+            try {
+                AsynchronousImpl async = (AsynchronousImpl) AsynchronousImpl.INJECT;
+                Assert.fail();
+
+            } catch (TypeException te) {
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Invalid conversion from runtime type AsynchronousImpl.APIImpl to AsynchronousImpl', te),
+                        'Unexpected exception: ' + te
+                );
+            }
+
+            try {
+                AsynchronousDAO dao = (AsynchronousDAO) AsynchronousDAO.INJECT;
+                Assert.fail();
+
+            } catch (TypeException te) {
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Invalid conversion from runtime type AsynchronousDAO.APIImpl to AsynchronousDAO', te),
+                        'Unexpected exception: ' + te
+                );
+            }
+        }
+    }
+
     private static AsynchronousImpl createMock() {
         AsynchronousV1.Job job = (AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class)
                 .whenNoArguments()
-                    .forMethod('getReference').called(1).returns('MOCKED')
-                    .forMethod('getStatus').called(1).returns(AsynchronousV1.Status.CANCELLED)
+                    .forMethod('getReference')
+                        .called(1)
+                        .returns('MOCKED')
+                    .forMethod('getStatus')
+                        .called(1)
+                        .returns(AsynchronousV1.Status.CANCELLED)
                 .mock();
 
         return (AsynchronousImpl) MockerV1.of(AsynchronousImpl.class)
@@ -196,9 +257,12 @@ public with sharing class AsynchronousTests {
                         1000,
                         new Map<String, String>()
                 )
-                    .forMethod('createJob').returns(job)
+                    .forMethod('createJob')
+                        .called(1)
+                        .returns(job)
                 .whenArgument(new List<AsynchronousV1.Job> { job })
-                    .forMethod('queueJobs').called(1)
+                    .forMethod('queueJobs')
+                        .called(1)
                 .mock();
     }
 
@@ -221,13 +285,5 @@ public with sharing class AsynchronousTests {
         }
     }
 
-    private with sharing class MapComparator implements Comparator<Object> {
-        public Integer compare(Object param1, Object param2) {
-            if (param1 instanceof Map<String, String> && param2 instanceof Map<String, String>) {
-                return 0;
-            } else {
-                return -1;
-            }
-        }
-    }
+    private with sharing class ExtendedClass extends AsynchronousImpl {}
 }

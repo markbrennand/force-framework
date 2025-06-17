@@ -13,6 +13,58 @@ public with sharing class AsynchronousHelperTests {
     }
 
     @IsTest
+    private static void testBindingCheck() {
+        try {
+            DependencyV1.bind(AsynchronousHelper.API.class, AsynchronousImpl.Factory.class);
+        } catch(DependencyV1.APIException ae) {
+            Assert.isTrue(
+                    TestHelper.exceptionContains( 'Class AsynchronousImpl.Factory does not implement AsynchronousHelper.API', ae),
+                    'Unexpected exception: ' + ae
+            );
+        }
+    }
+
+    @IsTest
+    private static void testExtendedClassIsInsert() {
+        ExtendedClass extended = new ExtendedClass();
+
+        try {
+            extended.encodeState(null, null);
+            Assert.fail();
+        } catch(AsynchronousV1.APIException ae) {
+            Assert.areEqual('Access denied', ae.getMessage());
+        }
+
+        try {
+            extended.recordException(null, null);
+            Assert.fail();
+        } catch(AsynchronousV1.APIException ae) {
+            Assert.areEqual('Access denied', ae.getMessage());
+        }
+
+        try {
+            extended.recordInternalException(null, null);
+            Assert.fail();
+        } catch(AsynchronousV1.APIException ae) {
+            Assert.areEqual('Access denied', ae.getMessage());
+        }
+
+        try {
+            extended.decodeState(null);
+            Assert.fail();
+        } catch(AsynchronousV1.APIException ae) {
+            Assert.areEqual('Access denied', ae.getMessage());
+        }
+
+        try {
+            extended.queueJob(null);
+            Assert.fail();
+        } catch(AsynchronousV1.APIException ae) {
+            Assert.areEqual('Access denied', ae.getMessage());
+        }
+    }
+
+    @IsTest
     private static void testRecordException() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
@@ -64,7 +116,7 @@ public with sharing class AsynchronousHelperTests {
             }) {
                 AsynchronousHelper.MAX_CHUNK_SIZE = size;
                 List<AsynchronousJobState__c> chunks = AsynchronousHelper.INJECT.encodeState(asynchronousObject, state);
-                Assert.areEqual(state, AsynchronousHelper.INJECT.decodeState(chunks));
+                Assert.areEqual(state, AsynchronousHelper.INJECT.decodeState(chunks), 'Unexpected state for size ' + size);
             }
         }
     }
@@ -91,7 +143,7 @@ public with sharing class AsynchronousHelperTests {
 
             try {
                 AsynchronousHelper.INJECT.queueJob(asyncObject);
-                Assert.fail();
+                Assert.fail('Queue job should fail');
             } catch (DmlException de) {
                 Assert.areEqual(de, exc, 'Unexpected exception thrown');
             }
@@ -135,4 +187,6 @@ public with sharing class AsynchronousHelperTests {
                     .forMethod('persistObjects').called(1)
                 .mock();
     }
+
+    private with sharing class ExtendedClass extends AsynchronousHelper {}
 }

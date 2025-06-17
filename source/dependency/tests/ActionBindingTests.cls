@@ -22,6 +22,16 @@ public with sharing class ActionBindingTests {
             DependencyV1.bind(Map<String, Integer>.class, 'Test', BindingTestHelper.MapFactory.class);
             insert new Binding__c(Type__c = Integer.class.getName(), Action__c = 'Test', Implementation__c = BindingTestHelper.IntegerFactory.class.getName());
             insert new Binding__c(Type__c = (Map<String, Integer>.class).getName(), Action__c = 'Test', Implementation__c = BindingTestHelper.MapFactory.class.getName());
+
+            try {
+                insert new Binding__c(Type__c = (Map<Decimal, Integer>.class).getName(), Action__c = 'Test', Implementation__c = BindingTestHelper.MapFactory.class.getName());
+            } catch(DMLException de) {
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Class Map<Decimal,Integer> is not registered for bind checking', de),
+                        'Unexpected exception: ' + de
+                );
+            }
+
         }
     }
 

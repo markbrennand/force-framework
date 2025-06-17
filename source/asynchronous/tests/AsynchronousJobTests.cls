@@ -51,6 +51,7 @@ public with sharing class AsynchronousJobTests {
                 copyObject.OwnerId = null;
                 AsynchronousJob.fromSObject(copyObject);
                 Assert.fail();
+
             } catch (Assertion.AssertionException ae) {
             }
 

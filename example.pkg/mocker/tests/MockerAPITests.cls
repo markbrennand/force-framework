@@ -85,10 +85,10 @@ public with sharing class MockerAPITests {
     }
 
     /**
-    * @description
-    * This test shows how a Comparator can be used to validate that the arguments passed to the mocked method
-    * match the arguments registered in the mock.
-    */
+     * @description
+     * This test shows how a Comparator can be used to validate that the arguments passed to the mocked method
+     * match the arguments registered in the mock.
+     */
     @IsTest
     private static void testUserDefinedComparator() {
         Exception exc = new DmlException('Test');
@@ -107,6 +107,48 @@ public with sharing class MockerAPITests {
         mockedAPI.setCurrentTime(Datetime.now().addDays(1));
 
         // Check that the mocked method has been called the correct number of times.
+        forcefw.MockerV1.validate();
+    }
+
+    /**
+     * @description
+     * This test shows how a Comparator can be used to validate that the arguments passed to the mocked method
+     * match the arguments registered in the mock.
+     */
+    @IsTest
+    private static void testAnyArgument() {
+
+        // Create a mocked API for the setCurrentTime method.
+        MockerTestAPI mockedAPI = (MockerTestAPI) forcefw.MockerV1.of(new MockerFactory())
+                .whenArgument(forcefw.MockerV1.any(Datetime.class))
+                    .forMethod('setCurrentTime')
+                .   called(2)
+                .mock();
+
+        // Pass a date which cannot match that of the argument set for the mocked method.
+        mockedAPI.setCurrentTime(Datetime.now().addDays(1));
+
+        // We can pass null in as the argument.
+        mockedAPI.setCurrentTime(null);
+
+        // Check that the mocked method has been called the correct number of times.
+        forcefw.MockerV1.validate();
+
+        mockedAPI = (MockerTestAPI) forcefw.MockerV1.of(new MockerFactory())
+                .whenArgument(forcefw.MockerV1.anyNonNull(Datetime.class))
+                    .forMethod('setCurrentTime')
+                    .called(1)
+                .mock();
+
+        // Pass a date which cannot match that of the argument set for the mocked method.
+        mockedAPI.setCurrentTime(Datetime.now().addDays(1));
+
+        // Passing a null date should not match the parameter type.
+        try {
+            mockedAPI.setCurrentTime(null);
+            Assert.fail();
+        } catch(forcefw.Assertion.AssertionException ae) {}
+
         forcefw.MockerV1.validate();
     }
 

@@ -7,7 +7,6 @@
  *
  * @author Mark Brennand
  */
-
 public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job {
 
     /**

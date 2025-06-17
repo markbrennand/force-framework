@@ -84,27 +84,44 @@ global with sharing class MockerAPITests {
     }
 
     /**
-    * @description
-    * This test shows how a Comparator can be used to validate that the arguments passed to the mocked method
-    * match the arguments registered in the mock.
-    */
+     * @description
+     * This test shows how a Comparator can be used to validate that the arguments passed to the mocked method
+     * match the arguments registered in the mock.
+     */
     @IsTest
-    private static void testUserDefinedComparator() {
+    private static void testAnyArgument() {
 
         // Create a mocked API for the setCurrentTime method.
-        // A Datetime comparator is registered for the argument which checks that only the Type of the arguments match.
-        // The method must be called once.
         MockerTestAPI mockedAPI = (MockerTestAPI) MockerV1.of(MockerTestAPI.class)
-                .whenArgument(Datetime.now())
-                    .withComparators(new List<Comparator<Object>> { new DatetimeComparator() })
-                        .forMethod('setCurrentTime')
-                            .called(1)
+                .whenArgument(MockerV1.any(Datetime.class))
+                    .forMethod('setCurrentTime')
+                        .called(2)
                 .mock();
 
         // Pass a date which cannot match that of the argument set for the mocked method.
         mockedAPI.setCurrentTime(Datetime.now().addDays(1));
 
+        // We can pass null in as the argument.
+        mockedAPI.setCurrentTime(null);
+
         // Check that the mocked method has been called the correct number of times.
+        MockerV1.validate();
+
+        mockedAPI = (MockerTestAPI) MockerV1.of(MockerTestAPI.class)
+                .whenArgument(MockerV1.anyNonNull(Datetime.class))
+                    .forMethod('setCurrentTime')
+                        .called(1)
+                .mock();
+
+        // Pass a date which cannot match that of the argument set for the mocked method.
+        mockedAPI.setCurrentTime(Datetime.now().addDays(1));
+
+        // Passing a null date should not match the parameter type.
+        try {
+            mockedAPI.setCurrentTime(null);
+            Assert.fail();
+        } catch(Assertion.AssertionException ae) {}
+
         MockerV1.validate();
     }
 

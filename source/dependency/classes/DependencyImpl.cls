@@ -54,7 +54,7 @@ public with sharing virtual class DependencyImpl implements DependencyV1.API {
                 return INSTANCE;
             } else {
                 if (INSTANCE == null) {
-                    INSTANCE = new API();
+                    INSTANCE = new APIImpl();
                 }
                 return INSTANCE;
             }
@@ -108,7 +108,7 @@ public with sharing virtual class DependencyImpl implements DependencyV1.API {
      * @description
      * Class providing the implementation of the API.
      */
-    private class API implements DependencyV1.API {
+    private class APIImpl implements DependencyV1.API {
         /**
          * @description
          * Registry containing bindings from interfaces and abstract classes to implementations.
@@ -340,7 +340,7 @@ public with sharing virtual class DependencyImpl implements DependencyV1.API {
      * @param bindings The custom bindings to add to the registry.
      */
     public static void validate(List<Binding__c> bindings) {
-        final API validationImpl = new API();
+        final APIImpl validationImpl = new APIImpl();
 
         for (Binding__c binding : bindings) {
             try {
