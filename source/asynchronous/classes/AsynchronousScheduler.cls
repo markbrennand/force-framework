@@ -73,7 +73,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
      */
     @TestVisible
     private AsynchronousScheduler() {
-        super(QueueNext.class);
+        super(RunNextAvailable.class);
         Assertion.isNotNull(CONFIGURATION.get(NO_JOBS_TO_RUN_DELAY_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + NO_JOBS_TO_RUN_DELAY_PROPERTY);
         Assertion.isNotNull(CONFIGURATION.get(MAXIMUM_JOBS_TO_START_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + MAXIMUM_JOBS_TO_START_PROPERTY);
     }
@@ -211,7 +211,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
 
         if (!jobsLeftToStart.isEmpty()) {
             asyncJob = AsynchronousImpl.INJECT.createJob(
-                    QueueNext.class,
+                    RunNextAvailable.class,
                     null,
                     0,
                     0,
@@ -225,7 +225,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
             }
 
             asyncJob = AsynchronousImpl.INJECT.createJob(
-                    QueueNext.class,
+                    RunNextAvailable.class,
                     null,
                     0,
                     0,
@@ -234,7 +234,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
         }
 
         // More than one running Scheduler would cause the synchronisation to fail.
-        if (AsynchronousDAO.INJECT.countActiveObjects(new AsynchronousJob__c(Runnable__c = QueueNext.class.getName())) < 1) {
+        if (AsynchronousDAO.INJECT.countActiveObjects(new AsynchronousJob__c(Runnable__c = RunNextAvailable.class.getName())) < 1) {
             AsynchronousJob__c asyncObject = AsynchronousJob.toSObject(asyncJob);
             AsynchronousDAO.INJECT.persistObjects(
                     new List<AsynchronousJob__c> { asyncObject},
@@ -311,7 +311,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
      *
      * This allows the Scheduler class to be inaccessible from outside this class.
      */
-    public with sharing class QueueNext implements TypesV1.Factory {
+    public with sharing class RunNextAvailable implements TypesV1.Factory {
         public Object newInstance() {
             return new AsynchronousScheduler();
         }

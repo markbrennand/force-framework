@@ -1,0 +1,52 @@
+<!--
+ - Created by Mark Brennand on 20/06/2025.
+ -->
+
+<!-- Asynchronous Job Filters -->
+<template>
+    <div class="pane">
+	<lightning-card>
+	    <h3 slot="title">Filters</h3>
+	    <div slot="actions">
+		<c-asynchronous-job-actions
+		    onaction={clearSelected}
+		    onstartspinner={startSpinner}
+		    onstopspinner={stopSpinner}
+		></c-asynchronous-job-actions>
+	    </div>
+	    <lightning-layout>
+		<lightning-layout-item flexibility="grow" padding="horizontal-small">
+		    <div class="status-options">
+			<c-inline-checkbox-group
+			    name="statusCheckboxGroup"
+			    label="Status"
+			    options={statusOptions}
+			    onchange={filterStatusChange}>
+			</c-inline-checkbox-group>
+		    </div>
+		</lightning-layout-item>
+	    </lightning-layout>
+	    <div class="spacer"></div>
+	    <div class="filter-fields">
+		<lightning-layout>
+		    <lightning-layout-item flexibility="grow" padding="horizontal-small">
+			<lightning-input
+			    type="search"
+			    label="Runnable"
+			    onchange={setRunnableSearchTerm}
+			    variant="label-inline">
+			</lightning-input>
+		    </lightning-layout-item>
+		    <lightning-layout-item flexibility="grow" padding="horizontal-small">
+			<lightning-input
+			    type="search"
+			    label="Reference"
+			    onchange={setReferenceSearchTerm}
+			    variant="label-inline">
+			</lightning-input>
+		    </lightning-layout-item>
+		</lightning-layout>
+	    </div>
+	</lightning-card>
+    </div>
+</template>

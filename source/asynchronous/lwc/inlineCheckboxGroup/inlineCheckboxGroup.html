@@ -1,0 +1,24 @@
+<!--
+ - Created by Mark Brennand on 19/06/2025.
+ -->
+
+<!-- Horizontal Checkbox Group -->
+<template>
+    <div class="slds-grid full-width">
+    <div class="slds-size_1-of-8">{label}</div>
+    <fieldset class="slds-form-element slds-size_7-of-8">
+	<div class="slds-form-element__control">
+	    <div class="slds-grid slds-wrap">
+		<div class="slds-checkbox slds-col slds-size_1-of-5" for:each={_options} for:item="option" key={option.value}>
+		    <input if:true={option.checked} type="checkbox" name={name} id={option.value} value={option.value} checked onchange={updateSelected}/>
+		    <input if:false={option.checked} type="checkbox" name={name} id={option.value} value={option.value} onchange={updateSelected}/>
+		    <label class="slds-checkbox__label" for={option.value}>
+			<span class="slds-checkbox_faux"></span>
+			<span class="slds-form-element__label">{option.label}</span>
+		    </label>
+		</div>
+	    </div>
+	</div>
+    </fieldset>
+    </div>
+</template>

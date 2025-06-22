@@ -170,7 +170,7 @@ public with sharing class AsynchronousFinalizerTests {
                     MaximumRetries__c = 0,
                     RetryInterval__c = 0,
                     RetryNumber__c = 0,
-                    Runnable__c = AsynchronousScheduler.QueueNext.class.getName(),
+                    Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
                     ScheduledRunTime__c = Datetime.now()
             );
 

@@ -215,11 +215,11 @@ public with sharing class AsynchronousDAOTests {
         System.runAs(AsynchronousTestHelper.getUser()) {
             DependencyV1.bind(AsynchronousV1.DAO.class, AsynchronousDAO.Factory.class);
             try {
-                DependencyV1.bind(AsynchronousV1.DAO.class, AsynchronousScheduler.QueueNext.class);
+                DependencyV1.bind(AsynchronousV1.DAO.class, AsynchronousScheduler.RunNextAvailable.class);
                 Assert.fail('Binding check should fail');
             } catch (DependencyV1.APIException ae) {
                 Assert.isTrue(
-                        TestHelper.exceptionContains('Class AsynchronousScheduler.QueueNext does not implement AsynchronousV1.DAO', ae),
+                        TestHelper.exceptionContains('Class AsynchronousScheduler.RunNextAvailable does not implement AsynchronousV1.DAO', ae),
                         'Unexpected exception: ' + ae
                 );
             }

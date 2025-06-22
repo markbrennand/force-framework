@@ -1,0 +1,30 @@
+<!--
+ - Created by Mark Brennand on 21/06/2025.
+ -->
+
+<!-- Asynchronous Job Actions -->
+<template>
+    <lightning-layout horizontal-align="end">
+	<lightning-layout-item flexibility="no-grow" padding="horizontal-small">
+	    <lightning-button
+		disabled={viewNotAllowed}
+		label="View">
+	    </lightning-button>
+	</lightning-layout-item>
+	<lightning-layout-item flexibility="no-grow">
+	    <lightning-button
+		variant="destructive"
+		disabled={deleteNotAllowed}
+		onclick={deleteSelected}
+		label="Delete">
+	    </lightning-button>
+	</lightning-layout-item>
+	<lightning-layout-item flexibility="no-grow" padding="horizontal-small">
+	    <lightning-button
+		disabled={runNotAllowed}
+		onclick={runSelected}
+		label="Run">
+	    </lightning-button>
+	</lightning-layout-item>
+    </lightning-layout>
+</template>

@@ -97,7 +97,7 @@ public with sharing class AsynchronousFinalizer {
 
             try {
                 final AsynchronousV1.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
-                if (asyncJob.getRunnable() instanceof AsynchronousScheduler) {
+                if (asyncJob.getRunnable() instanceof AsynchronousScheduler && context.getResult() == ParentJobResult.SUCCESS) {
                     AsynchronousScheduler.queue(
                             (Set<String>) JSON.deserialize(
                                     asyncJob.getState().get(JOBS_TO_START), Set<String>.class)

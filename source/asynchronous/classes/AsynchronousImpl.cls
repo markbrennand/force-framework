@@ -187,6 +187,7 @@ public with sharing virtual class AsynchronousImpl implements AsynchronousV1.API
 
                 } else if (asyncObject.Status__c == AsynchronousV1.Status.PENDING.name()) {
                     asyncObject.Status__c = AsynchronousV1.Status.QUEUED.name();
+                    asyncObject.ScheduledRunTime__c = Datetime.now();
                     asyncObject.RetryNumber__c = 0;
                 }
 
@@ -284,6 +285,182 @@ public with sharing virtual class AsynchronousImpl implements AsynchronousV1.API
      */
     public List<AsynchronousV1.Job> queueJobs(final List<AsynchronousV1.Job> asyncJobs) {
         throw new AsynchronousV1.APIException('Access denied');
+    }
+
+    /**
+     * @description
+     * Returns a List of the AsynchronousJob__c objects matching the filter criteria.
+     *
+     * @param filters Query filters to be applied.
+     * @param offset The record to return results from.
+     * @param max  The maximum number of records to return.
+     *
+     * @return A list of the matching objects.
+     */
+    @AuraEnabled(Cacheable = false)
+    public static List<Map<String, Object>> getJobs(final Map<String, Object> filters, final Integer offset, final Integer max) {
+        final String userId = UserInfo.getUserId();
+        final List<AsynchronousJob__c> matches;
+
+        if (filters == null || filters.isEmpty()) {
+            matches = [
+                    SELECT Id, ApexJobId__c, Reference__c, Status__c, RetryNumber__c, MaximumRetries__c, Runnable__c, ScheduledRunTime__c, LastRunTime__c
+                    FROM AsynchronousJob__c
+                    WHERE OwnerId = :userId
+                    WITH USER_MODE
+                    ORDER BY ScheduledRunTime__c
+                    LIMIT :max
+                    OFFSET :offset
+            ];
+        } else {
+            matches = Database.query(
+                    'SELECT Id, ApexJobId__c, Reference__c, Status__c, RetryNumber__c, MaximumRetries__c, Runnable__c, ScheduledRunTime__c, LastRunTime__c'
+                            + ' FROM AsynchronousJob__c'
+                            + ' WHERE ' + buildQuery(filters)
+                            + ' WITH USER_MODE'
+                            + ' ORDER BY ScheduledRunTime__c '
+                            + ' LIMIT :max'
+                            + ' OFFSET :offset'
+            );
+        }
+
+        return buildReturnList(matches);
+    }
+
+    /**
+     * @description
+     * Deletes the given AsynchronousJob__c records.
+     *
+     * @param jobIds The ids of the jobs to delete.
+     */
+    @AuraEnabled(Cacheable = false)
+    public static void deleteJobs(final List<Id> jobIds) {
+        Database.delete(
+                [SELECT Id FROM AsynchronousJob__c WHERE Id IN :jobIds WITH USER_MODE],
+                AccessLevel.USER_MODE
+        );
+    }
+
+    /**
+     * @description
+     * Re-runs the given AsynchronousJob__c records.
+     *
+     * @param jobIds The ids of the jobs to re-run.
+     */
+    @AuraEnabled(Cacheable = false)
+    public static void runJobs(final List<Id> jobIds) {
+        final String schedulerClassName = AsynchronousScheduler.RunNextAvailable.class.getName();
+
+        final List<AsynchronousJob__c> jobs = [
+                SELECT Id
+                FROM AsynchronousJob__c
+                WHERE Id IN :jobIds AND Runnable__c != :schedulerClassName
+                WITH USER_MODE
+        ];
+
+        final Datetime now = Datetime.now();
+        for (AsynchronousJob__c job : jobs) {
+            job.Status__c = AsynchronousV1.Status.PENDING.name();
+            job.ScheduledRunTime__c = now;
+        }
+
+        Database.update(jobs, AccessLevel.USER_MODE);
+    }
+
+    /**
+     * @description
+     * Converts the filters argument from the LWC to a WHERE clause.
+     *
+     * @param filters The query filters.
+     *
+     * @return The WHERE clause for the query.
+     */
+    private static String buildQuery(final Map<String, Object> filters) {
+        String query = 'OwnerId = :userId';
+
+        for (String field : filters.keySet()) {
+            query += ' AND ';
+
+            final Object value = filters.get(field);
+            Boolean hasValue = false;
+
+            if (value instanceof List<Object>) {
+                query += (field += ' IN(');
+
+                Boolean first = true;
+                for (Object option : (List<Object>) value) {
+                    if (!first) {
+                        query += ',';
+                    }
+
+                    if (option instanceof String) {
+                        query += '\'' + String.escapeSingleQuotes((String) option) + '\'';
+                    } else {
+                        query += option;
+                    }
+
+                    first = false;
+                    hasValue = true;
+                }
+
+                query += ')';
+
+            } else if (value instanceof String){
+                query += (field += ' LIKE ');
+                query += '\'' + String.escapeSingleQuotes((String) value) + '\'';
+                hasValue = true;
+
+            } else {
+                query += (field += '=');
+                query += filters.get(field);
+                hasValue = true;
+            }
+
+            if (!hasValue) {
+                // The query filter returns no matches.
+                return 'Id = null';
+            }
+        }
+
+        return query;
+    }
+
+    /**
+     * @description
+     * Converts a List of AsynchronousJob__c records to the data format expectged by the LWC.
+     *
+     * @param matches Jobs to build the return list for.
+     *
+     * @return The list.
+     */
+    private static List<Map<String, Object>> buildReturnList(final List<AsynchronousJob__c> matches) {
+        final List<Map<String, Object>> returnList = new List<Map<String, Object>>();
+        final Datetime now = Datetime.now();
+        for (AsynchronousJob__c match : matches) {
+            Map<String, Object> fields = match.getPopulatedFieldsAsMap();
+            Map<String, Object> returnObject = new Map<String, Object>();
+
+            for (String field : fields.keySet()) {
+                final String stripped = field.replace('forcefw__', '');
+                returnObject.put(stripped, fields.get(field));
+            }
+
+            if (match.Status__c == AsynchronousV1.Status.RUNNING.name()) {
+                returnObject.put('RunTime__c', now.getTime() - match.LastRunTime__c.getTime());
+                if (match.RetryNumber__c > 0) {
+                    returnObject.put('Retry__c', match.RetryNumber__c + ' of ' + match.MaximumRetries__c);
+                }
+            } else if (match.Status__c == AsynchronousV1.Status.QUEUED.name()) {
+                if (match.RetryNumber__c > 0) {
+                    returnObject.put('Retry__c', match.RetryNumber__c + ' of ' + match.MaximumRetries__c);
+                }
+            }
+
+            returnList.add(returnObject);
+        }
+
+        return returnList;
+
     }
 
     // Set the default implementation of the API. This can be overridden using a Dependency Injection Binding.

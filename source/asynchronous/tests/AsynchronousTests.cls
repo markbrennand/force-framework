@@ -38,7 +38,7 @@ public with sharing class AsynchronousTests {
             };
 
             AsynchronousV1.Job job = AsynchronousV1.createJob(
-                    AsynchronousScheduler.QueueNext.class,
+                    AsynchronousScheduler.RunNextAvailable.class,
                     'TEST',
                     1,
                     1000,
@@ -101,11 +101,11 @@ public with sharing class AsynchronousTests {
         System.runAs(AsynchronousTestHelper.getUser()) {
             DependencyV1.bind(AsynchronousV1.API.class, AsynchronousImpl.Factory.class);
             try {
-                DependencyV1.bind(AsynchronousV1.API.class, AsynchronousScheduler.QueueNext.class);
+                DependencyV1.bind(AsynchronousV1.API.class, AsynchronousScheduler.RunNextAvailable.class);
                 Assert.fail();
             } catch (DependencyV1.APIException ae) {
                 Assert.isTrue(
-                        TestHelper.exceptionContains('Class AsynchronousScheduler.QueueNext does not implement AsynchronousV1.API', ae),
+                        TestHelper.exceptionContains('Class AsynchronousScheduler.RunNextAvailable does not implement AsynchronousV1.API', ae),
                         'Unexpected exception: ' + ae
                 );
             }
@@ -117,7 +117,7 @@ public with sharing class AsynchronousTests {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Status__c = AsynchronousV1.Status.PENDING.name(),
-                    Runnable__c = AsynchronousScheduler.QueueNext.class.getName(),
+                    Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
                     MaximumRetries__c = 0,
                     RetryNumber__c = 1,
                     RetryInterval__c = 0,
@@ -155,12 +155,12 @@ public with sharing class AsynchronousTests {
 
             AsynchronousHelper.INJECT = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
                     .whenArgument(
-                            new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName())
+                            new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName())
                     )
                         .forMethod('queueJob')
                             .called(1)
                     .whenArguments(
-                            new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName()),
+                            new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName()),
                             MockerV1.anyNonNull(Map<String, String>.class)
                     )
                         .forMethod('encodeState')

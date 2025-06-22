@@ -251,7 +251,7 @@ public with sharing class AsynchronousSchedulerTests {
 
             AsynchronousImpl.INJECT = (AsynchronousImpl) MockerV1.of(AsynchronousImpl.class)
                     .whenArguments(
-                            AsynchronousScheduler.QueueNext.class,
+                            AsynchronousScheduler.RunNextAvailable.class,
                             null,
                             0,
                             0,
@@ -264,7 +264,7 @@ public with sharing class AsynchronousSchedulerTests {
                     .mock();
 
             AsynchronousDAO.INJECT = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
-                    .whenArgument(new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName()))
+                    .whenArgument(new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName()))
                         .forMethod('countActiveObjects')
                             .called(1)
                             .returns(1)
@@ -296,7 +296,7 @@ public with sharing class AsynchronousSchedulerTests {
     private static void mockForRun(List<AsynchronousJob__c> asyncObjects, Integer maxJobsToStart, Set<Id> jobsThatShouldBeStarted) {
         AsynchronousHelper.INJECT = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
                 .whenArgument(new AsynchronousJob__c(
-                        Runnable__c = AsynchronousScheduler.QueueNext.class.getName(),
+                        Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
                         Status__c = AsynchronousV1.Status.PENDING.name()
                 ))
                     .forMethod('queueJob')
@@ -333,7 +333,7 @@ public with sharing class AsynchronousSchedulerTests {
                     .forMethod('getScheduledObjects')
                         .called(1)
                         .returns(scheduledObjects)
-                .whenArgument(new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.QueueNext.class.getName()))
+                .whenArgument(new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName()))
                     .forMethod('countActiveObjects')
                         .called(1)
                         .returns(0)
@@ -341,7 +341,7 @@ public with sharing class AsynchronousSchedulerTests {
                         new List<AsynchronousJob__c> {
                                 new AsynchronousJob__c(
                                         Status__c = AsynchronousV1.Status.PENDING.name(),
-                                        Runnable__c = AsynchronousScheduler.QueueNext.class.getName()
+                                        Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName()
                                 )
                         },
                         new List<Map<String, String>>{

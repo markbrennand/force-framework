@@ -97,7 +97,7 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
                     FROM AsynchronousJob__c
                     WHERE OwnerId = :UserInfo.getUserId()
                     AND ScheduledRunTime__c <= :Datetime.now()
-                    AND Runnable__c != :AsynchronousScheduler.QueueNext.class.getName()
+                    AND Runnable__c != :AsynchronousScheduler.RunNextAvailable.class.getName()
                     AND Status__c = :AsynchronousV1.Status.QUEUED.name()
                     WITH USER_MODE
                     ORDER BY ScheduledRunTime__c
@@ -124,7 +124,7 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
                     FROM AsynchronousJob__c
                     WHERE OwnerId = :UserInfo.getUserId()
                     AND Status__c IN :SCHEDULABLE_STATUSES
-                    AND Runnable__c != :AsynchronousScheduler.QueueNext.class.getName()
+                    AND Runnable__c != :AsynchronousScheduler.RunNextAvailable.class.getName()
                     WITH USER_MODE
             ];
         }

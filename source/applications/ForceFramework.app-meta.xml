@@ -15,5 +15,6 @@
     <navType>Standard</navType>
     <tabs>Binding__c</tabs>
     <tabs>AsynchronousJob__c</tabs>
+    <tabs>AsynchronousJobs</tabs>
     <uiType>Lightning</uiType>
 </CustomApplication>
