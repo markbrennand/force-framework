@@ -294,35 +294,27 @@ public with sharing virtual class AsynchronousImpl implements AsynchronousV1.API
      * @param filters Query filters to be applied.
      * @param offset The record to return results from.
      * @param max  The maximum number of records to return.
+     * @param ordering The ordering to apply to the results.
      *
      * @return A list of the matching objects.
      */
     @AuraEnabled(Cacheable = false)
-    public static List<Map<String, Object>> getJobs(final Map<String, Object> filters, final Integer offset, final Integer max) {
+    public static List<Map<String, Object>> getJobs(
+            final Map<String, Object> filters,
+            final String ordering,
+            final Integer offset,
+            final Integer max
+    ) {
         final String userId = UserInfo.getUserId();
-        final List<AsynchronousJob__c> matches;
-
-        if (filters == null || filters.isEmpty()) {
-            matches = [
-                    SELECT Id, ApexJobId__c, Reference__c, Status__c, RetryNumber__c, MaximumRetries__c, Runnable__c, ScheduledRunTime__c, LastRunTime__c
-                    FROM AsynchronousJob__c
-                    WHERE OwnerId = :userId
-                    WITH USER_MODE
-                    ORDER BY ScheduledRunTime__c
-                    LIMIT :max
-                    OFFSET :offset
-            ];
-        } else {
-            matches = Database.query(
-                    'SELECT Id, ApexJobId__c, Reference__c, Status__c, RetryNumber__c, MaximumRetries__c, Runnable__c, ScheduledRunTime__c, LastRunTime__c'
-                            + ' FROM AsynchronousJob__c'
-                            + ' WHERE ' + buildQuery(filters)
-                            + ' WITH USER_MODE'
-                            + ' ORDER BY ScheduledRunTime__c '
-                            + ' LIMIT :max'
-                            + ' OFFSET :offset'
-            );
-        }
+        final List<AsynchronousJob__c> matches = Database.query(
+                'SELECT Id, ApexJobId__c, Reference__c, Status__c, RetryNumber__c, MaximumRetries__c, Runnable__c, ScheduledRunTime__c, LastRunTime__c'
+                        + ' FROM AsynchronousJob__c'
+                        + ' WHERE ' + buildQuery(filters)
+                        + ' WITH USER_MODE'
+                        + ' ORDER BY '
+                        + ordering
+                        + ' LIMIT :max'
+                        + ' OFFSET :offset');
 
         return buildReturnList(matches);
     }
@@ -368,6 +360,39 @@ public with sharing virtual class AsynchronousImpl implements AsynchronousV1.API
     }
 
     /**
+    * @description
+    * Calculates the total number of objects per status for the current user.
+    *
+    * @return The totals.
+    */
+    @AuraEnabled(Cacheable = false)
+    public static Map<String, Integer> getTotals() {
+        final String userId = UserInfo.getUserId();
+        final List<AggregateResult> matches = Database.query(
+                'SELECT Status__c, Count(Id) Total__c'
+                        + ' FROM AsynchronousJob__c'
+                        + ' WHERE OwnerId = :userId'
+                        + ' WITH USER_MODE'
+                        + ' GROUP BY Status__c'
+        );
+
+        final String statusField = AsynchronousJob__c.Status__c.getDescribe().name;
+        final Map<String, Integer> returnMap = new Map<String, Integer>();
+        for (AggregateResult match : matches) {
+            returnMap.put((String) match.get(statusField), (Integer) match.get('Total__c'));
+        }
+
+        for (AsynchronousV1.Status status : AsynchronousV1.Status.values()) {
+            final String statusName = status.name();
+            if (!returnMap.containsKey(statusName)) {
+                returnMap.put(statusName, 0);
+            }
+        }
+
+        return returnMap;
+    }
+
+    /**
      * @description
      * Converts the filters argument from the LWC to a WHERE clause.
      *
@@ -377,6 +402,9 @@ public with sharing virtual class AsynchronousImpl implements AsynchronousV1.API
      */
     private static String buildQuery(final Map<String, Object> filters) {
         String query = 'OwnerId = :userId';
+        if (filters == null) {
+            return query;
+        }
 
         for (String field : filters.keySet()) {
             query += ' AND ';

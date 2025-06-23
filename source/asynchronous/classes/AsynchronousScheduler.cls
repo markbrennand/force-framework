@@ -101,10 +101,18 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
 
         } else {
             final String jobId = jobsToStart.iterator().next();
-            final AsynchronousJob__c asyncObject = AsynchronousDAO.INJECT.getObject(jobId);
 
-            asyncObject.ApexJobId__c = apexJobId;
-            AsynchronousHelper.INJECT.queueJob(asyncObject);
+            try {
+                final AsynchronousJob__c asyncObject = AsynchronousDAO.INJECT.getObject(jobId);
+                asyncObject.ApexJobId__c = apexJobId;
+                AsynchronousHelper.INJECT.queueJob(asyncObject);
+
+            } catch(Assertion.AssertionException ae) {
+                // An assertion exception indicates a problem with the job, so just ignore it.
+                // The most likely cause is that the job has been deleted but was identified to start and so
+                // still in the list of jobs to start.
+            }
+
             jobsToStart.remove(jobId);
 
             asyncJob.setState(

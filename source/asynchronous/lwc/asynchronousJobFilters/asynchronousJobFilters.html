@@ -5,48 +5,55 @@
 <!-- Asynchronous Job Filters -->
 <template>
     <div class="pane">
-	<lightning-card>
-	    <h3 slot="title">Filters</h3>
-	    <div slot="actions">
-		<c-asynchronous-job-actions
-		    onaction={clearSelected}
-		    onstartspinner={startSpinner}
-		    onstopspinner={stopSpinner}
-		></c-asynchronous-job-actions>
-	    </div>
-	    <lightning-layout>
-		<lightning-layout-item flexibility="grow" padding="horizontal-small">
-		    <div class="status-options">
-			<c-inline-checkbox-group
-			    name="statusCheckboxGroup"
-			    label="Status"
-			    options={statusOptions}
-			    onchange={filterStatusChange}>
-			</c-inline-checkbox-group>
+	<lightning-layout horizontal-align="end">
+	    <lightning-layout-item flexibility="grow" padding="around-small">
+	    	<lightning-card heading-level="6" title="Filters">
+		    <lightning-layout horizontal-align="end">
+			<lightning-layout-item flexibility="grow" padding="around-small">
+			    <div class="status-options">
+				<c-inline-checkbox-group
+				    name="statusCheckboxGroup"
+				    label="Status"
+				    options={statusOptions}
+				    onchange={filterStatusChange}>
+				</c-inline-checkbox-group>
+			    </div>
+			</lightning-layout-item>
+		    </lightning-layout>
+		    <div class="filter-fields">
+			<lightning-layout>
+			    <lightning-layout-item flexibility="grow" padding="horizontal-small">
+				<lightning-input
+				    type="search"
+				    label="Runnable"
+				    onchange={setRunnableSearchTerm}
+				    variant="label-inline">
+				</lightning-input>
+			    </lightning-layout-item>
+			    <lightning-layout-item flexibility="grow" padding="horizontal-small">
+				<lightning-input
+				    type="search"
+				    label="Reference"
+				    onchange={setReferenceSearchTerm}
+				    variant="label-inline">
+				</lightning-input>
+			    </lightning-layout-item>
+			</lightning-layout>
 		    </div>
-		</lightning-layout-item>
-	    </lightning-layout>
-	    <div class="spacer"></div>
-	    <div class="filter-fields">
-		<lightning-layout>
-		    <lightning-layout-item flexibility="grow" padding="horizontal-small">
-			<lightning-input
-			    type="search"
-			    label="Runnable"
-			    onchange={setRunnableSearchTerm}
-			    variant="label-inline">
-			</lightning-input>
-		    </lightning-layout-item>
-		    <lightning-layout-item flexibility="grow" padding="horizontal-small">
-			<lightning-input
-			    type="search"
-			    label="Reference"
-			    onchange={setReferenceSearchTerm}
-			    variant="label-inline">
-			</lightning-input>
-		    </lightning-layout-item>
-		</lightning-layout>
-	    </div>
-	</lightning-card>
+		</lightning-card>
+	    </lightning-layout-item>
+	    <lightning-layout-item flexibility="no-flex" padding="around-small">
+		<lightning-card heading-level="6" title="Jobs">
+		    <div slot="actions">
+			<c-asynchronous-job-actions
+			    onaction={clearSelected}
+			    onstartspinner={startSpinner}
+			    onstopspinner={stopSpinner}
+			></c-asynchronous-job-actions>
+		    </div>
+		    <c-asynchronous-job-totals refresh-rate={refreshRate}></c-asynchronous-job-totals>
+		</lightning-card>
+	    </lightning-layout-item>
+	</lightning-layout>
     </div>
 </template>

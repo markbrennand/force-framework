@@ -5,13 +5,14 @@
 import {LightningElement, api} from 'lwc';
 
 export default class AsynchronousJobFilters extends LightningElement {
+    @api refreshRate;
 
     statusOptions = [
-        { value: 'RUNNING', label: 'RUNNING', checked: true },
-        { value: 'QUEUED', label: 'QUEUED', checked: true },
-        { value: 'SUCCEEDED', label: 'SUCCEEDED' },
-        { value: 'FAILED', label: 'FAILED' },
-        { value: 'CANCELLED', label: 'CANCELLED' }
+        { value: 'RUNNING', label: 'Running', checked: true },
+        { value: 'QUEUED', label: 'Queued', checked: true },
+        { value: 'SUCCEEDED', label: 'Succeeded' },
+        { value: 'FAILED', label: 'Failed' },
+        { value: 'CANCELLED', label: 'Cancelled' }
     ];
 
     setRunnableSearchTerm(event) {

@@ -15,6 +15,7 @@ export default class AsynchronousJobList extends LightningElement {
     minColumnWidth = 120;
     maxColumnWidth = 275;
     showSpinner = false;
+    refreshRate = REFRESH_RATE;;
 
     _selectedRows= [];
     _statusFilter = [ 'RUNNING', 'QUEUED' ];
@@ -34,8 +35,7 @@ export default class AsynchronousJobList extends LightningElement {
 
     async connectedCallback() {
         this.data = await this.getData(true);
-        this.sort();
-        this._timerId = window.setTimeout(() => {  this.refresh() }, REFRESH_RATE);
+        this._timerId = window.setTimeout(() => {  this.refresh() }, this.refreshRate);
     }
 
     disconnectedCallback() {
@@ -47,29 +47,6 @@ export default class AsynchronousJobList extends LightningElement {
     sortData(event){
         this.sortedBy = event.detail.fieldName;
         this.sortedDirection = event.detail.sortDirection;
-        this.sort();
-    }
-
-    sort() {
-        let sortedData = [...this.data];
-        sortedData.sort((a,b)=>{
-            let valueA = a[this.sortedBy];
-            let valueB = b[this.sortedBy];
-
-            if(typeof valueA === 'string' && typeof valueB === 'string'){
-                valueA = valueA.toLowerCase();
-                valueB = valueB.toLowerCase();
-            }
-            if(valueA > valueB){
-                return this.sortedDirection === 'asc' ? 1 : -1;
-            } else if(valueA < valueB){
-                return this.sortedDirection === 'asc' ? -1 : 1;
-            } else{
-                return 0;
-            }
-        });
-
-        this.data = sortedData;
     }
 
     rowsSelected(event) {
@@ -90,13 +67,12 @@ export default class AsynchronousJobList extends LightningElement {
         }
     }
 
-    async refresh() {
+    async refresh(withSpinner) {
         if (this._selectedRows.length === 0) {
-            this.data = await this.getData(false);
-            this.sort();
+            this.data = await this.getData(withSpinner);
         }
 
-        this._timerId = window.setTimeout(() => {  this.refresh() }, REFRESH_RATE);
+        this._timerId = window.setTimeout(() => {  this.refresh(false) }, this.refreshRate);
     }
 
     async getData(withSpinner) {
@@ -112,7 +88,25 @@ export default class AsynchronousJobList extends LightningElement {
                 Runnable__c: '%' + this._runnableSearchTerm + '%'
             };
 
-            return await getJobs({ filters: filters , offset: 0, max: MAX_TO_FETCH });
+            try {
+                return await getJobs({
+                    filters: filters,
+                    ordering: this.sortedBy + ' ' + this.sortedDirection,
+                    offset: 0,
+                    max: MAX_TO_FETCH
+                });
+            } catch(err) {
+                this.dispatchEvent(
+                    new CustomEvent('showToastEvent',
+                        {
+                            title: 'Error',
+                            message: 'Fetch failed',
+                            messageData: err
+                        }
+                    )
+                );
+            }
+
         } finally {
             this.showSpinner = false;
         }
@@ -121,6 +115,12 @@ export default class AsynchronousJobList extends LightningElement {
     clearSelectedRows() {
         this._selectedRows = [];
         this.template.querySelector('lightning-datatable').selectedRows = [];
+
+        if (this._timerId) {
+            window.clearTimeout(this._timerId);
+        }
+
+        this.refresh(true);
     }
 
     startSpinner(event) {

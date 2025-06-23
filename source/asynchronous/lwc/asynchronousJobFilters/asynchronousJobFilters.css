@@ -4,5 +4,5 @@
 
 .pane { width: 100%; }
 .spacer { height: 16px; }
-.status-options { width: 750px; }
-.filter-fields { width: 700px }
+.status-options { width: 100%; }
+.filter-fields { width: 100%; }

@@ -13,10 +13,10 @@
 global with sharing class ConfigurationOverride implements forcefw.TypesV1.Factory {
     public Object newInstance() {
         return new Map<String, Integer> {
-                'maximumJobsToStart' => 1,  // Configures AsynchronousScheduler.
-                'noJobsToRunDelay' => 7500, // Configures AsynchronousScheduler.
-                'maximumActive' => 1,       // Configures AccountContactTotals and ExampleRunnable
-                'succeedOnRetryNumber' => 0 // Configures AccountContactTotals and ExampleRunnable
+                'maximumJobsToStart' => 4,  // Configures AsynchronousScheduler.
+                'noJobsToRunDelay' => 1000, // Configures AsynchronousScheduler.
+                'maximumActive' => 16,      // Configures AccountContactTotals and ExampleRunnable
+                'succeedOnRetryNumber' => 4 // Configures AccountContactTotals and ExampleRunnable
         };
     }
 }

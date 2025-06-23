@@ -1,0 +1,34 @@
+<!--
+ - Created by Mark Brennand on 23/06/2025.
+ -->
+
+<!-- Asynchronous Job Totals -->
+<template>
+    <lightning-layout horizontal-align="end">
+        <lightning-layout-item flexibility="no-grow" padding="horizontal-large">
+            <lightning-layout>
+                <lightning-layout-item class="slds-size_4-of-5" flexibility="grow" padding="horizontal-small">Queued</lightning-layout-item>
+                <lightning-layout-item class="slds-size-1-of-5" flexibility="no-flex" padding="horizontal-small">{queued}</lightning-layout-item>
+            </lightning-layout>
+            <lightning-layout>
+                <lightning-layout-item class="slds-size_4-of-5" flexibility="grow" padding="horizontal-small">Running</lightning-layout-item>
+                <lightning-layout-item class="slds-size-1-of-5" flexibility="no-flex" padding="horizontal-small">{running}</lightning-layout-item>
+            </lightning-layout>
+            <lightning-layout>
+                <lightning-layout-item class="slds-size_4-of-5" flexibility="grow" padding="horizontal-small">Succeeded</lightning-layout-item>
+                <lightning-layout-item class="slds-size-1-of-5" flexibility="no-flex" padding="horizontal-small">{succeeded}</lightning-layout-item>
+            </lightning-layout>
+            <lightning-layout>
+                <lightning-layout-item class="slds-size_4-of-5" flexibility="grow" padding="horizontal-small">Failed</lightning-layout-item>
+                <lightning-layout-item class="slds-size-1-of-5" flexibility="no-flex" padding="horizontal-small">{failed}</lightning-layout-item>
+            </lightning-layout>
+            <lightning-layout>
+                <lightning-layout-item class="slds-size_4-of-5" flexibility="grow" padding="horizontal-small">Cancelled</lightning-layout-item>
+                <lightning-layout-item class="slds-size-1-of-5" flexibility="no-flex" padding="horizontal-small">{cancelled}</lightning-layout-item>
+            </lightning-layout>
+        </lightning-layout-item>
+        <lightning-layout-item flexibility="grow">
+            <div>&nbsp;</div>
+        </lightning-layout-item>
+    </lightning-layout>
+</template>

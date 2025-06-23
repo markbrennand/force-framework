@@ -13,10 +13,10 @@
 public with sharing class ConfigurationOverride implements TypesV1.Factory {
     public Object newInstance() {
         return new Map<String, Integer> {
-                'maximumJobsToStart' => 1,  // Configures AsynchronousScheduler.
+                'maximumJobsToStart' => 4,  // Configures AsynchronousScheduler.
                 'noJobsToRunDelay' => 7500, // Configures AsynchronousScheduler.
-                'maximumActive' => 1,       // Configures AccountContactTotals and ExampleRunnable
-                'succeedOnRetryNumber' => 0 // Configures AccountContactTotals and ExampleRunnable
+                'maximumActive' => 16,       // Configures AccountContactTotals and ExampleRunnable
+                'succeedOnRetryNumber' => 2 // Configures AccountContactTotals and ExampleRunnable
         };
     }
 }
