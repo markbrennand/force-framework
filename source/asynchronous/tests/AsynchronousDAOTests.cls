@@ -226,6 +226,247 @@ public with sharing class AsynchronousDAOTests {
         }
     }
 
+    @IsTest
+    private static void testCountScheduledObjects() {
+        AsynchronousImpl.skipTriggers = true;
+
+        System.runAs(AsynchronousTestHelper.getUser()) {
+            AsynchronousJob__c job1 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.PENDING.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = Datetime.now()
+            );
+
+            AsynchronousJob__c job2 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = Datetime.now()
+            );
+
+            AsynchronousJob__c job3 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.SUCCEEDED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = Datetime.now()
+            );
+
+            AsynchronousJob__c job4 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = Datetime.now()
+            );
+
+            AsynchronousJob__c job5 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = Datetime.now()
+            );
+
+            AsynchronousJob__c job6 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = Datetime.now()
+            );
+
+            insert new List<AsynchronousJob__c> { job1, job2, job3, job4, job5, job6 };
+
+            Assert.areEqual(2, AsynchronousDAO.INJECT.countSchedulableObjects());
+
+            job1.Status__c = AsynchronousV1.Status.QUEUED.name();
+            upsert job1;
+            Assert.areEqual(3, AsynchronousDAO.INJECT.countSchedulableObjects());
+
+            job4.Status__c = AsynchronousV1.Status.SUCCEEDED.name();
+            upsert job4;
+            Assert.areEqual(2, AsynchronousDAO.INJECT.countSchedulableObjects());
+
+            job3.Status__c = AsynchronousV1.Status.FAILED.name();
+            upsert job3;
+            Assert.areEqual(2, AsynchronousDAO.INJECT.countSchedulableObjects());
+
+            job3.Status__c = AsynchronousV1.Status.CANCELLED.name();
+            upsert job3;
+            Assert.areEqual(2, AsynchronousDAO.INJECT.countSchedulableObjects());
+        }
+    }
+
+    @IsTest
+    private static void testGetScheduledObjects() {
+        System.runAs(AsynchronousTestHelper.getUser()) {
+            AsynchronousJob__c job1 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = Datetime.now().addDays(-1)
+            );
+
+            AsynchronousJob__c job2 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = Datetime.now().addDays(-2)
+            );
+
+            AsynchronousJob__c job3 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.SUCCEEDED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = Datetime.now().addDays(-1)
+            );
+
+            AsynchronousJob__c job4 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = Datetime.now().addDays(-4)
+            );
+
+            AsynchronousJob__c job5 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = Datetime.now().addDays(-1)
+            );
+
+            AsynchronousJob__c job6 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = Datetime.now().addDays(-1)
+            );
+
+            insert new List<AsynchronousJob__c> { job1, job2, job3, job4, job5, job6 };
+
+            Set<AsynchronousJob__c> scheduled = AsynchronousDAO.INJECT.getScheduledObjects(1);
+            Assert.areEqual(1, scheduled.size());
+            System.debug(job2);
+            System.debug(scheduled);
+            Assert.isTrue(ComparisonHelper.compare(scheduled, new Set<AsynchronousJob__c> { job2 }));
+
+            scheduled = AsynchronousDAO.INJECT.getScheduledObjects(2);
+            Assert.areEqual(2, scheduled.size());
+            Assert.isTrue(ComparisonHelper.compare(scheduled, new Set<AsynchronousJob__c> { job2, job1 }));
+
+            job1.ScheduledRunTime__c = Datetime.now().addDays(-3);
+            upsert job1;
+            scheduled = AsynchronousDAO.INJECT.getScheduledObjects(2);
+            Assert.areEqual(2, scheduled.size());
+            Assert.isTrue(ComparisonHelper.compare(scheduled, new Set<AsynchronousJob__c> { job1, job2 }));
+
+            scheduled = AsynchronousDAO.INJECT.getScheduledObjects(3);
+            Assert.areEqual(2, scheduled.size());
+            Assert.isTrue(ComparisonHelper.compare(scheduled, new Set<AsynchronousJob__c> { job1, job2 }));
+
+            job4.Status__c = AsynchronousV1.Status.QUEUED.name();
+            upsert job4;
+            scheduled = AsynchronousDAO.INJECT.getScheduledObjects(10);
+            Assert.areEqual(3, scheduled.size());
+            Assert.isTrue(ComparisonHelper.compare(scheduled, new Set<AsynchronousJob__c> { job4, job1, job2 }));
+
+            job6.Status__c = AsynchronousV1.Status.QUEUED.name();
+            upsert job6;
+            scheduled = AsynchronousDAO.INJECT.getScheduledObjects(10);
+            Assert.areEqual(3, scheduled.size());
+            Assert.isTrue(ComparisonHelper.compare(scheduled, new Set<AsynchronousJob__c> { job4, job1, job2 }));
+        }
+    }
+
+    @IsTest
+    private static void testPersistException() {
+        System.runAs(AsynchronousTestHelper.getUser()) {
+            AsynchronousJob__c job = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    ApexJobId__c = 'APEXJOB-1',
+                    Runnable__c = TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.FAILED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = Datetime.now().addDays(-1)
+            );
+
+            insert job;
+
+            Exception exc = new DMLException('Test');
+
+            AsynchronousJobException__c error = new AsynchronousJobException__c(
+                    AsynchronousJob__c = job.Id,
+                    RetryNumber__c = job.RetryNumber__c,
+                    StatusOnError__c = job.Status__c,
+                    ApexJobId__c = job.ApexJobId__c,
+                    ExceptionType__c = exc.getTypeName(),
+                    ExceptionMessage__c = exc.getMessage(),
+                    ExceptionStackTrace__c = exc.getStackTraceString()
+            );
+
+            AsynchronousDAO.INJECT.persistException(error);
+
+            AsynchronousJobException__c persisted = [
+                    SELECT Id, AsynchronousJob__c, RetryNumber__c, StatusOnError__c, ApexJobId__c, ExceptionType__c,
+                            ExceptionMessage__c, ExceptionStackTrace__c
+                    FROM AsynchronousJobException__c
+                    WHERE AsynchronousJob__c = :job.Id
+                    LIMIT 1
+            ];
+
+            Assert.areEqual(persisted, error);
+        }
+    }
+
     public with sharing class TestRunnable extends AsynchronousRunnableV1 {
 
         public TestRunnable() {

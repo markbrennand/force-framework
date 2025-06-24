@@ -25,6 +25,7 @@ export default class AsynchronousJobList extends LightningElement {
 
     columns = [
         { label: 'Apex Job', fieldName: 'ApexJobId__c' },
+        { label: 'Owner', fieldName: 'Owner' },
         { label: 'Reference', fieldName: 'Reference__c' },
         { label: 'Status', fieldName: 'Status__c', sortable: true },
         { label: 'Active (ms)', fieldName: 'RunTime__c' },

@@ -92,15 +92,19 @@ public with sharing class ComparisonHelper {
      *
      * @return True if the actual matches the expected.
      */
-    private static Boolean compareSObjects(final Iterable<SObject> expectedSObjects, final Iterable<SObject> actualSObjects) {
-
+    private static Boolean compareSObjects(final Iterable<Object> expectedSObjects, final Iterable<Object> actualSObjects) {
         if (count(expectedSObjects) != count(actualSObjects)) {
             return false;
         }
 
-        final Iterator<SObject> iter = actualSObjects.iterator();
-        for (SObject expectedSObject : expectedSObjects) {
-            if (!compareSObjects(expectedSObject, iter.next())) {
+        final Iterator<Object> iter = actualSObjects.iterator();
+        for (Object expectedSObject : expectedSObjects) {
+            final Object next = iter.next();
+            if (expectedSObject instanceof SObject && next instanceof SObject) {
+                if (!compareSObjects((SObject) expectedSObject, (SObject) next)) {
+                    return false;
+                }
+            } else {
                 return false;
             }
         }
@@ -166,9 +170,9 @@ public with sharing class ComparisonHelper {
     public with sharing class SObjectComparator implements Comparator<Object> {
 
         public Integer compare(final Object param1, final Object param2) {
-            return (param1 instanceof SObject && (!(param1 instanceof List<SObject>) && !(param1 instanceof Set<SObject>)))
-                && (param2 instanceof SObject && (!(param2 instanceof List<SObject>) && !(param2 instanceof Set<SObject>)))
-                && compareSObjects((SObject) param1, (SObject) param2) ? 0 : -1;
+            return param1 instanceof SObject && !(param1 instanceof Iterable<Object>) &&
+                    param2 instanceof SObject && !(param2 instanceof Iterable<Object>) &&
+                    compareSObjects((SObject) param1, (SObject) param2) ? 0 : -1;
         }
     }
 
@@ -178,8 +182,7 @@ public with sharing class ComparisonHelper {
      */
     public with sharing class SObjectCollectionComparator implements Comparator<Object> {
         public Integer compare(final Object param1, final Object param2) {
-            return (param1 instanceof List<SObject> || param1 instanceof Set<SObject>)
-                    && (param2 instanceof List<SObject> || param2 instanceof Set<SObject>)
+            return (param1 instanceof Iterable<Object> && param2 instanceof Iterable<Object>)
                     && compareSObjects((Iterable<SObject>) param1, (Iterable<SObject>) param2) ? 0 : -1;
         }
     }

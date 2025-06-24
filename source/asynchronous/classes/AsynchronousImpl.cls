@@ -307,7 +307,7 @@ public with sharing virtual class AsynchronousImpl implements AsynchronousV1.API
     ) {
         final String userId = UserInfo.getUserId();
         final List<AsynchronousJob__c> matches = Database.query(
-                'SELECT Id, ApexJobId__c, Reference__c, Status__c, RetryNumber__c, MaximumRetries__c, Runnable__c, ScheduledRunTime__c, LastRunTime__c'
+                'SELECT Id, Owner.Name, ApexJobId__c, Reference__c, Status__c, RetryNumber__c, MaximumRetries__c, Runnable__c, ScheduledRunTime__c, LastRunTime__c'
                         + ' FROM AsynchronousJob__c'
                         + ' WHERE ' + buildQuery(filters)
                         + ' WITH USER_MODE'
@@ -401,46 +401,42 @@ public with sharing virtual class AsynchronousImpl implements AsynchronousV1.API
      * @return The WHERE clause for the query.
      */
     private static String buildQuery(final Map<String, Object> filters) {
-        String query = 'OwnerId = :userId';
-        if (filters == null) {
-            return query;
+        if (filters == null || filters.isEmpty()) {
+            return 'Id != null';
         }
 
+        final List<String> clauses = new List<String>();
         for (String field : filters.keySet()) {
-            query += ' AND ';
-
             final Object value = filters.get(field);
             Boolean hasValue = false;
 
             if (value instanceof List<Object>) {
-                query += (field += ' IN(');
+                String clause =(field += ' IN(');
 
                 Boolean first = true;
                 for (Object option : (List<Object>) value) {
                     if (!first) {
-                        query += ',';
+                        clause += ',';
                     }
 
                     if (option instanceof String) {
-                        query += '\'' + String.escapeSingleQuotes((String) option) + '\'';
+                        clause += '\'' + String.escapeSingleQuotes((String) option) + '\'';
                     } else {
-                        query += option;
+                        clause += option;
                     }
 
                     first = false;
                     hasValue = true;
                 }
 
-                query += ')';
+                clauses.add(clause + ')');
 
-            } else if (value instanceof String){
-                query += (field += ' LIKE ');
-                query += '\'' + String.escapeSingleQuotes((String) value) + '\'';
+            } else if (value instanceof String) {
+                clauses.add(field + ' LIKE ' + '\'' + String.escapeSingleQuotes((String) value) + '\'');
                 hasValue = true;
 
             } else {
-                query += (field += '=');
-                query += filters.get(field);
+                clauses.add(field + '=' + filters.get(field));
                 hasValue = true;
             }
 
@@ -450,7 +446,7 @@ public with sharing virtual class AsynchronousImpl implements AsynchronousV1.API
             }
         }
 
-        return query;
+        return String.join(clauses, ' AND ');
     }
 
     /**
@@ -472,6 +468,8 @@ public with sharing virtual class AsynchronousImpl implements AsynchronousV1.API
                 final String stripped = field.replace('forcefw__', '');
                 returnObject.put(stripped, fields.get(field));
             }
+
+            returnObject.put('Owner', match.Owner.Name);
 
             if (match.Status__c == AsynchronousV1.Status.RUNNING.name()) {
                 returnObject.put('RunTime__c', now.getTime() - match.LastRunTime__c.getTime());

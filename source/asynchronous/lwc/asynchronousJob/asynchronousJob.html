@@ -6,10 +6,7 @@
 <template>
     <div class="pane">
 	<lightning-layout vertical-align="stretch" horizontal-align="start" multiple-rows="false" class="full-height">
-	    <lightning-layout-item flexibility="no-grow" class="custom-box job-manager" padding="around-small">
-		<c-asynchronous-job-manager onrefreshlist={refreshList}></c-asynchronous-job-manager>
-	    </lightning-layout-item>
-	    <lightning-layout-item flexibility="no-grow" class="custom-box job-list" padding="around-small">
+	    <lightning-layout-item flexibility="grow" class="custom-box job-list" padding="around-small">
 		<c-asynchronous-job-list></c-asynchronous-job-list>
 	    </lightning-layout-item>
 	</lightning-layout>
