@@ -17,7 +17,7 @@ public with sharing class AsynchronousJobTests {
     @IsTest
     static void testAllStatuses() {
         System.runAs(AsynchronousTestHelper.getUser()) {
-            for (AsynchronousV1.Status status : AsynchronousV1.Status.values()) {
+            for (Asynchronous.Status status : Asynchronous.Status.values()) {
                 AsynchronousJob__c asynchronous = new AsynchronousJob__c(
                         OwnerId = UserInfo.getUserId(),
                         Status__c = status.name(),
@@ -38,7 +38,7 @@ public with sharing class AsynchronousJobTests {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
-                    Status__c = AsynchronousV1.Status.PENDING.name(),
+                    Status__c = Asynchronous.Status.PENDING.name(),
                     Runnable__c = AsynchronousJobTests.Runnable.class.getName(),
                     MaximumRetries__c = 0,
                     RetryNumber__c = 0,
@@ -110,7 +110,7 @@ public with sharing class AsynchronousJobTests {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asynchronous = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
-                    Status__c = AsynchronousV1.Status.PENDING.name(),
+                    Status__c = Asynchronous.Status.PENDING.name(),
                     Runnable__c = 'AsynchronousJobTests.Runnable',
                     Reference__c = 'Test',
                     MaximumRetries__c = 1,
@@ -141,7 +141,7 @@ public with sharing class AsynchronousJobTests {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                     OwnerId = UserInfo.getUserId(),
-                    Status__c = AsynchronousV1.Status.PENDING.name(),
+                    Status__c = Asynchronous.Status.PENDING.name(),
                     Runnable__c = AsynchronousJobTests.Runnable.class.getName(),
                     Reference__c = 'Test',
                     MaximumRetries__c = 1,
@@ -151,9 +151,9 @@ public with sharing class AsynchronousJobTests {
                     LastRunTime__c = now
             );
 
-            AsynchronousV1.Job job = AsynchronousJob.fromSObject(asyncObject);
+            Asynchronous.Job job = AsynchronousJob.fromSObject(asyncObject);
             Assert.areEqual(UserInfo.getUserId(), job.getOwnerId());
-            Assert.areEqual(AsynchronousV1.Status.PENDING, job.getStatus());
+            Assert.areEqual(Asynchronous.Status.PENDING, job.getStatus());
             Assert.isTrue(job.getRunnable() instanceof AsynchronousJobTests.Runnable);
             Assert.areEqual('Test', job.getReference());
             Assert.areEqual(1, job.getMaximumRetries());
@@ -164,11 +164,11 @@ public with sharing class AsynchronousJobTests {
         }
     }
 
-    public with sharing class Runnable extends AsynchronousRunnableV1 {
+    public with sharing class Runnable extends AsynchronousV1.Runnable {
         public Runnable() {
             super(Runnable.class);
         }
 
-        public override void run(AsynchronousV1.Job job, String apexJobId) {}
+        public override void run(Asynchronous.Job job, String apexJobId) {}
     }
 }

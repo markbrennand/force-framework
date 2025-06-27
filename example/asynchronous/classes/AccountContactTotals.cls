@@ -5,7 +5,7 @@
  * @author Mark Brennand
  */
 
-global with sharing class AccountContactTotals extends AsynchronousRunnableV1 {
+global with sharing class AccountContactTotals extends AsynchronousV1.Runnable {
 
     // Setup a default registry entry for the configuration for the class.
     // The configuration can be overridden by adding a custom binding.
@@ -41,9 +41,9 @@ global with sharing class AccountContactTotals extends AsynchronousRunnableV1 {
      * @param job The Asynchronous API job being run.
      * @param apexJobId The Id of the Apex Job that is running the job
      */
-    public override void run(final AsynchronousV1.Job job, final String apexJobId) {
+    public override void run(final Asynchronous.Job job, final String apexJobId) {
         if (job.getRetryNumber() < configuration.get('succeedOnRetryNumber')) {
-            throw new AsynchronousV1.APIException('Failed on retry ' + job.getRetryNumber());
+            throw new Asynchronous.APIException('Failed on retry ' + job.getRetryNumber());
         }
 
         final String accountId = job.getState().get('accountId');
@@ -169,7 +169,7 @@ global with sharing class AccountContactTotals extends AsynchronousRunnableV1 {
             accountIds.add(account.Id);
         }
 
-        final List<AsynchronousV1.Job> jobs = new List<AsynchronousV1.Job>();
+        final List<Asynchronous.Job> jobs = new List<Asynchronous.Job>();
 
         for (Id accountId : accountIds) {
             jobs.add(

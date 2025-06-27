@@ -83,7 +83,7 @@ public with sharing class AsynchronousFinalizer {
          * @param context Information about job result.
          */
         public void execute(final FinalizerContext context) {
-            final AsynchronousJob__c asyncObject = AsynchronousDAO.INJECT.getObject(asyncObjectId);
+            final AsynchronousJob__c asyncObject = AsynchronousDAO.API.getObject(asyncObjectId);
 
             try {
                 if (context.getResult() == ParentJobResult.SUCCESS) {
@@ -92,11 +92,11 @@ public with sharing class AsynchronousFinalizer {
                     onFailure(asyncObject, context.getException());
                 }
             } catch(Exception exc) {
-                AsynchronousHelper.INJECT.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
+                AsynchronousHelper.API.recordInternalException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
             }
 
             try {
-                final AsynchronousV1.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
+                final Asynchronous.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
                 if (asyncJob.getRunnable() instanceof AsynchronousScheduler) {
                     AsynchronousScheduler.queue(
                             (Set<String>) JSON.deserialize(
@@ -105,7 +105,7 @@ public with sharing class AsynchronousFinalizer {
                 }
 
             } catch(Exception exc) {
-                AsynchronousHelper.INJECT.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
+                AsynchronousHelper.API.recordInternalException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
             }
         }
 
@@ -116,13 +116,13 @@ public with sharing class AsynchronousFinalizer {
          * @param asyncObject The AsynchronousJob__c object for the job.
          */
         private void onSuccess(final AsynchronousJob__c asyncObject) {
-            final AsynchronousV1.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
+            final Asynchronous.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
 
             if (asyncJob.getRunnable().onSuccess(asyncJob)) {
-                asyncObject.Status__c = AsynchronousV1.Status.SUCCEEDED.name();
-                AsynchronousDAO.INJECT.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+                asyncObject.Status__c = Asynchronous.Status.SUCCEEDED.name();
+                AsynchronousDAO.API.persistObjects(new List<AsynchronousJob__c> { asyncObject });
             } else {
-                AsynchronousDAO.INJECT.removeObjects(new List<AsynchronousJob__c> { asyncObject });
+                AsynchronousDAO.API.removeObjects(new List<AsynchronousJob__c> { asyncObject });
             }
         }
 
@@ -140,27 +140,27 @@ public with sharing class AsynchronousFinalizer {
         private void onFailure(final AsynchronousJob__c asyncObject, final Exception exc) {
             final Integer maximumRetries = (Integer) asyncObject.MaximumRetries__c;
             final Integer retryNumber = (Integer) asyncObject.RetryNumber__c;
-            final AsynchronousV1.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
+            final Asynchronous.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
 
-            AsynchronousHelper.INJECT.recordException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
+            AsynchronousHelper.API.recordException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
 
             if (retryNumber == maximumRetries) {
                 if (asyncJob.getRunnable().onFailure(asyncJob, exc)) {
-                    asyncObject.Status__c = AsynchronousV1.Status.FAILED.name();
-                    AsynchronousImpl.skipTriggers = true;
-                    AsynchronousDAO.INJECT.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+                    asyncObject.Status__c = Asynchronous.Status.FAILED.name();
+                    AsynchronousAPI.skipTriggers = true;
+                    AsynchronousDAO.API.persistObjects(new List<AsynchronousJob__c> { asyncObject });
                 } else {
-                    AsynchronousDAO.INJECT.removeObjects(new List<AsynchronousJob__c> { asyncObject });
+                    AsynchronousDAO.API.removeObjects(new List<AsynchronousJob__c> { asyncObject });
                 }
             } else {
                 asyncObject.Status__c = asyncJob.getRunnable().onError(asyncJob, exc).name();
-                if (asyncObject.Status__c == AsynchronousV1.Status.QUEUED.name()) {
+                if (asyncObject.Status__c == Asynchronous.Status.QUEUED.name()) {
                     asyncObject.RetryNumber__c = retryNumber + 1;
                     asyncObject.ScheduledRunTime__c =
                             Datetime.newInstance(System.currentTimeMillis() + asyncJob.getRetryInterval());
                 }
 
-                AsynchronousDAO.INJECT.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+                AsynchronousDAO.API.persistObjects(new List<AsynchronousJob__c> { asyncObject });
             }
         }
     }

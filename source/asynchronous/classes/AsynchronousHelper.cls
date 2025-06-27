@@ -7,7 +7,7 @@
  * The implementation of the API is hidden in the private Implementation class. The class is hidden so an application
  * cannot access the class to mis-use it.
  * <br><br>
- * All application access is restricted to the API instance variable INJECT. This ensures the application can only
+ * All application access is restricted to the API instance variable API. This ensures the application can only
  * ever call the methods of the API interface.
  * <br><br>
  * The outer class implements the API only to allow it to be mocked. Any calls to the API method implementations
@@ -32,7 +32,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          * @param asyncObject The Asynchronous object to record the Exception against.
          * @param exc The exception to be recorded.
          */
-        void recordException(AsynchronousJob__c asyncObject, AsynchronousV1.APIException exc);
+        void recordException(AsynchronousJob__c asyncObject, Asynchronous.APIException exc);
 
         /**
          * @description
@@ -43,7 +43,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          * @param asyncObject The Asynchronous object to record the Exception against.
          * @param exc The exception to be recorded.
          */
-        void recordInternalException(AsynchronousJob__c asyncObject, AsynchronousV1.APIException exc);
+        void recordInternalException(AsynchronousJob__c asyncObject, Asynchronous.APIException exc);
 
         /**
          * @description
@@ -80,10 +80,10 @@ public with sharing virtual class AsynchronousHelper implements API {
      * Active API instance.
      */
     @TestVisible
-    public static API INJECT {
+    public static API API {
         public get {
-            if (Test.isRunningTest() && INJECT != null) { // INJECT has been mocked.
-                return INJECT;
+            if (Test.isRunningTest() && API != null) { // API has been mocked.
+                return API;
             } else {
                 return (API) DependencyV1.inject(API.class);
             }
@@ -110,51 +110,9 @@ public with sharing virtual class AsynchronousHelper implements API {
 
     /**
      * @description
-     * Creates the default API implementation.
-     * <br><br>
-     * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
-     * We use the factory to defer the construction by injection to this class, which is able to construct it.
-     */
-    public with sharing class Factory implements TypesV1.Factory {
-        public Object newInstance() {
-            return new APIImpl();
-        }
-    }
-
-
-    /**
-     * @description
-     * Class providing check on Binding made to AsynchronousDAO.API.
-     */
-    public with sharing class BindingCheck implements DependencyV1.BindingCheck {
-
-        /**
-         * @description
-         * Checks that a valid binding has been made to AsynchronousDAO.API.
-         *
-         * @param forType The type being bound to, AsynchronousDAO.API.
-         * @param withImpl The implementation being bound to AsynchronousDAO.API.
-         *
-         * @return The result of the validation.
-         */
-        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
-            if (TypesV1.newInstance(withImpl) instanceof AsynchronousHelper.API) {
-                return new DependencyV1.ValidationResult(true, null);
-            } else {
-                return new DependencyV1.ValidationResult(
-                        false,
-                        'Class ' + withImpl.getName() + ' does not implement ' + forType.getName()
-                );
-            }
-        }
-    }
-
-
-    /**
-     * @description
      * Class providing the implementation of the API.
      */
-    private with sharing class APIImpl implements API {
+    private with sharing class Implementation implements API {
 
         /**
          * @description
@@ -165,7 +123,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          * @param asyncObject The Asynchronous object to record the Exception against.
          * @param exc The wrapped exception to be recorded.
          */
-        public void recordException(final AsynchronousJob__c asyncObject, final AsynchronousV1.APIException exc) {
+        public void recordException(final AsynchronousJob__c asyncObject, final Asynchronous.APIException exc) {
             Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.apiRecordException.asynchronousObject');
             Assertion.isNotNull(exc, 'argument: AsynchronousHelper.apiRecordException.exc');
 
@@ -179,7 +137,7 @@ public with sharing virtual class AsynchronousHelper implements API {
                     ExceptionStackTrace__c = exc.getCause().getStackTraceString()
             );
 
-            AsynchronousDAO.INJECT.persistException(asyncError);
+            AsynchronousDAO.API.persistException(asyncError);
         }
 
         /**
@@ -194,10 +152,10 @@ public with sharing virtual class AsynchronousHelper implements API {
          * @param asyncObject The Asynchronous object to record the Exception against.
          * @param exc The wrapped exception to be recorded.
          */
-        public void recordInternalException(final AsynchronousJob__c asyncObject, final AsynchronousV1.APIException exc) {
+        public void recordInternalException(final AsynchronousJob__c asyncObject, final Asynchronous.APIException exc) {
             recordException(asyncObject, exc);
-            asyncObject.Status__c = AsynchronousV1.Status.FAILED.name();
-            AsynchronousDAO.INJECT.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+            asyncObject.Status__c = Asynchronous.Status.FAILED.name();
+            AsynchronousDAO.API.persistObjects(new List<AsynchronousJob__c> { asyncObject });
         }
 
         /**
@@ -288,16 +246,16 @@ public with sharing virtual class AsynchronousHelper implements API {
      * @description
      * Method is solely for mocking use.
      */
-    public void recordException(final AsynchronousJob__c asyncObject, final AsynchronousV1.APIException exc) {
-        throw new AsynchronousV1.APIException('Access denied');
+    public void recordException(final AsynchronousJob__c asyncObject, final Asynchronous.APIException exc) {
+        throw new Asynchronous.APIException('Access denied');
     }
 
     /**
      * @description
      * Method is solely for mocking use.
      */
-    public void recordInternalException(final AsynchronousJob__c asyncObject, final AsynchronousV1.APIException exc) {
-        throw new AsynchronousV1.APIException('Access denied');
+    public void recordInternalException(final AsynchronousJob__c asyncObject, final Asynchronous.APIException exc) {
+        throw new Asynchronous.APIException('Access denied');
     }
 
     /**
@@ -305,7 +263,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      * Method is solely for mocking use.
      */
     public Map<String, String> decodeState(final List<AsynchronousJobState__c> asyncStateObjects) {
-        throw new AsynchronousV1.APIException('Access denied');
+        throw new Asynchronous.APIException('Access denied');
     }
 
     /**
@@ -316,7 +274,7 @@ public with sharing virtual class AsynchronousHelper implements API {
             final AsynchronousJob__c asyncObject,
             final Map<String, String> state
     ) {
-        throw new AsynchronousV1.APIException('Access denied');
+        throw new Asynchronous.APIException('Access denied');
     }
 
     /**
@@ -324,7 +282,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      * Method is solely for mocking use.
      */
     public void queueJob(final AsynchronousJob__c asyncObject) {
-        throw new AsynchronousV1.APIException('Access denied');
+        throw new Asynchronous.APIException('Access denied');
     }
 
     /**
@@ -338,12 +296,12 @@ public with sharing virtual class AsynchronousHelper implements API {
     @Future
     private static void startAsynchronousJob(final String asyncObjectId) {
         Assertion.isNotNull(asyncObjectId, 'argument: AsynchronousHelper.startAsynchronousJob.asyncObjectId');
-        final AsynchronousJob__c asyncObject = AsynchronousDAO.INJECT.getObject(asyncObjectId);
+        final AsynchronousJob__c asyncObject = AsynchronousDAO.API.getObject(asyncObjectId);
 
         try {
             enqueueApexJob(asyncObject);
         } catch(Exception exc) {
-            AsynchronousHelper.INJECT.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
+            AsynchronousHelper.API.recordInternalException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
         }
     }
 
@@ -357,18 +315,59 @@ public with sharing virtual class AsynchronousHelper implements API {
         Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.enqueueApexJob.asyncObject');
 
         final AsynchronousJob asyncJob = (AsynchronousJob) AsynchronousJob.fromSObject(asyncObject);
-        final AsynchronousRunnableV1 runnable = (AsynchronousRunnableV1) asyncJob.getRunnable();
+        final Asynchronous.ApexJobRunnable runnable = (Asynchronous.ApexJobRunnable) asyncJob.getRunnable();
 
-        asyncObject.Status__c = AsynchronousV1.Status.RUNNING.name();
+        asyncObject.Status__c = Asynchronous.Status.RUNNING.name();
         asyncObject.LastRunTime__c = Datetime.now();
 
-        AsynchronousDAO.INJECT.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+        AsynchronousDAO.API.persistObjects(new List<AsynchronousJob__c> { asyncObject });
 
         asyncObject.ApexJobId__c = System.enqueueJob(
-                runnable.forJob(AsynchronousJob.fromSObject(AsynchronousDAO.INJECT.getObject(asyncObject.Id)))
+                runnable.forJob(AsynchronousJob.fromSObject(AsynchronousDAO.API.getObject(asyncObject.Id)))
         );
 
-        AsynchronousDAO.INJECT.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+        AsynchronousDAO.API.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+    }
+
+
+    /**
+     * @description
+     * Creates the default API implementation.
+     * <br><br>
+     * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
+     * We use the factory to defer the construction by injection to this class, which is able to construct it.
+     */
+    public with sharing class Factory implements TypesV1.Factory {
+        public Object newInstance() {
+            return new Implementation();
+        }
+    }
+
+    /**
+     * @description
+     * Class providing check on Binding made to AsynchronousDAO.API.
+     */
+    public with sharing class BindingCheck implements Dependency.BindingCheck {
+
+        /**
+         * @description
+         * Checks that a valid binding has been made to AsynchronousDAO.API.
+         *
+         * @param forType The type being bound to, AsynchronousDAO.API.
+         * @param withImpl The implementation being bound to AsynchronousDAO.API.
+         *
+         * @return The result of the validation.
+         */
+        public Dependency.ValidationResult validate(Type forType, Type withImpl) {
+            if (TypesV1.newInstance(withImpl) instanceof AsynchronousHelper.API) {
+                return new Dependency.ValidationResult(true, null);
+            } else {
+                return new Dependency.ValidationResult(
+                        false,
+                        'Class ' + withImpl.getName() + ' does not implement ' + forType.getName()
+                );
+            }
+        }
     }
 
     // Set the default implementation of the API. This can be overridden using a Dependency Injection Binding.

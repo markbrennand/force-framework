@@ -82,18 +82,18 @@ public with sharing class ComparisonHelperTests {
     private static void testAdditionalComparator() {
         Exception exc1 = new DMLException('TEST');
 
-        Assert.isFalse(ComparisonHelper.compare(exc1, new DependencyV1.APIException('TEST')));
+        Assert.isFalse(ComparisonHelper.compare(exc1, new Dependency.APIException('TEST')));
 
         Assert.isTrue(ComparisonHelper.compare(
                 new List<Comparator<Object>> { new ExceptionComparator() },
                 exc1,
-                new DependencyV1.APIException('TEST'))
+                new Dependency.APIException('TEST'))
         );
 
         Assert.isFalse(ComparisonHelper.compare(
                 new List<Comparator<Object>> { new ExceptionComparator() },
                 exc1,
-                new DependencyV1.APIException('ANOTHER'))
+                new Dependency.APIException('ANOTHER'))
         );
     }
 

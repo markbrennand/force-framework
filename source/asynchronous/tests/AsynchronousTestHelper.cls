@@ -20,7 +20,7 @@ public with sharing class AsynchronousTestHelper {
                 TimeZoneSidKey = 'Europe/London',
                 LocaleSidKey = 'en_US',
                 LanguageLocaleKey = 'en_US',
-                FirstName = 'Registry',
+                FirstName = 'Asynchronous',
                 LastName = 'User'
         );
 
@@ -45,5 +45,11 @@ public with sharing class AsynchronousTestHelper {
 
     public static User getUser() {
         return [SELECT Id FROM User WHERE Username = 'user@asynchronous.force-fw.test.com' LIMIT 1];
+    }
+
+    public with sharing class TestRunnable extends AsynchronousV1.Runnable {
+        public TestRunnable() {
+            super(TestRunnable.class);
+        }
     }
 }

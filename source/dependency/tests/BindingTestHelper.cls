@@ -99,7 +99,7 @@ public with sharing class BindingTestHelper {
 
     @TestVisible
     private static void handleException(Exception exc, String expectedError) {
-        if (! (exc instanceof DMLException || exc instanceof DependencyV1.APIException)) {
+        if (! (exc instanceof DMLException || exc instanceof Dependency.APIException)) {
             throw exc;
         }
 
@@ -123,7 +123,7 @@ public with sharing class BindingTestHelper {
         }
     }
 
-    public with sharing class PrototypeTest extends AbstractTest implements DependencyV1.Prototype {
+    public with sharing class PrototypeTest extends AbstractTest implements Dependency.Prototype {
         private String value;
 
         public PrototypeTest() {
@@ -145,7 +145,7 @@ public with sharing class BindingTestHelper {
         }
     }
 
-    public with sharing class PrototypeCustomTest extends AbstractTest implements DependencyV1.Prototype {
+    public with sharing class PrototypeCustomTest extends AbstractTest implements Dependency.Prototype {
         private String value;
 
         public PrototypeCustomTest() {
@@ -156,16 +156,16 @@ public with sharing class BindingTestHelper {
         }
     }
 
-    public with sharing class AbstractTestBindingCheck implements DependencyV1.BindingCheck {
-        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
+    public with sharing class AbstractTestBindingCheck implements Dependency.BindingCheck {
+        public Dependency.ValidationResult validate(Type forType, Type withImpl) {
             Object instance = TypesV1.newInstance(withImpl);
             SINGLETON_INSTANCE =
             PROTOTYPE_INSTANCE = 0;
 
             if (instance instanceof AbstractTest) {
-                return new DependencyV1.ValidationResult(true, null);
+                return new Dependency.ValidationResult(true, null);
             } else {
-                return new DependencyV1.ValidationResult(
+                return new Dependency.ValidationResult(
                         false,
                         'Class ' + withImpl.getName() + ' does not extend AbstractTest'
                 );
@@ -173,16 +173,16 @@ public with sharing class BindingTestHelper {
         }
     }
 
-    public with sharing class TestInterfaceBindingCheck implements DependencyV1.BindingCheck {
-        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
+    public with sharing class TestInterfaceBindingCheck implements Dependency.BindingCheck {
+        public Dependency.ValidationResult validate(Type forType, Type withImpl) {
             Object instance = TypesV1.newInstance(withImpl);
             SINGLETON_INSTANCE =
             PROTOTYPE_INSTANCE = 0;
 
             if (instance instanceof TestInterface) {
-                return new DependencyV1.ValidationResult(true, null);
+                return new Dependency.ValidationResult(true, null);
             } else {
-                return new DependencyV1.ValidationResult(
+                return new Dependency.ValidationResult(
                         false,
                         'Class ' + withImpl.getName() + ' does not implement TestInterface'
                 );

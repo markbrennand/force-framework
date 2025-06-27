@@ -18,14 +18,14 @@ public with sharing class AsynchronousTests {
         try {
             extended.createJob(null, null, null, null, null);
             Assert.fail();
-        } catch (AsynchronousV1.APIException ae) {
+        } catch (Asynchronous.APIException ae) {
             Assert.areEqual('Access denied', ae.getMessage());
         }
 
         try {
             extended.queueJobs(null);
             Assert.fail();
-        } catch (AsynchronousV1.APIException ae) {
+        } catch (Asynchronous.APIException ae) {
             Assert.areEqual('Access denied', ae.getMessage());
         }
     }
@@ -37,7 +37,7 @@ public with sharing class AsynchronousTests {
                     'Key1' => 'Value1', 'Key2' => 'Value2'
             };
 
-            AsynchronousV1.Job job = AsynchronousV1.createJob(
+            Asynchronous.Job job = AsynchronousV1.createJob(
                     AsynchronousScheduler.RunNextAvailable.class,
                     'TEST',
                     1,
@@ -51,12 +51,12 @@ public with sharing class AsynchronousTests {
             Assert.areEqual(1000, job.getRetryInterval());
             Assert.areEqual(0, job.getRetryNumber());
             Assert.areEqual(state, job.getState());
-            Assert.areEqual(AsynchronousV1.Status.PENDING, job.getStatus());
+            Assert.areEqual(Asynchronous.Status.PENDING, job.getStatus());
 
-            AsynchronousDAO.INJECT = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
+            AsynchronousDAO.API = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
                     .whenArguments(
                             new List<AsynchronousJob__c>{
-                                    new AsynchronousJob__c(Status__c = AsynchronousV1.Status.PENDING.name())
+                                    new AsynchronousJob__c(Status__c = Asynchronous.Status.PENDING.name())
                             },
                             new List<Map<String, String>>{
                                     state
@@ -67,7 +67,7 @@ public with sharing class AsynchronousTests {
                             .returns(new AddIdModifier())
                     .mock();
 
-            for (AsynchronousV1.Job queuedJob : AsynchronousV1.queueJobs(new List<AsynchronousV1.Job> { job })) {
+            for (Asynchronous.Job queuedJob : AsynchronousV1.queueJobs(new List<Asynchronous.Job> { job })) {
                 Assert.isNotNull(((AsynchronousJob) queuedJob).asyncObjectId);
             }
 
@@ -78,9 +78,9 @@ public with sharing class AsynchronousTests {
     @IsTest
     private static void testMocking() {
         System.runAs(AsynchronousTestHelper.getUser()) {
-            AsynchronousImpl.INJECT = createMock();
+            AsynchronousAPI.API = createMock();
 
-            AsynchronousV1.Job job = AsynchronousImpl.INJECT.createJob(
+            Asynchronous.Job job = AsynchronousAPI.API.createJob(
                     AsynchronousTests.class,
                     null,
                     1,
@@ -88,10 +88,10 @@ public with sharing class AsynchronousTests {
                     new Map<String, String>()
             );
 
-            Assert.areEqual(AsynchronousV1.Status.CANCELLED, job.getStatus());
+            Assert.areEqual(Asynchronous.Status.CANCELLED, job.getStatus());
             Assert.areEqual('MOCKED', job.getReference());
 
-            AsynchronousImpl.INJECT.queueJobs(new List<AsynchronousV1.Job>{ job });
+            AsynchronousAPI.API.queueJobs(new List<Asynchronous.Job>{ job });
             MockerV1.validate();
         }
     }
@@ -99,13 +99,24 @@ public with sharing class AsynchronousTests {
     @IsTest
     private static void testBindingCheck() {
         System.runAs(AsynchronousTestHelper.getUser()) {
-            DependencyV1.bind(AsynchronousV1.API.class, AsynchronousImpl.Factory.class);
+            DependencyV1.bind(Asynchronous.API.class, AsynchronousAPI.Factory.class);
             try {
-                DependencyV1.bind(AsynchronousV1.API.class, AsynchronousScheduler.RunNextAvailable.class);
+                DependencyV1.bind(Asynchronous.API.class, AsynchronousScheduler.RunNextAvailable.class);
                 Assert.fail();
-            } catch (DependencyV1.APIException ae) {
+            } catch (Dependency.APIException ae) {
                 Assert.isTrue(
-                        TestHelper.exceptionContains('Class AsynchronousScheduler.RunNextAvailable does not implement AsynchronousV1.API', ae),
+                        TestHelper.exceptionContains('Class AsynchronousScheduler.RunNextAvailable does not implement Asynchronous.API', ae),
+                        'Unexpected exception: ' + ae
+                );
+            }
+
+            DependencyV1.bind(Asynchronous.LWC.class, AsynchronousLWC.Factory.class);
+            try {
+                DependencyV1.bind(Asynchronous.LWC.class, AsynchronousScheduler.RunNextAvailable.class);
+                Assert.fail();
+            } catch (Dependency.APIException ae) {
+                Assert.isTrue(
+                        TestHelper.exceptionContains('Class AsynchronousScheduler.RunNextAvailable does not implement Asynchronous.LWC', ae),
                         'Unexpected exception: ' + ae
                 );
             }
@@ -113,90 +124,449 @@ public with sharing class AsynchronousTests {
     }
 
     @IsTest
-    private static void testTriggers() {
+    private static void testGetJobs() {
+        AsynchronousAPI.skipTriggers = true;
+
         System.runAs(AsynchronousTestHelper.getUser()) {
-            AsynchronousJob__c asyncObject = new AsynchronousJob__c(
-                    Status__c = AsynchronousV1.Status.PENDING.name(),
+            AsynchronousJob__c job1 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = Asynchronous.Status.QUEUED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST1',
+                    ScheduledRunTime__c = Datetime.now().addDays(-1),
+                    LastRunTime__c = Datetime.now()
+            );
+
+            AsynchronousJob__c job2 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = Datetime.now().addDays(-2),
+                    LastRunTime__c = Datetime.now()
+            );
+
+            AsynchronousJob__c job3 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = Asynchronous.Status.SUCCEEDED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST3',
+                    ScheduledRunTime__c = Datetime.now().addDays(1),
+                    LastRunTime__c = Datetime.now()
+            );
+
+            AsynchronousJob__c job4 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = Asynchronous.Status.FAILED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST4',
+                    ScheduledRunTime__c = Datetime.now().addDays(2),
+                    LastRunTime__c = Datetime.now()
+            );
+
+            AsynchronousJob__c job5 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = Asynchronous.Status.CANCELLED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST5',
+                    ScheduledRunTime__c = Datetime.now().addDays(0),
+                    LastRunTime__c = Datetime.now()
+            );
+
+            insert new List<AsynchronousJob__c>{
+                    job1, job2, job3, job4, job5
+            };
+
+            List<Map<String, Object>> jobs = AsynchronousLWC.API.getJobs(
+                    null,
+                    'ScheduledRunTime__c ASC',
+                    0,
+                    1
+            );
+
+            Assert.areEqual(1, jobs.size());
+            Assert.areEqual(job2.Id, jobs[0].get('Id'));
+
+            jobs = AsynchronousV1.getJobs(
+                    null,
+                    'ScheduledRunTime__c ASC',
+                    0,
+                    1
+            );
+
+            Assert.areEqual(1, jobs.size());
+            Assert.areEqual(job2.Id, jobs[0].get('Id'));
+
+            jobs = AsynchronousLWC.API.getJobs(
+                    new Map<String, Object>{
+                            'Status__c' => new List<String>{
+                                    'QUEUED', 'SUCCEEDED'
+                            }
+                    },
+                    'ScheduledRunTime__c DESC',
+                    0,
+                    3
+            );
+
+            Assert.areEqual(2, jobs.size());
+            Assert.areEqual(job3.Id, jobs[0].get('Id'));
+            Assert.areEqual(job1.Id, jobs[1].get('Id'));
+
+            jobs = AsynchronousV1.getJobs(
+                    new Map<String, Object>{
+                            'Status__c' => new List<String>{
+                                    'QUEUED', 'SUCCEEDED'
+                            },
+                            'Reference__c' => '%T3'
+                    },
+                    'ScheduledRunTime__c DESC',
+                    0,
+                    2
+            );
+
+            Assert.areEqual(1, jobs.size());
+            Assert.areEqual(job3.Id, jobs[0].get('Id'));
+
+            jobs = AsynchronousLWC.API.getJobs(
+                    new Map<String, Object>{
+                            'Status__c' => new List<String>{
+                                    'QUEUED', 'RUNNING'
+                            }
+                    },
+                    'ScheduledRunTime__c ASC',
+                    0,
+                    3
+            );
+
+            Assert.areEqual(2, jobs.size());
+            Assert.areEqual(new Set<String>{
+                    'Id', 'LastRunTime__c', 'MaximumRetries__c', 'Owner', 'OwnerId', 'Reference__c', 'RetryNumber__c', 'Retry__c', 'Runnable__c', 'ScheduledRunTime__c', 'Status__c'
+            }, jobs[1].keySet());
+
+            Assert.areEqual(new Set<String>{
+                    'Id', 'LastRunTime__c', 'MaximumRetries__c', 'Owner', 'OwnerId', 'Reference__c', 'RetryNumber__c', 'Retry__c', 'RunTime__c', 'Runnable__c', 'ScheduledRunTime__c', 'Status__c'
+            }, jobs[0].keySet());
+
+            jobs = AsynchronousV1.getJobs(
+                    new Map<String, Object>{
+                            'Status__c' => new List<String>{
+                                    'QUEUED', 'RUNNING'
+                            }
+                    },
+                    'ScheduledRunTime__c ASC',
+                    0,
+                    3
+            );
+
+            Assert.areEqual(2, jobs.size());
+            Assert.areEqual(new Set<String>{
+                    'Id', 'LastRunTime__c', 'MaximumRetries__c', 'Owner', 'OwnerId', 'Reference__c', 'RetryNumber__c', 'Retry__c', 'Runnable__c', 'ScheduledRunTime__c', 'Status__c'
+            }, jobs[1].keySet());
+
+            Assert.areEqual(new Set<String>{
+                    'Id', 'LastRunTime__c', 'MaximumRetries__c', 'Owner', 'OwnerId', 'Reference__c', 'RetryNumber__c', 'Retry__c', 'RunTime__c', 'Runnable__c', 'ScheduledRunTime__c', 'Status__c'
+            }, jobs[0].keySet());
+        }
+    }
+
+    @IsTest
+    private static void testRunJobs() {
+        AsynchronousAPI.skipTriggers = true;
+
+        System.runAs(AsynchronousTestHelper.getUser()) {
+            AsynchronousJob__c job1 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = Asynchronous.Status.QUEUED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST1',
+                    ScheduledRunTime__c = Datetime.now().addDays(-1)
+            );
+
+            AsynchronousJob__c job2 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = Datetime.now().addDays(-2)
+            );
+
+            insert new List<AsynchronousJob__c> { job1, job2 };
+
+            AsynchronousLWC.API.runJobs(new List<Id> { job1.Id, job2.Id });
+            Assert.areEqual(
+                    2,
+                    [
+                            SELECT COUNT()
+                            FROM AsynchronousJob__c
+                            WHERE Status__c = :Asynchronous.Status.PENDING.name()
+                    ]
+            );
+
+            job1.Status__c = Asynchronous.Status.QUEUED.name();
+            job2.Status__c = Asynchronous.Status.RUNNING.name();
+            upsert new List<AsynchronousJob__c> { job1, job2 };
+
+            AsynchronousV1.runJobs(new List<Id> { job1.Id, job2.Id });
+            Assert.areEqual(
+                    2,
+                    [
+                            SELECT COUNT()
+                            FROM AsynchronousJob__c
+                            WHERE Status__c = :Asynchronous.Status.PENDING.name()
+                    ]
+            );
+        }
+    }
+
+    @IsTest
+    private static void testDeleteJobs() {
+        AsynchronousAPI.skipTriggers = true;
+
+        System.runAs(AsynchronousTestHelper.getUser()) {
+            AsynchronousJob__c job1 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = Asynchronous.Status.QUEUED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST1',
+                    ScheduledRunTime__c = Datetime.now().addDays(-1)
+            );
+
+            AsynchronousJob__c job2 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = Datetime.now().addDays(-2)
+            );
+
+            AsynchronousJob__c job3 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = Asynchronous.Status.SUCCEEDED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST3',
+                    ScheduledRunTime__c = Datetime.now().addDays(-2)
+            );
+
+            AsynchronousJob__c job4 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = Asynchronous.Status.FAILED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST4',
+                    ScheduledRunTime__c = Datetime.now().addDays(-2)
+            );
+
+            AsynchronousJob__c job5 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = Asynchronous.Status.CANCELLED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST5',
+                    ScheduledRunTime__c = Datetime.now().addDays(-2)
+            );
+
+            insert new List<AsynchronousJob__c> { job1, job2, job3, job4, job5 };
+
+            AsynchronousLWC.API.deleteJobs(new List<Id> { job1.Id, job2.Id });
+            Assert.areEqual(3, [SELECT COUNT() FROM AsynchronousJob__c]);
+            Assert.areEqual(0, [SELECT COUNT() FROM AsynchronousJob__c WHERE Id = :job1.Id OR Id = :job2.Id ]);
+
+            AsynchronousV1.deleteJobs(new List<Id> { job3.Id, job4.Id });
+            Assert.areEqual(1, [SELECT COUNT() FROM AsynchronousJob__c]);
+            Assert.areEqual(0, [SELECT COUNT() FROM AsynchronousJob__c WHERE Id = :job3.Id OR Id = :job4.Id ]);
+        }
+    }
+
+    @IsTest
+    private static void testGetJobTotals() {
+        AsynchronousAPI.skipTriggers = true;
+
+        System.runAs(AsynchronousTestHelper.getUser()) {
+            AsynchronousJob__c job1 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = Asynchronous.Status.QUEUED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST1',
+                    ScheduledRunTime__c = Datetime.now().addDays(-1)
+            );
+
+            AsynchronousJob__c job2 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = Datetime.now().addDays(-2)
+            );
+
+            AsynchronousJob__c job3 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = Asynchronous.Status.SUCCEEDED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST3',
+                    ScheduledRunTime__c = Datetime.now().addDays(-1)
+            );
+
+            AsynchronousJob__c job4 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = Asynchronous.Status.FAILED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST4',
+                    ScheduledRunTime__c = Datetime.now().addDays(-4)
+            );
+
+            AsynchronousJob__c job5 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
-                    MaximumRetries__c = 0,
+                    Status__c = Asynchronous.Status.CANCELLED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
                     RetryNumber__c = 1,
-                    RetryInterval__c = 0,
-                    ScheduledRunTime__c = Datetime.now()
+                    Reference__c = 'TEST5',
+                    ScheduledRunTime__c = Datetime.now().addDays(-1)
             );
 
-            insert asyncObject;
-            asyncObject = [SELECT Status__c, RetryNumber__c FROM AsynchronousJob__c WHERE Id = :asyncObject.Id];
-            Assert.areEqual(AsynchronousV1.Status.QUEUED.name(), asyncObject.Status__c);
-            Assert.areEqual(0, asyncObject.RetryNumber__c);
-
-            asyncObject = new AsynchronousJob__c(
-                    Status__c = AsynchronousV1.Status.CANCELLED.name(),
-                    Runnable__c = TestAsynchronousRunnable.class.getName(),
-                    MaximumRetries__c = 0,
+            AsynchronousJob__c job6 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
+                    Status__c = Asynchronous.Status.QUEUED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
                     RetryNumber__c = 1,
-                    RetryInterval__c = 0,
-                    ScheduledRunTime__c = Datetime.now()
+                    Reference__c = 'TEST6',
+                    ScheduledRunTime__c = Datetime.now().addDays(-1)
             );
 
-            insert asyncObject;
-            Assert.areEqual(1, [SELECT COUNT() FROM AsynchronousJob__c WHERE Id = :asyncObject.Id]);
+            insert new List<AsynchronousJob__c> { job1, job2, job3, job4, job5, job6 };
 
-            asyncObject = new AsynchronousJob__c(
-                    Status__c = AsynchronousV1.Status.CANCELLED.name(),
-                    Runnable__c = TestAsynchronousRunnable.class.getName(),
-                    MaximumRetries__c = 1, // Causes runnable to request job deletion.
+            Map<String, Integer> counts = AsynchronousLWC.API.getTotals();
+            Assert.areEqual(6, counts.size());
+            Assert.areEqual(0, counts.get('PENDING'));
+            Assert.areEqual(2, counts.get('QUEUED'));
+            Assert.areEqual(1, counts.get('RUNNING'));
+            Assert.areEqual(1, counts.get('SUCCEEDED'));
+            Assert.areEqual(1, counts.get('FAILED'));
+            Assert.areEqual(1, counts.get('CANCELLED'));
+
+            counts = AsynchronousV1.getTotals();
+            Assert.areEqual(6, counts.size());
+            Assert.areEqual(0, counts.get('PENDING'));
+            Assert.areEqual(2, counts.get('QUEUED'));
+            Assert.areEqual(1, counts.get('RUNNING'));
+            Assert.areEqual(1, counts.get('SUCCEEDED'));
+            Assert.areEqual(1, counts.get('FAILED'));
+            Assert.areEqual(1, counts.get('CANCELLED'));
+
+            job4.Status__c = Asynchronous.Status.CANCELLED.name();
+            job5.Status__c = Asynchronous.Status.RUNNING.name();
+            job6.Status__c = Asynchronous.Status.CANCELLED.name();
+            upsert new List<AsynchronousJob__c> { job4, job5, job6 };
+
+            counts = AsynchronousLWC.API.getTotals();
+            Assert.areEqual(6, counts.size());
+            Assert.areEqual(0, counts.get('PENDING'));
+            Assert.areEqual(1, counts.get('QUEUED'));
+            Assert.areEqual(2, counts.get('RUNNING'));
+            Assert.areEqual(1, counts.get('SUCCEEDED'));
+            Assert.areEqual(2, counts.get('CANCELLED'));
+            Assert.areEqual(0, counts.get('FAILED'));
+
+            counts = AsynchronousV1.getTotals();
+            Assert.areEqual(6, counts.size());
+            Assert.areEqual(0, counts.get('PENDING'));
+            Assert.areEqual(1, counts.get('QUEUED'));
+            Assert.areEqual(2, counts.get('RUNNING'));
+            Assert.areEqual(1, counts.get('SUCCEEDED'));
+            Assert.areEqual(2, counts.get('CANCELLED'));
+            Assert.areEqual(0, counts.get('FAILED'));
+        }
+    }
+
+    @IsTest
+    private static void testPersistException() {
+        System.runAs(AsynchronousTestHelper.getUser()) {
+            AsynchronousJob__c job = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    ApexJobId__c = 'APEXJOB-1',
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = Asynchronous.Status.FAILED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
                     RetryNumber__c = 1,
-                    RetryInterval__c = 0,
-                    ScheduledRunTime__c = Datetime.now()
+                    Reference__c = 'TEST1',
+                    ScheduledRunTime__c = Datetime.now().addDays(-1)
             );
 
-            insert asyncObject;
-            Assert.areEqual(0, [SELECT COUNT() FROM AsynchronousJob__c WHERE Id = :asyncObject.Id]);
+            insert job;
 
-            AsynchronousHelper.INJECT = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
-                    .whenArgument(
-                            new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName())
-                    )
-                        .forMethod('queueJob')
-                            .called(1)
-                    .whenArguments(
-                            new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName()),
-                            MockerV1.anyNonNull(Map<String, String>.class)
-                    )
-                        .forMethod('encodeState')
-                            .called(1)
-                            .returns(new List<AsynchronousJobState__c>())
-                    .mock();
+            Exception exc = new DMLException('Test');
 
-            asyncObject = new AsynchronousJob__c(
-                    Status__c = AsynchronousV1.Status.PENDING.name(),
-                    Runnable__c = TestAsynchronousRunnable.class.getName(),
-                    MaximumRetries__c = 0,
-                    RetryNumber__c = 0,
-                    RetryInterval__c = 0,
-                    ScheduledRunTime__c = Datetime.now()
+            AsynchronousJobException__c error = new AsynchronousJobException__c(
+                    AsynchronousJob__c = job.Id,
+                    RetryNumber__c = job.RetryNumber__c,
+                    StatusOnError__c = job.Status__c,
+                    ApexJobId__c = job.ApexJobId__c,
+                    ExceptionType__c = exc.getTypeName(),
+                    ExceptionMessage__c = exc.getMessage(),
+                    ExceptionStackTrace__c = exc.getStackTraceString()
             );
 
-            insert asyncObject;
-            MockerV1.validate();
+            AsynchronousDAO.API.persistException(error);
 
-            try {
-                insert new AsynchronousJob__c(
-                        Status__c = AsynchronousV1.Status.PENDING.name(),
-                        Runnable__c = AsynchronousTests.class.getName(),
-                        MaximumRetries__c = 0,
-                        RetryNumber__c = 0,
-                        RetryInterval__c = 0,
-                        ScheduledRunTime__c = Datetime.now()
-                );
-                Assert.fail();
+            AsynchronousJobException__c persisted = [
+                    SELECT Id, AsynchronousJob__c, RetryNumber__c, StatusOnError__c, ApexJobId__c, ExceptionType__c,
+                            ExceptionMessage__c, ExceptionStackTrace__c
+                    FROM AsynchronousJobException__c
+                    WHERE AsynchronousJob__c = :job.Id
+                    LIMIT 1
+            ];
 
-            } catch(DmlException de) {
-                Assert.isTrue(
-                    TestHelper.exceptionContains('Class AsynchronousTests does not implement Asynchronous.Runnable', de),
-                    'Unexpected exception: ' + de
-                );
-            }
+            Assert.areEqual(persisted, error);
         }
     }
 
@@ -204,52 +574,52 @@ public with sharing class AsynchronousTests {
     private static void testOnlyAPICanBeUsed() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             try {
-                AsynchronousHelper helper = (AsynchronousHelper) AsynchronousHelper.INJECT;
+                AsynchronousHelper helper = (AsynchronousHelper) AsynchronousHelper.API;
                 Assert.fail();
 
             } catch (TypeException te) {
                 Assert.isTrue(
-                        TestHelper.exceptionContains('Invalid conversion from runtime type AsynchronousHelper.APIImpl to AsynchronousHelper', te),
+                        TestHelper.exceptionContains('Invalid conversion from runtime type AsynchronousHelper.Implementation to AsynchronousHelper', te),
                         'Unexpected exception: ' + te
                 );
             }
 
             try {
-                AsynchronousImpl async = (AsynchronousImpl) AsynchronousImpl.INJECT;
+                AsynchronousAPI async = (AsynchronousAPI) AsynchronousAPI.API;
                 Assert.fail();
 
             } catch (TypeException te) {
                 Assert.isTrue(
-                        TestHelper.exceptionContains('Invalid conversion from runtime type AsynchronousImpl.APIImpl to AsynchronousImpl', te),
+                        TestHelper.exceptionContains('Invalid conversion from runtime type AsynchronousAPI.Implementation to AsynchronousAPI', te),
                         'Unexpected exception: ' + te
                 );
             }
 
             try {
-                AsynchronousDAO dao = (AsynchronousDAO) AsynchronousDAO.INJECT;
+                AsynchronousDAO dao = (AsynchronousDAO) AsynchronousDAO.API;
                 Assert.fail();
 
             } catch (TypeException te) {
                 Assert.isTrue(
-                        TestHelper.exceptionContains('Invalid conversion from runtime type AsynchronousDAO.APIImpl to AsynchronousDAO', te),
+                        TestHelper.exceptionContains('Invalid conversion from runtime type AsynchronousDAO.Implementation to AsynchronousDAO', te),
                         'Unexpected exception: ' + te
                 );
             }
         }
     }
 
-    private static AsynchronousImpl createMock() {
-        AsynchronousV1.Job job = (AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class)
+    private static AsynchronousAPI createMock() {
+        Asynchronous.Job job = (Asynchronous.Job) MockerV1.of(AsynchronousJob.class)
                 .whenNoArguments()
                     .forMethod('getReference')
                         .called(1)
                         .returns('MOCKED')
                     .forMethod('getStatus')
                         .called(1)
-                        .returns(AsynchronousV1.Status.CANCELLED)
+                        .returns(Asynchronous.Status.CANCELLED)
                 .mock();
 
-        return (AsynchronousImpl) MockerV1.of(AsynchronousImpl.class)
+        return (AsynchronousAPI) MockerV1.of(AsynchronousAPI.class)
                 .whenArguments(
                         AsynchronousTests.class,
                         null,
@@ -260,18 +630,18 @@ public with sharing class AsynchronousTests {
                     .forMethod('createJob')
                         .called(1)
                         .returns(job)
-                .whenArgument(new List<AsynchronousV1.Job> { job })
+                .whenArgument(new List<Asynchronous.Job> { job })
                     .forMethod('queueJobs')
                         .called(1)
                 .mock();
     }
 
-    public with sharing class TestAsynchronousRunnable extends AsynchronousRunnableV1 {
+    public with sharing class TestAsynchronousRunnable extends AsynchronousV1.Runnable {
         public TestAsynchronousRunnable() {
             super(TestAsynchronousRunnable.class);
         }
 
-        public override Boolean onCancellation(AsynchronousV1.Job job) {
+        public override Boolean onCancellation(Asynchronous.Job job) {
             return job.getMaximumRetries() == 0;
         }
     }
@@ -285,5 +655,5 @@ public with sharing class AsynchronousTests {
         }
     }
 
-    private with sharing class ExtendedClass extends AsynchronousImpl {}
+    private with sharing class ExtendedClass extends AsynchronousAPI {}
 }

@@ -8,7 +8,7 @@
  *
  * @author Mark Brennand
  */
-public with sharing class ApexTypeBindingCheck implements DependencyV1.BindingCheck {
+public with sharing class ApexTypeBindingCheck implements Dependency.BindingCheck {
 
     /**
      * @description
@@ -19,7 +19,7 @@ public with sharing class ApexTypeBindingCheck implements DependencyV1.BindingCh
      *
      * @return The result of the validation.
      */
-    public DependencyV1.ValidationResult validate(final Type forType, final Type withImpl) {
+    public Dependency.ValidationResult validate(final Type forType, final Type withImpl) {
         switch on forType.getName() {
             when 'String' {
                 return buildValidationResult(TypesV1.newInstance(withImpl) instanceof String, forType, withImpl);
@@ -46,7 +46,7 @@ public with sharing class ApexTypeBindingCheck implements DependencyV1.BindingCh
                 return buildValidationResult(TypesV1.newInstance(withImpl) instanceof Map<String,Object>, forType, withImpl);
             }
             when else {
-                return new DependencyV1.ValidationResult(
+                return new Dependency.ValidationResult(
                         false,
                         'Class ' + forType.getName() + ' is not registered for bind checking'
                 );
@@ -64,10 +64,10 @@ public with sharing class ApexTypeBindingCheck implements DependencyV1.BindingCh
      *
      * @return The validation result.
      */
-    private DependencyV1.ValidationResult buildValidationResult(final Boolean isValid, final Type forType, final Type withImpl) {
+    private Dependency.ValidationResult buildValidationResult(final Boolean isValid, final Type forType, final Type withImpl) {
         return isValid
-                ? new DependencyV1.ValidationResult(true, null)
-                : new DependencyV1.ValidationResult(
+                ? new Dependency.ValidationResult(true, null)
+                : new Dependency.ValidationResult(
                         false,
                         'Class ' + withImpl.getName() + ' cannot be assigned to an ' + forType.getName()
                 );

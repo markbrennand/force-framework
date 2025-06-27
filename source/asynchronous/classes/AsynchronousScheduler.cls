@@ -1,27 +1,27 @@
 /**
  * @description
  * The Scheduler is responsible for finding and starting the next job that can be run based on its scheduled time.
- *
+ * <br><br>
  * The Scheduler queue method is the controller for the concurrency. The Scheduler selects the jobs that are runnable.
  * The number of active instances of each job is checked against its maximum concurrency. If there is concurrency
  * available the Id of the job is added to a Set jobs to start. A Scheduler job is started passing in the Set
  * as an argument.
- *
+ * <br><br>
  * The Scheduler job starts the first job in the Set and removes the Id of the job from the Set. The new Set is
  * saved in the Set.
- *
+ * <br><br>
  * The Finalizer, if finalizing, a Scheduler, extracts the Set from the job. It calls the Scheduler's queue method
  * passing the Set as argument. If the Set is not empty, a new Scheduler is started, passing in the new Set as
  * argument. This pattern is repeated till the Set is empty.
- *
+ * <br><br>
  * When an empty Set is passed to the queue method, the Scheduler builds the next Set of job ids that can be run.
- *
+ * <br><br>
  * Due to the Queueable limit of only 1 Apex job being allowed to be started, a Scheduler will be run for every
  * job that is started.
  *
  * @author Mark Brennand
  */
-public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
+public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable {
 
     /**
      * @description
@@ -90,7 +90,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
      * @param asyncJob The Asynchronous job for the Scheduler.
      * @param apexJobId The Id of the Apex job for the Runnable.
      */
-    public override void run(final AsynchronousV1.Job asyncJob, final String apexJobId) {
+    public override void run(final Asynchronous.Job asyncJob, final String apexJobId) {
         Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.run.asyncJob');
 
         final Set<String> jobsToStart = (Set<String>)
@@ -103,9 +103,9 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
             final String jobId = jobsToStart.iterator().next();
 
             try {
-                final AsynchronousJob__c asyncObject = AsynchronousDAO.INJECT.getObject(jobId);
+                final AsynchronousJob__c asyncObject = AsynchronousDAO.API.getObject(jobId);
                 asyncObject.ApexJobId__c = apexJobId;
-                AsynchronousHelper.INJECT.queueJob(asyncObject);
+                AsynchronousHelper.API.queueJob(asyncObject);
 
             } catch(Assertion.AssertionException ae) {
                 // An assertion exception indicates a problem with the job, so just ignore it.
@@ -173,7 +173,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
      *
      * @return False to indicate that the Asynchronous__c for the job is to be deleted.
      */
-    public override Boolean onSuccess(final AsynchronousV1.Job asyncJob) {
+    public override Boolean onSuccess(final Asynchronous.Job asyncJob) {
         Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onSuccess.asyncJob');
         return false;
     }
@@ -187,7 +187,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
      *
      * @return True to indicate that the Asynchronous__c for the job is to be kept.
      */
-    public override Boolean onFailure(final AsynchronousV1.Job asyncJob, final Exception exc) {
+    public override Boolean onFailure(final Asynchronous.Job asyncJob, final Exception exc) {
         Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onFailure.asyncJob');
         return true;
     }
@@ -200,7 +200,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
      *
      * @return False to indicate that the Asynchronous__c for the job is to be deleted.
      */
-    public override Boolean onCancellation(final AsynchronousV1.Job asyncJob) {
+    public override Boolean onCancellation(final Asynchronous.Job asyncJob) {
         Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onCancellation.asyncJob');
         return false;
     }
@@ -215,10 +215,10 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
      * @param jobsLeftToStart The jobs that are left to start from the previous scheduler run.
      */
     public static void queue(final Set<String> jobsLeftToStart) {
-        final AsynchronousV1.Job asyncJob;
+        final Asynchronous.Job asyncJob;
 
         if (!jobsLeftToStart.isEmpty()) {
-            asyncJob = AsynchronousImpl.INJECT.createJob(
+            asyncJob = AsynchronousAPI.API.createJob(
                     RunNextAvailable.class,
                     null,
                     0,
@@ -228,11 +228,11 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
 
         } else {
             final Set<String> newJobsToStart = getJobIdsToStart(CONFIGURATION.get(MAXIMUM_JOBS_TO_START_PROPERTY));
-            if (newJobsToStart.isEmpty() && (AsynchronousDAO.INJECT.countSchedulableObjects() == 0)) {
+            if (newJobsToStart.isEmpty() && (AsynchronousDAO.API.countSchedulableObjects() == 0)) {
                 return;
             }
 
-            asyncJob = AsynchronousImpl.INJECT.createJob(
+            asyncJob = AsynchronousAPI.API.createJob(
                     RunNextAvailable.class,
                     null,
                     0,
@@ -242,13 +242,13 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
         }
 
         // More than one running Scheduler would cause the synchronisation to fail.
-        if (AsynchronousDAO.INJECT.countActiveObjects(new AsynchronousJob__c(Runnable__c = RunNextAvailable.class.getName())) < 1) {
+        if (AsynchronousDAO.API.countActiveObjects(new AsynchronousJob__c(Runnable__c = RunNextAvailable.class.getName())) < 1) {
             AsynchronousJob__c asyncObject = AsynchronousJob.toSObject(asyncJob);
-            AsynchronousDAO.INJECT.persistObjects(
+            AsynchronousDAO.API.persistObjects(
                     new List<AsynchronousJob__c> { asyncObject},
                     new List<Map<String, String>> { asyncJob.getState() }
             );
-            AsynchronousHelper.INJECT.queueJob(asyncObject);
+            AsynchronousHelper.API.queueJob(asyncObject);
         }
     }
 
@@ -267,7 +267,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
         final Map<String, Integer> activeCountCache = new Map<String, Integer>();
         final Map<String, Integer> activeCache = new Map<String, Integer>();
 
-        for (AsynchronousJob__c asyncObject : AsynchronousDAO.INJECT.getScheduledObjects(maxToStart)) {
+        for (AsynchronousJob__c asyncObject : AsynchronousDAO.API.getScheduledObjects(maxToStart)) {
             final String runnable = asyncObject.Runnable__c;
             final Integer maxActive;
             final Integer active;
@@ -277,7 +277,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
 
             } else {
                 maxActive =
-                        ((AsynchronousV1.Runnable) TypesV1.newInstance(TypesV1.load(asyncObject.Runnable__c)))
+                        ((Asynchronous.Runnable) TypesV1.newInstance(TypesV1.load(asyncObject.Runnable__c)))
                                 .getMaximumActive();
 
                 activeCountCache.put(runnable, maxActive);
@@ -287,7 +287,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousRunnableV1 {
                 active = activeCache.get(runnable);
 
             } else {
-                active = AsynchronousDAO.INJECT.countActiveObjects(asyncObject);
+                active = AsynchronousDAO.API.countActiveObjects(asyncObject);
                 activeCache.put(runnable, active);
             }
 

@@ -25,153 +25,6 @@ global with sharing class DependencyV1 {
 
     /**
      * @description
-     * Interface defining the API provided by this class.
-     * <br><br>
-     * It is public as it is not intended for re-implementation outside the package.
-     */
-    public interface API {
-
-        /**
-         * @description
-         * If the registry contains a binding for the given type, its implementation is returned.
-         * <br><br>
-         * Should no binding exist, an exception must be thrown.
-         *
-         * @param forType The type to be bound.
-         *
-         * @return The implementation of the given type.
-         */
-        Object inject(final Type forType);
-
-        /**
-         * @description
-         * If the registry contains a binding for the given type and action, its implementation is returned.
-         * <br><br>
-         * Should no binding exist, an exception must be thrown.
-         *
-         * @param forType The type to be bound.
-         * @param action The action specific to the binding to be bound.
-         *
-         * @return The implementation of the given type.
-         */
-        Object inject(final Type forType, final String action);
-
-        /**
-         * @description
-         * Returns true if registry contains a binding for the given type and action, false if not.
-         *
-         * @param forType The type to be checked.
-         *
-         * @return True if binding exists, false if not.
-         */
-        Boolean isBound(final Type forType);
-
-        /**
-         * @description
-         * Returns true if registry contains a binding for the given type and action, false if not.
-         *
-         * @param forType The type to be checked.
-         * @param action The action specific to the binding to be checked.
-         *
-         * @return True if binding exists, false if not.
-         */
-        Boolean isBound(final Type forType, final String action);
-
-        /**
-         * @description
-         * Adds a binding to the registry.
-         *
-         * @param forType The type to be bound. Must be either an interface or abstract class.
-         * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
-         */
-        void bind(final Type forType, final Type withImpl);
-
-        /**
-         * @description
-         * Adds a binding to the registry.
-         *
-         * @param forType The type to be bound. Must be either an interface or abstract class.
-         * @param action The action used in combination with the type to uniquely identify the binding.
-         * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
-         */
-        void bind(final Type forType, final String action, final Type withImpl);
-
-        /**
-         * @description
-         * Forces the custom bindings to be reloaded.
-         */
-        void reload();
-    }
-
-    /**
-     * @description
-     * A class implementing this interface will have a new instance of itself created each time it is in injected into
-     * an application.
-     */
-    global interface Prototype {}
-
-    /**
-     * @description
-     * Class representing result of a binding validation check.
-     */
-    global with sharing class ValidationResult {
-        public final Boolean isValid { public get; private set; }
-        public final String errorMessage { public get; private set; }
-
-        /**
-         * @description
-         * Constructs a validation result object which is used to inform the caller of the BindingCheck.validate
-         * method of the result of the validation.
-         *
-         * @param isValid True if the validation passed. False if not.
-         * @param errorMessage The error message to be recorded in the Exception thrown to record the failure.
-         */
-        global ValidationResult(final Boolean isValid, final String errorMessage) {
-            Assertion.isNotNull(isValid, 'argument: Dependency.ValidationResult.isValid may not be null');
-            Assertion.isTrue(isValid || errorMessage != null, 'argument: Dependency.ValidationResult.errorMessage must be set');
-            this.isValid = isValid;
-            this.errorMessage = errorMessage;
-        }
-    }
-
-    /**
-     * @description
-     * Interface to be implemented to check a binding in the registry.
-     * <br><br>
-     * Each checker must be defined in a record in the Binding Check custom metadata.
-     */
-    global interface BindingCheck {
-
-        /**
-         * @description
-         * Given a type to be bound, a class implementing this method must check that the given implementation class
-         * can be bound to it.
-         * <br><br>
-         * If the for type is an interface then an implementation of this method must check that the implementation
-         * class implements the interface.
-         * <br><br>
-         * If the for type is an abstract class then an implementation of this method must check that the implementation
-         * class extends the abstract class.
-         * <br><br>
-         * If the for type is a class then an implementation of this method must check that the implementation
-         * class is of the same class or a super class of it.
-         *
-         * @param forType The type to be bound.
-         * @param withImpl The implementation to bind to the type.
-         *
-         * @return The result of the validation.
-         */
-        ValidationResult validate(Type forType, Type withImpl);
-    }
-
-    /**
-     * @description
-     * Exception thrown when a dependency injection operation fails.
-     */
-    global with sharing class APIException extends Exception {}
-
-    /**
-     * @description
      * If the registry contains a binding for the given type, its implementation is returned.
      * <br><br>
      * Should no binding exist, an exception is thrown.
@@ -181,7 +34,7 @@ global with sharing class DependencyV1 {
      * @return The implementation of the given type.
      */
     global static Object inject(final Type forType) {
-        return DependencyImpl.INSTANCE.inject(forType);
+        return DependencyAPI.API.inject(forType);
     }
 
     /**
@@ -196,7 +49,7 @@ global with sharing class DependencyV1 {
      * @return The implementation of the given type.
      */
     global static Object inject(final Type forType, final String action) {
-        return DependencyImpl.INSTANCE.inject(forType, action);
+        return DependencyAPI.API.inject(forType, action);
     }
 
     /**
@@ -208,7 +61,7 @@ global with sharing class DependencyV1 {
      * @return True if binding exists, false if not.
      */
     global static Boolean isBound(final Type forType) {
-        return DependencyImpl.INSTANCE.isBound(forType);
+        return DependencyAPI.API.isBound(forType);
     }
 
     /**
@@ -221,7 +74,7 @@ global with sharing class DependencyV1 {
      * @return True if binding exists, false if not.
      */
     global static Boolean isBound(final Type forType, final String action) {
-        return DependencyImpl.INSTANCE.isBound(forType, action);
+        return DependencyAPI.API.isBound(forType, action);
     }
 
     /**
@@ -232,7 +85,7 @@ global with sharing class DependencyV1 {
      * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
      */
     global static void bind(final Type forType, final Type withImpl) {
-        DependencyImpl.INSTANCE.bind(forType, withImpl);
+        DependencyAPI.API.bind(forType, withImpl);
     }
 
     /**
@@ -244,7 +97,7 @@ global with sharing class DependencyV1 {
      * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
      */
     global static void bind(final Type forType, final String action, final Type withImpl) {
-        DependencyImpl.INSTANCE.bind(forType, action, withImpl);
+        DependencyAPI.API.bind(forType, action, withImpl);
     }
 
     /**
@@ -252,6 +105,6 @@ global with sharing class DependencyV1 {
      * Forces the custom bindings to be reloaded.
      */
     global static void reload() {
-        DependencyImpl.INSTANCE.reload();
+        DependencyAPI.API.reload();
     }
 }

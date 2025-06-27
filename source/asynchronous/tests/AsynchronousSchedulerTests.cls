@@ -26,7 +26,7 @@ public with sharing class AsynchronousSchedulerTests {
     @IsTest
     private static void testDelayedWhenNoJobsToRun() {
         System.runAs(AsynchronousTestHelper.getUser()) {
-            AsynchronousV1.Job asyncJob = (AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class)
+            Asynchronous.Job asyncJob = (Asynchronous.Job) MockerV1.of(AsynchronousJob.class)
                     .whenNoArguments()
                         .forMethod('getState')
                             .called(1)
@@ -63,20 +63,20 @@ public with sharing class AsynchronousSchedulerTests {
                     })
             };
 
-            AsynchronousDAO.INJECT = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
+            AsynchronousDAO.API = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
                     .whenArgument(asyncJobId1)
                         .forMethod('getObject')
                             .called(1)
                             .returns(asyncObject)
                     .mock();
 
-            AsynchronousHelper.INJECT = (AsynchronousHelper.API) MockerV1.of(AsynchronousHelper.class)
+            AsynchronousHelper.API = (AsynchronousHelper.API) MockerV1.of(AsynchronousHelper.class)
                     .whenArgument(asyncObject)
                         .forMethod('queueJob')
                             .called(1)
                     .mock();
 
-            AsynchronousV1.Job asyncJob = (AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class)
+            Asynchronous.Job asyncJob = (Asynchronous.Job) MockerV1.of(AsynchronousJob.class)
                     .whenNoArguments()
                         .forMethod('getState')
                             .called(1)
@@ -249,7 +249,7 @@ public with sharing class AsynchronousSchedulerTests {
                     MockerV1.fakeId(AsynchronousJob__c.SObjectType)
             };
 
-            AsynchronousImpl.INJECT = (AsynchronousImpl) MockerV1.of(AsynchronousImpl.class)
+            AsynchronousAPI.API = (AsynchronousAPI) MockerV1.of(AsynchronousAPI.class)
                     .whenArguments(
                             AsynchronousScheduler.RunNextAvailable.class,
                             null,
@@ -263,7 +263,7 @@ public with sharing class AsynchronousSchedulerTests {
                             .called(1)
                     .mock();
 
-            AsynchronousDAO.INJECT = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
+            AsynchronousDAO.API = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
                     .whenArgument(new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName()))
                         .forMethod('countActiveObjects')
                             .called(1)
@@ -287,17 +287,17 @@ public with sharing class AsynchronousSchedulerTests {
     private static void testRunnableReturnValues() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousScheduler scheduler = new AsynchronousScheduler();
-            Assert.isFalse(scheduler.onSuccess((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock()));
-            Assert.isTrue(scheduler.onFailure((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock(), new DMLException('Test')));
-            Assert.isFalse(scheduler.onCancellation((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock()));
+            Assert.isFalse(scheduler.onSuccess((Asynchronous.Job) MockerV1.of(AsynchronousJob.class).mock()));
+            Assert.isTrue(scheduler.onFailure((Asynchronous.Job) MockerV1.of(AsynchronousJob.class).mock(), new DMLException('Test')));
+            Assert.isFalse(scheduler.onCancellation((Asynchronous.Job) MockerV1.of(AsynchronousJob.class).mock()));
         }
     }
 
     private static void mockForRun(List<AsynchronousJob__c> asyncObjects, Integer maxJobsToStart, Set<Id> jobsThatShouldBeStarted) {
-        AsynchronousHelper.INJECT = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
+        AsynchronousHelper.API = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
                 .whenArgument(new AsynchronousJob__c(
                         Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
-                        Status__c = AsynchronousV1.Status.PENDING.name()
+                        Status__c = Asynchronous.Status.PENDING.name()
                 ))
                     .forMethod('queueJob')
                         .called(1)
@@ -340,7 +340,7 @@ public with sharing class AsynchronousSchedulerTests {
                 .whenArguments(
                         new List<AsynchronousJob__c> {
                                 new AsynchronousJob__c(
-                                        Status__c = AsynchronousV1.Status.PENDING.name(),
+                                        Status__c = Asynchronous.Status.PENDING.name(),
                                         Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName()
                                 )
                         },
@@ -361,7 +361,7 @@ public with sharing class AsynchronousSchedulerTests {
                             .returns(0);
         }
 
-        AsynchronousDAO.INJECT = (AsynchronousDAO) mocked.mock();
+        AsynchronousDAO.API = (AsynchronousDAO) mocked.mock();
 
         AsynchronousScheduler.CONFIGURATION = new Map<String, Integer> {
                 AsynchronousScheduler.MAXIMUM_JOBS_TO_START_PROPERTY => maxJobsToStart,
@@ -369,7 +369,7 @@ public with sharing class AsynchronousSchedulerTests {
         };
     }
 
-    public with sharing class SingleConcurrencyTestRunnable extends AsynchronousRunnableV1 {
+    public with sharing class SingleConcurrencyTestRunnable extends AsynchronousV1.Runnable {
         public SingleConcurrencyTestRunnable() {
             super(SingleConcurrencyTestRunnable.class);
         }
@@ -379,7 +379,7 @@ public with sharing class AsynchronousSchedulerTests {
         }
     }
 
-    public with sharing class DoubleConcurrencyTestRunnable extends AsynchronousRunnableV1 {
+    public with sharing class DoubleConcurrencyTestRunnable extends AsynchronousV1.Runnable {
         public DoubleConcurrencyTestRunnable() {
             super(DoubleConcurrencyTestRunnable.class);
         }

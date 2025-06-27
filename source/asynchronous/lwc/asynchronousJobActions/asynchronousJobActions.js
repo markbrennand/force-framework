@@ -2,10 +2,10 @@
  * Created by Mark Brennand on 21/06/2025.
  */
 
-import {LightningElement, api} from 'lwc';
+import { LightningElement, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import deleteJobs from '@salesforce/apex/AsynchronousImpl.deleteJobs';
-import runJobs from '@salesforce/apex/AsynchronousImpl.runJobs';
+import deleteJobs from '@salesforce/apex/AsynchronousV1.deleteJobs';
+import runJobs from '@salesforce/apex/AsynchronousV1.runJobs';
 
 export default class AsynchronousJobActions extends LightningElement {
     viewNotAllowed = true;
@@ -47,11 +47,11 @@ export default class AsynchronousJobActions extends LightningElement {
             (error) => {
                 this._reset();
                 this.dispatchEvent(
-                    new CustomEvent('showToastEvent',
+                    new ShowToastEvent(
                         {
                             title: 'Error',
-                            message: 'Deletion failed',
-                            messageData: error
+                            message: 'Deletion failed, Status: {0}, Exception: {1}',
+                            messageData: [ '' + err.status, err.body.message ]
                         }
                     )
                 );
@@ -69,11 +69,11 @@ export default class AsynchronousJobActions extends LightningElement {
             (error) => {
                 this._reset();
                 this.dispatchEvent(
-                    new CustomEvent('showToastEvent',
+                    new ShowToastEvent(
                         {
                             title: 'Error',
-                            message: 'Deletion failed',
-                            messageData: error
+                            message: 'Run jobs failed, Status: {0}, Exception: {1}',
+                            messageData: [ '' + err.status, err.body.message ]
                         }
                     )
                 );

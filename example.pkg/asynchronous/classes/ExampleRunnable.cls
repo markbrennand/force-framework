@@ -3,7 +3,7 @@
  * @author Mark Brennand
  */
 
-global with sharing class ExampleRunnable extends forcefw.AsynchronousRunnableV1 {
+global with sharing class ExampleRunnable extends forcefw.AsynchronousV1.Runnable {
 
     static {
         forcefw.DependencyV1.bind(Map<String, Integer>.class, 'ExampleRunnable', Configuration.class);
@@ -17,7 +17,7 @@ global with sharing class ExampleRunnable extends forcefw.AsynchronousRunnableV1
         super(Executor.class);
     }
 
-    public override void run(forcefw.AsynchronousV1.Job job, String apexJobId) {
+    public override void run(forcefw.Asynchronous.Job job, String apexJobId) {
         Assert.isNotNull(job.getRetryNumber(), 'Job has no retry number');
         Assert.isNotNull(apexJobId, 'No Apex Job id');
 
@@ -42,11 +42,11 @@ global with sharing class ExampleRunnable extends forcefw.AsynchronousRunnableV1
         return configuration.get('maximumActive');
     }
 
-    public override forcefw.AsynchronousV1.Status onError(forcefw.AsynchronousV1.job job, Exception exc) {
-        return forcefw.AsynchronousV1.Status.QUEUED;
+    public override forcefw.Asynchronous.Status onError(forcefw.Asynchronous.job job, Exception exc) {
+        return forcefw.Asynchronous.Status.QUEUED;
     }
 
-    public override Boolean onCancellation(forcefw.AsynchronousV1.Job asyncJob) {
+    public override Boolean onCancellation(forcefw.Asynchronous.Job asyncJob) {
         return true;
     }
 

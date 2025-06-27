@@ -5,7 +5,7 @@
  * The implementation of the API is hidden in the private Implementation class. The class is hidden so an application
  * cannot access the class to mis-use it.
  * <br><br>
- * All application access is restricted to the API instance variable INJECT. This ensures the application can only
+ * All application access is restricted to the API instance variable API. This ensures the application can only
  * ever call the methods of the API interface.
  * <br><br>
  * The outer class implements the API only to allow it to be mocked. Any calls to the API method implementations
@@ -13,7 +13,7 @@
  *
  * @author Mark Brennand
  */
-public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO {
+public with sharing virtual class AsynchronousDAO implements Asynchronous.DAO {
 
     /**
      * @description
@@ -22,12 +22,12 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
      * The instance is injected from the Registry.
      */
     @TestVisible
-    public static AsynchronousV1.DAO INJECT {
+    public static Asynchronous.DAO API {
         public get {
-            if (Test.isRunningTest() && INJECT != null) { // INJECT has been mocked.
-                return INJECT;
+            if (Test.isRunningTest() && API != null) { // API has been mocked.
+                return API;
             } else {
-                return (AsynchronousV1.DAO) DependencyV1.inject(AsynchronousV1.DAO.class);
+                return (Asynchronous.DAO) DependencyV1.inject(Asynchronous.DAO.class);
             }
         }
         private set;
@@ -37,22 +37,9 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
 
     /**
      * @description
-     * Creates the default API implementation.
-     *
-     * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
-     * We use the factory to defer the construction by injection to this class, which is able to construct it.
-     */
-    public with sharing class Factory implements TypesV1.Factory {
-        public Object newInstance() {
-            return new APIImpl();
-        }
-    }
-
-    /**
-     * @description
      * Class providing the implementation of the API.
      */
-    private with sharing class APIImpl implements AsynchronousV1.DAO {
+    private with sharing class Implementation implements Asynchronous.DAO {
 
         /**
          * @description
@@ -98,7 +85,7 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
                     WHERE OwnerId = :UserInfo.getUserId()
                     AND ScheduledRunTime__c <= :Datetime.now()
                     AND Runnable__c != :AsynchronousScheduler.RunNextAvailable.class.getName()
-                    AND Status__c = :AsynchronousV1.Status.QUEUED.name()
+                    AND Status__c = :Asynchronous.Status.QUEUED.name()
                     WITH USER_MODE
                     ORDER BY ScheduledRunTime__c
                     LIMIT :maxJobsToReturn
@@ -115,8 +102,8 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
          */
         public Integer countSchedulableObjects() {
             final Set<String> SCHEDULABLE_STATUSES = new Set<String> {
-                    AsynchronousV1.Status.QUEUED.name(),
-                    AsynchronousV1.Status.RUNNING.name()
+                    Asynchronous.Status.QUEUED.name(),
+                    Asynchronous.Status.RUNNING.name()
             };
 
             return [
@@ -147,7 +134,7 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
                     FROM AsynchronousJob__c
                     WHERE OwnerId = :UserInfo.getUserId()
                     AND Runnable__c = :asyncObject.Runnable__c
-                    AND Status__c = :AsynchronousV1.Status.RUNNING.name()
+                    AND Status__c = :Asynchronous.Status.RUNNING.name()
                     WITH USER_MODE
             ];
         }
@@ -161,11 +148,11 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
         public void persistObjects(final List<AsynchronousJob__c> asyncObjects) {
             Assertion.isNotNull(asyncObjects, 'argument: AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
 
-            final Boolean savedSkipTriggers = AsynchronousImpl.skipTriggers;
+            final Boolean savedSkipTriggers = AsynchronousAPI.skipTriggers;
 
-            AsynchronousImpl.skipTriggers = true;
+            AsynchronousAPI.skipTriggers = true;
             Database.upsert(asyncObjects, AccessLevel.USER_MODE);
-            AsynchronousImpl.skipTriggers = savedSkipTriggers;
+            AsynchronousAPI.skipTriggers = savedSkipTriggers;
         }
 
         /**
@@ -185,9 +172,9 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
             Assertion.isNotNull(states, 'argument: AsynchronousDAO.apiPersistAsynchronous.states');
             Assertion.areEqual(asyncObjects.size(), states.size(), 'The number of Asynchronous objects does not match the number of states');
 
-            final Boolean savedSkipTriggers = AsynchronousImpl.skipTriggers;
+            final Boolean savedSkipTriggers = AsynchronousAPI.skipTriggers;
 
-            AsynchronousImpl.skipTriggers = false;
+            AsynchronousAPI.skipTriggers = false;
             Database.upsert(asyncObjects, AccessLevel.USER_MODE);
 
             final Set<Id> allIds = new Set<Id>();
@@ -195,7 +182,7 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
             for (Integer i = 0; i < asyncObjects.size(); i++) {
                 final AsynchronousJob__c asynchronousObject = asyncObjects[i];
                 allIds.add(asynchronousObject.Id);
-                newStates.addAll(AsynchronousHelper.INJECT.encodeState(asynchronousObject, states[i]));
+                newStates.addAll(AsynchronousHelper.API.encodeState(asynchronousObject, states[i]));
             }
 
             Database.delete(
@@ -205,7 +192,7 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
 
             Database.upsert(newStates, AccessLevel.USER_MODE);
 
-            AsynchronousImpl.skipTriggers = savedSkipTriggers;
+            AsynchronousAPI.skipTriggers = savedSkipTriggers;
         }
 
         /**
@@ -233,9 +220,86 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
 
     /**
      * @description
+     * Method is solely for mocking use.
+     */
+    public AsynchronousJob__c getObject(final Id asyncObjectId) {
+        throw new Asynchronous.APIException('Access denied');
+    }
+
+    /**
+     * @description
+     * Method is solely for mocking use.
+     */
+    public Set<AsynchronousJob__c> getScheduledObjects(final Integer maxJobsToReturn) {
+        throw new Asynchronous.APIException('Access denied');
+    }
+
+    /**
+     * @description
+     * Method is solely for mocking use.
+     */
+    public Integer countSchedulableObjects() {
+        throw new Asynchronous.APIException('Access denied');
+    }
+
+    /**
+     * @description
+     * Method is solely for mocking use.
+     */
+    public Integer countActiveObjects(final AsynchronousJob__c asyncJob) {
+        throw new Asynchronous.APIException('Access denied');
+    }
+
+    /**
+     * @description
+     * Method is solely for mocking use.
+     */
+    public void persistObjects(final List<AsynchronousJob__c> asyncObjects) {
+        throw new Asynchronous.APIException('Access denied');
+    }
+
+    /**
+     * @description
+     * Method is solely for mocking use.
+     */
+    public void persistObjects(final List<AsynchronousJob__c> asyncObjects, final List<Map<String, String>> states) {
+        throw new Asynchronous.APIException('Access denied');
+    }
+
+    /**
+     * @description
+     * Method is solely for mocking use.
+     */
+    public void removeObjects(final List<AsynchronousJob__c> asyncObjects) {
+        throw new Asynchronous.APIException('Access denied');
+    }
+
+    /**
+     * @description
+     * Method is solely for mocking use.
+     */
+    public void persistException(AsynchronousJobException__c asyncError) {
+        throw new Asynchronous.APIException('Access denied');
+    }
+
+    /**
+     * @description
+     * Creates the default API implementation.
+     *
+     * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
+     * We use the factory to defer the construction by injection to this class, which is able to construct it.
+     */
+    public with sharing class Factory implements TypesV1.Factory {
+        public Object newInstance() {
+            return new Implementation();
+        }
+    }
+
+    /**
+     * @description
      * Class providing check on Binding made to AsynchronousDAO.API.
      */
-    public with sharing class BindingCheck implements DependencyV1.BindingCheck {
+    public with sharing class BindingCheck implements Dependency.BindingCheck {
 
         /**
          * @description
@@ -246,11 +310,11 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
          *
          * @return The result of the validation.
          */
-        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
-            if (TypesV1.newInstance(withImpl) instanceof AsynchronousV1.DAO) {
-                return new DependencyV1.ValidationResult(true, null);
+        public Dependency.ValidationResult validate(Type forType, Type withImpl) {
+            if (TypesV1.newInstance(withImpl) instanceof Asynchronous.DAO) {
+                return new Dependency.ValidationResult(true, null);
             } else {
-                return new DependencyV1.ValidationResult(
+                return new Dependency.ValidationResult(
                         false,
                         'Class ' + withImpl.getName() + ' does not implement ' + forType.getName()
                 );
@@ -258,72 +322,9 @@ public with sharing virtual class AsynchronousDAO implements AsynchronousV1.DAO 
         }
     }
 
-    /**
-     * @description
-     * Method is solely for mocking use.
-     */
-    public AsynchronousJob__c getObject(final Id asyncObjectId) {
-        throw new AsynchronousV1.APIException('Access denied');
-    }
-
-    /**
-     * @description
-     * Method is solely for mocking use.
-     */
-    public Set<AsynchronousJob__c> getScheduledObjects(final Integer maxJobsToReturn) {
-        throw new AsynchronousV1.APIException('Access denied');
-    }
-
-    /**
-     * @description
-     * Method is solely for mocking use.
-     */
-    public Integer countSchedulableObjects() {
-        throw new AsynchronousV1.APIException('Access denied');
-    }
-
-    /**
-     * @description
-     * Method is solely for mocking use.
-     */
-    public Integer countActiveObjects(final AsynchronousJob__c asyncJob) {
-        throw new AsynchronousV1.APIException('Access denied');
-    }
-
-    /**
-     * @description
-     * Method is solely for mocking use.
-     */
-    public void persistObjects(final List<AsynchronousJob__c> asyncObjects) {
-        throw new AsynchronousV1.APIException('Access denied');
-    }
-
-    /**
-     * @description
-     * Method is solely for mocking use.
-     */
-    public void persistObjects(final List<AsynchronousJob__c> asyncObjects, final List<Map<String, String>> states) {
-        throw new AsynchronousV1.APIException('Access denied');
-    }
-
-    /**
-     * @description
-     * Method is solely for mocking use.
-     */
-    public void removeObjects(final List<AsynchronousJob__c> asyncObjects) {
-        throw new AsynchronousV1.APIException('Access denied');
-    }
-
-    /**
-     * @description
-     * Method is solely for mocking use.
-     */
-    public void persistException(AsynchronousJobException__c asyncError) {
-        throw new AsynchronousV1.APIException('Access denied');
-    }
 
     // Set the default implementation of the API. This can be overridden using a Dependency Binding.
     static {
-        DependencyV1.bind(AsynchronousV1.DAO.class, Factory.class);
+        DependencyV1.bind(Asynchronous.DAO.class, Factory.class);
     }
 }

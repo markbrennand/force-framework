@@ -3,7 +3,8 @@
  */
 
 import { LightningElement } from 'lwc';
-import getJobs from '@salesforce/apex/AsynchronousImpl.getJobs';
+import getJobs from '@salesforce/apex/AsynchronousV1.getJobs';
+import {ShowToastEvent} from "lightning/platformShowToastEvent";
 
 const MAX_TO_FETCH = 200;
 const REFRESH_RATE = 2500;
@@ -98,11 +99,11 @@ export default class AsynchronousJobList extends LightningElement {
                 });
             } catch(err) {
                 this.dispatchEvent(
-                    new CustomEvent('showToastEvent',
+                    new ShowToastEvent(
                         {
                             title: 'Error',
-                            message: 'Fetch failed',
-                            messageData: err
+                            message: 'Get jobs failed, Status: {0}, Exception: {1}',
+                            messageData: [ '' + err.status, err.body.message ]
                         }
                     )
                 );

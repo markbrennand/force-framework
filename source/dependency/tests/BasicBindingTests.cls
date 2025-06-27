@@ -49,7 +49,7 @@ public with sharing class BasicBindingTests {
             try {
                 DependencyV1.inject(BindingTestHelper.TestInterface.class);
                 Assert.fail();
-            } catch (DependencyV1.APIException ae) {
+            } catch (Dependency.APIException ae) {
                 Assert.isTrue(
                         TestHelper.exceptionContains('Binding for BindingTestHelper.TestInterface not found in registry', ae),
                         'Unexpected exception: ' + ae

@@ -5,6 +5,6 @@
  * @author Mark Brennand
  */
 trigger Binding on Binding__c (after insert, after update) {
-    DependencyImpl.checkForDuplicates();
-    DependencyImpl.validate((List<Binding__c>) Trigger.new);
+    DependencyAPI.checkForDuplicates();
+    DependencyAPI.validate((List<Binding__c>) Trigger.new);
 }

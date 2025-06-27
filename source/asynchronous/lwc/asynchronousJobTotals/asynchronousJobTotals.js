@@ -3,7 +3,8 @@
  */
 
 import { LightningElement, api } from 'lwc';
-import getTotals from '@salesforce/apex/AsynchronousImpl.getTotals';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import getTotals from '@salesforce/apex/AsynchronousV1.getTotals';
 
 export default class AsynchronousJobTotals extends LightningElement {
     @api refreshRate = 10000;
@@ -41,11 +42,11 @@ export default class AsynchronousJobTotals extends LightningElement {
             this.cancelled = totals.CANCELLED;
         } catch (err) {
             this.dispatchEvent(
-                new CustomEvent('showToastEvent',
+                new ShowToastEvent(
                     {
                         title: 'Error',
-                        message: 'Fetch failed',
-                        messageData: err
+                        message: 'Get totals call failed, Status: {0}, Exception: {1}',
+                        messageData: [ '' + err.status, err.body.message ]
                     }
                 )
             );

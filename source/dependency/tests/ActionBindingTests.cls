@@ -71,7 +71,7 @@ public with sharing class ActionBindingTests {
             try {
                 DependencyV1.inject(BindingTestHelper.TestInterface.class, 'NotTest');
                 Assert.fail();
-            } catch (DependencyV1.APIException ae) {
+            } catch (Dependency.APIException ae) {
                 Assert.isTrue(
                         TestHelper.exceptionContains('Binding for BindingTestHelper.TestInterface with action NotTest not found in registry', ae),
                         'Unexpected exception: ' + ae

@@ -4,8 +4,8 @@
  */
 trigger AsynchronousJob on AsynchronousJob__c (before insert, before update, after insert, after update) {
     if (Trigger.isBefore) {
-        AsynchronousImpl.onTriggerBefore((List<AsynchronousJob__c>) Trigger.new);
+        AsynchronousAPI.onTriggerBefore((List<AsynchronousJob__c>) Trigger.new);
     } else {
-        AsynchronousImpl.onTriggerAfter((List<AsynchronousJob__c>) Trigger.new, (Map<Id, AsynchronousJob__c>) Trigger.oldMap);
+        AsynchronousAPI.onTriggerAfter((List<AsynchronousJob__c>) Trigger.new, (Map<Id, AsynchronousJob__c>) Trigger.oldMap);
     }
 }

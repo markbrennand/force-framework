@@ -12,28 +12,28 @@ global with sharing class BindingChecks {
      *
      * A custom metadata record for the BindingCheck__mdt type is used to register the validator.
      */
-    global class QueryBindingCheck implements forcefw.DependencyV1.BindingCheck {
-        public forcefw.DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
+    global class QueryBindingCheck implements forcefw.Dependency.BindingCheck {
+        public forcefw.Dependency.ValidationResult validate(Type forType, Type withImpl) {
             if (forType == QueryClasses.QueryInterface.class) {
                 if (forcefw.TypesV1.newInstance(withImpl) instanceof QueryClasses.QueryInterface) {
-                    return new forcefw.DependencyV1.ValidationResult(true, null);
+                    return new forcefw.Dependency.ValidationResult(true, null);
                 } else {
-                    return new forcefw.DependencyV1.ValidationResult(
+                    return new forcefw.Dependency.ValidationResult(
                             false,
                             'Class "' + withImpl.getName() + '" does not implement "' + forType.getName() + '"'
                     );
                 }
             } else if (forType == QueryClasses.AbstractQuery.class) {
                 if (forcefw.TypesV1.newInstance(withImpl) instanceof QueryClasses.AbstractQuery) {
-                    return new forcefw.DependencyV1.ValidationResult(true, null);
+                    return new forcefw.Dependency.ValidationResult(true, null);
                 } else {
-                    return new forcefw.DependencyV1.ValidationResult(
+                    return new forcefw.Dependency.ValidationResult(
                             false,
                             'Class "' + withImpl.getName() + '" does not extend "' + forType.getName() + '"'
                     );
                 }
             } else {
-                return new forcefw.DependencyV1.ValidationResult(
+                return new forcefw.Dependency.ValidationResult(
                         false,
                         'Type "' + forType.getName() + '" is not supported for validation'
                 );
@@ -47,25 +47,25 @@ global with sharing class BindingChecks {
      *
      * A custom metadata record for the BindingCheck__mdt type is used to register the validator.
      */
-    global with sharing class MapBindingCheck implements forcefw.DependencyV1.BindingCheck {
-        public forcefw.DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
+    global with sharing class MapBindingCheck implements forcefw.Dependency.BindingCheck {
+        public forcefw.Dependency.ValidationResult validate(Type forType, Type withImpl) {
             Object impl = forcefw.TypesV1.newInstance(withImpl);
 
             switch on forType.getName() {
                 when 'Map<String,Integer>' {
                     if (impl instanceof Map<String, Integer>) {
-                        return new forcefw.DependencyV1.ValidationResult(true, null);
+                        return new forcefw.Dependency.ValidationResult(true, null);
                     }
                 }
                 when else {
-                    return new forcefw.DependencyV1.ValidationResult(
+                    return new forcefw.Dependency.ValidationResult(
                             false,
                             'Type "' + withImpl + '" can not be validated'
                     );
                 }
             }
 
-            return new forcefw.DependencyV1.ValidationResult(
+            return new forcefw.Dependency.ValidationResult(
                     false,
                     'Implementation "' + withImpl.getName() + '" is not an instance of "' + forType.getName() + '"'
             );
@@ -78,12 +78,12 @@ global with sharing class BindingChecks {
     *
     * A custom metadata record for the BindingCheck__mdt type is used to register the validator.
     */
-    global with sharing class AccountManagerBindingCheck implements forcefw.DependencyV1.BindingCheck {
-        public forcefw.DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
+    global with sharing class AccountManagerBindingCheck implements forcefw.Dependency.BindingCheck {
+        public forcefw.Dependency.ValidationResult validate(Type forType, Type withImpl) {
             if (forcefw.TypesV1.newInstance(withImpl) instanceof AccountClasses.AccountManager) {
-                return new forcefw.DependencyV1.ValidationResult(true, null);
+                return new forcefw.Dependency.ValidationResult(true, null);
             } else {
-                return new forcefw.DependencyV1.ValidationResult(
+                return new forcefw.Dependency.ValidationResult(
                         false,
                         'Implementation "' + withImpl.getName() + '" is not an instance of "' + forType.getName() + '"'
                 );
