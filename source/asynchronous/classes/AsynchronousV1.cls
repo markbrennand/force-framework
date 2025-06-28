@@ -1,4 +1,51 @@
 /**
+ * MIT License
+ *
+ * Copyright (c) 2025 Mark Brennand
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+/**
+ * MIT License
+ *
+ * Copyright (c) 2025 Mark Brennand
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+/**
  * @description
  * Class defining the services offered by the Asynchronous API.
  * <br><br>
@@ -17,17 +64,17 @@
 global with sharing virtual class AsynchronousV1 {
 
     /**
-     *  @description
+     * @description
      * Implementation of Runnable that classes may extend to make coding the logic of a job simpler.
      * <br><br>
      * Default implementations of all the methods are coded in this class. They may be overridden.
      * <br><br>
-     * The run() method will need to be overridden to code the logic for the job.
+     * The Asynchronous.ApexJobRunnable.run() method will need to be implemented to code the logic for the job.
      * <br><br>
      * Classes extending this class must have a no-op constructor which calls the constructor for this class with
      * the Type of the extending class.
      */
-    global with sharing virtual class Runnable extends Asynchronous.ApexJobRunnable {
+    global with sharing abstract class Runnable extends Asynchronous.ApexJobRunnable {
 
         /**
          * @description
@@ -42,7 +89,7 @@ global with sharing virtual class AsynchronousV1 {
         /**
          * @description
          * Returns the maximum number of concurrent executions of the Runnable that are allowed.
-         *
+         * <br><br>
          * If the concurrency is exceeded, a job will not be started.
          *
          * @return Maximum concurrent executions.
@@ -54,7 +101,7 @@ global with sharing virtual class AsynchronousV1 {
         /**
          * @description
          * Called on successful completion of the Asynchronous__c object for the class.
-         *
+         * <br><br>
          * To succeed, the class's run method must not have thrown an Exception when called.
          *
          * @param asyncJob The job that has succeeded.
@@ -68,7 +115,7 @@ global with sharing virtual class AsynchronousV1 {
         /**
          * @description
          * Called on failure to run the job after exhausting the Asynchronous__c object's re-tries.
-         *
+         * <br><br>
          * To fail, the class's run method must have thrown an Exception every time it was called.
          *
          * @param asyncJob The job that has failed.
@@ -96,7 +143,7 @@ global with sharing virtual class AsynchronousV1 {
          * @description
          * Called when an Exception occurs during the running of an Asynchronous__c object and there are re-tries left to
          * be made.
-         *
+         * <br><br>
          * The status value returned by this method determines what happens to the job. Return QUEUED to re-try the
          * job. Return CANCELLED if the job is not to be re-tried and no further processing of it is to be made. The
          * onCancellation method of this class will be called.

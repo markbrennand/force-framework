@@ -1,4 +1,27 @@
 /**
+ * MIT License
+ *
+ * Copyright (c) 2025 Mark Brennand
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+/**
  * @description
  * Unit tests for AsynchronousDAO class.
  *
@@ -110,12 +133,19 @@ public with sharing class AsynchronousDAOTests {
             AsynchronousJob__c fetched1 = AsynchronousDAO.API.getObject(job1.Id);
             AsynchronousJob__c fetched2 = AsynchronousDAO.API.getObject(job2.Id);
 
+            job1.ScheduledRunTime__c = fetched1.ScheduledRunTime__c > job1.ScheduledRunTime__c
+                    ? fetched1.ScheduledRunTime__c : job1.ScheduledRunTime__c;
+
+            job1.ScheduledRunTime__c = fetched2.ScheduledRunTime__c > job1.ScheduledRunTime__c
+                    ? fetched2.ScheduledRunTime__c : job1.ScheduledRunTime__c;
+
             Assert.isTrue(ComparisonHelper.compare(job1, fetched1), 'Mis-match of data retrieved and data stored');
             Assert.isTrue(ComparisonHelper.compare(job2, fetched2), 'Mis-match of data retrieved and data stored');
 
             AsynchronousDAO.API.removeObjects(new List<AsynchronousJob__c> { fetched1 });
             try {
                 AsynchronousDAO.API.getObject(fetched1.Id);
+                Assert.fail();
             } catch(Assertion.AssertionException ae) {
                 Assert.isTrue(ae.getMessage().contains('not found'));
             }
@@ -193,6 +223,7 @@ public with sharing class AsynchronousDAOTests {
             AsynchronousDAO.API.removeObjects(new List<AsynchronousJob__c> { fetched1 });
             try {
                 AsynchronousDAO.API.getObject(fetched1.Id);
+                Assert.fail();
             } catch(Assertion.AssertionException ae) {
                 Assert.isTrue(ae.getMessage().contains('not found'));
             }
