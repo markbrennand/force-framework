@@ -4,15 +4,7 @@
  *
  * @author Mark Brennand
  */
-
 global with sharing class AccountContactTotals extends forcefw.AsynchronousV1.Runnable {
-
-    // Setup a default registry entry for the configuration for the class.
-    // The configuration can be overridden by adding a custom binding.
-    static {
-        forcefw.DependencyV1.bind(Map<String, Integer>.class, 'AccountContactTotals', Configuration.class);
-        forcefw.DependencyV1.reload();
-    }
 
     /**
      * @description
@@ -85,7 +77,7 @@ global with sharing class AccountContactTotals extends forcefw.AsynchronousV1.Ru
      *
      * @return The maximum number of concurrent jobs.
      */
-    public override integer getMaximumActive() {
+    public override Integer getMaximumActive() {
         return configuration.get('maximumActive');
     }
 
@@ -112,12 +104,12 @@ global with sharing class AccountContactTotals extends forcefw.AsynchronousV1.Ru
      * @param contacts The modified Contacts.
      * @param oldValues The original values of the modified Contacts.
      */
-    public static void startCalculationJob(final List<Contact> contacts, final Map<Id, Contact> oldValues) {
+    public static void startCalculationJob(final List<Contact> contacts, final forcefw.TriggersV1.Event event) {
         final List<Account> accounts = new List<Account>();
         final Set<Id> orphanedContactIds = new Set<Id>();
 
         if (contacts == null) {
-            for (Contact deletedContact : oldValues.values()) {
+            for (Contact deletedContact : (List<Contact>) event.getOldValues()) {
                 if (deletedContact.AccountId != null) {
                     accounts.add(new Account(Id = deletedContact.AccountId));
                 }
@@ -129,8 +121,8 @@ global with sharing class AccountContactTotals extends forcefw.AsynchronousV1.Ru
                     orphanedContactIds.add(contact.Id);
                 }
 
-                final Contact oldValue = oldValues?.get(contact.Id);
-                if (oldValue != null) {
+                if (event.hasOldValue(contact)) {
+                    final Contact oldValue = (Contact) event.getOldValue(contact);
                     if (contact.AccountId != oldValue.AccountId) {
                         if (contact.AccountId != null) {
                             accounts.add(new Account(Id = contact.AccountId));
@@ -206,5 +198,12 @@ global with sharing class AccountContactTotals extends forcefw.AsynchronousV1.Ru
         public Object newInstance() {
             return new Map<String, Integer> { 'succeedOnRetryNumber' => 0, 'maximumActive' => 1 };
         }
+    }
+
+    // Setup a default registry entry for the configuration for the class.
+    // The configuration can be overridden by adding a custom binding.
+    static {
+        forcefw.DependencyV1.bind(Map<String, Integer>.class, 'AccountContactTotals', Configuration.class);
+        forcefw.DependencyV1.reload();
     }
 }

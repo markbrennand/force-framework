@@ -1,43 +1,22 @@
 /**
- * MIT License
- *
- * Copyright (c) 2025 Mark Brennand
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-/**
  * @description
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../../LICENSE target="_blank">MIT License</a>.
+ * <br><br>
  * Finalizer called on completion of an Apex job.
- *
+ * <br><br>
  * Success or failure of the job is determined from the context.
- *
+ * <br><br>
  * If successful, the Asynchronous job's Runnable's onSuccess method will be called.
- *
+ * <br><br>
  * If the job has failed, the job's Runnable's onError method will be called. The return value will indicate
  * whether processing of the job is to be continued.
- *
+ * <br><br>
  * If processing is to be continued and the number of re-tries has been reached for the job, the job's Runnable's
  * on Failure method will be called.
- *
+ * <br><br>
  * If the number of re-tries hasn't been reached, the job's Status is set to QUEUED and the re-try number is
  * incremented.
- *
+ * <br><br>
  * If there are scheduled jobs left to process, a new Asynchronous scheduler is queued.
  *
  * @author Mark Brennand
@@ -53,7 +32,7 @@ public with sharing class AsynchronousFinalizer {
     /**
      * @description
      * Factory method to create a new Finalizer.
-     *
+     * <br><br>
      * The implementation is hidden to prevent re-use outside the framework.
      *
      * @param asyncObjectId The id of the Asynchronous object.
@@ -89,16 +68,16 @@ public with sharing class AsynchronousFinalizer {
         /**
          * @description
          * Called when the Apex job has completed.
-         *
+         * <br><br>
          * The context is used to determine the status of the job.
-         *
+         * <br><br>
          * If the job succeeded, the Runnable's onSuccess method is called. The return value
          * from the call indicates whether to keep the AsynchronousJob__c object or delete it.
-         *
+         * <br><br>
          * If the job failed and there are more re-tries available, the Runnable's onError method
          * is called. The return value from the method indicates the new Status to assign to the
          * job.
-         *
+         * <br><br>
          * If the job failed and the re-tries have been exhausted, the Runnable's onFailure method
          * is called. The return value from the call indicates whether to keep the AsynchronousJob__c
          * object or delete it.
@@ -152,7 +131,7 @@ public with sharing class AsynchronousFinalizer {
         /**
          * @description
          * Method handling the failed processing of a job.
-         *
+         * <br><br>
          * If re-tries are available, and the Status returned by the Runnable's onError method
          * is QUEUED, then the job is scheduled to run again in the number of milliseconds given
          * by the job's Retry Interval.
@@ -170,7 +149,6 @@ public with sharing class AsynchronousFinalizer {
             if (retryNumber == maximumRetries) {
                 if (asyncJob.getRunnable().onFailure(asyncJob, exc)) {
                     asyncObject.Status__c = Asynchronous.Status.FAILED.name();
-                    AsynchronousAPI.skipTriggers = true;
                     AsynchronousDAO.API.persistObjects(new List<AsynchronousJob__c> { asyncObject });
                 } else {
                     AsynchronousDAO.API.removeObjects(new List<AsynchronousJob__c> { asyncObject });

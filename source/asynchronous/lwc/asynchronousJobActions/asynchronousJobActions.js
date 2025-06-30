@@ -51,7 +51,7 @@ export default class AsynchronousJobActions extends LightningElement {
                         {
                             title: 'Error',
                             message: 'Deletion failed, Status: {0}, Exception: {1}',
-                            messageData: [ '' + err.status, err.body.message ]
+                            messageData: [ '' + error.status, error.body.message || error.body.pageErrors[0]?.message ]
                         }
                     )
                 );
@@ -68,12 +68,13 @@ export default class AsynchronousJobActions extends LightningElement {
             },
             (error) => {
                 this._reset();
+
                 this.dispatchEvent(
                     new ShowToastEvent(
                         {
                             title: 'Error',
                             message: 'Run jobs failed, Status: {0}, Exception: {1}',
-                            messageData: [ '' + err.status, err.body.message ]
+                            messageData: [ '' + error.status, error.body.message || error.body.pageErrors[0]?.message ]
                         }
                     )
                 );

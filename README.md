@@ -71,3 +71,15 @@ mocking for a class to be defined in a single statement.
 
 See [Mocker](source/mocker/README.md)
 
+## Triggers
+A lightweight API for Trigger development. The _Trigger.EventHandler_ class can be extended to implement the logic for
+the trigger. The trigger actions are code as _onBefore_ and _onAfter_ methods for each of the three DML operations,
+insertion, update and deletion. The API supports the enforcement of a maximum recursion count. Should the trigger
+perform DML that causes the same trigger to be fired, this is classed as a recursive call. The trigger implementation
+determines the maximum recursion, and if set, when exceeded;
+- Whether to throw a _Exception_
+- Whether to ignore the recursive call by not invoking the _on_ methods of the trigger implementation. 
+
+
+See [Triggers](source/triggers/README.md)
+

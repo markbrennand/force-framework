@@ -1,30 +1,9 @@
 /**
- * MIT License
- *
- * Copyright (c) 2025 Mark Brennand
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-/**
  * @description
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../../LICENSE target="_blank">MIT License</a>.
+ * <br><br>
  * Implementation of the Asynchronous.Job interface for use by the default implementation of the framework.
- *
+ * <br><br>
  * The class is virtual so other implementations may re-use it. The constructor, though, is protected so the
  * class may only be extended and never instantiated outside the default implementation.
  *
@@ -60,10 +39,10 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
     /**
      * @description
      * The active state for the job.
-     *
+     * <br><br>
      * The state is the work area for the job. It can be used to pass arguments to the job. Store data to be
      * saved on job completion. Modify data between retries. etc.
-     *
+     * <br><br>
      * State can be updated by the Runnable. Any changes will be preserved on return of control to the Asynchronous
      * framework. The state will not be preserved if the Runnable throws an Exception.
      */
@@ -102,7 +81,7 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
     /**
      * @description
      * The date and time at which the job last ran.
-     *
+     * <br><br>
      * The value in this field will be set by the Asynchronous Scheduler when the Apex job is queued. If the
      * Runnable called by the job does not throw an Exception, the value will be updated to the timestamp at
      * which the Runnable's run method was called.
@@ -425,6 +404,14 @@ public with sharing virtual class AsynchronousJob implements Asynchronous.Job {
         return asyncJob;
     }
 
+    /**
+     * @description
+     * Given an internal representation of a job, this method returns the equivalent AsynchronousJob__c object.
+     *
+     * @param asyncJob The internal representation of a job.
+     *
+     * @return The AsynchronousJob__c object.
+     */
     public static AsynchronousJob__c toSObject(final Asynchronous.Job asyncJob) {
         Assertion.isNotNull(asyncJob, 'argument: AsynchronousJob.toSObject.asyncJob');
         return new AsynchronousJob__c(

@@ -1,30 +1,9 @@
 /**
- * MIT License
- *
- * Copyright (c) 2025 Mark Brennand
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-/**
  * @description
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../../LICENSE target="_blank">MIT License</a>.
+ * <br><br>
  * Helper class providing utility methods for object comparison.
- *
+ * <br><br>
  * If the objects are SObjects, or a Collection of SObjects, additional matching logic is applied. Fields of the
  * SObject being compared to the expected one must match all of those in the expected. Fields not defined in the
  * expected may be present in the one being compared.
@@ -47,7 +26,7 @@ public with sharing class ComparisonHelper {
     /**
      * @description
      * Compares two objects for equality.
-     *
+     * <br><br>
      * A built in List of comparators is used to check. If a match is made by one of the comparators, the objects
      * are considered equal.
      *
@@ -63,7 +42,7 @@ public with sharing class ComparisonHelper {
     /**
      * @description
      * Compares two objects for equality using additional comparators.
-     *
+     * <br><br>
      * The built in List of comparators is supplemented with the additional comparators. When checking for equality,
      * the additional comparators are used before the built ins.
      *
@@ -107,7 +86,7 @@ public with sharing class ComparisonHelper {
     /**
      * @description
      * Compares two SObjects.
-     *
+     * <br><br>
      * Fields of actualSObject must match all of those in expectedSObject. Fields not defined in expectedSObject
      * may be present in actualSObject.
      *
@@ -122,7 +101,7 @@ public with sharing class ComparisonHelper {
 
     /**
      * Utility class for comparing two SObjects.
-     *
+     * <br><br>
      * The object being compared to the required object.
      * - must have field values identical to those set in the required object.
      * - may have values for fields that do not have a value in the required object.

@@ -20,7 +20,7 @@ not have state that may change in use.
 If an implementation class is required to have state, then the class must implement the _Dependency.Prototype_
 interface.
 
-See the reference [Apex docs](SfApexDocs/dependencyv1.html) for the API. It is suggested that you keep a page open with the
+See the reference [Apex docs](SfApexDocs/index.html) for the API. It is suggested that you keep a page open with the
 Apex docs loaded for your reference whilst reading this page.
 
 If you wish to try the _Dependency Injection_ example code, see [Geting Started](../../GETTINGSTARTED.md).

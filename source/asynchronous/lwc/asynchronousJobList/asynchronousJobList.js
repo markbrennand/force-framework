@@ -97,13 +97,13 @@ export default class AsynchronousJobList extends LightningElement {
                     offset: 0,
                     max: MAX_TO_FETCH
                 });
-            } catch(err) {
+            } catch(error) {
                 this.dispatchEvent(
                     new ShowToastEvent(
                         {
                             title: 'Error',
                             message: 'Get jobs failed, Status: {0}, Exception: {1}',
-                            messageData: [ '' + err.status, err.body.message ]
+                            messageData: [ '' + error.status, error.body.message || error.body.pageErrors[0]?.message ]
                         }
                     )
                 );

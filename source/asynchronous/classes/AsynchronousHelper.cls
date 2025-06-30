@@ -1,28 +1,7 @@
 /**
- * MIT License
- *
- * Copyright (c) 2025 Mark Brennand
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-/**
  * @description
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../../LICENSE target="_blank">MIT License</a>.
+ * <br><br>
  * Class containing helper methods for the Asynchronous framework.
  * <br><br>
  * The methods herein are intended for the sole use of the framework.
@@ -49,7 +28,7 @@ public with sharing virtual class AsynchronousHelper implements API {
         /**
          * @description
          * Records the detail of an Exception.
-         *
+         * <br><br>
          * Due to a stubbing issue with Exception, the actual Exception must be wrapped in APIException.
          *
          * @param asyncObject The Asynchronous object to record the Exception against.
@@ -60,7 +39,7 @@ public with sharing virtual class AsynchronousHelper implements API {
         /**
          * @description
          * Records a new internal Exception encountered in the framework.
-         *
+         * <br><br>
          * Due to a stubbing issue with Exception, the actual Exception must be wrapped in APIException.
          *
          * @param asyncObject The Asynchronous object to record the Exception against.
@@ -117,7 +96,7 @@ public with sharing virtual class AsynchronousHelper implements API {
     /**
      * @description
      * Maximum amount of data that can be stored in a chunk.
-     *
+     * <br><br>
      * The variable is not declared as final so it can be overridden by a unit test.
      */
     @TestVisible
@@ -140,7 +119,7 @@ public with sharing virtual class AsynchronousHelper implements API {
         /**
          * @description
          * Records the detail of an Exception in an Asynchronous Exception object.
-         *
+         * <br><br>
          * A new record is created and persisted for each Exception recorded.
          *
          * @param asyncObject The Asynchronous object to record the Exception against.
@@ -166,9 +145,9 @@ public with sharing virtual class AsynchronousHelper implements API {
         /**
          * @description
          * Records a new internal error encountered in the framework.
-         *
+         * <br><br>
          * Exceptions thrown from the Runnable for an Apex job are not recorded using this method.
-         *
+         * <br><br>
          * A new Asynchronous Exception is created to record the Exception and the Status of the Asynchronous job
          * is changed to indicate it failed. No further processing will be performed on the job.
          *
@@ -249,7 +228,7 @@ public with sharing virtual class AsynchronousHelper implements API {
         /**
          * @description
          * Schedules an Apex job for the given Asynchronous object.
-         *
+         * <br><br>
          * If an Exception occurs during the queueing, a future job is started to run the job.
          *
          * @param asyncObject The job to be queued.
@@ -311,7 +290,7 @@ public with sharing virtual class AsynchronousHelper implements API {
     /**
      * @description
      * Called if an Apex job could not be started in the request it was queued in.
-     *
+     * <br><br>
      * The most likely reason the job could not be started is exceeding the Apex job chaining limit.
      *
      * @param asyncObjectId The id of the AsynchronousJob__c to be started.
@@ -382,14 +361,12 @@ public with sharing virtual class AsynchronousHelper implements API {
          * @return The result of the validation.
          */
         public Dependency.ValidationResult validate(Type forType, Type withImpl) {
-            if (TypesV1.newInstance(withImpl) instanceof AsynchronousHelper.API) {
-                return new Dependency.ValidationResult(true, null);
-            } else {
-                return new Dependency.ValidationResult(
-                        false,
-                        'Class ' + withImpl.getName() + ' does not implement ' + forType.getName()
-                );
-            }
+            return DependencyHelper.buildValidationResult(
+                    TypesV1.newInstance(withImpl) instanceof AsynchronousHelper.API,
+                    true,
+                    forType,
+                    withImpl
+            );
         }
     }
 

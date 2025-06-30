@@ -1,30 +1,10 @@
-/**
- * MIT License
- *
- * Copyright (c) 2025 Mark Brennand
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+
 /**
  * @description
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../../LICENSE target="_blank">MIT License</a>.
+ * <br><br>
  * Class defining the API for all DML and SOQL operations required by the default Asynchronous API implementation.
-  * <br><br>
+ * <br><br>
  * The implementation of the API is hidden in the private Implementation class. The class is hidden so an application
  * cannot access the class to mis-use it.
  * <br><br>
@@ -171,11 +151,11 @@ public with sharing virtual class AsynchronousDAO implements Asynchronous.DAO {
         public void persistObjects(final List<AsynchronousJob__c> asyncObjects) {
             Assertion.isNotNull(asyncObjects, 'argument: AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
 
-            final Boolean savedSkipTriggers = AsynchronousAPI.skipTriggers;
+            final Boolean savedSkipTriggers = AsynchronousJobTrigger.skipTriggers;
 
-            AsynchronousAPI.skipTriggers = true;
+            AsynchronousJobTrigger.skipTriggers = true;
             Database.upsert(asyncObjects, AccessLevel.USER_MODE);
-            AsynchronousAPI.skipTriggers = savedSkipTriggers;
+            AsynchronousJobTrigger.skipTriggers = savedSkipTriggers;
         }
 
         /**
@@ -195,9 +175,9 @@ public with sharing virtual class AsynchronousDAO implements Asynchronous.DAO {
             Assertion.isNotNull(states, 'argument: AsynchronousDAO.apiPersistAsynchronous.states');
             Assertion.areEqual(asyncObjects.size(), states.size(), 'The number of Asynchronous objects does not match the number of states');
 
-            final Boolean savedSkipTriggers = AsynchronousAPI.skipTriggers;
+            final Boolean savedSkipTriggers = AsynchronousJobTrigger.skipTriggers;
 
-            AsynchronousAPI.skipTriggers = false;
+            AsynchronousJobTrigger.skipTriggers = false;
             Database.upsert(asyncObjects, AccessLevel.USER_MODE);
 
             final Set<Id> allIds = new Set<Id>();
@@ -215,7 +195,7 @@ public with sharing virtual class AsynchronousDAO implements Asynchronous.DAO {
 
             Database.upsert(newStates, AccessLevel.USER_MODE);
 
-            AsynchronousAPI.skipTriggers = savedSkipTriggers;
+            AsynchronousJobTrigger.skipTriggers = savedSkipTriggers;
         }
 
         /**
@@ -308,7 +288,7 @@ public with sharing virtual class AsynchronousDAO implements Asynchronous.DAO {
     /**
      * @description
      * Creates the default API implementation.
-     *
+     * <br><br>
      * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
@@ -334,14 +314,12 @@ public with sharing virtual class AsynchronousDAO implements Asynchronous.DAO {
          * @return The result of the validation.
          */
         public Dependency.ValidationResult validate(Type forType, Type withImpl) {
-            if (TypesV1.newInstance(withImpl) instanceof Asynchronous.DAO) {
-                return new Dependency.ValidationResult(true, null);
-            } else {
-                return new Dependency.ValidationResult(
-                        false,
-                        'Class ' + withImpl.getName() + ' does not implement ' + forType.getName()
-                );
-            }
+            return DependencyHelper.buildValidationResult(
+                    TypesV1.newInstance(withImpl) instanceof Asynchronous.DAO,
+                    true,
+                    forType,
+                    withImpl
+            );
         }
     }
 

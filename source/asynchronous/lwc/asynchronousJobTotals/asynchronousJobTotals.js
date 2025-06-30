@@ -40,13 +40,13 @@ export default class AsynchronousJobTotals extends LightningElement {
             this.succeeded = totals.SUCCEEDED;
             this.failed = totals.FAILED;
             this.cancelled = totals.CANCELLED;
-        } catch (err) {
+        } catch (error) {
             this.dispatchEvent(
                 new ShowToastEvent(
                     {
                         title: 'Error',
                         message: 'Get totals call failed, Status: {0}, Exception: {1}',
-                        messageData: [ '' + err.status, err.body.message ]
+                        messageData: [ '' + error.status, error.body.message || error.body.pageErrors[0]?.message ]
                     }
                 )
             );

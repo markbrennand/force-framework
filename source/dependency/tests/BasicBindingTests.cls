@@ -1,5 +1,7 @@
 /**
  * @description
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../../LICENSE target="_blank">MIT License</a>.
+ * <br><br>
  * Unit tests for basic binding.
  *
  * @author Mark Brennand
@@ -95,15 +97,16 @@ public with sharing class BasicBindingTests {
     static void testCustomSingletonBindings() {
         setup(true);
         System.runAs(BindingTestHelper.getManager()) {
-            insert new Binding__c(
-                    Type__c = BindingTestHelper.TestInterface.class.getName(),
-                    Implementation__c = BindingTestHelper.SingletonCustomTest.class.getName()
-            );
-
-            insert new Binding__c(
-                    Type__c = BindingTestHelper.AbstractTest.class.getName(),
-                    Implementation__c = BindingTestHelper.SingletonCustomTest.class.getName()
-            );
+            insert new List<Binding__c> {
+                    new Binding__c(
+                            Type__c = BindingTestHelper.TestInterface.class.getName(),
+                            Implementation__c = BindingTestHelper.SingletonCustomTest.class.getName()
+                    ),
+                    new Binding__c(
+                            Type__c = BindingTestHelper.AbstractTest.class.getName(),
+                            Implementation__c = BindingTestHelper.SingletonCustomTest.class.getName()
+                    )
+            };
         }
 
         BindingTestHelper.SINGLETON_INSTANCE =
@@ -123,15 +126,16 @@ public with sharing class BasicBindingTests {
     static void testCustomPrototypeBindings() {
         setup(true);
         System.runAs(BindingTestHelper.getManager()) {
-            insert new Binding__c(
-                    Type__c = BindingTestHelper.TestInterface.class.getName(),
-                    Implementation__c = BindingTestHelper.PrototypeCustomTest.class.getName()
-            );
-
-            insert new Binding__c(
-                    Type__c = BindingTestHelper.AbstractTest.class.getName(),
-                    Implementation__c = BindingTestHelper.PrototypeCustomTest.class.getName()
-            );
+            insert new List<Binding__c> {
+                    new Binding__c(
+                            Type__c = BindingTestHelper.TestInterface.class.getName(),
+                            Implementation__c = BindingTestHelper.PrototypeCustomTest.class.getName()
+                    ),
+                    new Binding__c(
+                            Type__c = BindingTestHelper.AbstractTest.class.getName(),
+                            Implementation__c = BindingTestHelper.PrototypeCustomTest.class.getName()
+                    )
+            };
         }
 
         System.runAs(BindingTestHelper.getUser()) {

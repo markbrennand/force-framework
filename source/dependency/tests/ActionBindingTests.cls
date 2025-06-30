@@ -1,28 +1,7 @@
 /**
- * MIT License
- *
- * Copyright (c) 2025 Mark Brennand
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-/**
  * @description
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../../LICENSE target="_blank">MIT License</a>.
+ * <br><br>
  * Unit tests for action binding.
  *
  * @author Mark Brennand
@@ -63,8 +42,8 @@ public with sharing class ActionBindingTests {
         System.runAs(BindingTestHelper.getManager()) {
             BindingTestHelper.testBindingFailure(BindingTestHelper.TestInterface.class, 'Test', User.class, 'Class User does not implement TestInterface');
             BindingTestHelper.testBindingFailure(BindingTestHelper.AbstractTest.class, 'Test', User.class, 'Class User does not extend AbstractTest');
-            BindingTestHelper.testBindingFailure(Integer.class, 'Test', User.class, 'Class User cannot be assigned to an Integer');
-            BindingTestHelper.testBindingFailure(Map<String, Integer>.class, 'Test', Map<String, Double>.class, 'Class Map<String,Double> cannot be assigned to an Map<String,Integer>');
+            BindingTestHelper.testBindingFailure(Integer.class, 'Test', User.class, 'Class User does not extend Integer');
+            BindingTestHelper.testBindingFailure(Map<String, Integer>.class, 'Test', Map<String, Double>.class, 'Class Map<String,Double> does not extend Map<String,Integer>');
             DependencyV1.bind(BindingTestHelper.TestInterface.class, 'Test', BindingTestHelper.SingletonTest.class);
             DependencyV1.bind(BindingTestHelper.AbstractTest.class, 'Test', BindingTestHelper.SingletonTest.class);
             DependencyV1.bind(Integer.class, 'Test', BindingTestHelper.IntegerFactory.class);
@@ -159,17 +138,18 @@ public with sharing class ActionBindingTests {
     static void testCustomSingletonBindings() {
         setup(true);
         System.runAs(BindingTestHelper.getManager()) {
-            insert new Binding__c(
-                    Type__c = BindingTestHelper.TestInterface.class.getName(),
-                    Action__c = 'Test',
-                    Implementation__c = BindingTestHelper.SingletonCustomTest.class.getName()
-            );
-
-            insert new Binding__c(
-                    Type__c = BindingTestHelper.AbstractTest.class.getName(),
-                    Action__c = 'Test',
-                    Implementation__c = BindingTestHelper.SingletonCustomTest.class.getName()
-            );
+            insert new List<Binding__c> {
+                    new Binding__c(
+                            Type__c = BindingTestHelper.TestInterface.class.getName(),
+                            Action__c = 'Test',
+                            Implementation__c = BindingTestHelper.SingletonCustomTest.class.getName()
+                    ),
+                    new Binding__c(
+                            Type__c = BindingTestHelper.AbstractTest.class.getName(),
+                            Action__c = 'Test',
+                            Implementation__c = BindingTestHelper.SingletonCustomTest.class.getName()
+                    )
+            };
         }
 
         System.runAs(BindingTestHelper.getUser()) {
@@ -184,17 +164,18 @@ public with sharing class ActionBindingTests {
     static void testCustomPrototypeBindings() {
         setup(true);
         System.runAs(BindingTestHelper.getManager()) {
-            insert new Binding__c(
-                    Type__c = BindingTestHelper.TestInterface.class.getName(),
-                    Action__c = 'Test',
-                    Implementation__c = BindingTestHelper.PrototypeCustomTest.class.getName()
-            );
-
-            insert new Binding__c(
-                    Type__c = BindingTestHelper.AbstractTest.class.getName(),
-                    Action__c = 'Test',
-                    Implementation__c = BindingTestHelper.PrototypeCustomTest.class.getName()
-            );
+            insert new List<Binding__c> {
+                    new Binding__c(
+                            Type__c = BindingTestHelper.TestInterface.class.getName(),
+                            Action__c = 'Test',
+                            Implementation__c = BindingTestHelper.PrototypeCustomTest.class.getName()
+                    ),
+                    new Binding__c(
+                            Type__c = BindingTestHelper.AbstractTest.class.getName(),
+                            Action__c = 'Test',
+                            Implementation__c = BindingTestHelper.PrototypeCustomTest.class.getName()
+                    )
+            };
         }
 
         System.runAs(BindingTestHelper.getUser()) {

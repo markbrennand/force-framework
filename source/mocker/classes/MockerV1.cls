@@ -1,28 +1,7 @@
 /**
- * MIT License
- *
- * Copyright (c) 2025 Mark Brennand
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-/**
  * @description
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../../LICENSE target="_blank">MIT License</a>.
+ * <br><br>
  * Classes providing the Mocker API.
  * <br><br>
  * Rather than defining fixed lists of functions and arguments to be mocked, this solution defines the arguments
@@ -283,7 +262,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
     /**
      * @description
      * Creates a new Mocker that may be used to define a mocking scenario.
-     *
+     * <br><br>
      * The Factory argument will be called to create the stubbed object.
      *
      * @param factory Factory that will create the stubbed object.
@@ -318,7 +297,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
     /**
      * Returns an argument which can be used in a whenArgument call to represent a method parameter which must be
      * of the given Type but whose value is not checked.
-     *
+     * <br><br>
      * The parameter may be null if the types match.
      *
      * @param type The Type the argument is for.
@@ -332,7 +311,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
     /**
      * Returns an argument which can be used in a whenArgument call to represent a method parameter which must be
      * of the given Type but whose value is not checked.
-     *
+     * <br><br>
      * The parameter must be non null if the types match.
      *
      * @param type The Type the argument is for.
