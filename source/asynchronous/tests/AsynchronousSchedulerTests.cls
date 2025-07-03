@@ -28,7 +28,7 @@ public with sharing class AsynchronousSchedulerTests {
     @IsTest
     private static void testDelayedWhenNoJobsToRun() {
         System.runAs(AsynchronousTestHelper.getUser()) {
-            Asynchronous.Job asyncJob = (Asynchronous.Job) MockerV1.of(AsynchronousJob.class)
+            AsynchronousV1.Job asyncJob = (AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class)
                     .whenNoArguments()
                         .forMethod('getState')
                             .called(1)
@@ -78,7 +78,7 @@ public with sharing class AsynchronousSchedulerTests {
                             .called(1)
                     .mock();
 
-            Asynchronous.Job asyncJob = (Asynchronous.Job) MockerV1.of(AsynchronousJob.class)
+            AsynchronousV1.Job asyncJob = (AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class)
                     .whenNoArguments()
                         .forMethod('getState')
                             .called(1)
@@ -289,9 +289,9 @@ public with sharing class AsynchronousSchedulerTests {
     private static void testRunnableReturnValues() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousScheduler scheduler = new AsynchronousScheduler();
-            Assert.isFalse(scheduler.onSuccess((Asynchronous.Job) MockerV1.of(AsynchronousJob.class).mock()));
-            Assert.isTrue(scheduler.onFailure((Asynchronous.Job) MockerV1.of(AsynchronousJob.class).mock(), new DMLException('Test')));
-            Assert.isFalse(scheduler.onCancellation((Asynchronous.Job) MockerV1.of(AsynchronousJob.class).mock()));
+            Assert.isFalse(scheduler.onSuccess((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock()));
+            Assert.isTrue(scheduler.onFailure((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock(), new DMLException('Test')));
+            Assert.isFalse(scheduler.onCancellation((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock()));
         }
     }
 
@@ -299,7 +299,7 @@ public with sharing class AsynchronousSchedulerTests {
         AsynchronousHelper.API = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
                 .whenArgument(new AsynchronousJob__c(
                         Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
-                        Status__c = Asynchronous.Status.PENDING.name()
+                        Status__c = AsynchronousV1.Status.PENDING.name()
                 ))
                     .forMethod('queueJob')
                         .called(1)
@@ -342,7 +342,7 @@ public with sharing class AsynchronousSchedulerTests {
                 .whenArguments(
                         new List<AsynchronousJob__c> {
                                 new AsynchronousJob__c(
-                                        Status__c = Asynchronous.Status.PENDING.name(),
+                                        Status__c = AsynchronousV1.Status.PENDING.name(),
                                         Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName()
                                 )
                         },
@@ -380,7 +380,7 @@ public with sharing class AsynchronousSchedulerTests {
             return 1;
         }
 
-        public override void run(Asynchronous.Job asyncJob, String apexJobId) {}
+        public override void run(AsynchronousV1.Job asyncJob, String apexJobId) {}
     }
 
     public with sharing class DoubleConcurrencyTestRunnable extends AsynchronousV1.Runnable {
@@ -392,6 +392,6 @@ public with sharing class AsynchronousSchedulerTests {
             return 2;
         }
 
-        public override void run(Asynchronous.Job asyncJob, String apexJobId) {}
+        public override void run(AsynchronousV1.Job asyncJob, String apexJobId) {}
     }
 }

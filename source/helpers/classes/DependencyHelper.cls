@@ -20,16 +20,16 @@ public with sharing class DependencyHelper {
      *
      * @return The validation result.
      */
-    public static Dependency.ValidationResult buildValidationResult(
+    public static DependencyV1.ValidationResult buildValidationResult(
             final Boolean isOfType,
             final Boolean isForTypeAnInterface,
             final Type forType,
             final Type withImpl
     ) {
         if (isOfType) {
-            return new Dependency.ValidationResult(true, null);
+            return new DependencyV1.ValidationResult(true, null);
         } else {
-            return new Dependency.ValidationResult(
+            return new DependencyV1.ValidationResult(
                     false,
                     isForTypeAnInterface
                         ? 'Class ' + withImpl.getName() + ' does not implement ' + forType.getName()

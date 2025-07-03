@@ -15,7 +15,50 @@
  *
  * @author Mark Brennand
  */
-public with sharing virtual class AsynchronousLWC implements Asynchronous.LWC {
+public with sharing virtual class AsynchronousLWC implements API {
+
+    /**
+     * Interface defining the calls that may be made from the Asynchronous Job LWC.
+     */
+    public interface API {
+
+        /**
+         * @description
+         * Returns a List of the AsynchronousJob__c objects matching the filter criteria.
+         *
+         * @param filters Query filters to be applied.
+         * @param ordering The ordering to apply to the results.
+         * @param offset The record to return results from.
+         * @param max  The maximum number of records to return.
+         *
+         * @return A list of the matching objects.
+         */
+        List<Map<String, Object>> getJobs(Map<String, Object> filters, String ordering, Integer offset, Integer max);
+
+        /**
+         * @description
+         * Deletes the given AsynchronousJob__c records.
+         *
+         * @param jobIds The ids of the jobs to delete.
+         */
+        void deleteJobs(List<Id> jobIds);
+
+        /**
+         * @description
+         * Re-runs the given AsynchronousJob__c records.
+         *
+         * @param jobIds The ids of the jobs to re-run.
+         */
+        void runJobs(List<Id> jobIds);
+
+        /**
+         * @description
+         * Calculates the total number of objects per status for the current user.
+         *
+         * @return The totals.
+         */
+        Map<String, Integer> getTotals();
+    }
 
     /**
      * @description
@@ -28,23 +71,22 @@ public with sharing virtual class AsynchronousLWC implements Asynchronous.LWC {
      * The instance is test visible so it can be mocked.
      */
     @TestVisible
-    public static Asynchronous.LWC API {
+    public static API API {
         public get {
             if (Test.isRunningTest() && API != null) { // API has been mocked.
                 return API;
             } else {
-                return (Asynchronous.LWC) DependencyV1.inject(Asynchronous.LWC.class);
+                return (API) DependencyV1.inject(API.class);
             }
         }
         private set;
     }
 
-
     /**
      * @description
      * Class providing the implementation of the LWC.
      */
-    private with sharing class Implementation implements Asynchronous.LWC {
+    private with sharing class Implementation implements API {
 
         /**
          * @description
@@ -107,7 +149,7 @@ public with sharing virtual class AsynchronousLWC implements Asynchronous.LWC {
 
             final Datetime now = Datetime.now();
             for (AsynchronousJob__c job : jobs) {
-                job.Status__c = Asynchronous.Status.PENDING.name();
+                job.Status__c = AsynchronousV1.Status.PENDING.name();
                 job.ScheduledRunTime__c = now;
             }
 
@@ -134,7 +176,7 @@ public with sharing virtual class AsynchronousLWC implements Asynchronous.LWC {
                 returnMap.put((String) match.get(statusField), (Integer) match.get('Total__c'));
             }
 
-            for (Asynchronous.Status status : Asynchronous.Status.values()) {
+            for (AsynchronousV1.Status status : AsynchronousV1.Status.values()) {
                 final String statusName = status.name();
                 if (!returnMap.containsKey(statusName)) {
                     returnMap.put(statusName, 0);
@@ -223,12 +265,12 @@ public with sharing virtual class AsynchronousLWC implements Asynchronous.LWC {
 
                 returnObject.put('Owner', match.Owner.Name);
 
-                if (match.Status__c == Asynchronous.Status.RUNNING.name()) {
+                if (match.Status__c == AsynchronousV1.Status.RUNNING.name()) {
                     returnObject.put('RunTime__c', now.getTime() - match.LastRunTime__c.getTime());
                     if (match.RetryNumber__c > 0) {
                         returnObject.put('Retry__c', match.RetryNumber__c + ' of ' + match.MaximumRetries__c);
                     }
-                } else if (match.Status__c == Asynchronous.Status.QUEUED.name()) {
+                } else if (match.Status__c == AsynchronousV1.Status.QUEUED.name()) {
                     if (match.RetryNumber__c > 0) {
                         returnObject.put('Retry__c', match.RetryNumber__c + ' of ' + match.MaximumRetries__c);
                     }
@@ -242,42 +284,10 @@ public with sharing virtual class AsynchronousLWC implements Asynchronous.LWC {
     }
 
     /**
-      * @description
-      * Method is solely for mocking use.
-      */
-    public List<Map<String, Object>> getJobs(Map<String, Object> filters, String ordering, Integer offset, Integer max) {
-        throw new Asynchronous.APIException('Access denied');
-    }
-
-    /**
-      * @description
-      * Method is solely for mocking use.
-      */
-    public void deleteJobs(List<Id> jobIds) {
-        throw new Asynchronous.APIException('Access denied');
-    }
-
-    /**
-      * @description
-      * Method is solely for mocking use.
-      */
-    public void runJobs(List<Id> jobIds) {
-        throw new Asynchronous.APIException('Access denied');
-    }
-
-    /**
-      * @description
-      * Method is solely for mocking use.
-      */
-    public Map<String, Integer> getTotals() {
-        throw new Asynchronous.APIException('Access denied');
-    }
-
-    /**
      * @description
      * Class providing check on Binding made to AsynchronousV1.LWC.
      */
-    public with sharing class BindingCheck implements Dependency.BindingCheck {
+    public with sharing class BindingCheck implements DependencyV1.BindingCheck {
 
         /**
          * @description
@@ -288,9 +298,9 @@ public with sharing virtual class AsynchronousLWC implements Asynchronous.LWC {
          *
          * @return The result of the validation.
          */
-        public Dependency.ValidationResult validate(Type forType, Type withImpl) {
+        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
             return DependencyHelper.buildValidationResult(
-                    TypesV1.newInstance(withImpl) instanceof Asynchronous.LWC,
+                    TypesV1.newInstance(withImpl) instanceof API,
                     true,
                     forType,
                     withImpl
@@ -311,8 +321,40 @@ public with sharing virtual class AsynchronousLWC implements Asynchronous.LWC {
         }
     }
 
+    /**
+      * @description
+      * Method is solely for mocking use.
+      */
+    public List<Map<String, Object>> getJobs(Map<String, Object> filters, String ordering, Integer offset, Integer max) {
+        throw new AsynchronousV1.APIException('Access denied');
+    }
+
+    /**
+      * @description
+      * Method is solely for mocking use.
+      */
+    public void deleteJobs(List<Id> jobIds) {
+        throw new AsynchronousV1.APIException('Access denied');
+    }
+
+    /**
+      * @description
+      * Method is solely for mocking use.
+      */
+    public void runJobs(List<Id> jobIds) {
+        throw new AsynchronousV1.APIException('Access denied');
+    }
+
+    /**
+      * @description
+      * Method is solely for mocking use.
+      */
+    public Map<String, Integer> getTotals() {
+        throw new AsynchronousV1.APIException('Access denied');
+    }
+
     // Set the default implementations of API and LWC. This can be overridden using a Dependency Injection Binding.
     static {
-        DependencyV1.bind(Asynchronous.LWC.class, Factory.class);
+        DependencyV1.bind(API.class, Factory.class);
     }
 }

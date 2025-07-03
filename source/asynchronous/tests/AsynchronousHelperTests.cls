@@ -18,7 +18,7 @@ public with sharing class AsynchronousHelperTests {
     private static void testBindingCheck() {
         try {
             DependencyV1.bind(AsynchronousHelper.API.class, AsynchronousAPI.Factory.class);
-        } catch(Dependency.APIException ae) {
+        } catch(DependencyV1.APIException ae) {
             Assert.isTrue(
                     TestHelper.exceptionContains( 'Class AsynchronousAPI.Factory does not implement AsynchronousHelper.API', ae),
                     'Unexpected exception: ' + ae
@@ -33,35 +33,35 @@ public with sharing class AsynchronousHelperTests {
         try {
             extended.encodeState(null, null);
             Assert.fail();
-        } catch(Asynchronous.APIException ae) {
+        } catch(AsynchronousV1.APIException ae) {
             Assert.areEqual('Access denied', ae.getMessage());
         }
 
         try {
             extended.recordException(null, null);
             Assert.fail();
-        } catch(Asynchronous.APIException ae) {
+        } catch(AsynchronousV1.APIException ae) {
             Assert.areEqual('Access denied', ae.getMessage());
         }
 
         try {
             extended.recordInternalException(null, null);
             Assert.fail();
-        } catch(Asynchronous.APIException ae) {
+        } catch(AsynchronousV1.APIException ae) {
             Assert.areEqual('Access denied', ae.getMessage());
         }
 
         try {
             extended.decodeState(null);
             Assert.fail();
-        } catch(Asynchronous.APIException ae) {
+        } catch(AsynchronousV1.APIException ae) {
             Assert.areEqual('Access denied', ae.getMessage());
         }
 
         try {
             extended.queueJob(null);
             Assert.fail();
-        } catch(Asynchronous.APIException ae) {
+        } catch(AsynchronousV1.APIException ae) {
             Assert.areEqual('Access denied', ae.getMessage());
         }
     }
@@ -71,14 +71,14 @@ public with sharing class AsynchronousHelperTests {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     RetryNumber__c = 1
             );
 
-            Exception exc = new Asynchronous.APIException('Test');
+            Exception exc = new AsynchronousV1.APIException('Test');
 
             AsynchronousDAO.API = mockForRecordException(asyncObject, exc);
-            AsynchronousHelper.API.recordException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
+            AsynchronousHelper.API.recordException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
             MockerV1.validate();
         }
     }
@@ -88,14 +88,14 @@ public with sharing class AsynchronousHelperTests {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     RetryNumber__c = 3
             );
 
-            Exception exc = new Asynchronous.APIException('Test');
+            Exception exc = new AsynchronousV1.APIException('Test');
 
             AsynchronousDAO.API = mockForInternalFailure(asyncObject, exc);
-            AsynchronousHelper.API.recordInternalException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
+            AsynchronousHelper.API.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
             MockerV1.validate();
         }
     }
@@ -130,7 +130,7 @@ public with sharing class AsynchronousHelperTests {
             final Exception exc = new DMLException('Test');
 
             AsynchronousHelper.API = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
-                    .whenArguments(asyncObject, new Asynchronous.APIException('Wrapper', exc))
+                    .whenArguments(asyncObject, new AsynchronousV1.APIException('Wrapper', exc))
                         .withComparators(new List<Comparator<Object>>{
                                 new TestHelper.ExceptionComparator()
                         })
@@ -140,8 +140,8 @@ public with sharing class AsynchronousHelperTests {
                         .forMethod('queueJob').called(1).throws(exc)
                     .mock();
 
-            AsynchronousHelper.API.recordException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
-            AsynchronousHelper.API.recordInternalException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
+            AsynchronousHelper.API.recordException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
+            AsynchronousHelper.API.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
 
             try {
                 AsynchronousHelper.API.queueJob(asyncObject);
@@ -158,7 +158,7 @@ public with sharing class AsynchronousHelperTests {
                 .whenArgument(new AsynchronousJobException__c(
                         AsynchronousJob__c = asyncObject.Id,
                         RetryNumber__c = asyncObject.RetryNumber__c,
-                        StatusOnError__c = Asynchronous.Status.RUNNING.name(),
+                        StatusOnError__c = AsynchronousV1.Status.RUNNING.name(),
                         ExceptionType__c = exc.getTypeName(),
                         ExceptionMessage__c = exc.getMessage(),
                         ExceptionStackTrace__c = exc.getStackTraceString()
@@ -174,7 +174,7 @@ public with sharing class AsynchronousHelperTests {
                 .whenArgument(new AsynchronousJobException__c(
                         AsynchronousJob__c = asyncObject.Id,
                         RetryNumber__c = asyncObject.RetryNumber__c,
-                        StatusOnError__c = Asynchronous.Status.RUNNING.name(),
+                        StatusOnError__c = AsynchronousV1.Status.RUNNING.name(),
                         ExceptionType__c = exc.getTypeName(),
                         ExceptionMessage__c = exc.getMessage(),
                         ExceptionStackTrace__c = exc.getStackTraceString()
@@ -184,7 +184,7 @@ public with sharing class AsynchronousHelperTests {
 
                 // And the status of the Asynchronous object set to FAILED.
                 .whenArgument(new List<AsynchronousJob__c> {
-                        new AsynchronousJob__c(Id = asyncObject.Id, Status__c = Asynchronous.Status.FAILED.name())
+                        new AsynchronousJob__c(Id = asyncObject.Id, Status__c = AsynchronousV1.Status.FAILED.name())
                 })
                     .forMethod('persistObjects').called(1)
                 .mock();

@@ -1,3 +1,3 @@
-trigger ContactTotals on Contact (after insert, after update, after delete) {
-    TriggersV1.route();
+trigger ContactTotals on Contact (before insert, after insert, before update, after update, before delete, after delete) {
+    TriggerV1.publish();
 }

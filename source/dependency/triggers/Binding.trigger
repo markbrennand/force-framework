@@ -6,6 +6,6 @@
  *
  * @author Mark Brennand
  */
-trigger Binding on Binding__c (after insert, after update) {
-    TriggersV1.route();
+trigger Binding on Binding__c (before insert, after insert, before update, after update, before delete, after delete ) {
+    TriggerV1.publish();
 }

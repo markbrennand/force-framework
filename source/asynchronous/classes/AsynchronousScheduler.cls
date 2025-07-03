@@ -92,7 +92,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * @param asyncJob The Asynchronous job for the Scheduler.
      * @param apexJobId The Id of the Apex job for the Runnable.
      */
-    public override void run(final Asynchronous.Job asyncJob, final String apexJobId) {
+    public override void run(final AsynchronousV1.Job asyncJob, final String apexJobId) {
         Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.run.asyncJob');
 
         final Set<String> jobsToStart = (Set<String>)
@@ -175,7 +175,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      *
      * @return False to indicate that the Asynchronous__c for the job is to be deleted.
      */
-    public override Boolean onSuccess(final Asynchronous.Job asyncJob) {
+    public override Boolean onSuccess(final AsynchronousV1.Job asyncJob) {
         Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onSuccess.asyncJob');
         return false;
     }
@@ -189,7 +189,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      *
      * @return True to indicate that the Asynchronous__c for the job is to be kept.
      */
-    public override Boolean onFailure(final Asynchronous.Job asyncJob, final Exception exc) {
+    public override Boolean onFailure(final AsynchronousV1.Job asyncJob, final Exception exc) {
         Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onFailure.asyncJob');
         return true;
     }
@@ -202,7 +202,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      *
      * @return False to indicate that the Asynchronous__c for the job is to be deleted.
      */
-    public override Boolean onCancellation(final Asynchronous.Job asyncJob) {
+    public override Boolean onCancellation(final AsynchronousV1.Job asyncJob) {
         Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onCancellation.asyncJob');
         return false;
     }
@@ -217,7 +217,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * @param jobsLeftToStart The jobs that are left to start from the previous scheduler run.
      */
     public static void queue(final Set<String> jobsLeftToStart) {
-        final Asynchronous.Job asyncJob;
+        final AsynchronousV1.Job asyncJob;
 
         if (!jobsLeftToStart.isEmpty()) {
             asyncJob = AsynchronousAPI.API.createJob(
@@ -279,7 +279,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
 
             } else {
                 maxActive =
-                        ((Asynchronous.Runnable) TypesV1.newInstance(TypesV1.load(asyncObject.Runnable__c)))
+                        ((AsynchronousV1.RunnableJob) TypesV1.newInstance(TypesV1.load(asyncObject.Runnable__c)))
                                 .getMaximumActive();
 
                 activeCountCache.put(runnable, maxActive);

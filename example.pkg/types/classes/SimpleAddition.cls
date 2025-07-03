@@ -39,12 +39,12 @@ global with sharing class SimpleAddition {
      * @description
      * Called on registry initialisation to check bindings to SimpleAddition.API are valid.
      */
-    global with sharing class BindingCheck implements forcefw.Dependency.BindingCheck {
-        public forcefw.Dependency.ValidationResult validate(final Type forType, final Type withImpl) {
+    global with sharing class BindingCheck implements forcefw.DependencyV1.BindingCheck {
+        public forcefw.DependencyV1.ValidationResult validate(final Type forType, final Type withImpl) {
             if (forcefw.TypesV1.newInstance(withImpl) instanceof API) {
-                return new forcefw.Dependency.ValidationResult(true, null);
+                return new forcefw.DependencyV1.ValidationResult(true, null);
             } else {
-                return new forcefw.Dependency.ValidationResult(false, 'Type ' + withImpl.getName() + ' does not implement SimpleAddition.API');
+                return new forcefw.DependencyV1.ValidationResult(false, 'Type ' + withImpl.getName() + ' does not implement SimpleAddition.API');
             }
         }
     }

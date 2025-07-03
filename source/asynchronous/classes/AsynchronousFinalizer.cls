@@ -94,11 +94,11 @@ public with sharing class AsynchronousFinalizer {
                     onFailure(asyncObject, context.getException());
                 }
             } catch(Exception exc) {
-                AsynchronousHelper.API.recordInternalException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
+                AsynchronousHelper.API.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
             }
 
             try {
-                final Asynchronous.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
+                final AsynchronousV1.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
                 if (asyncJob.getRunnable() instanceof AsynchronousScheduler) {
                     AsynchronousScheduler.queue(
                             (Set<String>) JSON.deserialize(
@@ -107,7 +107,7 @@ public with sharing class AsynchronousFinalizer {
                 }
 
             } catch(Exception exc) {
-                AsynchronousHelper.API.recordInternalException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
+                AsynchronousHelper.API.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
             }
         }
 
@@ -118,10 +118,10 @@ public with sharing class AsynchronousFinalizer {
          * @param asyncObject The AsynchronousJob__c object for the job.
          */
         private void onSuccess(final AsynchronousJob__c asyncObject) {
-            final Asynchronous.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
+            final AsynchronousV1.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
 
             if (asyncJob.getRunnable().onSuccess(asyncJob)) {
-                asyncObject.Status__c = Asynchronous.Status.SUCCEEDED.name();
+                asyncObject.Status__c = AsynchronousV1.Status.SUCCEEDED.name();
                 AsynchronousDAO.API.persistObjects(new List<AsynchronousJob__c> { asyncObject });
             } else {
                 AsynchronousDAO.API.removeObjects(new List<AsynchronousJob__c> { asyncObject });
@@ -142,20 +142,20 @@ public with sharing class AsynchronousFinalizer {
         private void onFailure(final AsynchronousJob__c asyncObject, final Exception exc) {
             final Integer maximumRetries = (Integer) asyncObject.MaximumRetries__c;
             final Integer retryNumber = (Integer) asyncObject.RetryNumber__c;
-            final Asynchronous.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
+            final AsynchronousV1.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
 
-            AsynchronousHelper.API.recordException(asyncObject, new Asynchronous.APIException('Wrapper', exc));
+            AsynchronousHelper.API.recordException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
 
             if (retryNumber == maximumRetries) {
                 if (asyncJob.getRunnable().onFailure(asyncJob, exc)) {
-                    asyncObject.Status__c = Asynchronous.Status.FAILED.name();
+                    asyncObject.Status__c = AsynchronousV1.Status.FAILED.name();
                     AsynchronousDAO.API.persistObjects(new List<AsynchronousJob__c> { asyncObject });
                 } else {
                     AsynchronousDAO.API.removeObjects(new List<AsynchronousJob__c> { asyncObject });
                 }
             } else {
                 asyncObject.Status__c = asyncJob.getRunnable().onError(asyncJob, exc).name();
-                if (asyncObject.Status__c == Asynchronous.Status.QUEUED.name()) {
+                if (asyncObject.Status__c == AsynchronousV1.Status.QUEUED.name()) {
                     asyncObject.RetryNumber__c = retryNumber + 1;
                     asyncObject.ScheduledRunTime__c =
                             Datetime.newInstance(System.currentTimeMillis() + asyncJob.getRetryInterval());

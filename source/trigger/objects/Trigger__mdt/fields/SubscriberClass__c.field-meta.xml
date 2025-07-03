@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SubscriberClass__c</fullName>
+    <description>The Apex class that will be loaded to consume the Trigger Event generated when the associated Trigger fires.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <inlineHelpText>The Apex class that will be loaded to consume the Trigger Event generated when the associated Trigger fires.</inlineHelpText>
+    <label>Subscriber Class</label>
+    <length>255</length>
+    <required>true</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

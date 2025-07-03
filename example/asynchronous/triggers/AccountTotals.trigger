@@ -1,4 +1,3 @@
-trigger AccountTotals on Account (after insert, after update) {
-    TriggersV1.route();
-    // AccountContactTotals.startCalculationJob((List<Account>) Trigger.new, new Set<Id>());
+trigger AccountTotals on Account (before insert, after insert, before update, after update, before delete, after delete) {
+    TriggerV1.publish();
 }

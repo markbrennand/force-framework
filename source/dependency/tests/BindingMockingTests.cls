@@ -29,7 +29,7 @@ public with sharing class BindingMockingTests {
             try {
                 DependencyV1.inject(BindingTestHelper.AbstractTest.class);
                 Assert.fail();
-            } catch (Dependency.APIException ae) {
+            } catch (DependencyV1.APIException ae) {
                 Assert.areEqual('Binding for BindingTestHelper.AbstractTest is not defined', ae.getMessage());
             }
 
@@ -38,14 +38,14 @@ public with sharing class BindingMockingTests {
             try {
                 DependencyV1.inject(BindingTestHelper.AbstractTest.class, 'NotTest');
                 Assert.fail();
-            } catch (Dependency.APIException ae) {
+            } catch (DependencyV1.APIException ae) {
                 Assert.areEqual('Binding for BindingTestHelper.AbstractTest for action NotTest is not defined', ae.getMessage());
             }
 
             try {
                 DependencyV1.inject(BindingTestHelper.TestInterface.class, 'Test');
                 Assert.fail();
-            } catch (Dependency.APIException ae) {
+            } catch (DependencyV1.APIException ae) {
                 Assert.areEqual('Binding for BindingTestHelper.TestInterface for action Test is not defined', ae.getMessage());
             }
 
@@ -70,14 +70,14 @@ public with sharing class BindingMockingTests {
                     .returns(false)
                 .forMethod('inject')
                     .called(1)
-                    .throws(new Dependency.APIException('Binding for BindingTestHelper.TestInterface for action Test is not defined'))
+                    .throws(new DependencyV1.APIException('Binding for BindingTestHelper.TestInterface for action Test is not defined'))
             .whenArgument(BindingTestHelper.AbstractTest.class)
                 .forMethod('isBound')
                     .called(1)
                     .returns(false)
                 .forMethod('inject')
                     .called(1)
-                    .throws(new Dependency.APIException('Binding for BindingTestHelper.AbstractTest is not defined'))
+                    .throws(new DependencyV1.APIException('Binding for BindingTestHelper.AbstractTest is not defined'))
             .whenArguments(BindingTestHelper.AbstractTest.class, 'Test')
                 .forMethod('isBound')
                     .called(1)
@@ -91,7 +91,7 @@ public with sharing class BindingMockingTests {
                     .returns(false)
                 .forMethod('inject')
                     .called(1)
-                    .throws(new Dependency.APIException('Binding for BindingTestHelper.AbstractTest for action NotTest is not defined'));
+                    .throws(new DependencyV1.APIException('Binding for BindingTestHelper.AbstractTest for action NotTest is not defined'));
 
         return (DependencyAPI) mocked.mock();
     }

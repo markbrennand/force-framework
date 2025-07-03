@@ -12,6 +12,6 @@
     </values>
     <values>
         <field>Type__c</field>
-        <value xsi:type="xsd:string">Asynchronous.DAO</value>
+        <value xsi:type="xsd:string">AsynchronousDAO.API</value>
     </values>
 </CustomMetadata>

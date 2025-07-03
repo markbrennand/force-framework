@@ -6,11 +6,11 @@
  * <br><br>
  * In addition to the primitive types, some Map types are validated too.
  * <br><br>
- * See <a href=../README.md target="_blank">README</a> for full details of Dependency.BindingCheck API.
+ * See <a href=../README.md target="_blank">README</a> for full details of DependencyV1.BindingCheck API.
  *
  * @author Mark Brennand
  */
-public with sharing class ApexTypeBindingCheck implements Dependency.BindingCheck {
+public with sharing class ApexTypeBindingCheck implements DependencyV1.BindingCheck {
 
     /**
      * @description
@@ -21,7 +21,7 @@ public with sharing class ApexTypeBindingCheck implements Dependency.BindingChec
      *
      * @return The result of the validation.
      */
-    public Dependency.ValidationResult validate(final Type forType, final Type withImpl) {
+    public DependencyV1.ValidationResult validate(final Type forType, final Type withImpl) {
         switch on forType.getName() {
             when 'String' {
                 return DependencyHelper.buildValidationResult(TypesV1.newInstance(withImpl) instanceof String, false, forType, withImpl);
@@ -48,7 +48,7 @@ public with sharing class ApexTypeBindingCheck implements Dependency.BindingChec
                 return DependencyHelper.buildValidationResult(TypesV1.newInstance(withImpl) instanceof Map<String, Object>, false, forType, withImpl);
             }
             when else {
-                return new Dependency.ValidationResult(
+                return new DependencyV1.ValidationResult(
                         false,
                         'Class ' + forType.getName() + ' is not registered for bind checking'
                 );

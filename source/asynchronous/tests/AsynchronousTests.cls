@@ -20,14 +20,14 @@ public with sharing class AsynchronousTests {
         try {
             extended.createJob(null, null, null, null, null);
             Assert.fail();
-        } catch (Asynchronous.APIException ae) {
+        } catch (AsynchronousV1.APIException ae) {
             Assert.areEqual('Access denied', ae.getMessage());
         }
 
         try {
             extended.queueJobs(null);
             Assert.fail();
-        } catch (Asynchronous.APIException ae) {
+        } catch (AsynchronousV1.APIException ae) {
             Assert.areEqual('Access denied', ae.getMessage());
         }
     }
@@ -39,7 +39,7 @@ public with sharing class AsynchronousTests {
                     'Key1' => 'Value1', 'Key2' => 'Value2'
             };
 
-            Asynchronous.Job job = AsynchronousV1.createJob(
+            AsynchronousV1.Job job = AsynchronousV1.createJob(
                     AsynchronousScheduler.RunNextAvailable.class,
                     'TEST',
                     1,
@@ -53,12 +53,12 @@ public with sharing class AsynchronousTests {
             Assert.areEqual(1000, job.getRetryInterval());
             Assert.areEqual(0, job.getRetryNumber());
             Assert.areEqual(state, job.getState());
-            Assert.areEqual(Asynchronous.Status.PENDING, job.getStatus());
+            Assert.areEqual(AsynchronousV1.Status.PENDING, job.getStatus());
 
             AsynchronousDAO.API = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
                     .whenArguments(
                             new List<AsynchronousJob__c>{
-                                    new AsynchronousJob__c(Status__c = Asynchronous.Status.PENDING.name())
+                                    new AsynchronousJob__c(Status__c = AsynchronousV1.Status.PENDING.name())
                             },
                             new List<Map<String, String>>{
                                     state
@@ -69,7 +69,7 @@ public with sharing class AsynchronousTests {
                             .returns(new AddIdModifier())
                     .mock();
 
-            for (Asynchronous.Job queuedJob : AsynchronousV1.queueJobs(new List<Asynchronous.Job> { job })) {
+            for (AsynchronousV1.Job queuedJob : AsynchronousV1.queueJobs(new List<AsynchronousV1.Job> { job })) {
                 Assert.isNotNull(((AsynchronousJob) queuedJob).asyncObjectId);
             }
 
@@ -82,7 +82,7 @@ public with sharing class AsynchronousTests {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousAPI.API = createMock();
 
-            Asynchronous.Job job = AsynchronousAPI.API.createJob(
+            AsynchronousV1.Job job = AsynchronousAPI.API.createJob(
                     AsynchronousTests.class,
                     null,
                     1,
@@ -90,10 +90,10 @@ public with sharing class AsynchronousTests {
                     new Map<String, String>()
             );
 
-            Assert.areEqual(Asynchronous.Status.CANCELLED, job.getStatus());
+            Assert.areEqual(AsynchronousV1.Status.CANCELLED, job.getStatus());
             Assert.areEqual('MOCKED', job.getReference());
 
-            AsynchronousAPI.API.queueJobs(new List<Asynchronous.Job>{ job });
+            AsynchronousAPI.API.queueJobs(new List<AsynchronousV1.Job>{ job });
             MockerV1.validate();
         }
     }
@@ -101,24 +101,24 @@ public with sharing class AsynchronousTests {
     @IsTest
     private static void testBindingCheck() {
         System.runAs(AsynchronousTestHelper.getUser()) {
-            DependencyV1.bind(Asynchronous.API.class, AsynchronousAPI.Factory.class);
+            DependencyV1.bind(AsynchronousAPI.API.class, AsynchronousAPI.Factory.class);
             try {
-                DependencyV1.bind(Asynchronous.API.class, AsynchronousScheduler.RunNextAvailable.class);
+                DependencyV1.bind(AsynchronousAPI.API.class, AsynchronousScheduler.RunNextAvailable.class);
                 Assert.fail();
-            } catch (Dependency.APIException ae) {
+            } catch (DependencyV1.APIException ae) {
                 Assert.isTrue(
-                        TestHelper.exceptionContains('Class AsynchronousScheduler.RunNextAvailable does not implement Asynchronous.API', ae),
+                        TestHelper.exceptionContains('Class AsynchronousScheduler.RunNextAvailable does not implement AsynchronousAPI.API', ae),
                         'Unexpected exception: ' + ae
                 );
             }
 
-            DependencyV1.bind(Asynchronous.LWC.class, AsynchronousLWC.Factory.class);
+            DependencyV1.bind(AsynchronousLWC.API.class, AsynchronousLWC.Factory.class);
             try {
-                DependencyV1.bind(Asynchronous.LWC.class, AsynchronousScheduler.RunNextAvailable.class);
+                DependencyV1.bind(AsynchronousLWC.API.class, AsynchronousScheduler.RunNextAvailable.class);
                 Assert.fail();
-            } catch (Dependency.APIException ae) {
+            } catch (DependencyV1.APIException ae) {
                 Assert.isTrue(
-                        TestHelper.exceptionContains('Class AsynchronousScheduler.RunNextAvailable does not implement Asynchronous.LWC', ae),
+                        TestHelper.exceptionContains('Class AsynchronousScheduler.RunNextAvailable does not implement AsynchronousLWC.API', ae),
                         'Unexpected exception: ' + ae
                 );
             }
@@ -127,13 +127,13 @@ public with sharing class AsynchronousTests {
 
     @IsTest
     private static void testGetJobs() {
-        AsynchronousJobTrigger.skipTriggers = true;
+        AsynchronousJobSubscriber.skipTriggers = true;
 
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c job1 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.QUEUED.name(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -145,7 +145,7 @@ public with sharing class AsynchronousTests {
             AsynchronousJob__c job2 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -157,7 +157,7 @@ public with sharing class AsynchronousTests {
             AsynchronousJob__c job3 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.SUCCEEDED.name(),
+                    Status__c = AsynchronousV1.Status.SUCCEEDED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -169,7 +169,7 @@ public with sharing class AsynchronousTests {
             AsynchronousJob__c job4 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.FAILED.name(),
+                    Status__c = AsynchronousV1.Status.FAILED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -181,7 +181,7 @@ public with sharing class AsynchronousTests {
             AsynchronousJob__c job5 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.CANCELLED.name(),
+                    Status__c = AsynchronousV1.Status.CANCELLED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -288,13 +288,13 @@ public with sharing class AsynchronousTests {
 
     @IsTest
     private static void testRunJobs() {
-        AsynchronousJobTrigger.skipTriggers = true;
+        AsynchronousJobSubscriber.skipTriggers = true;
 
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c job1 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.QUEUED.name(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -305,7 +305,7 @@ public with sharing class AsynchronousTests {
             AsynchronousJob__c job2 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -321,12 +321,12 @@ public with sharing class AsynchronousTests {
                     [
                             SELECT COUNT()
                             FROM AsynchronousJob__c
-                            WHERE Status__c = :Asynchronous.Status.PENDING.name()
+                            WHERE Status__c = :AsynchronousV1.Status.PENDING.name()
                     ]
             );
 
-            job1.Status__c = Asynchronous.Status.QUEUED.name();
-            job2.Status__c = Asynchronous.Status.RUNNING.name();
+            job1.Status__c = AsynchronousV1.Status.QUEUED.name();
+            job2.Status__c = AsynchronousV1.Status.RUNNING.name();
             upsert new List<AsynchronousJob__c> { job1, job2 };
 
             AsynchronousV1.runJobs(new List<Id> { job1.Id, job2.Id });
@@ -335,7 +335,7 @@ public with sharing class AsynchronousTests {
                     [
                             SELECT COUNT()
                             FROM AsynchronousJob__c
-                            WHERE Status__c = :Asynchronous.Status.PENDING.name()
+                            WHERE Status__c = :AsynchronousV1.Status.PENDING.name()
                     ]
             );
         }
@@ -343,13 +343,13 @@ public with sharing class AsynchronousTests {
 
     @IsTest
     private static void testDeleteJobs() {
-        AsynchronousJobTrigger.skipTriggers = true;
+        AsynchronousJobSubscriber.skipTriggers = true;
 
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c job1 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.QUEUED.name(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -360,7 +360,7 @@ public with sharing class AsynchronousTests {
             AsynchronousJob__c job2 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -371,7 +371,7 @@ public with sharing class AsynchronousTests {
             AsynchronousJob__c job3 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.SUCCEEDED.name(),
+                    Status__c = AsynchronousV1.Status.SUCCEEDED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -382,7 +382,7 @@ public with sharing class AsynchronousTests {
             AsynchronousJob__c job4 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.FAILED.name(),
+                    Status__c = AsynchronousV1.Status.FAILED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -393,7 +393,7 @@ public with sharing class AsynchronousTests {
             AsynchronousJob__c job5 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.CANCELLED.name(),
+                    Status__c = AsynchronousV1.Status.CANCELLED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -415,13 +415,13 @@ public with sharing class AsynchronousTests {
 
     @IsTest
     private static void testGetJobTotals() {
-        AsynchronousJobTrigger.skipTriggers = true;
+        AsynchronousJobSubscriber.skipTriggers = true;
 
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c job1 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.QUEUED.name(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -432,7 +432,7 @@ public with sharing class AsynchronousTests {
             AsynchronousJob__c job2 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -443,7 +443,7 @@ public with sharing class AsynchronousTests {
             AsynchronousJob__c job3 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.SUCCEEDED.name(),
+                    Status__c = AsynchronousV1.Status.SUCCEEDED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -454,7 +454,7 @@ public with sharing class AsynchronousTests {
             AsynchronousJob__c job4 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.FAILED.name(),
+                    Status__c = AsynchronousV1.Status.FAILED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -465,7 +465,7 @@ public with sharing class AsynchronousTests {
             AsynchronousJob__c job5 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
-                    Status__c = Asynchronous.Status.CANCELLED.name(),
+                    Status__c = AsynchronousV1.Status.CANCELLED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -476,7 +476,7 @@ public with sharing class AsynchronousTests {
             AsynchronousJob__c job6 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
-                    Status__c = Asynchronous.Status.QUEUED.name(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -504,9 +504,9 @@ public with sharing class AsynchronousTests {
             Assert.areEqual(1, counts.get('FAILED'));
             Assert.areEqual(1, counts.get('CANCELLED'));
 
-            job4.Status__c = Asynchronous.Status.CANCELLED.name();
-            job5.Status__c = Asynchronous.Status.RUNNING.name();
-            job6.Status__c = Asynchronous.Status.CANCELLED.name();
+            job4.Status__c = AsynchronousV1.Status.CANCELLED.name();
+            job5.Status__c = AsynchronousV1.Status.RUNNING.name();
+            job6.Status__c = AsynchronousV1.Status.CANCELLED.name();
             upsert new List<AsynchronousJob__c> { job4, job5, job6 };
 
             counts = AsynchronousLWC.API.getTotals();
@@ -536,7 +536,7 @@ public with sharing class AsynchronousTests {
                     OwnerId = UserInfo.getUserId(),
                     ApexJobId__c = 'APEXJOB-1',
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.FAILED.name(),
+                    Status__c = AsynchronousV1.Status.FAILED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -611,14 +611,14 @@ public with sharing class AsynchronousTests {
     }
 
     private static AsynchronousAPI createMock() {
-        Asynchronous.Job job = (Asynchronous.Job) MockerV1.of(AsynchronousJob.class)
+        AsynchronousV1.Job job = (AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class)
                 .whenNoArguments()
                     .forMethod('getReference')
                         .called(1)
                         .returns('MOCKED')
                     .forMethod('getStatus')
                         .called(1)
-                        .returns(Asynchronous.Status.CANCELLED)
+                        .returns(AsynchronousV1.Status.CANCELLED)
                 .mock();
 
         return (AsynchronousAPI) MockerV1.of(AsynchronousAPI.class)
@@ -632,7 +632,7 @@ public with sharing class AsynchronousTests {
                     .forMethod('createJob')
                         .called(1)
                         .returns(job)
-                .whenArgument(new List<Asynchronous.Job> { job })
+                .whenArgument(new List<AsynchronousV1.Job> { job })
                     .forMethod('queueJobs')
                         .called(1)
                 .mock();
@@ -643,11 +643,11 @@ public with sharing class AsynchronousTests {
             super(TestAsynchronousRunnable.class);
         }
 
-        public override Boolean onCancellation(Asynchronous.Job job) {
+        public override Boolean onCancellation(AsynchronousV1.Job job) {
             return job.getMaximumRetries() == 0;
         }
 
-        public override void run(Asynchronous.Job asyncJob, String apexJobId) {}
+        public override void run(AsynchronousV1.Job asyncJob, String apexJobId) {}
     }
 
     private with sharing class AddIdModifier implements MockerV1.Modifier {

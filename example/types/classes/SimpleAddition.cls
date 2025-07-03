@@ -45,12 +45,12 @@ global with sharing class SimpleAddition {
      * It is global as when called from Dependency class in Force Framework package, this class will be in a
      * different namespace.
      */
-    global with sharing class BindingCheck implements Dependency.BindingCheck {
-        public Dependency.ValidationResult validate(final Type forType, final Type withImpl) {
+    global with sharing class BindingCheck implements DependencyV1.BindingCheck {
+        public DependencyV1.ValidationResult validate(final Type forType, final Type withImpl) {
             if (TypesV1.newInstance(withImpl) instanceof API) {
-                return new Dependency.ValidationResult(true, null);
+                return new DependencyV1.ValidationResult(true, null);
             } else {
-                return new Dependency.ValidationResult(false, 'Type ' + withImpl.getName() + ' does not implement SimpleAddition.API');
+                return new DependencyV1.ValidationResult(false, 'Type ' + withImpl.getName() + ' does not implement SimpleAddition.API');
             }
         }
     }

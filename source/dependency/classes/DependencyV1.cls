@@ -27,6 +27,73 @@ global with sharing class DependencyV1 {
 
     /**
      * @description
+     * Exception thrown when a dependency injection operation fails.
+     */
+    global with sharing class APIException extends Exception {}
+
+    /**
+     * @description
+     * A class implementing this interface will have a new instance of itself created each time it is in injected into
+     * an application.
+     */
+    global interface Prototype {}
+
+    /**
+     * @description
+     * Class representing result of a binding validation check.
+     */
+    global with sharing class ValidationResult {
+        public final Boolean isValid { public get; private set; }
+        public final String errorMessage { public get; private set; }
+
+        /**
+         * @description
+         * Constructs a validation result object which is used to inform the caller of the BindingCheck.validate
+         * method of the result of the validation.
+         *
+         * @param isValid True if the validation passed. False if not.
+         * @param errorMessage The error message to be recorded in the Exception thrown to record the failure.
+         */
+        global ValidationResult(final Boolean isValid, final String errorMessage) {
+            Assertion.isNotNull(isValid, 'argument: DependencyV1.ValidationResult.isValid may not be null');
+            Assertion.isTrue(isValid || errorMessage != null, 'argument: DependencyV1.ValidationResult.errorMessage must be set');
+            this.isValid = isValid;
+            this.errorMessage = errorMessage;
+        }
+    }
+
+    /**
+     * @description
+     * Interface to be implemented to check a binding in the registry.
+     * <br><br>
+     * Each checker must be defined in a record in the Binding Check custom metadata.
+     */
+    global interface BindingCheck {
+
+        /**
+         * @description
+         * Given a type to be bound, a class implementing this method must check that the given implementation class
+         * can be bound to it.
+         * <br><br>
+         * If the for type is an interface then an implementation of this method must check that the implementation
+         * class implements the interface.
+         * <br><br>
+         * If the for type is an abstract class then an implementation of this method must check that the implementation
+         * class extends the abstract class.
+         * <br><br>
+         * If the for type is a class then an implementation of this method must check that the implementation
+         * class is of the same class or a super class of it.
+         *
+         * @param forType The type to be bound.
+         * @param withImpl The implementation to bind to the type.
+         *
+         * @return The result of the validation.
+         */
+        ValidationResult validate(Type forType, Type withImpl);
+    }
+
+    /**
+     * @description
      * If the registry contains a binding for the given type, its implementation is returned.
      * <br><br>
      * Should no binding exist, an exception is thrown.

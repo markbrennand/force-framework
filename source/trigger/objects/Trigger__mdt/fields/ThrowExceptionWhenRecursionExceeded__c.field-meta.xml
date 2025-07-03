@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ThrowExceptionWhenRecursionExceeded__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>If this checkbox is checked, an Exception will be thrown when the associated trigger has exceeded its recursive depth limit. If unchecked, an event will not be published for the trigger. Effectively, the trigger invocation will be ignored.</description>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <inlineHelpText>If this checkbox is checked, an Exception will be thrown when the associated trigger has exceeded its recursive depth limit. If unchecked, an event will not be published for the trigger. Effectively, the trigger invocation will be ignored.</inlineHelpText>
+    <label>Throw Exception When Recursion Exceeded</label>
+    <type>Checkbox</type>
+</CustomField>

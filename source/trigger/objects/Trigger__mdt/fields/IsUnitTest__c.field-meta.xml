@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>IsUnitTest__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>True if the record is for use in a unit test only.</description>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <inlineHelpText>True if the record is for use in a unit test only.</inlineHelpText>
+    <label>Is Unit Test</label>
+    <type>Checkbox</type>
+</CustomField>

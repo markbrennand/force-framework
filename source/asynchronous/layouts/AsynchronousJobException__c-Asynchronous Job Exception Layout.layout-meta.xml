@@ -37,7 +37,7 @@
                 <field>AsynchronousJob__c</field>
             </layoutItems>
             <layoutItems>
-                <behavior>Readonly</behavior>
+                <behavior>Required</behavior>
                 <field>RetryNumber__c</field>
             </layoutItems>
             <layoutItems>

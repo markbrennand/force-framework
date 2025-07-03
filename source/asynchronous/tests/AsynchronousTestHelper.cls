@@ -54,6 +54,6 @@ public with sharing class AsynchronousTestHelper {
             super(TestRunnable.class);
         }
 
-        public override void run(Asynchronous.Job asyncJob, String apexJobId) {}
+        public override void run(AsynchronousV1.Job asyncJob, String apexJobId) {}
     }
 }

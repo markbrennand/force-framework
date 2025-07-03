@@ -21,56 +21,56 @@ public with sharing class AsynchronousDAOTests {
         try {
             extended.getObject(null);
             Assert.fail();
-        } catch(Asynchronous.APIException ae) {
+        } catch(AsynchronousV1.APIException ae) {
             Assert.areEqual('Access denied', ae.getMessage());
         }
 
         try {
             extended.getScheduledObjects(null);
             Assert.fail();
-        } catch(Asynchronous.APIException ae) {
+        } catch(AsynchronousV1.APIException ae) {
             Assert.areEqual('Access denied', ae.getMessage());
         }
 
         try {
             extended.countSchedulableObjects();
             Assert.fail();
-        } catch(Asynchronous.APIException ae) {
+        } catch(AsynchronousV1.APIException ae) {
             Assert.areEqual('Access denied', ae.getMessage());
         }
 
         try {
             extended.countActiveObjects(null);
             Assert.fail();
-        } catch(Asynchronous.APIException ae) {
+        } catch(AsynchronousV1.APIException ae) {
             Assert.areEqual('Access denied', ae.getMessage());
         }
 
         try {
             extended.persistObjects(null);
             Assert.fail();
-        } catch(Asynchronous.APIException ae) {
+        } catch(AsynchronousV1.APIException ae) {
             Assert.areEqual('Access denied', ae.getMessage());
         }
 
         try {
             extended.persistObjects(null, null);
             Assert.fail();
-        } catch(Asynchronous.APIException ae) {
+        } catch(AsynchronousV1.APIException ae) {
             Assert.areEqual('Access denied', ae.getMessage());
         }
 
         try {
             extended.removeObjects(null);
             Assert.fail();
-        } catch(Asynchronous.APIException ae) {
+        } catch(AsynchronousV1.APIException ae) {
             Assert.areEqual('Access denied', ae.getMessage());
         }
 
         try {
             extended.persistException(null);
             Assert.fail();
-        } catch(Asynchronous.APIException ae) {
+        } catch(AsynchronousV1.APIException ae) {
             Assert.areEqual('Access denied', ae.getMessage());
         }
     }
@@ -79,14 +79,14 @@ public with sharing class AsynchronousDAOTests {
     private static void testJobCRUD() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousHelper.API = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
-                    .whenArgument(new AsynchronousJob__c(Status__c = Asynchronous.Status.PENDING.name()))
+                    .whenArgument(new AsynchronousJob__c(Status__c = AsynchronousV1.Status.PENDING.name()))
                         .forMethod('queueJob').called(0)
                     .mock();
 
             AsynchronousJob__c job1 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.PENDING.name(),
+                    Status__c = AsynchronousV1.Status.PENDING.name(),
                     MaximumRetries__c = 0,
                     RetryInterval__c = 1000,
                     RetryNumber__c = 1,
@@ -97,7 +97,7 @@ public with sharing class AsynchronousDAOTests {
             AsynchronousJob__c job2 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.PENDING.name(),
+                    Status__c = AsynchronousV1.Status.PENDING.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -130,7 +130,7 @@ public with sharing class AsynchronousDAOTests {
             }
 
             fetched2.LastRunTime__c = Datetime.now();
-            fetched2.Status__c = Asynchronous.Status.FAILED.name();
+            fetched2.Status__c = AsynchronousV1.Status.FAILED.name();
 
             AsynchronousDAO.API.persistObjects(new List<AsynchronousJob__c> { fetched2 });
             AsynchronousJob__c updatedFetched2 = AsynchronousDAO.API.getObject(job2.Id);
@@ -144,10 +144,10 @@ public with sharing class AsynchronousDAOTests {
     private static void testJobAndStateCRUD() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousHelper.API = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
-                    .whenArgument(new AsynchronousJob__c(Status__c = Asynchronous.Status.PENDING.name()))
+                    .whenArgument(new AsynchronousJob__c(Status__c = AsynchronousV1.Status.PENDING.name()))
                         .forMethod('queueJob').called(1)
                     .whenArguments(
-                            new AsynchronousJob__c(Status__c = Asynchronous.Status.PENDING.name()),
+                            new AsynchronousJob__c(Status__c = AsynchronousV1.Status.PENDING.name()),
                             MockerV1.anyNonNull(Map<String, String>.class)
                     )
                         .forMethod('encodeState')
@@ -158,7 +158,7 @@ public with sharing class AsynchronousDAOTests {
             AsynchronousJob__c job1 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.PENDING.name(),
+                    Status__c = AsynchronousV1.Status.PENDING.name(),
                     MaximumRetries__c = 0,
                     RetryInterval__c = 1000,
                     RetryNumber__c = 1,
@@ -171,7 +171,7 @@ public with sharing class AsynchronousDAOTests {
             AsynchronousJob__c job2 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.PENDING.name(),
+                    Status__c = AsynchronousV1.Status.PENDING.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -189,10 +189,17 @@ public with sharing class AsynchronousDAOTests {
             AsynchronousJob__c fetched1 = AsynchronousDAO.API.getObject(job1.Id);
             AsynchronousJob__c fetched2 = AsynchronousDAO.API.getObject(job2.Id);
 
-            job1.Status__c = Asynchronous.Status.QUEUED.name();
+            job1.Status__c = AsynchronousV1.Status.QUEUED.name();
             job1.RetryNumber__c = 0;
-            job2.Status__c = Asynchronous.Status.QUEUED.name();
+            job2.Status__c = AsynchronousV1.Status.QUEUED.name();
             job2.RetryNumber__c = 0;
+
+
+            job1.ScheduledRunTime__c = fetched1.ScheduledRunTime__c > job1.ScheduledRunTime__c
+                    ? fetched1.ScheduledRunTime__c : job1.ScheduledRunTime__c;
+
+            job1.ScheduledRunTime__c = fetched2.ScheduledRunTime__c > job1.ScheduledRunTime__c
+                    ? fetched2.ScheduledRunTime__c : job1.ScheduledRunTime__c;
 
             Assert.isTrue(ComparisonHelper.compare(job1, fetched1), 'Mis-match of data retrieved and data stored');
             Assert.isTrue(ComparisonHelper.compare(job2, fetched2), 'Mis-match of data retrieved and data stored');
@@ -208,7 +215,7 @@ public with sharing class AsynchronousDAOTests {
             }
 
             fetched2.LastRunTime__c = Datetime.now();
-            fetched2.Status__c = Asynchronous.Status.FAILED.name();
+            fetched2.Status__c = AsynchronousV1.Status.FAILED.name();
 
             AsynchronousDAO.API.persistObjects(new List<AsynchronousJob__c> { fetched2 });
             AsynchronousJob__c updatedFetched2 = AsynchronousDAO.API.getObject(job2.Id);
@@ -223,13 +230,13 @@ public with sharing class AsynchronousDAOTests {
     @IsTest
     private static void testBindingCheck() {
         System.runAs(AsynchronousTestHelper.getUser()) {
-            DependencyV1.bind(Asynchronous.DAO.class, AsynchronousDAO.Factory.class);
+            DependencyV1.bind(AsynchronousDAO.API.class, AsynchronousDAO.Factory.class);
             try {
-                DependencyV1.bind(Asynchronous.DAO.class, AsynchronousScheduler.RunNextAvailable.class);
+                DependencyV1.bind(AsynchronousDAO.API.class, AsynchronousScheduler.RunNextAvailable.class);
                 Assert.fail('Binding check should fail');
-            } catch (Dependency.APIException ae) {
+            } catch (DependencyV1.APIException ae) {
                 Assert.isTrue(
-                        TestHelper.exceptionContains('Class AsynchronousScheduler.RunNextAvailable does not implement Asynchronous.DAO', ae),
+                        TestHelper.exceptionContains('Class AsynchronousScheduler.RunNextAvailable does not implement AsynchronousDAO.API', ae),
                         'Unexpected exception: ' + ae
                 );
             }
@@ -238,13 +245,13 @@ public with sharing class AsynchronousDAOTests {
 
     @IsTest
     private static void testCountScheduledObjects() {
-        AsynchronousJobTrigger.skipTriggers = true;
+        AsynchronousJobSubscriber.skipTriggers = true;
 
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c job1 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.PENDING.name(),
+                    Status__c = AsynchronousV1.Status.PENDING.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -255,7 +262,7 @@ public with sharing class AsynchronousDAOTests {
             AsynchronousJob__c job2 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.QUEUED.name(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -266,7 +273,7 @@ public with sharing class AsynchronousDAOTests {
             AsynchronousJob__c job3 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.SUCCEEDED.name(),
+                    Status__c = AsynchronousV1.Status.SUCCEEDED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -277,7 +284,7 @@ public with sharing class AsynchronousDAOTests {
             AsynchronousJob__c job4 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -288,7 +295,7 @@ public with sharing class AsynchronousDAOTests {
             AsynchronousJob__c job5 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
-                    Status__c = Asynchronous.Status.QUEUED.name(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -299,7 +306,7 @@ public with sharing class AsynchronousDAOTests {
             AsynchronousJob__c job6 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -311,19 +318,19 @@ public with sharing class AsynchronousDAOTests {
 
             Assert.areEqual(2, AsynchronousDAO.API.countSchedulableObjects());
 
-            job1.Status__c = Asynchronous.Status.QUEUED.name();
+            job1.Status__c = AsynchronousV1.Status.QUEUED.name();
             upsert job1;
             Assert.areEqual(3, AsynchronousDAO.API.countSchedulableObjects());
 
-            job4.Status__c = Asynchronous.Status.SUCCEEDED.name();
+            job4.Status__c = AsynchronousV1.Status.SUCCEEDED.name();
             upsert job4;
             Assert.areEqual(2, AsynchronousDAO.API.countSchedulableObjects());
 
-            job3.Status__c = Asynchronous.Status.FAILED.name();
+            job3.Status__c = AsynchronousV1.Status.FAILED.name();
             upsert job3;
             Assert.areEqual(2, AsynchronousDAO.API.countSchedulableObjects());
 
-            job3.Status__c = Asynchronous.Status.CANCELLED.name();
+            job3.Status__c = AsynchronousV1.Status.CANCELLED.name();
             upsert job3;
             Assert.areEqual(2, AsynchronousDAO.API.countSchedulableObjects());
         }
@@ -335,7 +342,7 @@ public with sharing class AsynchronousDAOTests {
             AsynchronousJob__c job1 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.QUEUED.name(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -346,7 +353,7 @@ public with sharing class AsynchronousDAOTests {
             AsynchronousJob__c job2 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.QUEUED.name(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -357,7 +364,7 @@ public with sharing class AsynchronousDAOTests {
             AsynchronousJob__c job3 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.SUCCEEDED.name(),
+                    Status__c = AsynchronousV1.Status.SUCCEEDED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -368,7 +375,7 @@ public with sharing class AsynchronousDAOTests {
             AsynchronousJob__c job4 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -379,7 +386,7 @@ public with sharing class AsynchronousDAOTests {
             AsynchronousJob__c job5 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
-                    Status__c = Asynchronous.Status.QUEUED.name(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -390,7 +397,7 @@ public with sharing class AsynchronousDAOTests {
             AsynchronousJob__c job6 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
-                    Status__c = Asynchronous.Status.RUNNING.name(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
@@ -402,8 +409,6 @@ public with sharing class AsynchronousDAOTests {
 
             Set<AsynchronousJob__c> scheduled = AsynchronousDAO.API.getScheduledObjects(1);
             Assert.areEqual(1, scheduled.size());
-            System.debug(job2);
-            System.debug(scheduled);
             Assert.isTrue(ComparisonHelper.compare(scheduled, new Set<AsynchronousJob__c> { job2 }));
 
             scheduled = AsynchronousDAO.API.getScheduledObjects(2);
@@ -420,13 +425,13 @@ public with sharing class AsynchronousDAOTests {
             Assert.areEqual(2, scheduled.size());
             Assert.isTrue(ComparisonHelper.compare(scheduled, new Set<AsynchronousJob__c> { job1, job2 }));
 
-            job4.Status__c = Asynchronous.Status.QUEUED.name();
+            job4.Status__c = AsynchronousV1.Status.QUEUED.name();
             upsert job4;
             scheduled = AsynchronousDAO.API.getScheduledObjects(10);
             Assert.areEqual(3, scheduled.size());
             Assert.isTrue(ComparisonHelper.compare(scheduled, new Set<AsynchronousJob__c> { job4, job1, job2 }));
 
-            job6.Status__c = Asynchronous.Status.QUEUED.name();
+            job6.Status__c = AsynchronousV1.Status.QUEUED.name();
             upsert job6;
             scheduled = AsynchronousDAO.API.getScheduledObjects(10);
             Assert.areEqual(3, scheduled.size());
@@ -441,7 +446,7 @@ public with sharing class AsynchronousDAOTests {
                     OwnerId = UserInfo.getUserId(),
                     ApexJobId__c = 'APEXJOB-1',
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
-                    Status__c = Asynchronous.Status.FAILED.name(),
+                    Status__c = AsynchronousV1.Status.FAILED.name(),
                     MaximumRetries__c = 1,
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,

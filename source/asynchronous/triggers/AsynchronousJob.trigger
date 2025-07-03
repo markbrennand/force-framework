@@ -6,6 +6,6 @@
  *
  * @author Mark Brennand
  */
-trigger AsynchronousJob on AsynchronousJob__c (before insert, before update, after insert, after update) {
-    TriggersV1.route();
+trigger AsynchronousJob on AsynchronousJob__c (before insert, before update, after insert, after update, before delete, after delete) {
+    TriggerV1.publish();
 }

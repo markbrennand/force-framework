@@ -18,10 +18,10 @@ public with sharing class AsynchronousRunnableTests {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousV1.Runnable runnable = new AsynchronousTestHelper.TestRunnable();
             Assert.areEqual(1, runnable.getMaximumActive());
-            Assert.isTrue(runnable.onSuccess((Asynchronous.Job) MockerV1.of(AsynchronousJob.class).mock()));
-            Assert.isTrue(runnable.onCancellation((Asynchronous.Job) MockerV1.of(AsynchronousJob.class).mock()));
-            Assert.isTrue(runnable.onFailure((Asynchronous.Job) MockerV1.of(AsynchronousJob.class).mock(), new DMLException('Test')));
-            Assert.areEqual(Asynchronous.Status.QUEUED, runnable.onError((Asynchronous.Job) MockerV1.of(AsynchronousJob.class).mock(), new DMLException('Test')));
+            Assert.isTrue(runnable.onSuccess((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock()));
+            Assert.isTrue(runnable.onCancellation((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock()));
+            Assert.isTrue(runnable.onFailure((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock(), new DMLException('Test')));
+            Assert.areEqual(AsynchronousV1.Status.QUEUED, runnable.onError((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock(), new DMLException('Test')));
         }
     }
 
@@ -29,7 +29,7 @@ public with sharing class AsynchronousRunnableTests {
     private static void testForJob() {
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousV1.Runnable runnable = new AsynchronousTestHelper.TestRunnable();
-            Asynchronous.Job job = (Asynchronous.Job) MockerV1.of(AsynchronousJob.class).mock();
+            AsynchronousV1.Job job = (AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock();
             runnable.forJob(job);
             Assert.areEqual(job, runnable.asyncJob);
         }

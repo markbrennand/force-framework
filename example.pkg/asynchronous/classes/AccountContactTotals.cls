@@ -33,9 +33,9 @@ global with sharing class AccountContactTotals extends forcefw.AsynchronousV1.Ru
      * @param job The Asynchronous API job being run.
      * @param apexJobId The Id of the Apex Job that is running the job
      */
-    public override void run(final forcefw.Asynchronous.Job job, final String apexJobId) {
+    public void run(final forcefw.AsynchronousV1.Job job, final String apexJobId) {
         if (job.getRetryNumber() < configuration.get('succeedOnRetryNumber')) {
-            throw new forcefw.Asynchronous.APIException('Failed on retry ' + job.getRetryNumber());
+            throw new forcefw.AsynchronousV1.APIException('Failed on retry ' + job.getRetryNumber());
         }
 
         final String accountId = job.getState().get('accountId');
@@ -102,9 +102,9 @@ global with sharing class AccountContactTotals extends forcefw.AsynchronousV1.Ru
      * Called by Contact trigger to start an Asynchronous Job to update Contact(s).
      *
      * @param contacts The modified Contacts.
-     * @param oldValues The original values of the modified Contacts.
+     * @param event The event representing the trigger action.
      */
-    public static void startCalculationJob(final List<Contact> contacts, final forcefw.TriggersV1.Event event) {
+    public static void startCalculationJob(final List<Contact> contacts, final forcefw.TriggerV1.Event event) {
         final List<Account> accounts = new List<Account>();
         final Set<Id> orphanedContactIds = new Set<Id>();
 
@@ -161,7 +161,7 @@ global with sharing class AccountContactTotals extends forcefw.AsynchronousV1.Ru
             accountIds.add(account.Id);
         }
 
-        final List<forcefw.Asynchronous.Job> jobs = new List<forcefw.Asynchronous.Job>();
+        final List<forcefw.AsynchronousV1.Job> jobs = new List<forcefw.AsynchronousV1.Job>();
 
         for (Id accountId : accountIds) {
             jobs.add(

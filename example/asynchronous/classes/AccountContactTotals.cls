@@ -33,9 +33,9 @@ global with sharing class AccountContactTotals extends AsynchronousV1.Runnable {
      * @param job The Asynchronous API job being run.
      * @param apexJobId The Id of the Apex Job that is running the job
      */
-    public override void run(final Asynchronous.Job job, final String apexJobId) {
+    public override void run(final AsynchronousV1.Job job, final String apexJobId) {
         if (job.getRetryNumber() < configuration.get('succeedOnRetryNumber')) {
-            throw new Asynchronous.APIException('Failed on retry ' + job.getRetryNumber());
+            throw new AsynchronousV1.APIException('Failed on retry ' + job.getRetryNumber());
         }
 
         final String accountId = job.getState().get('accountId');
@@ -102,14 +102,14 @@ global with sharing class AccountContactTotals extends AsynchronousV1.Runnable {
      * Called by Contact trigger to start an Asynchronous Job to update Contact(s).
      *
      * @param contacts The modified Contacts.
-     * @param oldValues The original values of the modified Contacts.
+     * @param event The event created by the trigger.
      */
-    public static void startCalculationJob(final List<Contact> contacts, final TriggersV1.Event event) {
+    public static void startCalculationJob(final List<Contact> contacts, final TriggerV1.Event event) {
         final List<Account> accounts = new List<Account>();
         final Set<Id> orphanedContactIds = new Set<Id>();
 
-        if (contacts == null) {
-            for (Contact deletedContact : (List<Contact>) event.getOldValues()) {
+        if (event.getOperation() == TriggerV1.Operation.DELETING) {
+            for (Contact deletedContact : contacts) {
                 if (deletedContact.AccountId != null) {
                     accounts.add(new Account(Id = deletedContact.AccountId));
                 }
@@ -161,7 +161,7 @@ global with sharing class AccountContactTotals extends AsynchronousV1.Runnable {
             accountIds.add(account.Id);
         }
 
-        final List<Asynchronous.Job> jobs = new List<Asynchronous.Job>();
+        final List<AsynchronousV1.Job> jobs = new List<AsynchronousV1.Job>();
 
         for (Id accountId : accountIds) {
             jobs.add(
