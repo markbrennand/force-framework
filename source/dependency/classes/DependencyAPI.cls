@@ -37,7 +37,6 @@ public with sharing virtual class DependencyAPI implements API {
             if (CHECKS == null) {
                 CHECKS = loadBindingChecks();
             }
-
             return CHECKS;
         }
         private set;
@@ -366,22 +365,10 @@ public with sharing virtual class DependencyAPI implements API {
          * @param bindings The custom bindings to add to the registry.
          */
         public void build(List<Binding__c> bindings) {
-            for (Binding__c binding : bindings) {
-                try {
-                    final Type type = TypesV1.load(binding.Type__c);
-                    final Type implementation = TypesV1.load(binding.Implementation__c);
-
-                    if (binding.Action__c == null) {
-                        bind(type, implementation);
-                    } else {
-                        bind(type, binding.Action__c, implementation);
-                    }
-                } catch (Exception e) {
-                    binding.addError(e.getMessage());
-                }
-            }
+            ArrayV1.over(bindings)
+                    .sharing(this)
+                    .forEach(new AddBinding());
         }
-
     }
 
     /**
@@ -395,10 +382,43 @@ public with sharing virtual class DependencyAPI implements API {
      * - A type with an action that is bound to more than one implementation.
      */
     public static void checkForDuplicates() {
-        final List<Binding__c> bindings = [SELECT Type__c, Action__c FROM Binding__c WITH USER_MODE];
-        final Set<String> keys = new Set<String>();
+        ArrayV1.over([SELECT Type__c, Action__c FROM Binding__c WITH USER_MODE])
+                .sharing(new Set<String>())
+                .forEach(new DuplicateCheck());
+    }
 
-        for (Binding__c binding : bindings) {
+    /**
+     * @description
+     * Validates the given bindings.
+     *
+     * @param bindings The custom bindings to add to the registry.
+     */
+    public static void validate(List<Binding__c> bindings) {
+        ArrayV1.over(bindings).sharing(new Implementation()).forEach(new BindingValidator());
+    }
+
+    /**
+     * @description
+     * Builds a Map from the Type set in a binding to a Binding Check that can be called to validate its
+     * assignment.
+     *
+     * @return  The Map of Types to Bind Check.
+     */
+    private static Map<Type, List<DependencyV1.BindingCheck>> loadBindingChecks() {
+        return (Map<Type, List<DependencyV1.BindingCheck>>)
+                ArrayV1.over(BindingCheck__mdt.getAll().values())
+                        .reduce(new AddBindingCheck(), new Map<Type, List<DependencyV1.BindingCheck>>());
+    }
+
+    /**
+     * @description
+     * Callback class to check for a duplicate binding.
+     */
+    private with sharing class DuplicateCheck extends ArrayV1.Callback {
+        public override Object function(Object element, Object currentValue, Integer index) {
+            final Binding__c binding = (Binding__c) element;
+            final Set<String> keys = (Set<String>) shared();
+
             if (binding.Action__c == null) {
                 if (keys.contains(binding.Type__c)) {
                     throw createException('Binding for', binding.Type__c, 'already exists');
@@ -411,46 +431,74 @@ public with sharing virtual class DependencyAPI implements API {
                 }
                 keys.add(key);
             }
+
+            return null;
         }
     }
 
     /**
      * @description
-     * Validates the given bindings.
-     *
-     * @param bindings The custom bindings to add to the registry.
+     * Callback class to validate a Binding object.
      */
-    public static void validate(List<Binding__c> bindings) {
-        final Implementation validationImpl = new Implementation();
+    private with sharing class BindingValidator extends ArrayV1.Callback {
+        public override Object function(final Object element, final Object currentValue, final Integer index) {
+            final Binding__c binding = (Binding__c) element;
+            final API api = (API) shared();
 
-        for (Binding__c binding : bindings) {
             try {
                 final Type type = TypesV1.load(binding.Type__c);
                 final Type implementation = TypesV1.load(binding.Implementation__c);
 
                 if (binding.Action__c == null) {
-                    validationImpl.bind(type, implementation);
+                    api.bind(type, implementation);
                 } else {
-                    validationImpl.bind(type, binding.Action__c, implementation);
+                    api.bind(type, binding.Action__c, implementation);
                 }
             } catch (Exception e) {
                 binding.addError(e.getMessage());
             }
+
+            return null;
         }
     }
 
     /**
      * @description
-     * Builds a Map from the Type set in a binding to a Binding Check that can be called to validate its
-     * assignment.
-     *
-     * @return  The Map of Types to Bind Check.
+     * Callback class to add a Binding to the registry.
      */
-    private static Map<Type, List<DependencyV1.BindingCheck>> loadBindingChecks() {
-        final Boolean isTest = Test.isRunningTest();
-        final Map<Type, List<DependencyV1.BindingCheck>> checks = new Map<Type, List<DependencyV1.BindingCheck>>();
+    private with sharing class AddBinding extends ArrayV1.Callback {
+        public override Object function(final Object element, final Object currentValue, final Integer index) {
+            final Binding__c binding = (Binding__c) element;
+            try {
 
-        for (BindingCheck__mdt check : BindingCheck__mdt.getAll().values()) {
+                final API parent = (API) shared();
+                final Type type = TypesV1.load(binding.Type__c);
+                final Type implementation = TypesV1.load(binding.Implementation__c);
+
+                if (binding.Action__c == null) {
+                    parent.bind(type, implementation);
+                } else {
+                    parent.bind(type, binding.Action__c, implementation);
+                }
+            } catch (Exception e) {
+                binding.addError(e.getMessage());
+            }
+
+            return null;
+        }
+    }
+
+    /**
+     * @description
+     * Callback class to add a Binding Check from a Binding__mdt custom metadata record.
+     */
+    private with sharing class AddBindingCheck extends ArrayV1.Callback {
+        final Boolean isTest = Test.isRunningTest();
+
+        public override Object function(final Object element, final Object currentValue, final Integer index) {
+            final BindingCheck__mdt check = (BindingCheck__mdt) element;
+            final Map<Type, List<DependencyV1.BindingCheck>> checks = (Map<Type, List<DependencyV1.BindingCheck>>) currentValue;
+
             if (check.IsUnitTest__c == isTest) {
                 Assertion.isNotNull(check.Type__C, 'Binding Check Metadata record ' + check.Label + ' has no Type defined');
                 Assertion.isNotNull(check.BindingCheck__c, 'Binding Check Metadata record ' + check.Label + ' has no BindingCheck class');
@@ -467,9 +515,9 @@ public with sharing virtual class DependencyAPI implements API {
                     checks.get(forType).add((DependencyV1.BindingCheck) checker);
                 }
             }
-        }
 
-        return checks;
+            return checks;
+        }
     }
 
     /**

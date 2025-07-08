@@ -27,7 +27,7 @@ public with sharing class AsynchronousHelperTests {
     }
 
     @IsTest
-    private static void testExtendedClassIsInsert() {
+    private static void testExtendedClassIsInert() {
         ExtendedClass extended = new ExtendedClass();
 
         try {
@@ -113,6 +113,7 @@ public with sharing class AsynchronousHelperTests {
 
             // Repeat the encode/decode test for different chunk sizes.
             AsynchronousJob__c asynchronousObject = new AsynchronousJob__c(Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType));
+
             for (Integer size : new List<Integer>{
                     AsynchronousHelper.MAX_CHUNK_SIZE, 1, 2, 4, 8, 16, 32, 62, 128, 256
             }) {

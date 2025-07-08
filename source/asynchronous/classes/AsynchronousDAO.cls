@@ -240,11 +240,16 @@ public with sharing virtual class AsynchronousDAO implements API {
         public void persistObjects(final List<AsynchronousJob__c> asyncObjects) {
             Assertion.isNotNull(asyncObjects, 'argument: AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
 
-            final Boolean savedSkipTriggers = AsynchronousJobSubscriber.skipTriggers;
+            final Boolean subscribersEnabled = TriggerV1.isEnabled(AsynchronousJobSubscriber.Factory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
 
-            AsynchronousJobSubscriber.skipTriggers = true;
             Database.upsert(asyncObjects, AccessLevel.USER_MODE);
-            AsynchronousJobSubscriber.skipTriggers = savedSkipTriggers;
+
+            if (subscribersEnabled) {
+                TriggerV1.enable(AsynchronousJobSubscriber.Factory.class);
+            } else {
+                TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
+            }
         }
 
         /**
@@ -264,9 +269,9 @@ public with sharing virtual class AsynchronousDAO implements API {
             Assertion.isNotNull(states, 'argument: AsynchronousDAO.apiPersistAsynchronous.states');
             Assertion.areEqual(asyncObjects.size(), states.size(), 'The number of Asynchronous objects does not match the number of states');
 
-            final Boolean savedSkipTriggers = AsynchronousJobSubscriber.skipTriggers;
+            final Boolean subscribersEnabled = TriggerV1.isEnabled(AsynchronousJobSubscriber.Factory.class);
+            TriggerV1.enable(AsynchronousJobSubscriber.Factory.class);
 
-            AsynchronousJobSubscriber.skipTriggers = false;
             Database.upsert(asyncObjects, AccessLevel.USER_MODE);
 
             final Set<Id> allIds = new Set<Id>();
@@ -284,7 +289,11 @@ public with sharing virtual class AsynchronousDAO implements API {
 
             Database.upsert(newStates, AccessLevel.USER_MODE);
 
-            AsynchronousJobSubscriber.skipTriggers = savedSkipTriggers;
+            if (subscribersEnabled) {
+                TriggerV1.enable(AsynchronousJobSubscriber.Factory.class);
+            } else {
+                TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
+            }
         }
 
         /**

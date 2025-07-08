@@ -393,7 +393,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
             Assertion.isNotNull(arguments, 'argument: Mocker.MockMatcher.handleMethodCall.arguments');
 
             final List<Arguments> allArguments = STUBBED_OBJECTS.get(stubbedObject);
-            Assertion.isNotNull(arguments, 'The are no arguments assigned to the stub ' + stubbedObject);
+            Assertion.isNotNull(allArguments, 'The are no arguments assigned to the stub ' + stubbedObject);
 
             for (Arguments argument : allArguments) {
                 if (argument.matches(arguments, paramTypes)) {

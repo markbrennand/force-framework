@@ -7,7 +7,7 @@
  * The Subscriber interface defines the contract that implementations must provide to process events generated
  * by the Trigger API.
  * <br><br>
- * Each Subscriber class must register itself with a Trigger metadata record.
+ * Each Subscriber implementation must register itself with a Trigger metadata record.
  * <br><br>
  * See <a href=../README.md target="_blank">README</a> for full details of the Trigger API.
  *
@@ -32,34 +32,6 @@ global with sharing class TriggerV1 {
      * Prevent construction.
      */
     private TriggerV1() {}
-
-    /**
-     * @description
-     * Classes implementing this interface may register themselves for use of the Trigger API.
-     */
-    global interface Subscriber {
-
-        /**
-         * @description
-         * Method called by the Trigger API when a trigger fires.
-         * <br><br>
-         * The event argument encapsulates all the information for the trigger operation that has fired.
-         * <br><br>
-         * All the Subscriber implementations bound to the object whose trigger hss fired will have their
-         * onEvent method called.
-         *
-         * @param event The trigger event.
-         */
-        void onEvent(Event event);
-
-        /**
-         * @description
-         * Returns the operations the subscriber will accept.
-         *
-         * @return The operations.
-         */
-        Set<Operation> forOperations();
-    }
 
     /**
      * @description
@@ -147,6 +119,34 @@ global with sharing class TriggerV1 {
 
     /**
      * @description
+     * Classes implementing this interface may register themselves for use of the Trigger API.
+     */
+    global interface Subscriber {
+
+        /**
+         * @description
+         * Method called by the Trigger API when a trigger fires.
+         * <br><br>
+         * The event argument encapsulates all the information for the trigger operation that has fired.
+         * <br><br>
+         * All the Subscriber implementations bound to the object whose trigger hss fired will have their
+         * onEvent method called.
+         *
+         * @param event The trigger event.
+         */
+        void onEvent(Event event);
+
+        /**
+         * @description
+         * Returns the operations the subscriber will accept.
+         *
+         * @return The operations.
+         */
+        Set<Operation> forOperations();
+    }
+
+    /**
+     * @description
      * Entry point for Trigger API.
      * <br><br>
      * This method must be called from the Apex Trigger.
@@ -160,6 +160,72 @@ global with sharing class TriggerV1 {
 
     /**
      * @description
+     * Disables the subscribers for the given object type.
+     *
+     * @param type The object type whose subscribers are to be disabled.
+     */
+    global static void disable(final SObjectType type) {
+        TriggerAPI.API.disable(type);
+    }
+    /**
+     * @description
+     * Enables the subscribers for the given object type.
+     *
+     * @param type The object type whose subscribers are to be enabled.
+     */
+    global static void enable(final SObjectType type) {
+        TriggerAPI.API.enable(type);
+    }
+
+    /**
+     * @description
+     * Determines whether subscribers are enabled for the given object type.
+     *
+     * @param type The object type whose subscription status is to be checked.
+     *
+     * @return True if the subscribers are enabled.
+     */
+    global static Boolean isEnabled(final SObjectType type) {
+        return TriggerAPI.API.isEnabled(type);
+    }
+
+    /**
+     * @description
+     * Disables the given Subscriber class.
+     * <br><br>
+     * No further events will be published to the associated subscriber.
+     *
+     * @param type The Subscriber class to disable.
+     */
+    global static void disable(Type type) {
+        TriggerAPI.API.disable(type);
+    }
+
+    /**
+     * @description
+     * Enables the given Subscriber class.
+     * <br><br>
+     * Events will be published to the associated subscriber.
+     *
+     * @param type The Subscriber class to enable.
+     */
+    global static void enable(Type type) {
+        TriggerAPI.API.enable(type);
+    }
+
+    /**
+     * @description
+     * Determines whether the given Subscriber class is enabled.
+     *
+     * @param type The Subscriber class to be checked.
+     *
+     * @return True if the Subscriber class is enabled.
+     */
+    global static Boolean isEnabled(Type type) {
+        return TriggerAPI.API.isEnabled(type);
+    }
+    /**
+     * @description
      * Definition a subscriber may use to indicate that it wishes to subscribe to all the trigger operations.
      */
     global static final Set<Operation> ALL_OPERATIONS = new Set<Operation> {
@@ -167,4 +233,29 @@ global with sharing class TriggerV1 {
             Operation.UPDATING,
             Operation.DELETING
     };
+
+    /**
+     * @description
+     * Class providing check on Binding made to TriggerV1.Subscriber.
+     */
+    public with sharing class BindingCheck implements DependencyV1.BindingCheck {
+
+        /**
+         * @description
+         * Checks that a valid binding has been made to TriggerV1.Subscriber.
+         *
+         * @param forType The type being bound to, TriggerV1.Subscriber.
+         * @param withImpl The implementation being bound to TriggerV1.Subscriber.
+         *
+         * @return The result of the validation.
+         */
+        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
+            return DependencyHelper.buildValidationResult(
+                    TypesV1.newInstance(withImpl) instanceof Subscriber,
+                    true,
+                    forType,
+                    withImpl
+            );
+        }
+    }
 }

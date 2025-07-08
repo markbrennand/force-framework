@@ -102,7 +102,7 @@ global with sharing class AccountContactTotals extends forcefw.AsynchronousV1.Ru
      * Called by Contact trigger to start an Asynchronous Job to update Contact(s).
      *
      * @param contacts The modified Contacts.
-     * @param event The event representing the trigger action.
+     * @param event The event representing the trigger invocation.
      */
     public static void startCalculationJob(final List<Contact> contacts, final forcefw.TriggerV1.Event event) {
         final List<Account> accounts = new List<Account>();

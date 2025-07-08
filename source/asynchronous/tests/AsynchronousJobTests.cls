@@ -161,6 +161,7 @@ public with sharing class AsynchronousJobTests {
             Assert.areEqual(1, job.getMaximumRetries());
             Assert.areEqual(1000, job.getRetryInterval());
             Assert.areEqual(0, job.getRetryNumber());
+            Assert.areEqual(1, job.getRetriesRemaining());
             Assert.areEqual(now.addMinutes(1), job.getScheduledRunTime());
             Assert.areEqual(now, job.getLastRunTime());
         }

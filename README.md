@@ -29,12 +29,12 @@ for _Force Framework_ use, and set up the example code.
 The Force Framework comprises the following APIs. 
 
 ## Types
-The S of SOLID is Single Use Only. The API for access to Apex types allows classes to
-be developed which are not publicly accessible and allow only the use of the methods defined in the
-interface they implement. This provides Separation of Concern, as an application will
-be limited to calling ony the methods of the interface. An application will be unable to construct an instance of the
-concrete class providing the interface. This helps to prevent the use of the class for something other than its
-single use.
+The S of SOLID is Single Use Only. The API for access to Apex types allows classes to be developed which are not
+publicly accessible and allow only the use of the methods defined in the interface they implement.
+
+This provides Separation of Concern, as an application will be limited to calling ony the methods of the interface.
+An application will be unable to construct an instance of the concrete class providing the interface. This helps to
+prevent the use of the class for something other than its single use.
 
 See [Types](source/types/README.md)
 
@@ -42,44 +42,59 @@ See [Types](source/types/README.md)
 The D of SOLID is Dependency Inversion. This requires that functionality is abstracted into interfaces or abstract
 classes. An application must then only use the interface rather than its concrete implementation. To aid in this,
 frameworks such as Spring for Java, support Dependency Injection. This allows the implementation of the interface to be
-bound into the application at run time. This is not something supported natively by Apex. This API
-allows the initialisation of a registry either programmatically or from a custom object. Once initialised, dependencies
-can be injected into an Apex application from the Apex _Type_ of the interface the application wants to use.
+bound into the application at run time.
+
+This is not something supported natively by Apex. This API  allows the initialisation of a registry either
+programmatically or from a custom object. Once initialised, dependencies can be injected into an Apex application from
+the Apex _Type_ of the interface the application wants to use.
 
 See [Dependency Injection](source/dependency/README.md)
 
 ## Asynchronous
 Apex provides the ability to run code asynchronously using the _Queueable_ interface and _System.enqueueJob_.
 Determining why a job failed is not easy. Re-running the job on failure is not something supported
-by Apex Jobs. Any concurrency restrictions for the Apex Job would need to be coded in the application.
-These issues, and more, are addressed by the Asynchronous API. Jobs can be started
-using the _Asynchronous_ class and their progress can be monitored from a custom object. The API
-will guarantee that the number of jobs running will always be the maximum concurrency set for the type
-of job or less. The API will re-try a job on failure upto the maximum number of re-tries set for
-the job on its creation.
+by Apex Jobs. Any concurrency restrictions for the Apex Job would need to be coded in the application. 
+
+These issues, and more, are addressed by the Asynchronous API. Jobs can be started using the _Asynchronous_ class and
+their progress can be monitored from a custom object. The API will guarantee that the number of jobs running will
+always be the maximum concurrency set for the type of job or less. The API will re-try a job on failure upto the
+maximum number of re-tries set for the job on its creation.
 
 See [Asynchronous](source/asynchronous/README.md)
 
 ## Mocker
 In a unit test, mock objects can simulate the behavior of complex, real objects and are therefore useful when a real
 object is impractical or impossible to incorporate into a unit test. The Force Framework suite includes an API for 
-mocking. In most mocking solutions, methods and their expected arguments are defined individually. There is redundancy
+mocking.
+
+In most mocking solutions, methods and their expected arguments are defined individually. There is redundancy
 in that solution as methods in a class may take the same arguments. For example, a class may have several getter
-methods, all of which have no argument. The Mocker API first defines the arguments, including no arguments, and then
+methods, all of which have no argument. The Mocker API first defines the arguments (including no arguments) and then
 the methods expecting those arguments are assigned to them. The solution is defined to be chained allowing  a full
 mocking for a class to be defined in a single statement.
 
 See [Mocker](source/mocker/README.md)
 
 ## Trigger
-A lightweight API for Trigger development. The _TriggersV1.Event_ class can be extended to implement the logic for
-the trigger. The trigger actions are coded as _onBefore_ and _onAfter_ methods for each of the three DML operations,
-insertion, update and deletion. The API supports the enforcement of a maximum recursion count. Should the trigger
-perform DML that causes the same trigger to be fired, this is classed as a recursive call. The class extending
-the _TriggersV1.Event_ class defines the maximum recursion it allows. If set (value > 0), when exceeded, the
-extending class also defines;
-- Whether an _Exception_ is thrown.
-- Whether to ignore the recursive call by not invoking the _on_ methods of the trigger implementation. 
+A lightweight API for Trigger development. The _TriggersV1.Subscriber_ class can be implemented to code the logic for
+a trigger. A subscriber can be bound to the object type it wishes to receive events for by creating a _Trigger__mdt_
+custom metadata record for it. The object's trigger should be set to receive on before and on after notifications
+for all three of the operations. To send an event representing the trigger to each subscriber bound to the object
+type the trigger fired for, it must call the _TriggerV1.publish_ method. The Trigger API will then create an event
+and send it to all the subscribers.
 
+Should the trigger perform DML that causes the same trigger to be fired, this is classed as a recursive call. The
+_Trigger__mdt__ custom metadatga record defines the maximum recursive depth for each subscriber. If set (value > 0),
+when exceeded, the metadata record also defines;
+- Whether an _Exception_ is thrown.
+- Whether to ignore the recursive call by not sending the event to the subscriber. 
 
 See [Trigger](source/trigger/README.md)
+
+## Array
+The Array API provides a new way to iterate over array elements and process them. It is styled on the non-mutating
+Javascript methods, e.g. _forEach_ and _reduce_. As Apex does not support passing a function by reference or
+anyonymous inner classes, the callback method used in the Javascript methods is replaced by the
+_ArrayIteratorV1.Callback_ class. The _function_ method of this class must be overridden to code the required logic.
+
+See [Array](source/array/README.md)

@@ -176,18 +176,9 @@ public with sharing virtual class AsynchronousAPI implements API {
 
             AsynchronousDAO.API.persistObjects(asyncObjects, states);
 
-            final List<AsynchronousV1.Job> returnList = new List<AsynchronousV1.Job>();
-            Integer i = 0;
-
-            for (AsynchronousJob__c asyncObject : asyncObjects) {
-                Assertion.isNotNull(asyncObject.Id, 'Asynchronous.Job object has not been assigned an Id');
-
-                final AsynchronousV1.Job updatedJob = AsynchronousJob.fromSObject(asyncObject);
-                updatedJob.setState(states[i++]);
-                returnList.add(updatedJob);
-            }
-
-            return returnList;
+            return (List<AsynchronousV1.Job>) ArrayV1.over(asyncObjects)
+                    .sharing(states)
+                    .reduce(new JobUpdater(), new List<AsynchronousV1.Job>());
         }
     }
 
@@ -331,6 +322,24 @@ public with sharing virtual class AsynchronousAPI implements API {
                     forType,
                     withImpl
             );
+        }
+    }
+
+    /**
+     * @description
+     * Class called when building the List of AsynchronousV1.Job records to return after the associated jobs have
+     * bgeen queued.
+     */
+    private with sharing class JobUpdater extends ArrayV1.Callback {
+        public override Object function(Object element, Object currentValue, Integer index) {
+            final AsynchronousJob__c asyncObject = (AsynchronousJob__c) element;
+            Assertion.isNotNull(asyncObject.Id, 'Asynchronous.Job object has not been assigned an Id');
+
+            final AsynchronousV1.Job updatedJob = AsynchronousJob.fromSObject(asyncObject);
+            updatedJob.setState(((List<Map<String, String>>) shared())[index]);
+
+            ((List<AsynchronousV1.Job>) currentValue).add(updatedJob);
+            return currentValue;
         }
     }
 

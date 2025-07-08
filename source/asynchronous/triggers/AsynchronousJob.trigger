@@ -3,6 +3,8 @@
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../../LICENSE target="_blank">MIT License</a>.
  * <br><br>
  * Trigger for DML performed on AsynchronousJob__c object.
+ * <br><br>
+ * The Trigger API is used to build and publish an Event representing the Trigger action.
  *
  * @author Mark Brennand
  */

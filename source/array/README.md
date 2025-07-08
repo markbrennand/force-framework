@@ -1,5 +1,5 @@
 [back](../../README.md)
-# Trigger
+# Array
 Documentation and example code coming soon.
 
 See the reference [Apex docs](SfApexDocs/index.html) for the API. It is suggested that you keep a page open

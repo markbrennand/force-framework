@@ -37,7 +37,7 @@ public with sharing class DependencySubscriber {
          * @description
          * Check Binding__c records are valid.
          *
-         * @param event The event representing the trigger action.
+         * @param event The event representing the trigger invocation.
          */
         private void handle(final TriggerV1.Event event) {
             DependencyAPI.checkForDuplicates();
@@ -54,8 +54,10 @@ public with sharing class DependencySubscriber {
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
     public with sharing class Factory implements TypesV1.Factory {
+        private Implementation subscriber = new Implementation();
+
         public Object newInstance() {
-            return new Implementation();
+            return subscriber;
         }
     }
 }

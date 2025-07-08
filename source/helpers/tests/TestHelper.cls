@@ -8,7 +8,6 @@
  */
 @IsTest
 public with sharing class TestHelper {
-    private final static String NAMESPACE = [SELECT NamespacePrefix FROM Organization LIMIT 1].NamespacePrefix;
 
     @TestVisible
     private with sharing class ExceptionComparator implements Comparator<Object> {
@@ -24,11 +23,8 @@ public with sharing class TestHelper {
 
     @TestVisible
     private static Boolean textContains(final String expected, final String text) {
-        if (String.isEmpty(NAMESPACE)) {
-            return text.contains(expected);
-        } else {
-            return text.replace(NAMESPACE + '.', '').contains(expected);
-        }
+        return text.replace('forcefw.', '').contains(expected);
+
     }
 
     @TestVisible

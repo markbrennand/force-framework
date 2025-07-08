@@ -105,17 +105,18 @@ public with sharing virtual class AsynchronousLWC implements API {
                 final Integer offset,
                 final Integer max
         ) {
-            final List<AsynchronousJob__c> matches = Database.query(
-                    'SELECT Id, Owner.Name, ApexJobId__c, Reference__c, Status__c, RetryNumber__c, MaximumRetries__c, Runnable__c, ScheduledRunTime__c, LastRunTime__c'
-                            + ' FROM AsynchronousJob__c'
-                            + ' WHERE ' + buildQuery(filters)
-                            + ' WITH USER_MODE'
-                            + ' ORDER BY '
-                            + ordering
-                            + ' LIMIT :max'
-                            + ' OFFSET :offset');
-
-            return buildReturnList(matches);
+            return (List<Map<String, Object>>) ArrayV1.over(
+                    Database.query(
+                            'SELECT Id, Owner.Name, ApexJobId__c, Reference__c, Status__c, RetryNumber__c, MaximumRetries__c, Runnable__c, ScheduledRunTime__c, LastRunTime__c'
+                                    + ' FROM AsynchronousJob__c'
+                                    + ' WHERE ' + buildQuery(filters)
+                                    + ' WITH USER_MODE'
+                                    + ' ORDER BY '
+                                    + ordering
+                                    + ' LIMIT :max'
+                                    + ' OFFSET :offset'
+                    ))
+                    .reduce(new ResultBuilder(), new List<Map<String, Object>>());
         }
 
         /**
@@ -139,19 +140,13 @@ public with sharing virtual class AsynchronousLWC implements API {
          */
         public void runJobs(final List<Id> jobIds) {
             final String schedulerClassName = AsynchronousScheduler.RunNextAvailable.class.getName();
-
-            final List<AsynchronousJob__c> jobs = [
-                    SELECT Id
-                    FROM AsynchronousJob__c
-                    WHERE Id IN :jobIds AND Runnable__c != :schedulerClassName
-                    WITH USER_MODE
-            ];
-
-            final Datetime now = Datetime.now();
-            for (AsynchronousJob__c job : jobs) {
-                job.Status__c = AsynchronousV1.Status.PENDING.name();
-                job.ScheduledRunTime__c = now;
-            }
+            final List<AsynchronousJob__c> jobs = (List<AsynchronousJob__c>) ArrayV1.over([
+                        SELECT Id
+                        FROM AsynchronousJob__c
+                        WHERE Id IN :jobIds AND Runnable__c != :schedulerClassName
+                        WITH USER_MODE
+                    ])
+                    .transform(new RequeueJob());
 
             Database.update(jobs, AccessLevel.USER_MODE);
         }
@@ -163,18 +158,13 @@ public with sharing virtual class AsynchronousLWC implements API {
          * @return The totals.
          */
         public Map<String, Integer> getTotals() {
-            final List<AggregateResult> matches = Database.query(
-                    'SELECT Status__c, Count(Id) Total__c'
-                            + ' FROM AsynchronousJob__c'
-                            + ' WITH USER_MODE'
-                            + ' GROUP BY Status__c'
-            );
-
-            final String statusField = AsynchronousJob__c.Status__c.getDescribe().name;
-            final Map<String, Integer> returnMap = new Map<String, Integer>();
-            for (AggregateResult match : matches) {
-                returnMap.put((String) match.get(statusField), (Integer) match.get('Total__c'));
-            }
+            final Map<String, Integer> returnMap = (Map<String, Integer>) ArrayV1.over([
+                            SELECT Status__c, Count(Id) Total__c
+                            FROM AsynchronousJob__c
+                            WITH USER_MODE
+                            GROUP BY Status__c
+                    ])
+                    .reduce(new BuildTotals(), new Map<String, Integer>());
 
             for (AsynchronousV1.Status status : AsynchronousV1.Status.values()) {
                 final String statusName = status.name();
@@ -242,45 +232,6 @@ public with sharing virtual class AsynchronousLWC implements API {
 
             return String.join(clauses, ' AND ');
         }
-
-        /**
-         * @description
-         * Converts a List of AsynchronousJob__c records to the data format expected by the LWC.
-         *
-         * @param matches Jobs to build the return list for.
-         *
-         * @return The list.
-         */
-        private List<Map<String, Object>> buildReturnList(final List<AsynchronousJob__c> matches) {
-            final List<Map<String, Object>> returnList = new List<Map<String, Object>>();
-            final Datetime now = Datetime.now();
-            for (AsynchronousJob__c match : matches) {
-                Map<String, Object> fields = match.getPopulatedFieldsAsMap();
-                Map<String, Object> returnObject = new Map<String, Object>();
-
-                for (String field : fields.keySet()) {
-                    final String stripped = field.replace('forcefw__', '');
-                    returnObject.put(stripped, fields.get(field));
-                }
-
-                returnObject.put('Owner', match.Owner.Name);
-
-                if (match.Status__c == AsynchronousV1.Status.RUNNING.name()) {
-                    returnObject.put('RunTime__c', now.getTime() - match.LastRunTime__c.getTime());
-                    if (match.RetryNumber__c > 0) {
-                        returnObject.put('Retry__c', match.RetryNumber__c + ' of ' + match.MaximumRetries__c);
-                    }
-                } else if (match.Status__c == AsynchronousV1.Status.QUEUED.name()) {
-                    if (match.RetryNumber__c > 0) {
-                        returnObject.put('Retry__c', match.RetryNumber__c + ' of ' + match.MaximumRetries__c);
-                    }
-                }
-
-                returnList.add(returnObject);
-            }
-
-            return returnList;
-        }
     }
 
     /**
@@ -318,6 +269,70 @@ public with sharing virtual class AsynchronousLWC implements API {
     public with sharing class Factory implements TypesV1.Factory {
         public Object newInstance() {
             return new Implementation();
+        }
+    }
+
+    /**
+     * @description
+     * Callback class to re-queue a job.
+     */
+    private with sharing class RequeueJob extends ArrayV1.Callback {
+        private final Datetime now = Datetime.now();
+
+        public override Object function(Object element, Object currentValue, Integer index) {
+            final AsynchronousJob__c job = (AsynchronousJob__c) element;
+            job.Status__c = AsynchronousV1.Status.PENDING.name();
+            job.ScheduledRunTime__c = now;
+            return job;
+        }
+    }
+
+    /**
+     * @description
+     * Callback class to build totals for Job status.
+     */
+    private with sharing class BuildTotals extends ArrayV1.Callback {
+        private final String statusField = AsynchronousJob__c.Status__c.getDescribe().name;
+
+        public override Object function(Object element, Object currentValue, Integer index) {
+            final AggregateResult result = (AggregateResult) element;
+            ((Map<String, Integer>) currentValue).put((String) result.get(statusField), (Integer) result.get('Total__c'));
+            return currentValue;
+        }
+    }
+
+    /**
+     * @description
+     * Callback class to build the Map representing a job and add it to the List to return.
+     */
+    private with sharing class ResultBuilder extends ArrayV1.Callback {
+        final Datetime now = Datetime.now();
+
+        public override Object function(Object element, Object currentValue, Integer index) {
+            final AsynchronousJob__c match = (AsynchronousJob__c) element;
+            final Map<String, Object> fields = match.getPopulatedFieldsAsMap();
+            Map<String, Object> returnObject = new Map<String, Object>();
+
+            for (String field : fields.keySet()) {
+                final String stripped = field.replace('forcefw__', '');
+                returnObject.put(stripped, fields.get(field));
+            }
+
+            returnObject.put('Owner', match.Owner.Name);
+
+            if (match.Status__c == AsynchronousV1.Status.RUNNING.name()) {
+                returnObject.put('RunTime__c', now.getTime() - match.LastRunTime__c.getTime());
+                if (match.RetryNumber__c > 0) {
+                    returnObject.put('Retry__c', match.RetryNumber__c + ' of ' + match.MaximumRetries__c);
+                }
+            } else if (match.Status__c == AsynchronousV1.Status.QUEUED.name()) {
+                if (match.RetryNumber__c > 0) {
+                    returnObject.put('Retry__c', match.RetryNumber__c + ' of ' + match.MaximumRetries__c);
+                }
+            }
+
+            ((List<Map<String, Object>>) currentValue).add(returnObject);
+            return currentValue;
         }
     }
 

@@ -95,4 +95,60 @@ public with sharing class BindingMockingTests {
 
         return (DependencyAPI) mocked.mock();
     }
+
+    @IsTest
+    private static void testExtendedClassesAreInert() {
+        ExtendedClass extended = new ExtendedClass();
+
+        try {
+            extended.inject(null);
+            Assert.fail();
+        } catch (DependencyV1.APIException ae) {
+            Assert.areEqual('Access denied', ae.getMessage());
+        }
+
+        try {
+            extended.inject(null, null);
+            Assert.fail();
+        } catch (DependencyV1.APIException ae) {
+            Assert.areEqual('Access denied', ae.getMessage());
+        }
+
+        try {
+            extended.isBound(null);
+            Assert.fail();
+        } catch (DependencyV1.APIException ae) {
+            Assert.areEqual('Access denied', ae.getMessage());
+        }
+
+        try {
+            extended.isBound(null, null);
+            Assert.fail();
+        } catch (DependencyV1.APIException ae) {
+            Assert.areEqual('Access denied', ae.getMessage());
+        }
+
+        try {
+            extended.bind(null, null);
+            Assert.fail();
+        } catch (DependencyV1.APIException ae) {
+            Assert.areEqual('Access denied', ae.getMessage());
+        }
+
+        try {
+            extended.bind(null, null, null);
+            Assert.fail();
+        } catch (DependencyV1.APIException ae) {
+            Assert.areEqual('Access denied', ae.getMessage());
+        }
+
+        try {
+            extended.reload();
+            Assert.fail();
+        } catch (DependencyV1.APIException ae) {
+            Assert.areEqual('Access denied', ae.getMessage());
+        }
+    }
+
+    private with sharing class ExtendedClass extends DependencyAPI {}
 }

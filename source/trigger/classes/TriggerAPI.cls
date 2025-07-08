@@ -1,9 +1,14 @@
 /**
  * @description
- * Class providing the Triggers API.
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../../LICENSE target="_blank">MIT License</a>.
  * <br><br>
- * This class will generate an Event representing the trigger that fired and send it to all subscribers bound to
- * the event.
+ * Class providing the Trigger API.
+ * <br><br>
+ * The Trigger custom metadata records define the subscribers for each object type. Each Trigger invocation
+ * is turned into its representation as an Event. The event is then published to each subscriber
+ * bound to the type of object the trigger has fired for.
+ * <br><br>
+ * See <a href=../README.md target="_blank">README</a> for full details of the Trigger API.
  *
  * @author Mark Brennand
  */
@@ -50,6 +55,62 @@ public with sharing virtual class TriggerAPI implements API {
          * bound to the object type of the trigger that fired.
          */
         void publish();
+
+        /**
+         * @description
+         * Disables the subscribers for the given object type.
+         *
+         * @param type The object type whose subscribers are to be disabled.
+         */
+        void disable(final SObjectType type);
+
+        /**
+         * @description
+         * Enables the subscribers for the given object type.
+         *
+         * @param type The object type whose subscribers are to be enabled.
+         */
+        void enable(final SObjectType type);
+
+        /**
+         * @description
+         * Determines whether subscribers are enabled for the given object type.
+         *
+         * @param type The object type whose subscription status is to be checked.
+         *
+         * @return True if the subscribers are enabled.
+         */
+        Boolean isEnabled(SObjectType type);
+
+        /**
+         * @description
+         * Disables the given Subscriber class.
+         * <br><br>
+         * No further events will be published to the associated subscriber.
+         *
+         * @param type The Subscriber class to disable.
+         */
+        void disable(Type type);
+
+        /**
+         * @description
+         * Enables the given Subscriber class.
+         * <br><br>
+         * Events will be published to the associated subscriber.
+         *
+         * @param type The Subscriber class to enable.
+         */
+        void enable(Type type);
+
+        /**
+         * @description
+         * Determines whether the given Subscriber class is enabled.
+         *
+         * @param type The Subscriber class to be checked.
+         *
+         * @return True if the Subscriber class is enabled.
+         */
+        Boolean isEnabled(Type type);
     }
 
     /**
@@ -60,6 +121,12 @@ public with sharing virtual class TriggerAPI implements API {
      */
     protected TriggerAPI() {}
 
+    /**
+     * @description
+     * Class providing the implementation of the API.
+     * <br><br>
+     * The class is private to prevent its re-use.
+     */
     private with sharing class Implementation implements API {
 
         /**
@@ -88,107 +155,161 @@ public with sharing virtual class TriggerAPI implements API {
          */
         private final Map<String, TriggerV1.Subscriber> SUBSCRIBERS = new Map<String, TriggerV1.Subscriber>();
 
+        /**
+         * @description
+         * Determines whether subscriber for an object type is enabled or not.
+         */
+        private final Map<SObjectType, Boolean> DISABLED_OBJECT_TYPES = new Map<SObjectType, Boolean>();
+
+        /**
+         * @description
+         * Determines whether subscriber for an object type is enabled or not.
+         */
+        private final Map<String, Boolean> DISABLED_SUBSCRIBERS = new Map<String, Boolean>();
+
+        /**
+         * @description
+         * Publishes an Event representing the Trigger invocation to each subscriber bound to the object type
+         * that fired the Trigger.
+         */
         public void publish() {
             final SObjectType objectType = Trigger.isInsert
                     ? Trigger.new[0].getSObjectType()
                     : Trigger.old[0].getSObjectType();
 
+            if (DISABLED_OBJECT_TYPES.containsKey(objectType) && DISABLED_OBJECT_TYPES.get(objectType) == true) {
+                return;
+            }
+
             publishEvent(objectType);
         }
 
+        /**
+         * @description
+         * Disables the subscribers for the given object type.
+         *
+         * @param type The object type whose subscribers are to be disabled.
+         */
+        public void disable(final SObjectType type) {
+            DISABLED_OBJECT_TYPES.put(type, true);
+        }
+
+        /**
+         * @description
+         * Enables the subscribers for the given object type.
+         *
+         * @param type The object type whose subscribers are to be enabled.
+         */
+        public void enable(final SObjectType type) {
+            DISABLED_OBJECT_TYPES.remove(type);
+        }
+
+        /**
+         * @description
+         * Determines whether subscribers are enabled for the given object type.
+         *
+         * @param type The object type whose subscription status is to be checked.
+         *
+         * @return True if the subscribers are enabled.
+         */
+        public Boolean isEnabled(final SObjectType type) {
+            return !DISABLED_OBJECT_TYPES.containsKey(type) || DISABLED_OBJECT_TYPES.get(type) != true;
+        }
+
+        /**
+         * @description
+         * Disables the given Subscriber class.
+         * <br><br>
+         * No further events will be published to the associated subscriber.
+         *
+         * @param type The Subscriber class to disable.
+         */
+        public void disable(Type type) {
+            DISABLED_SUBSCRIBERS.put(type.getName(), true);
+        }
+
+        /**
+         * @description
+         * Enables the given Subscriber class.
+         * <br><br>
+         * Events will be published to the associated subscriber.
+         *
+         * @param type The Subscriber class to enable.
+         */
+        public void enable(Type type) {
+            DISABLED_SUBSCRIBERS.remove(type.getName());
+        }
+
+        /**
+         * @description
+         * Determines whether the given Subscriber class is enabled.
+         *
+         * @param type The Subscriber class to be checked.
+         *
+         * @return True if the Subscriber class is enabled.
+         */
+        public Boolean isEnabled(Type type) {
+            return !DISABLED_SUBSCRIBERS.containsKey(type.getName()) || DISABLED_SUBSCRIBERS.get(type.getName()) != true;
+        }
+
+        /**
+         * @description
+         * Finds the Trigger custom metadata for the given object type and publishes an event representing the Trigger
+         * invocation to each subscriber defined in the custom metadata.
+         * <br><br>
+         * A check is performed on the recursive depth of the current trigger invocation. If the depth exceeds
+         * the maximum value defined in the Trigger custom metadata record, then an Exception is thrown or
+         * the Trigger invocation is ignored. The Trigger custom metadata record defines which action is taken.
+         *
+         * @param objectType The type of object the trigger has fired for.
+         */
         private void publishEvent(final SObjectType objectType) {
-            final String key = getObjectKey(objectType.getDescribe().name);
+            final String objectKey = getObjectKey(objectType.getDescribe().name);
 
-            if (TRIGGER_DEFINITIONS.containsKey(key)) {
-                final TriggerV1.Event event = createEvent(key);
+            if (TRIGGER_DEFINITIONS.containsKey(objectKey)) {
+                final TriggerV1.Event event = createEvent(objectKey);
 
-                if (EVENTS.containsKey(key) && !EVENTS.get(key).isEmpty()) {
-                    EVENTS.get(key).add(0, event);
+                if (EVENTS.containsKey(objectKey) && !EVENTS.get(objectKey).isEmpty()) {
+                    EVENTS.get(objectKey).add(0, event);
                 } else {
-                    EVENTS.put(key, new List<TriggerV1.Event>{
-                            event
-                    });
+                    EVENTS.put(objectKey, new List<TriggerV1.Event> { event });
                 }
 
                 try {
-                    for (Trigger__mdt triggerDefinition : TRIGGER_DEFINITIONS.get(key)) {
-                        if (triggerDefinition.IsUnitTest__c != Test.isRunningTest()) {
-                            continue;
-                        }
-
-                        switch on checkRecursiveDepth(key, triggerDefinition) {
-                            when THROW_EXCEPTION {
-                                throw new TriggerV1.APIException('Maximum recursive calls exceeded for ' + key + ' event');
-                            }
-                            when IGNORE_EVENT {
-                                return;
-                            }
-                            when PROCESS_EVENT {
-                                processEvent(triggerDefinition, event);
-                            }
-                        }
-                    }
+                    ArrayV1.over(TRIGGER_DEFINITIONS.get(objectKey))
+                            .sharing(new PublishingInformation(this, objectKey, event))
+                            .forEach(new EventPublisher());
 
                 } finally {
-                    EVENTS.get(key).remove(0);
+                    EVENTS.get(objectKey).remove(0);
                 }
 
             } else {
-                throw new TriggerV1.APIException('No Trigger metadata record found for ' + key);
+                throw new TriggerV1.APIException('No Trigger metadata record found for ' + objectKey);
             }
         }
 
+        /**
+         * @description
+         * Builds the canonical key to match the Trigger_mdt.ObjectKey__c field.
+         *
+         * @param name The object type.
+         *
+         * @return The canonical key.
+         */
         private String getObjectKey(final String name) {
             return name.replace('__c', '').replaceFirst('^.*__', '');
         }
 
-        private RecursiveDepthAction checkRecursiveDepth(final String key, final Trigger__mdt triggerDefinition) {
-            final Integer maximumRecursiveCalls = (Integer) triggerDefinition.MaximumRecursiveDepth__c;
-            if (maximumRecursiveCalls > 0) {
-                if (EVENTS.get(key).size() > maximumRecursiveCalls) {
-                    if (triggerDefinition.ThrowExceptionWhenRecursionExceeded__c) {
-                        return RecursiveDepthAction.THROW_EXCEPTION;
-                    } else {
-                        return RecursiveDepthAction.IGNORE_EVENT;
-                    }
-                }
-            }
-
-            return RecursiveDepthAction.PROCESS_EVENT;
-        }
-
-
         /**
          * @description
-         * Calls the appropriate on method of the given Event based on the Trigger options.
+         * Builds an Event representing the Trigger invocation.
          *
-         * @param triggerDefinition The Trigger metadata record registered to process event.
-         * @param event The Event to process.
+         * @param objectKey The canonical key of the object the Trigger has fired for.
+         *
+         * @return The Event representing the Trigger invocation.
          */
-        private void processEvent(final Trigger__mdt triggerDefinition, final TriggerV1.Event event) {
-            final String subscriberClass = triggerDefinition.SubscriberClass__c;
-            final TriggerV1.Subscriber subscriber;
-            if (SUBSCRIBERS.containsKey(subscriberClass)) {
-                subscriber = SUBSCRIBERS.get(subscriberClass);
-            } else {
-                subscriber =
-                        (TriggerV1.Subscriber) TypesV1.newInstance(TypesV1.load(triggerDefinition.SubscriberClass__c));
-
-                SUBSCRIBERS.put(subscriberClass, subscriber);
-            }
-
-            final Set<TriggerV1.Operation> forOperations = subscriber.forOperations();
-
-            if (Trigger.isInsert && forOperations.contains(TriggerV1.Operation.INSERTING)) {
-                subscriber.onEvent(event);
-            } else if (Trigger.isUpdate && forOperations.contains(TriggerV1.Operation.UPDATING)) {
-                subscriber.onEvent(event);
-            } else if (Trigger.isDelete && forOperations.contains(TriggerV1.Operation.DELETING)) {
-                subscriber.onEvent(event);
-            }
-        }
-
-        private TriggerV1.Event createEvent(String key) {
+        private TriggerV1.Event createEvent(String objectKey) {
             final Boolean isBefore = Trigger.isBefore;
 
             final TriggerV1.Operation operation =
@@ -202,23 +323,23 @@ public with sharing virtual class TriggerAPI implements API {
                     Trigger.isInsert ? new Map<Id, SObject>() : Trigger.oldMap,
                     isBefore,
                     operation,
-                    EVENTS.containsKey(key) ? EVENTS.get(key).size() + 1 : 1
+                    EVENTS.containsKey(objectKey) ? EVENTS.get(objectKey).size() + 1 : 1
             );
         }
 
+        /**
+         * @description
+         * Builds a cache of the Trigger custom metadata records.
+         * <br><br>
+         * Each cache entry is keyed by the canonical object type and the value is the list of Trigger custom
+         * metadata records registered for that type.
+         *
+         * @return The cache of Trigger custom metadata records.
+         */
         private Map<String, List<Trigger__mdt>> loadTriggerDefinitions() {
-            final Map<String, List<Trigger__mdt>> triggerDefinitions = new Map<String, List<Trigger__mdt>>();
-
-            for (Trigger__mdt triggerDefinition : Trigger__mdt.getAll().values()) {
-                final String objectName = triggerDefinition.ObjectKey__c;
-                if (triggerDefinitions.containsKey(objectName)) {
-                    triggerDefinitions.get(objectName).add(triggerDefinition);
-                } else {
-                    triggerDefinitions.put(objectName, new List<Trigger__mdt> { triggerDefinition });
-                }
-            }
-
-            return triggerDefinitions;
+            return (Map<String, List<Trigger__mdt>>)
+                    ArrayV1.over(Trigger__mdt.getAll().values())
+                            .reduce(new TriggerDefinitionMapBuilder(), new Map<String, List<Trigger__mdt>>());
         }
     }
 
@@ -263,49 +384,18 @@ public with sharing virtual class TriggerAPI implements API {
             return records;
         }
 
-        /**
-         * @description
-         * Determines if a record has an old value registered.
-         *
-         * @param record The record to be checked.
-         *
-         * @return True if the record has an old value.
-         */
         public Boolean hasOldValue(SObject record) {
             return this.oldRecords.containsKey(record.Id);
         }
 
-        /**
-         * @description
-         * Gets the old value of a record.
-         *
-         * @param record The record whose old value is required.
-         *
-         * @return The old value of the record, or null if no old record found.
-         */
         public SObject getOldValue(SObject record) {
             return oldRecords.get(record.Id);
         }
 
-        /**
-         * @description
-         * Gets all the old values registered.
-         *
-         * @return All the old values.
-         */
         public List<SObject> getOldValues() {
             return oldRecords.values();
         }
 
-        /**
-         * @description
-         * Yields the currentg recursive depth of the trigger.
-         * <br><br>
-         * The recursive depth is the number of times the trigger has been called as a result of DML performed on
-         * the object associated with the trigger in trigger logic.
-         *
-         * @return The recursive depth.
-         */
         public Integer getRecursiveDepth() {
             return recursiveDepth;
         }
@@ -326,16 +416,16 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
-     * Class providing check on Binding made to TriggersAPIg.API.
+     * Class providing check on Binding made to TriggerAPI.API.
      */
     public with sharing class BindingCheck implements DependencyV1.BindingCheck {
 
         /**
          * @description
-         * Checks that a valid binding has been made to TriggersAPI.API.
+         * Checks that a valid binding has been made to TriggerAPI.API.
          *
-         * @param forType The type being bound to, AsynchronousV1.API.
-         * @param withImpl The implementation being bound to AsynchronousV1.API.
+         * @param forType The type being bound to, TriggerAPI.API.
+         * @param withImpl The implementation being bound to TriggerAPI.API.
          *
          * @return The result of the validation.
          */
@@ -351,9 +441,214 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * Builds the Map of object name to its associated Trigger metadata records.
+     */
+    private with sharing class TriggerDefinitionMapBuilder extends ArrayV1.Callback {
+        public override Object function(final Object element, final Object currentValue, final Integer index) {
+            final Map<String, List<Trigger__mdt>> triggerDefinitions = (Map<String, List<Trigger__mdt>>) currentValue;
+            final Trigger__mdt triggerDefinition  = (Trigger__mdt) element;
+            final String objectKey = triggerDefinition.ObjectKey__c;
+
+            if (triggerDefinitions.containsKey(objectKey)) {
+                triggerDefinitions.get(objectKey).add(triggerDefinition);
+            } else {
+                triggerDefinitions.put(objectKey, new List<Trigger__mdt> { triggerDefinition });
+            }
+
+            return triggerDefinitions;
+        }
+    }
+
+    /**
+     * @description
+     * Class called from forEach to publish event to each Subscriber defined in the Trigger metadata records for
+     * the object.
+     */
+    private with sharing class EventPublisher extends ArrayV1.Callback {
+
+        /**
+         * @description
+         * Publishes the Event to the the Subscriber defined by the Trigger metadata record being processed.
+         *
+         * @param element The Trigger metadata record.
+         * @param currentValue Ignored.
+         * @param globalValue The publishing information.
+         * @param index The positional index in the array of Trigger metadata records.
+         *
+         * @return Return value is ignored by caller.
+         */
+        public override Object function(final Object element, final Object currentValue, final Integer index) {
+            final Trigger__mdt triggerDefinition = (Trigger__mdt) element;
+
+            if (triggerDefinition.IsUnitTest__c != Test.isRunningTest()) {
+                return null;
+            }
+
+            // Add any namespace to the class before checking.
+            final Type subscriberType = TypesV1.load(triggerDefinition.SubscriberClass__c);
+            if (getPublishingInformation().parent.DISABLED_SUBSCRIBERS.containsKey(subscriberType.getName())) {
+                return null;
+            }
+
+            switch on checkRecursiveDepth(getPublishingInformation().objectKey, triggerDefinition) {
+                when THROW_EXCEPTION {
+                    throw new TriggerV1.APIException('Maximum recursive calls exceeded for ' + getPublishingInformation().objectKey + ' event');
+                }
+                when IGNORE_EVENT {
+                    return null;
+                }
+                when PROCESS_EVENT {
+                    processEvent(triggerDefinition, getPublishingInformation().event);
+                }
+            }
+
+            return null;
+        }
+
+        /**
+         * @description
+         * For the given canonical key and Trigger custom metadata records, the current recursive depth is checked
+         * against the maximum value set in the custom metadata record.
+         *
+         * @param objectKey The canonical key for the object the trigger has fired for.
+         * @param triggerDefinition The Trigger custom metadata record being processed.
+         *
+         * @return Result of the processing.
+         */
+        private RecursiveDepthAction checkRecursiveDepth(final String objectKey, final Trigger__mdt triggerDefinition) {
+            final Integer maximumRecursiveCalls = (Integer) triggerDefinition.MaximumRecursiveDepth__c;
+            if (maximumRecursiveCalls > 0) {
+                if (getPublishingInformation().parent.EVENTS.get(getPublishingInformation().objectKey).size() > maximumRecursiveCalls) {
+                    if (triggerDefinition.ThrowExceptionWhenRecursionExceeded__c) {
+                        return RecursiveDepthAction.THROW_EXCEPTION;
+                    } else {
+                        return RecursiveDepthAction.IGNORE_EVENT;
+                    }
+                }
+            }
+
+            return RecursiveDepthAction.PROCESS_EVENT;
+        }
+
+        /**
+         * @description
+         * For the given Trigger definition and Event, the Subscriber for the definition is loaded and the onEvent
+         * of it is called.
+         * <br><br>
+         * The Subscriber's forOperations method is first called, to determine which operations the Subscriber
+         * will consume.
+         *
+         * @param triggerDefinition The Trigger custom metadata record registered to process event.
+         * @param event The Event to publish.
+         */
+        private void processEvent(final Trigger__mdt triggerDefinition, final TriggerV1.Event event) {
+            final String subscriberClass = triggerDefinition.SubscriberClass__c;
+            final TriggerV1.Subscriber subscriber;
+            if (getPublishingInformation().parent.SUBSCRIBERS.containsKey(subscriberClass)) {
+                subscriber = getPublishingInformation().parent.SUBSCRIBERS.get(subscriberClass);
+            } else {
+                subscriber = (TriggerV1.Subscriber)
+                        TypesV1.newInstance(TypesV1.load(triggerDefinition.SubscriberClass__c));
+
+                getPublishingInformation().parent.SUBSCRIBERS.put(subscriberClass, subscriber);
+            }
+
+            final Set<TriggerV1.Operation> forOperations = subscriber.forOperations();
+
+            if (Trigger.isInsert && forOperations.contains(TriggerV1.Operation.INSERTING)) {
+                subscriber.onEvent(event);
+            } else if (Trigger.isUpdate && forOperations.contains(TriggerV1.Operation.UPDATING)) {
+                subscriber.onEvent(event);
+            } else if (Trigger.isDelete && forOperations.contains(TriggerV1.Operation.DELETING)) {
+                subscriber.onEvent(event);
+            }
+        }
+
+        /**
+         * @description
+         * Gets the publishing information for the Event.
+         *
+         * @return The publishing information.
+         */
+        private PublishingInformation getPublishingInformation() {
+            return (PublishingInformation) shared();
+        }
+    }
+
+    /**
+     * @description
+     * Class encapsulating all the information required to publish an event from an inner class called from forEach.
+     */
+    private with sharing class PublishingInformation {
+        public final Implementation parent { public get; private set; }
+        public final String objectKey { public get; private set; }
+        public final TriggerV1.Event event { public get; private set; }
+
+        public PublishingInformation(
+                final Implementation parent,
+                final String objectKey,
+                final TriggerV1.Event event
+
+        ) {
+            this.parent = parent;
+            this.objectKey = objectKey;
+            this.event = event;
+        }
+    }
+
+    /**
+     * @description
      * Method is solely for mocking use.
      */
     public void publish() {
+        throw new TriggerV1.APIException('Access denied');
+    }
+
+    /**
+     * @description
+     * Method is solely for mocking use.
+     */
+    public void disable(final SObjectType type) {
+        throw new TriggerV1.APIException('Access denied');
+    }
+
+    /**
+     * @description
+     * Method is solely for mocking use.
+     */
+    public void enable(final SObjectType type) {
+        throw new TriggerV1.APIException('Access denied');
+    }
+
+    /**
+     * @description
+     * Method is solely for mocking use.
+     */
+    public Boolean isEnabled(final SObjectType type) {
+        throw new TriggerV1.APIException('Access denied');
+    }
+
+    /**
+     * @description
+     * Method is solely for mocking use.
+     */
+    public void disable(Type type) {
+        throw new TriggerV1.APIException('Access denied');
+    }
+
+    /**
+     * @description
+     * Method is solely for mocking use.
+     */
+    public void enable(Type type) {
+        throw new TriggerV1.APIException('Access denied');
+    }
+
+    /**
+     * @description
+     * Method is solely for mocking use.
+     */
+    public Boolean isEnabled(Type type) {
         throw new TriggerV1.APIException('Access denied');
     }
 
