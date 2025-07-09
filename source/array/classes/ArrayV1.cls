@@ -177,6 +177,28 @@ global with sharing class ArrayV1 {
          * @return The new array.
          */
         Object at(Integer index);
+
+        /**
+         * @description
+         * Returns a string comprised of the array elements joined by the separator.
+         *
+         * @param separator Separator for array elements in output string.
+         *
+         * @return The joined array elements.
+         */
+        String join(String separator);
+
+        /**
+         * @description
+         * Returns true if the array contains a value that is matched by the callback function.
+         * <br><br>
+         * The callback function must return true if the array element is a match.
+         *
+         * @param callback The callback class to be invoked for each array element.
+         *
+         * @return True if a matching value is found.
+         */
+        Boolean some(Callback callback);
     }
 
     /**
@@ -242,7 +264,7 @@ global with sharing class ArrayV1 {
             for (Integer i = 0; i < count; i++) {
                 Object retVal = callback.function(objects[i], null, i);
                 if (! (retval instanceof Boolean)) {
-                    throw new APIException('Callback for filter() must return true or false');
+                    throw new APIException('Callback for filter() must return a Boolean');
                 }
 
                 if (retval == true) {
@@ -275,6 +297,25 @@ global with sharing class ArrayV1 {
                 throw new ArrayV1.APIException('Array index out of bounds');
             }
             return (index >= 0) ? objects[index] : objects[count + index];
+        }
+
+        public String join(final String separator) {
+            return String.join(objects, separator);
+        }
+
+        public Boolean some(final Callback callback) {
+            callback.sharing(shared);
+            for (Integer i = 0; i < count; i++) {
+                Object retVal = callback.function(objects[i], null, i);
+                if (! (retval instanceof Boolean)) {
+                    throw new APIException('Callback for some() must return a Boolean');
+                }
+
+                if (retval == true) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private List<Object> newListOfSameType() {

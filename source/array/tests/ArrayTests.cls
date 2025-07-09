@@ -111,7 +111,7 @@ public with sharing class ArrayTests {
             Assert.fail();
 
         } catch(ArrayV1.APIException ae) {
-            Assert.areEqual('Callback for filter() must return true or false', ae.getMessage());
+            Assert.areEqual('Callback for filter() must return a Boolean', ae.getMessage());
         }
     }
 
@@ -172,6 +172,40 @@ public with sharing class ArrayTests {
             Assert.fail();
         } catch(ArrayV1.APIException ae) {
             Assert.areEqual('Array index out of bounds', ae.getMessage());
+        }
+    }
+
+    @IsTest
+    private static void testJoin() {
+        Assert.areEqual('1-2-3-4-5', ArrayV1.over(new List<Integer> { 1, 2, 3, 4, 5 }).join('-'));
+    }
+
+    @IsTest
+    private static void testSome() {
+        List<AsynchronousJob__c> jobs1 = new List<AsynchronousJob__c> {
+                new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                new AsynchronousJob__c(Runnable__c = 'TEST2'),
+                new AsynchronousJob__c(Runnable__c = 'TEST3'),
+                new AsynchronousJob__c(Runnable__c = 'TEST1')
+        };
+
+        List<AsynchronousJob__c> jobs2 = new List<AsynchronousJob__c>{
+                new AsynchronousJob__c(Runnable__c = 'TEST4'),
+                new AsynchronousJob__c(Runnable__c = 'TEST5')
+        };
+
+        Assert.isTrue(ArrayV1.over(jobs1).some(new FilterTestRunnable()));
+        Assert.isFalse(ArrayV1.over(jobs2).some(new FilterTestRunnable()));
+        Assert.isTrue(ArrayV1.over(jobs1).sharing('TEST2').some(new FilterTestRunnable()));
+        Assert.isFalse(ArrayV1.over(jobs2).sharing('TEST2').some(new FilterTestRunnable()));
+        Assert.isFalse(ArrayV1.over(jobs1).sharing('TEST4').some(new FilterTestRunnable()));
+        Assert.isTrue(ArrayV1.over(jobs2).sharing('TEST4').some(new FilterTestRunnable()));
+
+        try {
+            Assert.isTrue(ArrayV1.over(jobs1).sharing(123).some(new FilterTestRunnable()));
+            Assert.fail();
+        } catch(ArrayV1.APIException ae) {
+            Assert.areEqual('Callback for some() must return a Boolean', ae.getMessage());
         }
     }
 
