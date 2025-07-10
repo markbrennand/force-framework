@@ -35,21 +35,15 @@ public with sharing virtual class AsynchronousJobSubscriber {
         }
 
         private void handleAfter(final TriggerV1.Event event) {
-            final List<AsynchronousJob__c> toDelete = (List<AsynchronousJob__c>)
-                    ArrayV1.over(event.getRecords()).sharing(event).reduce(
-                            new JobsToDeleteBuilder(),
-                            new List<AsynchronousJob__c>()
-                    );
+            AsynchronousDAO.API.removeObjects(
+                    (List<AsynchronousJob__c>)
+                            ArrayV1.over(event.getRecords()).sharing(event).reduce(
+                                    new JobsToDeleteBuilder(),
+                                    new List<AsynchronousJob__c>()
+                            )
+            );
 
-            final Boolean startScheduler = (Boolean)
-                    ArrayV1.over(event.getRecords()).reduce(
-                            new SchedulerStartCheck(),
-                            false
-                    );
-
-            AsynchronousDAO.API.removeObjects(toDelete);
-
-            if (startScheduler) {
+            if (!ArrayV1.over(event.getRecords()).every(new SchedulerStartCheck())) {
                 AsynchronousScheduler.queue(new Set<String>());
             }
         }
@@ -89,7 +83,7 @@ public with sharing virtual class AsynchronousJobSubscriber {
     private with sharing class JobsToDeleteBuilder extends ArrayV1.Callback {
         public override Object function(final Object element, final Object currentValue, final Integer index) {
             final AsynchronousJob__c asyncObject = (AsynchronousJob__c) element;
-            final TriggerV1.Event event = (TriggerV1.Event) shared();
+            final TriggerV1.Event event = (TriggerV1.Event) shared().get();
 
             if (asyncObject.Status__c == AsynchronousV1.Status.CANCELLED.name()
                     && event.hasOldValue(asyncObject)
@@ -110,8 +104,7 @@ public with sharing virtual class AsynchronousJobSubscriber {
     private with sharing class SchedulerStartCheck extends ArrayV1.Callback {
         public override Object function(Object element, Object currentValue, Integer index) {
             final AsynchronousJob__c asyncObject = (AsynchronousJob__c) element;
-            final Boolean isScheduler = AsynchronousJob.fromSObject(asyncObject).getRunnable() instanceof AsynchronousScheduler;
-            return (Boolean) currentValue || !isScheduler;
+            return AsynchronousJob.fromSObject(asyncObject).getRunnable() instanceof AsynchronousScheduler;
         }
     }
 }

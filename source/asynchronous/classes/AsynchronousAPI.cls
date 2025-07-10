@@ -336,7 +336,7 @@ public with sharing virtual class AsynchronousAPI implements API {
             Assertion.isNotNull(asyncObject.Id, 'Asynchronous.Job object has not been assigned an Id');
 
             final AsynchronousV1.Job updatedJob = AsynchronousJob.fromSObject(asyncObject);
-            updatedJob.setState(((List<Map<String, String>>) shared())[index]);
+            updatedJob.setState(((List<Map<String, String>>) shared().get())[index]);
 
             ((List<AsynchronousV1.Job>) currentValue).add(updatedJob);
             return currentValue;

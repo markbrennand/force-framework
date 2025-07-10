@@ -30,7 +30,7 @@ global with sharing class ArrayV1 {
          * @description
          * Data shared on Iterator initiation.
          */
-        private Object shared;
+        private Optional shared = Optional.empty();
 
         /**
          * @description
@@ -39,7 +39,7 @@ global with sharing class ArrayV1 {
          * @param shared The data to be shared.
          */
         private void sharing(final Object shared) {
-            this.shared = shared;
+            this.shared = Optional.ofNullable(shared);
         }
 
         /**
@@ -48,7 +48,7 @@ global with sharing class ArrayV1 {
          *
          * @return The shared data.
          */
-        global Object shared() {
+        global Optional shared() {
             return shared;
         }
 
@@ -105,15 +105,29 @@ global with sharing class ArrayV1 {
          * @description
          * Calls the callback for each element in the array being iterated over.
          * <br><br>
-         * The currentValue argument of the callback function will be first element of the array when first called for
-         * the iteration. In subsequent calls, the currentValue will be the last value returned by the callback's
-         * function() method.
+         * In the first call to the callback, the currentValue will be the first element of the array and the
+         * element argument will be the second element of the array. In subsequent calls, the currentValue will be
+         * the value returned by the last callback.
          *
-         * @param callback  @param callback The callback class to be invoked for each array element.
+         * @param callback The callback class to be invoked for each array element.
          *
          * @return The return value from the last element of the array iterated over.
          */
         Object reduce(Callback callback);
+
+        /**
+         * @description
+         * Calls the callback for each element in the array iterated over in reverse order.
+         * <br><br>
+         * In the first call to the callback, the currentValue will be the last element of the array and the
+         * element argument will be the second to last element of the array. In subsequent calls, the currentValue will be
+         * the value returned by the last callback.
+         *
+         * @param callback The callback class to be invoked for each array element.
+         *
+         * @return The return value from the last element of the array iterated over.
+         */
+        Object reduceRight(Callback callback);
 
         /**
          * @description
@@ -129,6 +143,21 @@ global with sharing class ArrayV1 {
          * @return The return value from the last element of the array iterated over.
          */
         Object reduce(Callback callback, Object initialValue);
+
+        /**
+         * @description
+         * Builds an object based on the processing of each element of the array iterated over in reverse order.
+         * <br><br>
+         * The currentValue argument of the callback function will be the value of the initialValue argument for
+         * the iteration. In subsequent calls, the currentValue will be the last value returned by the callback's
+          * function() method.
+         *
+         * @param callback The callback class to be invoked for each array element.
+         * @param initialValue The starting value for the iteration.
+         *
+         * @return The return value from the last element of the array iterated over.
+         */
+        Object reduceRight(Callback callback, Object initialValue);
 
         /**
          * @description
@@ -176,7 +205,7 @@ global with sharing class ArrayV1 {
          *
          * @return The new array.
          */
-        Object at(Integer index);
+        Optional at(Integer index);
 
         /**
          * @description
@@ -199,6 +228,42 @@ global with sharing class ArrayV1 {
          * @return True if a matching value is found.
          */
         Boolean some(Callback callback);
+
+        /**
+         * @description
+         * Returns true if all the elements of the array have a value that is matched by the callback function.
+         * <br><br>
+         * The callback function must return true if the array element is a match.
+         *
+         * @param callback The callback class to be invoked for each array element.
+         *
+         * @return True if all the elements match.
+         */
+        Boolean every(Callback callback);
+
+        /**
+         * @description
+         * Returns a new array with the elements of the original array in reversed order.
+         *
+         * @return The new array with the reversed elements.
+         */
+        List<Object> reverse();
+
+        /**
+         * @description
+         * Adds the given object to the end of the array.
+         *
+         * @param obj The object to add to the array.
+         */
+        void push(Object obj);
+
+        /**
+         * @description
+         * Removes the last element from the array and returns it.
+         *
+         * @return The last element of the array.
+         */
+        Optional pop();
     }
 
     /**
@@ -224,7 +289,7 @@ global with sharing class ArrayV1 {
     private with sharing class MethodsImpl implements Methods {
         private Object shared;
         private final List<Object> objects;
-        private final Integer count;
+        private Integer count;
 
         public MethodsImpl(final List<Object> objects) {
             isListValid(objects);
@@ -245,17 +310,19 @@ global with sharing class ArrayV1 {
         }
 
         public Object reduce(final Callback callback) {
-            return reduce(callback, objects[0]);
+            return reduce(callback, count > 0 ? objects[0] : null, 0, count - 1, 1);
+        }
+
+        public Object reduceRight(final Callback callback) {
+            return reduce(callback, count > 0 ? objects[count-1] : null, count - 1, 0, -1);
         }
 
         public Object reduce(final Callback callback, final Object initialValue) {
-            callback.sharing(shared);
-            Object value = initialValue;
-            for (Integer i = 0; i < count; i++) {
-                value = callback.function(objects[i], value, i);
-            }
-            return value;
+            return reduce(callback, initialValue, -1, count-1, 1);
+        }
 
+        public Object reduceRight(final Callback callback, final Object initialValue) {
+            return reduce(callback, initialValue, count, 0, -1);
         }
 
         public List<Object> filter(final Callback callback) {
@@ -290,13 +357,13 @@ global with sharing class ArrayV1 {
             return cloned;
         }
 
-        public Object at(final Integer index) {
+        public Optional at(final Integer index) {
             if ((index > 0 && index >= count) ||
                     (index < 0 && (count + index) < 0))
             {
-                throw new ArrayV1.APIException('Array index out of bounds');
+                return Optional.empty();
             }
-            return (index >= 0) ? objects[index] : objects[count + index];
+            return (index >= 0) ? Optional.of(objects[index]) : Optional.of(objects[count + index]);
         }
 
         public String join(final String separator) {
@@ -318,10 +385,69 @@ global with sharing class ArrayV1 {
             return false;
         }
 
+        public Boolean every(final Callback callback) {
+            callback.sharing(shared);
+            for (Integer i = 0; i < count; i++) {
+                Object retVal = callback.function(objects[i], null, i);
+                if (! (retval instanceof Boolean)) {
+                    throw new APIException('Callback for every() must return a Boolean');
+                }
+
+                if (retval != true) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public List<Object> reverse() {
+            final List<Object> cloned = newListOfSameType();
+            for (Integer i = count; i > 0; i--) {
+                cloned.add(objects[i-1]);
+            }
+            return cloned;
+        }
+
+        public void push(Object obj) {
+            objects.add(obj);
+            count++;
+        }
+
+        public Optional pop() {
+            if (objects.size() == 0) {
+                return Optional.empty();
+            }
+
+            final Object lastElement = objects[--count];
+            objects.remove(count);
+
+            return Optional.of(lastElement);
+        }
+
         private List<Object> newListOfSameType() {
             final List<Object> cloned = objects.clone();
             cloned.clear();
             return cloned;
+        }
+
+        private Object reduce(
+                final Callback callback,
+                final Object initialValue,
+                final Integer startIndex,
+                final Integer lastIndex,
+                final Integer increment
+        ) {
+            if (count == 0) {
+                throw new ArrayV1.APIException('The reduce() method requires an array containing at least one element');
+            }
+
+            callback.sharing(shared);
+            Object value = initialValue;
+            for (Integer i = startIndex; i != lastIndex;) {
+                i += increment;
+                value = callback.function(objects[i], value, i);
+            }
+            return value;
         }
     }
 }

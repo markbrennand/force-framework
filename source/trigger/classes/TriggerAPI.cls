@@ -571,7 +571,7 @@ public with sharing virtual class TriggerAPI implements API {
          * @return The publishing information.
          */
         private PublishingInformation getPublishingInformation() {
-            return (PublishingInformation) shared();
+            return (PublishingInformation) shared().get();
         }
     }
 

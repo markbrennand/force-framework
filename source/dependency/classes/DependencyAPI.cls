@@ -417,7 +417,7 @@ public with sharing virtual class DependencyAPI implements API {
     private with sharing class DuplicateCheck extends ArrayV1.Callback {
         public override Object function(Object element, Object currentValue, Integer index) {
             final Binding__c binding = (Binding__c) element;
-            final Set<String> keys = (Set<String>) shared();
+            final Set<String> keys = (Set<String>) shared().get();
 
             if (binding.Action__c == null) {
                 if (keys.contains(binding.Type__c)) {
@@ -443,7 +443,7 @@ public with sharing virtual class DependencyAPI implements API {
     private with sharing class BindingValidator extends ArrayV1.Callback {
         public override Object function(final Object element, final Object currentValue, final Integer index) {
             final Binding__c binding = (Binding__c) element;
-            final API api = (API) shared();
+            final API api = (API) shared().get();
 
             try {
                 final Type type = TypesV1.load(binding.Type__c);
@@ -471,7 +471,7 @@ public with sharing virtual class DependencyAPI implements API {
             final Binding__c binding = (Binding__c) element;
             try {
 
-                final API parent = (API) shared();
+                final API parent = (API) shared().get();
                 final Type type = TypesV1.load(binding.Type__c);
                 final Type implementation = TypesV1.load(binding.Implementation__c);
 

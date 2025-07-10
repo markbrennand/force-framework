@@ -422,10 +422,10 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
     global with sharing class Method extends MockerV1.Chainable {
         private final Arguments arguments;
         private final String methodName;
-        private Integer expectedCount;
+        private Optional expectedCount = Optional.empty();
         private Integer actualCount = 0;
-        private Object returnValue;
-        private Exception throws;
+        private Optional returnValue = Optional.empty();
+        private Optional throws = Optional.empty();
 
         /**
          * @description
@@ -456,7 +456,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
         global MockerV1.Method called(final Integer expectedCount) {
             Assertion.isNotNull(expectedCount, 'argument: Mocker.Method.called.expectedCount');
 
-            this.expectedCount = expectedCount;
+            this.expectedCount = Optional.ofNullable(expectedCount);
             return this;
         }
 
@@ -472,8 +472,8 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          * @return The object instance so it can be chained.
          */
         global MockerV1.Method returns(final Object returnValue) {
-            Assertion.isTrue(this.returnValue == null, 'Return value can only be set once');
-            this.returnValue = returnValue;
+            Assertion.isTrue(!this.returnValue.isPresent(), 'Return value can only be set once');
+            this.returnValue = Optional.of(returnValue);
             return this;
         }
 
@@ -487,8 +487,9 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          */
         global MockerV1.Method throws(final Exception throws) {
             Assertion.isNotNull(throws, 'argument: Mocker.Method.whichThrows.throws');
+            Assertion.isTrue(!this.throws.isPresent(), 'Exception to throw can only be set once');
 
-            this.throws = throws;
+            this.throws = Optional.of(throws);
             return this;
         }
 
@@ -539,27 +540,28 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
         private Object call(final List<Object> arguments) {
             actualCount++;
 
-            if (this.throws != null) {
-                throw throws;
-            }
-
-            if (returnValue instanceof Modifier) {
-                return ((Modifier) returnValue).process(arguments);
+            if (throws.isPresent()) {
+                throw (Exception) throws.get();
+            } else if (returnValue.isPresent()) {
+                final Object result = returnValue.get();
+                if (result instanceof Modifier) {
+                    return ((Modifier) result).process(arguments);
+                } else {
+                    return result;
+                }
             } else {
-                return returnValue;
+                return null;
             }
         }
 
         /**
          * @description
          * Called to check that the method has been called the correct number of times.
-         * <br><br>
-         * If the expectedCount is null, the method has not had an expected call count set, the check is ignored.
          */
         private void validate() {
-            if (expectedCount != null) {
+            if (expectedCount.isPresent()) {
                 Assertion.areEqual(
-                        expectedCount,
+                        (Integer) expectedCount.get(),
                         actualCount,
                         'Incorrect number of calls to ' + parent.mockedObject.toString().split(':')[0].split('__sfdc')[0] + '.' + methodName
                 );

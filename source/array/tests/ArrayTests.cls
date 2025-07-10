@@ -32,17 +32,29 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testReduce() {
-        Assert.areEqual(120, ArrayV1.over(new List<Integer>{
+        Assert.areEqual(-13, ArrayV1.over(new List<Integer>{
                 1, 2, 3, 4, 5
-        }).reduce(new ReduceMultiplier()));
+        }).reduce(new ReduceSubtractor()));
+
+        Assert.areEqual(1, ArrayV1.over(new List<Integer> { 1 }).reduce(new ReduceSubtractor()));
+
+        try {
+            Assert.areEqual(1, ArrayV1.over(new List<Integer>()).reduce(new ReduceSubtractor()));
+            Assert.fail();
+        } catch(ArrayV1.APIException ae) {
+            Assert.areEqual('The reduce() method requires an array containing at least one element', ae.getMessage());
+        }
+
         Map<String, Object> merged = (Map<String, Object>) ArrayV1.over(new List<AsynchronousJob__c>{
                         new AsynchronousJob__c(
                                 Runnable__c = 'TEST',
-                                RetryInterval__c = 1000
+                                RetryInterval__c = 1000,
+                                Status__c = 'STATUS1'
                         ),
                         new AsynchronousJob__c(
                                 RetryNumber__c = 0,
-                                MaximumRetries__c = 100
+                                MaximumRetries__c = 100,
+                                Status__c = 'STATUS2'
                         )
                 })
                 .reduce(new ObjectMerger(), new Map<String, Object>());
@@ -51,6 +63,7 @@ public with sharing class ArrayTests {
         Assert.areEqual(1000, merged.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
         Assert.areEqual(0, merged.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
         Assert.areEqual('TEST', merged.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
+        Assert.areEqual('STATUS2', merged.get(AsynchronousJob__c.Status__c.getDescribe().name));
 
         Map<String, Object> values = (Map<String, Object>) ArrayV1.over(new List<SObjectField>{
                         AsynchronousJob__c.MaximumRetries__c,
@@ -60,6 +73,56 @@ public with sharing class ArrayTests {
                 })
                 .sharing(merged)
                 .reduce(new ValueExtractor(), new Map<String, Object>());
+
+        Assert.areEqual(100, values.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
+        Assert.areEqual(1000, values.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
+        Assert.areEqual(0, values.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
+        Assert.areEqual('TEST', values.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
+    }
+
+    @IsTest
+    private static void testReduceRight() {
+        Assert.areEqual(-5, ArrayV1.over(new List<Integer>{
+                1, 2, 3, 4, 5
+        }).reduceRight(new ReduceSubtractor()));
+
+        Assert.areEqual(1, ArrayV1.over(new List<Integer> { 1 }).reduceRight(new ReduceSubtractor()));
+
+        try {
+            Assert.areEqual(1, ArrayV1.over(new List<Integer>()).reduceRight(new ReduceSubtractor()));
+            Assert.fail();
+        } catch(ArrayV1.APIException ae) {
+            Assert.areEqual('The reduce() method requires an array containing at least one element', ae.getMessage());
+        }
+
+        Map<String, Object> merged = (Map<String, Object>) ArrayV1.over(new List<AsynchronousJob__c>{
+                        new AsynchronousJob__c(
+                                Runnable__c = 'TEST',
+                                RetryInterval__c = 1000,
+                                Status__c = 'STATUS1'
+                        ),
+                        new AsynchronousJob__c(
+                                RetryNumber__c = 0,
+                                MaximumRetries__c = 100,
+                                Status__c = 'STATUS2'
+                        )
+                })
+                .reduceRight(new ObjectMerger(), new Map<String, Object>());
+
+        Assert.areEqual(100, merged.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
+        Assert.areEqual(1000, merged.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
+        Assert.areEqual(0, merged.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
+        Assert.areEqual('TEST', merged.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
+        Assert.areEqual('STATUS1', merged.get(AsynchronousJob__c.Status__c.getDescribe().name));
+
+        Map<String, Object> values = (Map<String, Object>) ArrayV1.over(new List<SObjectField>{
+                        AsynchronousJob__c.MaximumRetries__c,
+                        AsynchronousJob__c.RetryInterval__c,
+                        AsynchronousJob__c.RetryNumber__c,
+                        AsynchronousJob__c.Runnable__c
+                })
+                .sharing(merged)
+                .reduceRight(new ValueExtractor(), new Map<String, Object>());
 
         Assert.areEqual(100, values.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
         Assert.areEqual(1000, values.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
@@ -155,24 +218,12 @@ public with sharing class ArrayTests {
     private static void testAt() {
         ArrayV1.Methods methods = ArrayV1.over(new List<Integer> { 1, 2, 3, 4 });
 
-        Assert.areEqual(1, methods.at(0));
-        Assert.areEqual(4, methods.at(3));
-        Assert.areEqual(3, methods.at(-2));
-        Assert.areEqual(1, methods.at(-4));
-
-        try {
-            methods.at(4);
-            Assert.fail();
-        } catch(ArrayV1.APIException ae) {
-            Assert.areEqual('Array index out of bounds', ae.getMessage());
-        }
-
-        try {
-            methods.at(-5);
-            Assert.fail();
-        } catch(ArrayV1.APIException ae) {
-            Assert.areEqual('Array index out of bounds', ae.getMessage());
-        }
+        Assert.areEqual(1, methods.at(0).get());
+        Assert.areEqual(4, methods.at(3).get());
+        Assert.areEqual(3, methods.at(-2).get());
+        Assert.areEqual(1, methods.at(-4).get());
+        Assert.isFalse(methods.at(4).isPresent());
+        Assert.isFalse(methods.at(-5).isPresent());
     }
 
     @IsTest
@@ -209,16 +260,60 @@ public with sharing class ArrayTests {
         }
     }
 
+    @IsTest
+    private static void testEvery() {
+        List<AsynchronousJob__c> jobs1 = new List<AsynchronousJob__c> {
+                new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                new AsynchronousJob__c(Runnable__c = 'TEST1')
+        };
+
+        List<AsynchronousJob__c> jobs2 = new List<AsynchronousJob__c>{
+                new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                new AsynchronousJob__c(Runnable__c = 'TEST2')
+        };
+
+        Assert.isTrue(ArrayV1.over(jobs1).every(new FilterTestRunnable()));
+        Assert.isFalse(ArrayV1.over(jobs2).every(new FilterTestRunnable()));
+
+        try {
+            Assert.isTrue(ArrayV1.over(jobs1).sharing(123).every(new FilterTestRunnable()));
+            Assert.fail();
+        } catch(ArrayV1.APIException ae) {
+            Assert.areEqual('Callback for every() must return a Boolean', ae.getMessage());
+        }
+    }
+
+    @IsTest
+    private static void testReverse() {
+        List<String> reversed = (List<String>) ArrayV1.over(new List<String> { 'one', 'two', 'three' }).reverse();
+        Assert.areEqual(3, reversed.size());
+        Assert.areEqual('three', reversed[0]);
+        Assert.areEqual('two', reversed[1]);
+        Assert.areEqual('one', reversed[2]);
+    }
+
+    @IsTest
+    private static void testPushAndPop() {
+        ArrayV1.Methods stack = ArrayV1.over(new List<Integer>());
+        stack.push(1);
+        stack.push(2);
+        Assert.areEqual(2, (Integer) stack.pop().get());
+        stack.push(3);
+        Assert.areEqual(3, (Integer) stack.pop().get());
+        Assert.areEqual(1, (Integer) stack.pop().get());
+        Assert.isFalse(stack.pop().isPresent());
+    }
+
     private with sharing class ForEachMultiplier extends ArrayV1.Callback {
         public override Object function(Object element, Object currentValue, Integer index) {
-            ((List<Integer>) shared()).add(((Integer) element) * 2);
+            ((List<Integer>) shared().get()).add(((Integer) element) * 2);
             return null;
         }
     }
 
-    private with sharing class ReduceMultiplier extends ArrayV1.Callback {
+    private with sharing class ReduceSubtractor extends ArrayV1.Callback {
         public override Object function(Object element, Object currentValue, Integer index) {
-            return (Integer) element * (Integer) currentValue;
+            return (Integer) currentValue - (Integer) element;
         }
     }
 
@@ -234,7 +329,7 @@ public with sharing class ArrayTests {
     private with sharing class ValueExtractor extends ArrayV1.Callback {
         public override Object function(Object element, Object currentValue, Integer index) {
             Map<String, Object> valueMap = (Map<String, Object>) currentValue;
-            Map<String, Object> mergeMap = (Map<String, Object>) shared();
+            Map<String, Object> mergeMap = (Map<String, Object>) shared().get();
             SObjectField field = (SObjectField) element;
             valueMap.put(field.getDescribe().name, mergeMap.get(field.getDescribe().name));
             return valueMap;
@@ -243,20 +338,20 @@ public with sharing class ArrayTests {
 
     private with sharing class FilterTestRunnable extends ArrayV1.Callback {
         public override Object function(Object element, Object currentValue, Integer index) {
-            if (shared() != null && ! (shared() instanceof String)) {
-                return shared();
+            if (shared().isPresent() && ! (shared().get() instanceof String)) {
+                return shared().get();
             }
 
-            return (shared() == null)
+            return (!shared().isPresent())
                     ? ((AsynchronousJob__c) element).Runnable__c == 'TEST1'
-                    : ((AsynchronousJob__c) element).Runnable__c == (String) shared();
+                    : ((AsynchronousJob__c) element).Runnable__c == (String) shared().get();
         }
     }
 
     private with sharing class Transformer extends ArrayV1.Callback {
         public override Object function(Object element, Object currentValue, Integer index) {
             AsynchronousJob__c cloned = ((AsynchronousJob__c) element).clone();
-            cloned.RetryInterval__c = shared() == null ? 1000 : (Integer) shared();
+            cloned.RetryInterval__c = shared().isPresent() ?  (Integer) shared().get() : 1000;
             return cloned;
         }
     }
