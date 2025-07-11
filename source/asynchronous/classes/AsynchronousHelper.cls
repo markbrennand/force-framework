@@ -34,7 +34,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          * @param asyncObject The Asynchronous object to record the Exception against.
          * @param exc The exception to be recorded.
          */
-        void recordException(AsynchronousJob__c asyncObject, AsynchronousV1.APIException exc);
+        void recordException(final AsynchronousJob__c asyncObject, final AsynchronousV1.APIException exc);
 
         /**
          * @description
@@ -45,7 +45,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          * @param asyncObject The Asynchronous object to record the Exception against.
          * @param exc The exception to be recorded.
          */
-        void recordInternalException(AsynchronousJob__c asyncObject, AsynchronousV1.APIException exc);
+        void recordInternalException(final AsynchronousJob__c asyncObject, final AsynchronousV1.APIException exc);
 
         /**
          * @description
@@ -66,7 +66,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          *
          * @return The state objects representing the internal state.
          */
-        List<AsynchronousJobState__c> encodeState(AsynchronousJob__c asyncObject, Map<String, String> state);
+        List<AsynchronousJobState__c> encodeState(final AsynchronousJob__c asyncObject, final Map<String, String> state);
 
         /**
          * @description
@@ -74,7 +74,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          *
          * @param asyncObject The job to be queued for processing.
          */
-        void queueJob(AsynchronousJob__c asyncObject);
+        void queueJob(final AsynchronousJob__c asyncObject);
     }
 
     /**
@@ -360,7 +360,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          *
          * @return The result of the validation.
          */
-        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
+        public DependencyV1.ValidationResult validate(final Type forType, final Type withImpl) {
             return DependencyHelper.buildValidationResult(
                     TypesV1.newInstance(withImpl) instanceof AsynchronousHelper.API,
                     true,

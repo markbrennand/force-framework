@@ -68,7 +68,7 @@ global with sharing class ArrayV1 {
          *
          * @return A value representing the result of the processing.
          */
-        global abstract Object function(Object element, Object currentValue, Integer index);
+        global abstract Optional function(final Object element, final Optional currentValue, final Integer index);
     }
 
     /**
@@ -87,7 +87,7 @@ global with sharing class ArrayV1 {
          *
          * @return The Methods implementation, allowing the call to be chained with over().
          */
-        Methods sharing(Object shared);
+        Methods sharing(final Object shared);
 
         /**
          * @description
@@ -113,7 +113,7 @@ global with sharing class ArrayV1 {
          *
          * @return The return value from the last element of the array iterated over.
          */
-        Object reduce(Callback callback);
+        Object reduce(final Callback callback);
 
         /**
          * @description
@@ -127,7 +127,7 @@ global with sharing class ArrayV1 {
          *
          * @return The return value from the last element of the array iterated over.
          */
-        Object reduceRight(Callback callback);
+        Object reduceRight(final Callback callback);
 
         /**
          * @description
@@ -142,7 +142,7 @@ global with sharing class ArrayV1 {
          *
          * @return The return value from the last element of the array iterated over.
          */
-        Object reduce(Callback callback, Object initialValue);
+        Object reduce(final Callback callback, final Object initialValue);
 
         /**
          * @description
@@ -157,7 +157,7 @@ global with sharing class ArrayV1 {
          *
          * @return The return value from the last element of the array iterated over.
          */
-        Object reduceRight(Callback callback, Object initialValue);
+        Object reduceRight(final Callback callback, final Object initialValue);
 
         /**
          * @description
@@ -169,7 +169,7 @@ global with sharing class ArrayV1 {
          *
          * @return List of filtered results.
          */
-        List<Object> filter(Callback callback);
+        List<Object> filter(final Callback callback);
 
         /**
          * @description
@@ -183,7 +183,7 @@ global with sharing class ArrayV1 {
          *
          * @return The list of transformed objects.
          */
-        List<Object> transform(Callback callback);
+        List<Object> transform(final Callback callback);
 
         /**
          * @description
@@ -193,7 +193,7 @@ global with sharing class ArrayV1 {
          *
          * @return The new array.
          */
-        List<Object> concat(List<Object> elements);
+        List<Object> concat(final List<Object> elements);
 
         /**
          * @description
@@ -205,7 +205,7 @@ global with sharing class ArrayV1 {
          *
          * @return The new array.
          */
-        Optional at(Integer index);
+        Optional at(final Integer index);
 
         /**
          * @description
@@ -215,7 +215,7 @@ global with sharing class ArrayV1 {
          *
          * @return The joined array elements.
          */
-        String join(String separator);
+        String join(final String separator);
 
         /**
          * @description
@@ -227,7 +227,7 @@ global with sharing class ArrayV1 {
          *
          * @return True if a matching value is found.
          */
-        Boolean some(Callback callback);
+        Boolean some(final Callback callback);
 
         /**
          * @description
@@ -239,7 +239,7 @@ global with sharing class ArrayV1 {
          *
          * @return True if all the elements match.
          */
-        Boolean every(Callback callback);
+        Boolean every(final Callback callback);
 
         /**
          * @description
@@ -255,7 +255,7 @@ global with sharing class ArrayV1 {
          *
          * @param obj The object to add to the array.
          */
-        void push(Object obj);
+        void push(final Object obj);
 
         /**
          * @description
@@ -305,36 +305,36 @@ global with sharing class ArrayV1 {
         public void forEach(final Callback callback) {
             callback.sharing(shared);
             for (Integer i = 0; i < count; i++) {
-                callback.function(objects[i], null, i);
+                callback.function(objects[i], Optional.empty(), i);
             }
         }
 
         public Object reduce(final Callback callback) {
-            return reduce(callback, count > 0 ? objects[0] : null, 0, count - 1, 1);
+            return reduce(callback, getOptionalForElement(0), 0, count - 1, 1).get();
         }
 
         public Object reduceRight(final Callback callback) {
-            return reduce(callback, count > 0 ? objects[count-1] : null, count - 1, 0, -1);
+            return reduce(callback, getOptionalForElement(count-1), count - 1, 0, -1).get();
         }
 
         public Object reduce(final Callback callback, final Object initialValue) {
-            return reduce(callback, initialValue, -1, count-1, 1);
+            return reduce(callback, Optional.of(initialValue), -1, count-1, 1).get();
         }
 
         public Object reduceRight(final Callback callback, final Object initialValue) {
-            return reduce(callback, initialValue, count, 0, -1);
+            return reduce(callback, Optional.of(initialValue), count, 0, -1).get();
         }
 
         public List<Object> filter(final Callback callback) {
             callback.sharing(shared);
             final List<Object> filtered = newListOfSameType();
             for (Integer i = 0; i < count; i++) {
-                Object retVal = callback.function(objects[i], null, i);
-                if (! (retval instanceof Boolean)) {
+                final Optional retVal = callback.function(objects[i], null, i);
+                if (!retval.isPresent() || !(retval.get() instanceof Boolean)) {
                     throw new APIException('Callback for filter() must return a Boolean');
                 }
 
-                if (retval == true) {
+                if (retval.get() == true) {
                     filtered.add(objects[i]);
                 }
             }
@@ -345,7 +345,7 @@ global with sharing class ArrayV1 {
             callback.sharing(shared);
             final List<Object> mapped = newListOfSameType();
             for (Integer i = 0; i < count; i++) {
-                mapped.add(callback.function(objects[i], null, i));
+                mapped.add(callback.function(objects[i], Optional.empty(), i).get());
             }
             return mapped;
         }
@@ -373,12 +373,12 @@ global with sharing class ArrayV1 {
         public Boolean some(final Callback callback) {
             callback.sharing(shared);
             for (Integer i = 0; i < count; i++) {
-                Object retVal = callback.function(objects[i], null, i);
-                if (! (retval instanceof Boolean)) {
+                final Optional retVal = callback.function(objects[i], Optional.empty(), i);
+                if (!retval.isPresent() || ! (retval.get() instanceof Boolean)) {
                     throw new APIException('Callback for some() must return a Boolean');
                 }
 
-                if (retval == true) {
+                if (retval.get() == true) {
                     return true;
                 }
             }
@@ -388,12 +388,12 @@ global with sharing class ArrayV1 {
         public Boolean every(final Callback callback) {
             callback.sharing(shared);
             for (Integer i = 0; i < count; i++) {
-                Object retVal = callback.function(objects[i], null, i);
-                if (! (retval instanceof Boolean)) {
+                final Optional retVal = callback.function(objects[i], null, i);
+                if (!retval.isPresent() || !(retval.get() instanceof Boolean)) {
                     throw new APIException('Callback for every() must return a Boolean');
                 }
 
-                if (retval != true) {
+                if (retval.get() != true) {
                     return false;
                 }
             }
@@ -408,7 +408,7 @@ global with sharing class ArrayV1 {
             return cloned;
         }
 
-        public void push(Object obj) {
+        public void push(final Object obj) {
             objects.add(obj);
             count++;
         }
@@ -430,9 +430,9 @@ global with sharing class ArrayV1 {
             return cloned;
         }
 
-        private Object reduce(
+        private Optional reduce(
                 final Callback callback,
-                final Object initialValue,
+                final Optional initialValue,
                 final Integer startIndex,
                 final Integer lastIndex,
                 final Integer increment
@@ -442,12 +442,20 @@ global with sharing class ArrayV1 {
             }
 
             callback.sharing(shared);
-            Object value = initialValue;
+            Optional value = initialValue;
             for (Integer i = startIndex; i != lastIndex;) {
                 i += increment;
                 value = callback.function(objects[i], value, i);
             }
             return value;
+        }
+
+        private Optional getOptionalForElement(final Integer index) {
+            if (count == 0) {
+                return Optional.empty();
+            }
+
+            return Optional.of(objects[index]);
         }
     }
 }

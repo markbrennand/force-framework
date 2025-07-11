@@ -52,7 +52,7 @@ public with sharing class ComparisonHelper {
      *
      * @return True of objects match.
      */
-    public static Boolean compare(final List<Comparator<Object>> additionalComparators, Object expected, final Object actual) {
+    public static Boolean compare(final List<Comparator<Object>> additionalComparators, final Object expected, final Object actual) {
         final List<Comparator<Object>> allComparators = additionalComparators.clone();
         allComparators.addAll(COMPARATORS);
 

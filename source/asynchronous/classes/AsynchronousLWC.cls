@@ -33,7 +33,7 @@ public with sharing virtual class AsynchronousLWC implements API {
          *
          * @return A list of the matching objects.
          */
-        List<Map<String, Object>> getJobs(Map<String, Object> filters, String ordering, Integer offset, Integer max);
+        List<Map<String, Object>> getJobs(final Map<String, Object> filters, final String ordering, final Integer offset, final Integer max);
 
         /**
          * @description
@@ -41,7 +41,7 @@ public with sharing virtual class AsynchronousLWC implements API {
          *
          * @param jobIds The ids of the jobs to delete.
          */
-        void deleteJobs(List<Id> jobIds);
+        void deleteJobs(final List<Id> jobIds);
 
         /**
          * @description
@@ -49,7 +49,7 @@ public with sharing virtual class AsynchronousLWC implements API {
          *
          * @param jobIds The ids of the jobs to re-run.
          */
-        void runJobs(List<Id> jobIds);
+        void runJobs(final List<Id> jobIds);
 
         /**
          * @description
@@ -249,7 +249,7 @@ public with sharing virtual class AsynchronousLWC implements API {
          *
          * @return The result of the validation.
          */
-        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
+        public DependencyV1.ValidationResult validate(final Type forType, final Type withImpl) {
             return DependencyHelper.buildValidationResult(
                     TypesV1.newInstance(withImpl) instanceof API,
                     true,
@@ -279,11 +279,11 @@ public with sharing virtual class AsynchronousLWC implements API {
     private with sharing class RequeueJob extends ArrayV1.Callback {
         private final Datetime now = Datetime.now();
 
-        public override Object function(Object element, Object currentValue, Integer index) {
+        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
             final AsynchronousJob__c job = (AsynchronousJob__c) element;
             job.Status__c = AsynchronousV1.Status.PENDING.name();
             job.ScheduledRunTime__c = now;
-            return job;
+            return Optional.of(job);
         }
     }
 
@@ -294,9 +294,9 @@ public with sharing virtual class AsynchronousLWC implements API {
     private with sharing class BuildTotals extends ArrayV1.Callback {
         private final String statusField = AsynchronousJob__c.Status__c.getDescribe().name;
 
-        public override Object function(Object element, Object currentValue, Integer index) {
+        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
             final AggregateResult result = (AggregateResult) element;
-            ((Map<String, Integer>) currentValue).put((String) result.get(statusField), (Integer) result.get('Total__c'));
+            ((Map<String, Integer>) currentValue.get()).put((String) result.get(statusField), (Integer) result.get('Total__c'));
             return currentValue;
         }
     }
@@ -308,7 +308,7 @@ public with sharing virtual class AsynchronousLWC implements API {
     private with sharing class ResultBuilder extends ArrayV1.Callback {
         final Datetime now = Datetime.now();
 
-        public override Object function(Object element, Object currentValue, Integer index) {
+        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
             final AsynchronousJob__c match = (AsynchronousJob__c) element;
             final Map<String, Object> fields = match.getPopulatedFieldsAsMap();
             Map<String, Object> returnObject = new Map<String, Object>();
@@ -331,7 +331,7 @@ public with sharing virtual class AsynchronousLWC implements API {
                 }
             }
 
-            ((List<Map<String, Object>>) currentValue).add(returnObject);
+            ((List<Map<String, Object>>) currentValue.get()).add(returnObject);
             return currentValue;
         }
     }
@@ -340,7 +340,7 @@ public with sharing virtual class AsynchronousLWC implements API {
       * @description
       * Method is solely for mocking use.
       */
-    public List<Map<String, Object>> getJobs(Map<String, Object> filters, String ordering, Integer offset, Integer max) {
+    public List<Map<String, Object>> getJobs(final Map<String, Object> filters, final String ordering, final Integer offset, final Integer max) {
         throw new AsynchronousV1.APIException('Access denied');
     }
 
@@ -348,7 +348,7 @@ public with sharing virtual class AsynchronousLWC implements API {
       * @description
       * Method is solely for mocking use.
       */
-    public void deleteJobs(List<Id> jobIds) {
+    public void deleteJobs(final List<Id> jobIds) {
         throw new AsynchronousV1.APIException('Access denied');
     }
 
@@ -356,7 +356,7 @@ public with sharing virtual class AsynchronousLWC implements API {
       * @description
       * Method is solely for mocking use.
       */
-    public void runJobs(List<Id> jobIds) {
+    public void runJobs(final List<Id> jobIds) {
         throw new AsynchronousV1.APIException('Access denied');
     }
 

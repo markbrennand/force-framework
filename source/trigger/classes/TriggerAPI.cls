@@ -80,7 +80,7 @@ public with sharing virtual class TriggerAPI implements API {
          *
          * @return True if the subscribers are enabled.
          */
-        Boolean isEnabled(SObjectType type);
+        Boolean isEnabled(final SObjectType type);
 
         /**
          * @description
@@ -90,7 +90,7 @@ public with sharing virtual class TriggerAPI implements API {
          *
          * @param type The Subscriber class to disable.
          */
-        void disable(Type type);
+        void disable(final Type type);
 
         /**
          * @description
@@ -100,7 +100,7 @@ public with sharing virtual class TriggerAPI implements API {
          *
          * @param type The Subscriber class to enable.
          */
-        void enable(Type type);
+        void enable(final Type type);
 
         /**
          * @description
@@ -110,7 +110,7 @@ public with sharing virtual class TriggerAPI implements API {
          *
          * @return True if the Subscriber class is enabled.
          */
-        Boolean isEnabled(Type type);
+        Boolean isEnabled(final Type type);
     }
 
     /**
@@ -224,7 +224,7 @@ public with sharing virtual class TriggerAPI implements API {
          *
          * @param type The Subscriber class to disable.
          */
-        public void disable(Type type) {
+        public void disable(final Type type) {
             DISABLED_SUBSCRIBERS.put(type.getName(), true);
         }
 
@@ -236,7 +236,7 @@ public with sharing virtual class TriggerAPI implements API {
          *
          * @param type The Subscriber class to enable.
          */
-        public void enable(Type type) {
+        public void enable(final Type type) {
             DISABLED_SUBSCRIBERS.remove(type.getName());
         }
 
@@ -248,7 +248,7 @@ public with sharing virtual class TriggerAPI implements API {
          *
          * @return True if the Subscriber class is enabled.
          */
-        public Boolean isEnabled(Type type) {
+        public Boolean isEnabled(final Type type) {
             return !DISABLED_SUBSCRIBERS.containsKey(type.getName()) || DISABLED_SUBSCRIBERS.get(type.getName()) != true;
         }
 
@@ -309,7 +309,7 @@ public with sharing virtual class TriggerAPI implements API {
          *
          * @return The Event representing the Trigger invocation.
          */
-        private TriggerV1.Event createEvent(String objectKey) {
+        private TriggerV1.Event createEvent(final String objectKey) {
             final Boolean isBefore = Trigger.isBefore;
 
             final TriggerV1.Operation operation =
@@ -384,11 +384,11 @@ public with sharing virtual class TriggerAPI implements API {
             return records;
         }
 
-        public Boolean hasOldValue(SObject record) {
+        public Boolean hasOldValue(final SObject record) {
             return this.oldRecords.containsKey(record.Id);
         }
 
-        public SObject getOldValue(SObject record) {
+        public SObject getOldValue(final SObject record) {
             return oldRecords.get(record.Id);
         }
 
@@ -444,8 +444,8 @@ public with sharing virtual class TriggerAPI implements API {
      * Builds the Map of object name to its associated Trigger metadata records.
      */
     private with sharing class TriggerDefinitionMapBuilder extends ArrayV1.Callback {
-        public override Object function(final Object element, final Object currentValue, final Integer index) {
-            final Map<String, List<Trigger__mdt>> triggerDefinitions = (Map<String, List<Trigger__mdt>>) currentValue;
+        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
+            final Map<String, List<Trigger__mdt>> triggerDefinitions = (Map<String, List<Trigger__mdt>>) currentValue.get();
             final Trigger__mdt triggerDefinition  = (Trigger__mdt) element;
             final String objectKey = triggerDefinition.ObjectKey__c;
 
@@ -455,7 +455,7 @@ public with sharing virtual class TriggerAPI implements API {
                 triggerDefinitions.put(objectKey, new List<Trigger__mdt> { triggerDefinition });
             }
 
-            return triggerDefinitions;
+            return Optional.of(triggerDefinitions);
         }
     }
 
@@ -477,17 +477,17 @@ public with sharing virtual class TriggerAPI implements API {
          *
          * @return Return value is ignored by caller.
          */
-        public override Object function(final Object element, final Object currentValue, final Integer index) {
+        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
             final Trigger__mdt triggerDefinition = (Trigger__mdt) element;
 
             if (triggerDefinition.IsUnitTest__c != Test.isRunningTest()) {
-                return null;
+                return Optional.empty();
             }
 
             // Add any namespace to the class before checking.
             final Type subscriberType = TypesV1.load(triggerDefinition.SubscriberClass__c);
             if (getPublishingInformation().parent.DISABLED_SUBSCRIBERS.containsKey(subscriberType.getName())) {
-                return null;
+                return Optional.empty();
             }
 
             switch on checkRecursiveDepth(getPublishingInformation().objectKey, triggerDefinition) {
@@ -495,14 +495,14 @@ public with sharing virtual class TriggerAPI implements API {
                     throw new TriggerV1.APIException('Maximum recursive calls exceeded for ' + getPublishingInformation().objectKey + ' event');
                 }
                 when IGNORE_EVENT {
-                    return null;
+                    return Optional.empty();
                 }
                 when PROCESS_EVENT {
                     processEvent(triggerDefinition, getPublishingInformation().event);
                 }
             }
 
-            return null;
+            return Optional.empty();
         }
 
         /**
@@ -632,7 +632,7 @@ public with sharing virtual class TriggerAPI implements API {
      * @description
      * Method is solely for mocking use.
      */
-    public void disable(Type type) {
+    public void disable(final Type type) {
         throw new TriggerV1.APIException('Access denied');
     }
 
@@ -640,7 +640,7 @@ public with sharing virtual class TriggerAPI implements API {
      * @description
      * Method is solely for mocking use.
      */
-    public void enable(Type type) {
+    public void enable(final Type type) {
         throw new TriggerV1.APIException('Access denied');
     }
 
@@ -648,7 +648,7 @@ public with sharing virtual class TriggerAPI implements API {
      * @description
      * Method is solely for mocking use.
      */
-    public Boolean isEnabled(Type type) {
+    public Boolean isEnabled(final Type type) {
         throw new TriggerV1.APIException('Access denied');
     }
 

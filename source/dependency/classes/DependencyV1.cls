@@ -89,7 +89,7 @@ global with sharing class DependencyV1 {
          *
          * @return The result of the validation.
          */
-        ValidationResult validate(Type forType, Type withImpl);
+        ValidationResult validate(final Type forType, final Type withImpl);
     }
 
     /**

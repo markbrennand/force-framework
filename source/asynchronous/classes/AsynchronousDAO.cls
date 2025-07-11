@@ -32,7 +32,7 @@ public with sharing virtual class AsynchronousDAO implements API {
          *
          * @return The object.
          */
-        AsynchronousJob__c getObject(Id asyncObjectId);
+        AsynchronousJob__c getObject(final Id asyncObjectId);
 
         /**
          * @description
@@ -45,7 +45,7 @@ public with sharing virtual class AsynchronousDAO implements API {
          *
          * @return The objects.
          */
-        Set<AsynchronousJob__c> getScheduledObjects(Integer maxJobsToReturn);
+        Set<AsynchronousJob__c> getScheduledObjects(final Integer maxJobsToReturn);
 
         /**
          * @description
@@ -76,7 +76,7 @@ public with sharing virtual class AsynchronousDAO implements API {
          *
          * @param asyncObjects The objects to persist.
          */
-        void persistObjects(List<AsynchronousJob__c> asyncObjects);
+        void persistObjects(final List<AsynchronousJob__c> asyncObjects);
 
         /**
          * @description
@@ -88,7 +88,7 @@ public with sharing virtual class AsynchronousDAO implements API {
          * @param asyncObjects The objects to persist.
          * @param states The states to persist.
          */
-        void persistObjects(List<AsynchronousJob__c> asyncObjects, List<Map<String, String>> states);
+        void persistObjects(final List<AsynchronousJob__c> asyncObjects, final List<Map<String, String>> states);
 
         /**
          * @description
@@ -96,7 +96,7 @@ public with sharing virtual class AsynchronousDAO implements API {
          *
          * @param asyncObjects The objects to remove.
          */
-        void removeObjects(List<AsynchronousJob__c> asyncObjects);
+        void removeObjects(final List<AsynchronousJob__c> asyncObjects);
 
         /**
          * @description
@@ -104,7 +104,7 @@ public with sharing virtual class AsynchronousDAO implements API {
          *
          * @param asyncErrorObject The exception object to persist.
          */
-        void persistException(AsynchronousJobException__c asyncErrorObject);
+        void persistException(final AsynchronousJobException__c asyncErrorObject);
     }
 
     /**
@@ -141,7 +141,7 @@ public with sharing virtual class AsynchronousDAO implements API {
          *
          * @return The object.
          */
-        public AsynchronousJob__c getObject(Id asyncObjectId) {
+        public AsynchronousJob__c getObject(final Id asyncObjectId) {
             Assertion.isNotNull(asyncObjectId, 'argument: AsynchronousDAO.apiGetObject.asyncObjectId');
 
             final List<AsynchronousJob__c> asyncObjects = [
@@ -313,7 +313,7 @@ public with sharing virtual class AsynchronousDAO implements API {
          *
          * @param asyncErrorObject The exception object to persist.
          */
-        public void persistException(AsynchronousJobException__c asyncErrorObject) {
+        public void persistException(final AsynchronousJobException__c asyncErrorObject) {
             Assertion.isNotNull(asyncErrorObject, 'argument: AsynchronousDAO.apiPersistAsynchronousError.asyncErrorObject');
             Database.insert(asyncErrorObject, AccessLevel.USER_MODE);
         }
@@ -379,7 +379,7 @@ public with sharing virtual class AsynchronousDAO implements API {
      * @description
      * Method is solely for mocking use.
      */
-    public void persistException(AsynchronousJobException__c asyncError) {
+    public void persistException(final AsynchronousJobException__c asyncError) {
         throw new AsynchronousV1.APIException('Access denied');
     }
 
@@ -411,7 +411,7 @@ public with sharing virtual class AsynchronousDAO implements API {
          *
          * @return The result of the validation.
          */
-        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
+        public DependencyV1.ValidationResult validate(final Type forType, final Type withImpl) {
             return DependencyHelper.buildValidationResult(
                     TypesV1.newInstance(withImpl) instanceof API,
                     true,

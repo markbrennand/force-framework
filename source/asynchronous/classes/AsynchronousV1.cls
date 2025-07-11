@@ -99,7 +99,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @param state The new state.
          */
-        void setState(Map<String, String> state);
+        void setState(final Map<String, String> state);
 
         /**
          * @description
@@ -212,7 +212,7 @@ global with sharing virtual class AsynchronousV1 {
          * @param asyncJob The job being run.
          * @param apexJobId The Id of the Apex job for the RunnableJob.
          */
-        void run(Job asyncJob, String apexJobId);
+        void run(final Job asyncJob, final String apexJobId);
 
         /**
          * @description
@@ -224,7 +224,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return Whether to delete a record of the job or not.
          */
-        Boolean onSuccess(Job asyncJob);
+        Boolean onSuccess(final Job asyncJob);
 
         /**
          * @description
@@ -237,7 +237,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return Whether to delete a record of the job or not.
          */
-        Boolean onFailure(Job asyncJob, Exception exc);
+        Boolean onFailure(final Job asyncJob, final Exception exc);
 
         /**
          * @description
@@ -249,7 +249,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return Whether to delete a record of the job or not.
          */
-        Boolean onCancellation(Job asyncJob);
+        Boolean onCancellation(final Job asyncJob);
 
         /**
          * @description
@@ -267,7 +267,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return The new Status of the job.
          */
-        Status onError(Job asyncJob, Exception exc);
+        Status onError(final Job asyncJob, final Exception exc);
     }
 
     /**
@@ -421,7 +421,12 @@ global with sharing virtual class AsynchronousV1 {
      * @return A list of the matching objects.
      */
     @AuraEnabled(Cacheable=false)
-    public static List<Map<String, Object>> getJobs(final Map<String, Object> filters, String ordering, Integer offset, Integer max) {
+    public static List<Map<String, Object>> getJobs(
+            final Map<String, Object> filters,
+            final String ordering,
+            final Integer offset,
+            final Integer max
+    ) {
         return AsynchronousLWC.API.getJobs(filters, ordering, offset, max);
     }
 

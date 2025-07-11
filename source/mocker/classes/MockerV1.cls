@@ -46,6 +46,28 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
      * @description
+     * An implementation of the Modifier interface can be added as argument to Method.returns to make changes to the
+     * method arguments when a match for the arguments is found and the registered method is called.
+     * <br><br>
+     * An example use case for this would be to add an Id to objects inserted through a call to a mocked method.
+     *
+     */
+    global interface Modifier {
+
+        /**
+         * @description
+         * Called to make changes to the return value using the arguments passed into the Method.
+         *
+         * @param arguments The arguments passed to the Method.
+         *
+         * @return The return value.
+         */
+        Object process(final List<Object> arguments);
+    }
+
+
+    /**
+     * @description
      * Map containing the next Id number to use for each object type.
      */
     private final static Map<String, Integer> IDS = new Map<String, Integer>();
@@ -142,7 +164,12 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          *
          * @return The object instance so it can be chained.
          */
-        global MockerV1.Arguments whenArguments(final Object argument1, final Object argument2, final Object argument3, final Object argument4) {
+        global MockerV1.Arguments whenArguments(
+                final Object argument1,
+                final Object argument2,
+                final Object argument3,
+                final Object argument4
+        ) {
             return whenListOfArguments(new List<Object> { argument1, argument2, argument3, argument4  });
         }
 
@@ -160,7 +187,13 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          *
          * @return The object instance so it can be chained.
          */
-        global MockerV1.Arguments whenArguments(final Object argument1, final Object argument2, final Object argument3, final Object argument4, final Object argument5) {
+        global MockerV1.Arguments whenArguments(
+                final Object argument1,
+                final Object argument2,
+                final Object argument3,
+                final Object argument4,
+                final Object argument5
+        ) {
             return whenListOfArguments(new List<Object> { argument1, argument2, argument3, argument4, argument5  });
         }
 
@@ -187,27 +220,6 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
         global Object mock(){
             return parent.mockedObject;
         }
-    }
-
-    /**
-     * @description
-     * An implementation of the Modifier interface can be added as argument to Method.returns to make changes to the
-     * method arguments when a match for the arguments is found and the registered method is called.
-     * <br><br>
-     * An example use case for this would be to add an Id to objects inserted through a call to a mocked method.
-     *
-     */
-    global interface Modifier {
-
-        /**
-         * @description
-         * Called to make changes to the return value using the arguments passed into the Method.
-         *
-         * @param arguments The arguments passed to the Method.
-         *
-         * @return The return value.
-         */
-        Object process(List<Object> arguments);
     }
 
     /**
@@ -321,7 +333,6 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
     global static Object anyNonNull(final Type type) {
         return new AnyValue(type, false);
     }
-
 
     /**
      * @description
@@ -575,14 +586,8 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
      * Class representing a list of arguments for which mocked methods are to be registered.
      */
     global with sharing class Arguments extends MockerV1.Chainable {
-        final List<Object> expectedArguments;
-        final List<Method> methods = new List<Method>();
-
-        /**
-         * @description
-         * Additional comparators to use when checking the arguments for equivalence to those passed to the method call
-         * on the mocked objet.
-         */
+        private final List<Object> expectedArguments;
+        private final List<Method> methods = new List<Method>();
         private List<Comparator<Object>> comparators = new List<Comparator<Object>>();
 
         /**

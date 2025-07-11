@@ -83,7 +83,7 @@ global with sharing class TriggerV1 {
          *
          * @return True if the record has an old value.
          */
-        Boolean hasOldValue(SObject record);
+        Boolean hasOldValue(final SObject record);
 
         /**
          * @description
@@ -93,7 +93,7 @@ global with sharing class TriggerV1 {
          *
          * @return The old value of the record, or null if no old record found.
          */
-        SObject getOldValue(SObject record);
+        SObject getOldValue(final SObject record);
 
         /**
          * @description
@@ -134,7 +134,7 @@ global with sharing class TriggerV1 {
          *
          * @param event The trigger event.
          */
-        void onEvent(Event event);
+        void onEvent(final Event event);
 
         /**
          * @description
@@ -197,7 +197,7 @@ global with sharing class TriggerV1 {
      *
      * @param type The Subscriber class to disable.
      */
-    global static void disable(Type type) {
+    global static void disable(final Type type) {
         TriggerAPI.API.disable(type);
     }
 
@@ -209,7 +209,7 @@ global with sharing class TriggerV1 {
      *
      * @param type The Subscriber class to enable.
      */
-    global static void enable(Type type) {
+    global static void enable(final Type type) {
         TriggerAPI.API.enable(type);
     }
 
@@ -221,7 +221,7 @@ global with sharing class TriggerV1 {
      *
      * @return True if the Subscriber class is enabled.
      */
-    global static Boolean isEnabled(Type type) {
+    global static Boolean isEnabled(final Type type) {
         return TriggerAPI.API.isEnabled(type);
     }
     /**
@@ -249,7 +249,7 @@ global with sharing class TriggerV1 {
          *
          * @return The result of the validation.
          */
-        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
+        public DependencyV1.ValidationResult validate(final Type forType, final Type withImpl) {
             return DependencyHelper.buildValidationResult(
                     TypesV1.newInstance(withImpl) instanceof Subscriber,
                     true,

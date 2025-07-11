@@ -28,6 +28,13 @@ global with sharing class TypesV1 {
 
     /**
      * @description
+     * Exception thrown when a type related operation fails.
+     */
+    global with sharing class APIException extends Exception {}
+
+
+    /**
+     * @description
      * Supports use of a factory when instantiating a class.
      * <br><br>
      * If an instantiated class implements this interface then the newInstance method will create the actual instance.
@@ -87,10 +94,4 @@ global with sharing class TypesV1 {
             throw new APIException('Class ' + type.getName() + ' could not be constructed', e);
         }
     }
-
-    /**
-     * @description
-     * Exception thrown when a type related operation fails.
-     */
-    global with sharing class APIException extends Exception {}
 }

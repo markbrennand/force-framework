@@ -89,7 +89,7 @@ global with sharing class Assertion {
      */
     global with sharing class AssertionException extends Exception {}
 
-    private static String asString(Object value) {
+    private static String asString(final Object value) {
         return value == null ? 'null' : String.valueOf(value);
     }
 

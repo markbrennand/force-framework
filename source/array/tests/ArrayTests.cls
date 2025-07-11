@@ -305,54 +305,54 @@ public with sharing class ArrayTests {
     }
 
     private with sharing class ForEachMultiplier extends ArrayV1.Callback {
-        public override Object function(Object element, Object currentValue, Integer index) {
+        public override Optional function(Object element, Optional currentValue, Integer index) {
             ((List<Integer>) shared().get()).add(((Integer) element) * 2);
-            return null;
+            return Optional.empty();
         }
     }
 
     private with sharing class ReduceSubtractor extends ArrayV1.Callback {
-        public override Object function(Object element, Object currentValue, Integer index) {
-            return (Integer) currentValue - (Integer) element;
+        public override Optional function(Object element, Optional currentValue, Integer index) {
+            return Optional.of((Integer) currentValue.get() - (Integer) element);
         }
     }
 
     private with sharing class ObjectMerger extends ArrayV1.Callback {
-        public override Object function(Object element, Object currentValue, Integer index) {
-            Map<String, Object> mergeMap = (Map<String, Object>) currentValue;
+        public override Optional function(Object element, Optional currentValue, Integer index) {
+            Map<String, Object> mergeMap = (Map<String, Object>) currentValue.get();
             SObject record = (SObject) element;
             mergeMap.putAll(record.getPopulatedFieldsAsMap());
-            return mergeMap;
+            return Optional.of(mergeMap);
         }
     }
 
     private with sharing class ValueExtractor extends ArrayV1.Callback {
-        public override Object function(Object element, Object currentValue, Integer index) {
-            Map<String, Object> valueMap = (Map<String, Object>) currentValue;
+        public override Optional function(Object element, Optional currentValue, Integer index) {
+            Map<String, Object> valueMap = (Map<String, Object>) currentValue.get();
             Map<String, Object> mergeMap = (Map<String, Object>) shared().get();
             SObjectField field = (SObjectField) element;
             valueMap.put(field.getDescribe().name, mergeMap.get(field.getDescribe().name));
-            return valueMap;
+            return Optional.of(valueMap);
         }
     }
 
     private with sharing class FilterTestRunnable extends ArrayV1.Callback {
-        public override Object function(Object element, Object currentValue, Integer index) {
+        public override Optional function(Object element, Optional currentValue, Integer index) {
             if (shared().isPresent() && ! (shared().get() instanceof String)) {
-                return shared().get();
+                return Optional.of(shared().get());
             }
 
-            return (!shared().isPresent())
+            return Optional.of((!shared().isPresent())
                     ? ((AsynchronousJob__c) element).Runnable__c == 'TEST1'
-                    : ((AsynchronousJob__c) element).Runnable__c == (String) shared().get();
+                    : ((AsynchronousJob__c) element).Runnable__c == (String) shared().get());
         }
     }
 
     private with sharing class Transformer extends ArrayV1.Callback {
-        public override Object function(Object element, Object currentValue, Integer index) {
+        public override Optional function(Object element, Optional currentValue, Integer index) {
             AsynchronousJob__c cloned = ((AsynchronousJob__c) element).clone();
             cloned.RetryInterval__c = shared().isPresent() ?  (Integer) shared().get() : 1000;
-            return cloned;
+            return Optional.of(cloned);
         }
     }
 }

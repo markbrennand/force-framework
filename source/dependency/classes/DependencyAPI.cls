@@ -142,7 +142,6 @@ public with sharing virtual class DependencyAPI implements API {
         void reload();
     }
 
-
     /**
      * @description
      * Class that creates instances of the implementation class for the binding.
@@ -364,7 +363,7 @@ public with sharing virtual class DependencyAPI implements API {
          *
          * @param bindings The custom bindings to add to the registry.
          */
-        public void build(List<Binding__c> bindings) {
+        public void build(final List<Binding__c> bindings) {
             ArrayV1.over(bindings)
                     .sharing(this)
                     .forEach(new AddBinding());
@@ -393,7 +392,7 @@ public with sharing virtual class DependencyAPI implements API {
      *
      * @param bindings The custom bindings to add to the registry.
      */
-    public static void validate(List<Binding__c> bindings) {
+    public static void validate(final List<Binding__c> bindings) {
         ArrayV1.over(bindings).sharing(new Implementation()).forEach(new BindingValidator());
     }
 
@@ -415,7 +414,7 @@ public with sharing virtual class DependencyAPI implements API {
      * Callback class to check for a duplicate binding.
      */
     private with sharing class DuplicateCheck extends ArrayV1.Callback {
-        public override Object function(Object element, Object currentValue, Integer index) {
+        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
             final Binding__c binding = (Binding__c) element;
             final Set<String> keys = (Set<String>) shared().get();
 
@@ -432,7 +431,7 @@ public with sharing virtual class DependencyAPI implements API {
                 keys.add(key);
             }
 
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -441,7 +440,7 @@ public with sharing virtual class DependencyAPI implements API {
      * Callback class to validate a Binding object.
      */
     private with sharing class BindingValidator extends ArrayV1.Callback {
-        public override Object function(final Object element, final Object currentValue, final Integer index) {
+        public override Optional  function(final Object element, final Optional currentValue, final Integer index) {
             final Binding__c binding = (Binding__c) element;
             final API api = (API) shared().get();
 
@@ -458,7 +457,7 @@ public with sharing virtual class DependencyAPI implements API {
                 binding.addError(e.getMessage());
             }
 
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -467,7 +466,7 @@ public with sharing virtual class DependencyAPI implements API {
      * Callback class to add a Binding to the registry.
      */
     private with sharing class AddBinding extends ArrayV1.Callback {
-        public override Object function(final Object element, final Object currentValue, final Integer index) {
+        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
             final Binding__c binding = (Binding__c) element;
             try {
 
@@ -484,7 +483,7 @@ public with sharing virtual class DependencyAPI implements API {
                 binding.addError(e.getMessage());
             }
 
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -495,9 +494,9 @@ public with sharing virtual class DependencyAPI implements API {
     private with sharing class AddBindingCheck extends ArrayV1.Callback {
         final Boolean isTest = Test.isRunningTest();
 
-        public override Object function(final Object element, final Object currentValue, final Integer index) {
+        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
             final BindingCheck__mdt check = (BindingCheck__mdt) element;
-            final Map<Type, List<DependencyV1.BindingCheck>> checks = (Map<Type, List<DependencyV1.BindingCheck>>) currentValue;
+            final Map<Type, List<DependencyV1.BindingCheck>> checks = (Map<Type, List<DependencyV1.BindingCheck>>) currentValue.get();
 
             if (check.IsUnitTest__c == isTest) {
                 Assertion.isNotNull(check.Type__C, 'Binding Check Metadata record ' + check.Label + ' has no Type defined');
@@ -516,7 +515,7 @@ public with sharing virtual class DependencyAPI implements API {
                 }
             }
 
-            return checks;
+            return Optional.of(checks);
         }
     }
 
@@ -549,7 +548,7 @@ public with sharing virtual class DependencyAPI implements API {
      * if many actions are keyed for the same type.
      */
     private with sharing class ActionKey extends Key {
-        private String action;
+        private final String action;
 
         public ActionKey(final Type type, final String action) {
             super(type);
@@ -573,7 +572,11 @@ public with sharing virtual class DependencyAPI implements API {
      *
      * @return A new APIException with a formatted message.
      */
-    private static DependencyV1.APIException createException(String prefix, String typeName, String postfix) {
+    private static DependencyV1.APIException createException(
+            final String prefix,
+            final String typeName,
+            final String postfix
+    ) {
         return new DependencyV1.APIException(String.join(
                 new List<String>{
                         prefix,
@@ -597,7 +600,12 @@ public with sharing virtual class DependencyAPI implements API {
      *
      * @return A new APIException with a formatted mesgsage.
      */
-    private static DependencyV1.APIException createException(String prefix, String typeName, String action, String postfix) {
+    private static DependencyV1.APIException createException(
+            final String prefix,
+            final String typeName,
+            final String action,
+            final String postfix
+    ) {
         return new DependencyV1.APIException(String.join(
                 new List<String>{
                         prefix,

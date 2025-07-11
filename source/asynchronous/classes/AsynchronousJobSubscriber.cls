@@ -58,7 +58,7 @@ public with sharing virtual class AsynchronousJobSubscriber {
     }
 
     private with sharing class JobPreProcessor extends ArrayV1.Callback {
-        public override Object function(final Object element, final Object currentValue, final Integer index) {
+        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
             final AsynchronousJob__c asyncObject = (AsynchronousJob__c) element;
 
             try {
@@ -76,12 +76,12 @@ public with sharing virtual class AsynchronousJobSubscriber {
                 asyncObject.addError(e.getMessage());
             }
 
-            return null;
+            return Optional.empty();
         }
     }
 
     private with sharing class JobsToDeleteBuilder extends ArrayV1.Callback {
-        public override Object function(final Object element, final Object currentValue, final Integer index) {
+        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
             final AsynchronousJob__c asyncObject = (AsynchronousJob__c) element;
             final TriggerV1.Event event = (TriggerV1.Event) shared().get();
 
@@ -93,7 +93,7 @@ public with sharing virtual class AsynchronousJobSubscriber {
                 if (!asyncJob.getRunnable().onCancellation(asyncJob)) {
 
                     // We cannot add the job as it is read only in an after update call.
-                    ((List<AsynchronousJob__c>) currentValue).add(new AsynchronousJob__c(Id = asyncObject.Id));
+                    ((List<AsynchronousJob__c>) currentValue.get()).add(new AsynchronousJob__c(Id = asyncObject.Id));
                 }
             }
 
@@ -102,9 +102,9 @@ public with sharing virtual class AsynchronousJobSubscriber {
     }
 
     private with sharing class SchedulerStartCheck extends ArrayV1.Callback {
-        public override Object function(Object element, Object currentValue, Integer index) {
+        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
             final AsynchronousJob__c asyncObject = (AsynchronousJob__c) element;
-            return AsynchronousJob.fromSObject(asyncObject).getRunnable() instanceof AsynchronousScheduler;
+            return Optional.of(AsynchronousJob.fromSObject(asyncObject).getRunnable() instanceof AsynchronousScheduler);
         }
     }
 }
