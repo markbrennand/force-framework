@@ -437,9 +437,9 @@ public with sharing class AsynchronousDAOTests {
 
             insert new List<AsynchronousJob__c> { job1, job2, job3, job4, job5, job6 };
 
-            Set<AsynchronousJob__c> scheduled = AsynchronousDAO.API.getScheduledObjects(1);
+            List<AsynchronousJob__c> scheduled = AsynchronousDAO.API.getScheduledObjects(1);
             Assert.areEqual(1, scheduled.size());
-            Assert.isTrue(ComparisonHelper.compare(scheduled, new Set<AsynchronousJob__c> { job2 }));
+            Assert.isTrue(ComparisonHelper.compare(scheduled, new List<AsynchronousJob__c> { job2 }));
 
             scheduled = AsynchronousDAO.API.getScheduledObjects(2);
             Assert.areEqual(2, scheduled.size());

@@ -97,6 +97,10 @@
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
+        <tab>AsynchronousJobs</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
         <tab>Binding__c</tab>
         <visibility>Visible</visibility>
     </tabSettings>

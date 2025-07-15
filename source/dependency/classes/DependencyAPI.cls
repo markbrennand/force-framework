@@ -151,8 +151,8 @@ public with sharing virtual class DependencyAPI implements API {
      * If the class  implements the Prototype interface then a new instance is created for each wiring of the binding.
      */
     private with sharing class Factory {
+        private Optional instance = Optional.empty();
         private final Type type;
-        private Object instance;
 
         public Factory(final Type type) {
             this.type = type;
@@ -165,13 +165,13 @@ public with sharing virtual class DependencyAPI implements API {
          * @return Either the singleton instance or a new instance if the class being constructed implements Prototype.
          */
         public Object newInstance() {
-            if (instance instanceof DependencyV1.Prototype) {
-                return TypesV1.newInstance(type);
-            } else if (instance != null) {
-                return instance;
+            if (instance.isPresent()) {
+                return instance.get() instanceof DependencyV1.Prototype
+                        ? TypesV1.newInstance(type)
+                        : instance.get();
             } else {
-                instance = TypesV1.newInstance(type);
-                return instance;
+                instance = Optional.of(TypesV1.newInstance(type));
+                return instance.get();
             }
         }
     }
@@ -212,7 +212,7 @@ public with sharing virtual class DependencyAPI implements API {
 
             final Key key = new Key(forType);
             if (!REGISTRY.containsKey(key)) {
-                throw createException('Binding for', forType.getName(), 'not found in registry');
+                throw createException('Binding for', forType.getName(), Optional.empty(), 'not found in registry');
             }
 
             return REGISTRY.get(key).newInstance();
@@ -234,7 +234,7 @@ public with sharing virtual class DependencyAPI implements API {
 
             final Key key = new ActionKey(forType, action);
             if (!REGISTRY.containsKey(key)) {
-                throw createException('Binding for', forType.getName(), action, 'not found in registry');
+                throw createException('Binding for', forType.getName(), Optional.of(action), 'not found in registry');
             }
 
             return REGISTRY.get(key).newInstance();
@@ -275,7 +275,7 @@ public with sharing virtual class DependencyAPI implements API {
          * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
          */
         public void bind(final Type forType, final Type withImpl) {
-            validateTypes(forType, null, withImpl);
+            validateTypes(forType, Optional.empty(), withImpl);
             REGISTRY.put(new Key(forType), new Factory(withImpl));
         }
 
@@ -288,7 +288,7 @@ public with sharing virtual class DependencyAPI implements API {
          * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
          */
         public void bind(final Type forType, final String action, final Type withImpl) {
-            validateTypes(forType, action, withImpl);
+            validateTypes(forType, Optional.of(action), withImpl);
             REGISTRY.put(new ActionKey(forType, action), new Factory(withImpl));
         }
 
@@ -322,11 +322,11 @@ public with sharing virtual class DependencyAPI implements API {
          * The implementation must be a concrete class with a no-op constructor. The check is that it can be instantiated.
          *
          * @param forType The type to be validated.
-         * @param action The action or null if none.
+         * @param action The action. Optional.empty() if not set.
          * @param withImpl The implementation to be validated.
          */
-        private void validateTypes(final Type forType, final String action, final Type withImpl) {
-            if (action == null) {
+        private void validateTypes(final Type forType, final Optional action, final Type withImpl) {
+            if (!action.isPresent()) {
                 Boolean instantiable = false;
                 try {
                     TypesV1.newInstance(forType);
@@ -335,14 +335,14 @@ public with sharing virtual class DependencyAPI implements API {
                 }
 
                 if (instantiable) {
-                    throw createException('Class', forType.getName(), 'must not be instantiable');
+                    throw createException('Class', forType.getName(), Optional.empty(),  'must not be instantiable');
                 }
             }
 
             try {
                 TypesV1.newInstance(withImpl);
             } catch(Exception e) {
-                throw createException('Implementation', withImpl.getName(), 'must be instantiable');
+                throw createException('Implementation', withImpl.getName(), Optional.empty(), 'must be instantiable');
             }
 
             if (CHECKS.containsKey(forType)) {
@@ -353,7 +353,7 @@ public with sharing virtual class DependencyAPI implements API {
                     }
                 }
             } else {
-                throw createException('Class', forType.getName(), 'has no registered bind checker');
+                throw createException('Class', forType.getName(), Optional.empty(), 'has no registered bind checker');
             }
         }
 
@@ -420,13 +420,13 @@ public with sharing virtual class DependencyAPI implements API {
 
             if (binding.Action__c == null) {
                 if (keys.contains(binding.Type__c)) {
-                    throw createException('Binding for', binding.Type__c, 'already exists');
+                    throw createException('Binding for', binding.Type__c, Optional.empty(), 'already exists');
                 }
                 keys.add(binding.Type__c);
             } else {
                 final String key = binding.Type__c + ':' + binding.Action__c;
                 if (keys.contains(key)) {
-                    throw createException('Binding for', binding.Type__c, binding.Action__c, 'already exists');
+                    throw createException('Binding for', binding.Type__c, Optional.of(binding.Action__c), 'already exists');
                 }
                 keys.add(key);
             }
@@ -440,7 +440,7 @@ public with sharing virtual class DependencyAPI implements API {
      * Callback class to validate a Binding object.
      */
     private with sharing class BindingValidator extends ArrayV1.Callback {
-        public override Optional  function(final Object element, final Optional currentValue, final Integer index) {
+        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
             final Binding__c binding = (Binding__c) element;
             final API api = (API) shared().get();
 
@@ -505,7 +505,7 @@ public with sharing virtual class DependencyAPI implements API {
                 final Object checker = TypesV1.newInstance(TypesV1.load(check.BindingCheck__c));
 
                 if (! (checker instanceof DependencyV1.BindingCheck)) {
-                    throw createException('Class', check.BindingCheck__c, 'does not implement DependencyV1.BindingCheck');
+                    throw createException('Class', check.BindingCheck__c, Optional.empty(), 'does not implement DependencyV1.BindingCheck');
                 }
 
                 if (!checks.containsKey(forType)) {
@@ -568,33 +568,6 @@ public with sharing virtual class DependencyAPI implements API {
      *
      * @param prefix Prefix from exception message.
      * @param typeName The name of the type the exception is for.
-     * @param postfix Postfix for exception mesgsage.
-     *
-     * @return A new APIException with a formatted message.
-     */
-    private static DependencyV1.APIException createException(
-            final String prefix,
-            final String typeName,
-            final String postfix
-    ) {
-        return new DependencyV1.APIException(String.join(
-                new List<String>{
-                        prefix,
-                        ' ',
-                        typeName,
-                        ' ',
-                        postfix
-                },
-                ''
-        ));
-    }
-
-    /**
-     * @description
-     * Builds an APIException with a common format.
-     *
-     * @param prefix Prefix from exception message.
-     * @param typeName The name of the type the exception is for.
      * @param action The action the exception is for.
      * @param postfix Postfix for exception message.
      *
@@ -603,21 +576,34 @@ public with sharing virtual class DependencyAPI implements API {
     private static DependencyV1.APIException createException(
             final String prefix,
             final String typeName,
-            final String action,
+            final Optional action,
             final String postfix
     ) {
-        return new DependencyV1.APIException(String.join(
-                new List<String>{
-                        prefix,
-                        ' ',
-                        typeName,
-                        ' with action ',
-                        action,
-                        ' ',
-                        postfix
-                },
-                ''
-        ));
+        if (action.isPresent()) {
+            return new DependencyV1.APIException(String.join(
+                    new List<String>{
+                            prefix,
+                            ' ',
+                            typeName,
+                            ' with action ',
+                            (String) action.get(),
+                            ' ',
+                            postfix
+                    },
+                    ''
+            ));
+        } else {
+            return new DependencyV1.APIException(String.join(
+                    new List<String>{
+                            prefix,
+                            ' ',
+                            typeName,
+                            ' ',
+                            postfix
+                    },
+                    ''
+            ));
+        }
     }
 
     /**

@@ -356,10 +356,6 @@ public with sharing class TriggerTest {
 
             DependencyV1.reload();
         }
-
-        public Set<TriggerV1.Operation> forOperations() {
-            return new Set<TriggerV1.Operation> { TriggerV1.Operation.INSERTING, TriggerV1.Operation.UPDATING };
-        }
     }
 
     public with sharing class Subscriber2 implements TriggerV1.Subscriber {
@@ -379,10 +375,6 @@ public with sharing class TriggerTest {
             }
 
             DependencyV1.reload();
-        }
-
-        public Set<TriggerV1.Operation> forOperations() {
-            return new Set<TriggerV1.Operation> { TriggerV1.Operation.INSERTING, TriggerV1.Operation.DELETING };
         }
     }
 

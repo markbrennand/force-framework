@@ -49,4 +49,32 @@ public with sharing class OptionalTests {
         opt = Optional.empty();
         Assert.areEqual('OTHER', opt.orElse('OTHER'));
     }
+
+    @IsTest
+    private static void TestCall() {
+        Assert.isFalse(Optional.empty().call(new TestFunction()).isPresent());
+        Assert.areEqual(1, Optional.of('one').call(new TestFunction()).get());
+        Assert.areEqual(2, Optional.of('two').call(new TestFunction()).get());
+    }
+
+    @IsTest
+    private static void TestCallChaining() {
+        Assert.isFalse(Optional.empty().call(new TestFunction()).call(new TestFunction()).isPresent());
+        Assert.areEqual(1, Optional.of(1).call(new TestFunction()).call(new TestFunction()).get());
+        Assert.areEqual(2, Optional.of(2).call(new TestFunction()).call(new TestFunction()).get());
+    }
+
+    private with sharing class TestFunction implements Optional.Function {
+        public Optional apply(final Optional value) {
+            if (!value.isPresent()) {
+                return value;
+            }
+
+            if (value.get() instanceof String) {
+                return value.get() == 'one' ? Optional.of(1) : Optional.of(2);
+            } else {
+                return value.get() == 1 ? Optional.of('one') : Optional.of('two');
+            }
+        }
+    }
 }

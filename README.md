@@ -97,6 +97,8 @@ Javascript methods, e.g. _forEach_ and _reduce_. As Apex does not support passin
 anyonymous inner classes, the callback method used in the Javascript methods is replaced by the
 _ArrayIteratorV1.Callback_ class. The _function_ method of this class must be overridden to code the required logic.
 
+See [Array](source/array/README.md)
+
 ## Optional
 The use of null to represent an undefined value is bad practice. Apex lacks the _undefined_ variable value of Javascript.
 A solution to this problem was added to Java several versions ago. The Optional class. This class allows a value
@@ -106,3 +108,8 @@ method to determine whether the Optional has a value. Use _get_ to obtain the va
 will be thrown if an attempt is made to get an undefined value from an Optional.
 
 See [Optional](source/optional/README.md)
+
+## Query
+TBD.
+
+See [Query](source/query/README.md)

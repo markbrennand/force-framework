@@ -105,18 +105,40 @@ public with sharing virtual class AsynchronousLWC implements API {
                 final Integer offset,
                 final Integer max
         ) {
-            return (List<Map<String, Object>>) ArrayV1.over(
-                    Database.query(
-                            'SELECT Id, Owner.Name, ApexJobId__c, Reference__c, Status__c, RetryNumber__c, MaximumRetries__c, Runnable__c, ScheduledRunTime__c, LastRunTime__c'
-                                    + ' FROM AsynchronousJob__c'
-                                    + ' WHERE ' + buildQuery(filters)
-                                    + ' WITH USER_MODE'
-                                    + ' ORDER BY '
-                                    + ordering
-                                    + ' LIMIT :max'
-                                    + ' OFFSET :offset'
-                    ))
-                    .reduce(new ResultBuilder(), new List<Map<String, Object>>());
+            final QueryV1.API query = QueryV1.of(AsynchronousJob__c.SObjectType)
+                    .security(AccessLevel.USER_MODE)
+                    .matching(buildQuery(filters))
+                    .returning(new Set<SObjectField> {
+                            AsynchronousJob__c.ApexJobId__c,
+                            AsynchronousJob__c.Name,
+                            AsynchronousJob__c.Reference__c,
+                            AsynchronousJob__c.Status__c,
+                            AsynchronousJob__c.RetryNumber__c,
+                            AsynchronousJob__c.MaximumRetries__c,
+                            AsynchronousJob__c.Runnable__c,
+                            AsynchronousJob__c.ScheduledRunTime__c,
+                            AsynchronousJob__c.LastRunTime__c
+                    })
+                    .returning(AsynchronousJob__c.OwnerId, new Set<SObjectField> { User.Name })
+                    .max(Optional.of(max))
+                    .offset(Optional.of(offset));
+
+            final String[] parts = ordering.split(' ');
+            if (parts.size() != 2) {
+                throw new AsynchronousV1.APIException('Invalid order by');
+            }
+
+            final Map<String, SObjectField> fields = AsynchronousJob__c.SObjectType.getDescribe().fields.getMap();
+            final SObjectField orderField = fields.get(CommonHelper.getSObjectNamespace() + parts[0]);
+
+            final Optional matches;
+            if (parts[1].toLowerCase() == 'asc') {
+                matches = query.ascending(orderField).execute(Optional.of(new Map<String, Object>()));
+            } else {
+                matches = query.descending(orderField).execute(Optional.of(new Map<String, Object>()));
+            }
+
+            return (List<Map<String, Object>>) matches.call(new JobMatchProcessor()).get();
         }
 
         /**
@@ -126,10 +148,12 @@ public with sharing virtual class AsynchronousLWC implements API {
          * @param jobIds The ids of the jobs to delete.
          */
         public void deleteJobs(final List<Id> jobIds) {
-            Database.delete(
-                    [SELECT Id FROM AsynchronousJob__c WHERE Id IN :jobIds WITH USER_MODE],
-                    AccessLevel.USER_MODE
-            );
+            QueryV1.of(AsynchronousJob__c.SObjectType)
+                    .security(AccessLevel.USER_MODE)
+                    .matching('Id IN :jobIds')
+                    .returning(new Set<SObjectField> { AsynchronousJob__c.Id })
+                    .execute(Optional.of(new Map<String, Object> { 'jobIds' => jobIds }))
+                    .call(new QueryHelper.SObjectDeleter(AccessLevel.USER_MODE));
         }
 
         /**
@@ -139,16 +163,15 @@ public with sharing virtual class AsynchronousLWC implements API {
          * @param jobIds The ids of the jobs to re-run.
          */
         public void runJobs(final List<Id> jobIds) {
-            final String schedulerClassName = AsynchronousScheduler.RunNextAvailable.class.getName();
-            final List<AsynchronousJob__c> jobs = (List<AsynchronousJob__c>) ArrayV1.over([
-                        SELECT Id
-                        FROM AsynchronousJob__c
-                        WHERE Id IN :jobIds AND Runnable__c != :schedulerClassName
-                        WITH USER_MODE
-                    ])
-                    .transform(new RequeueJob());
-
-            Database.update(jobs, AccessLevel.USER_MODE);
+            QueryV1.of(AsynchronousJob__c.SObjectType)
+                    .security(AccessLevel.USER_MODE)
+                    .matching('Id IN :jobIds AND Runnable__c != :schedulerClassName')
+                    .returning(new Set<SObjectField> { AsynchronousJob__c.Id })
+                    .execute(Optional.of(new Map<String, Object> {
+                            'jobIds' => jobIds,
+                            'schedulerClassName' => AsynchronousScheduler.RunNextAvailable.class.getName()
+                    }))
+                    .call(new QueryHelper.SObjectTransformAndUpdate(new RequeueJob(), AccessLevel.USER_MODE));
         }
 
         /**
@@ -158,20 +181,24 @@ public with sharing virtual class AsynchronousLWC implements API {
          * @return The totals.
          */
         public Map<String, Integer> getTotals() {
-            final Map<String, Integer> returnMap = (Map<String, Integer>) ArrayV1.over([
-                            SELECT Status__c, Count(Id) Total__c
-                            FROM AsynchronousJob__c
-                            WITH USER_MODE
-                            GROUP BY Status__c
-                    ])
-                    .reduce(new BuildTotals(), new Map<String, Integer>());
-
+            final Map<String, Integer> returnMap = new Map<String, Integer>();
             for (AsynchronousV1.Status status : AsynchronousV1.Status.values()) {
-                final String statusName = status.name();
-                if (!returnMap.containsKey(statusName)) {
-                    returnMap.put(statusName, 0);
-                }
+                returnMap.put(status.name(), 0);
             }
+
+            returnMap.putAll((Map<String, Integer>) QueryV1.of(AsynchronousJob__c.SObjectType)
+                    .security(AccessLevel.USER_MODE)
+                    .returning(
+                            new Set<QueryV1.AggregatedField> {
+                                    new QueryV1.AggregatedField(AsynchronousJob__c.Status__c, Optional.empty(), Optional.empty()),
+                                    new QueryV1.AggregatedField(AsynchronousJob__c.Id, Optional.of('COUNT'),Optional.of('Total__c'))
+                            }
+                    )
+                    .aggregated(new Set<SObjectField> { AsynchronousJob__c.Status__c })
+                    .execute(Optional.empty())
+                    .call(new TotalsTransformer())
+                    .get()
+            );
 
             return returnMap;
         }
@@ -195,7 +222,7 @@ public with sharing virtual class AsynchronousLWC implements API {
                 Boolean hasValue = false;
 
                 if (value instanceof List<Object>) {
-                    String clause =(field += ' IN(');
+                    String clause = (field += ' IN(');
 
                     Boolean first = true;
                     for (Object option : (List<Object>) value) {
@@ -314,7 +341,7 @@ public with sharing virtual class AsynchronousLWC implements API {
             Map<String, Object> returnObject = new Map<String, Object>();
 
             for (String field : fields.keySet()) {
-                final String stripped = field.replace('forcefw__', '');
+                final String stripped = field.replace(CommonHelper.getSObjectNamespace(), '');
                 returnObject.put(stripped, fields.get(field));
             }
 
@@ -322,17 +349,46 @@ public with sharing virtual class AsynchronousLWC implements API {
 
             if (match.Status__c == AsynchronousV1.Status.RUNNING.name()) {
                 returnObject.put('RunTime__c', now.getTime() - match.LastRunTime__c.getTime());
-                if (match.RetryNumber__c > 0) {
-                    returnObject.put('Retry__c', match.RetryNumber__c + ' of ' + match.MaximumRetries__c);
-                }
-            } else if (match.Status__c == AsynchronousV1.Status.QUEUED.name()) {
-                if (match.RetryNumber__c > 0) {
-                    returnObject.put('Retry__c', match.RetryNumber__c + ' of ' + match.MaximumRetries__c);
-                }
             }
+
+            returnObject.put('RetriesRemaining__c', match.MaximumRetries__c - match.RetryNumber__c);
 
             ((List<Map<String, Object>>) currentValue.get()).add(returnObject);
             return currentValue;
+        }
+    }
+
+    /**
+     * @description
+     * Transformer class to build the List of jobs from the matches.
+     */
+    private with sharing class JobMatchProcessor implements Optional.Function {
+        public Optional apply(final Optional value) {
+            if (!value.isPresent()) {
+                return Optional.of(new List<Map<String, Object>>());
+            }
+
+            return Optional.of(
+                    ArrayV1.over((List<SObject>) value.get())
+                            .reduce(new ResultBuilder(), new List<Map<String, Object>>())
+            );
+        }
+    }
+
+    /**
+     * @description
+     * Transformer to build Map of Status counts from the List of aggregate results.
+     */
+    private with sharing class TotalsTransformer implements Optional.Function {
+        public Optional apply(final Optional value) {
+            if (!value.isPresent()) {
+                return Optional.of(new Map<String, Integer>());
+            }
+
+            return Optional.of(
+                    ArrayV1.over((List<AggregateResult>) value.get())
+                        .reduce(new BuildTotals(), new Map<String, Integer>())
+            );
         }
     }
 

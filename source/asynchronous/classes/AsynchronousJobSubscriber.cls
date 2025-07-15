@@ -18,10 +18,6 @@ public with sharing virtual class AsynchronousJobSubscriber {
 
     private with sharing class Implementation implements TriggerV1.Subscriber {
 
-        public Set<TriggerV1.Operation> forOperations() {
-            return new Set<TriggerV1.Operation> { TriggerV1.Operation.INSERTING, TriggerV1.Operation.UPDATING };
-        }
-
         public void onEvent(final TriggerV1.Event event) {
             if (event.isBefore()) {
                 handleBefore(event);

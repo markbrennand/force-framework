@@ -321,7 +321,7 @@ public with sharing class AsynchronousSchedulerTests {
             }
         }
 
-        Set<AsynchronousJob__c> scheduledObjects = new Set<AsynchronousJob__c>();
+        List<AsynchronousJob__c> scheduledObjects = new List<AsynchronousJob__c>();
         for (Integer i = 0; i < Math.min(asyncObjects.size(), maxJobsToStart); i++) {
             scheduledObjects.add(asyncObjects[i]);
         }

@@ -38,6 +38,8 @@ public with sharing class ArrayTests {
 
         Assert.areEqual(1, ArrayV1.over(new List<Integer> { 1 }).reduce(new ReduceSubtractor()));
 
+        Assert.isTrue(((List<Integer>) ArrayV1.over(new List<Integer>()).reduce(new ReduceSubtractor(), new List<Integer>())).isEmpty());
+
         try {
             Assert.areEqual(1, ArrayV1.over(new List<Integer>()).reduce(new ReduceSubtractor()));
             Assert.fail();
@@ -296,12 +298,42 @@ public with sharing class ArrayTests {
     private static void testPushAndPop() {
         ArrayV1.Methods stack = ArrayV1.over(new List<Integer>());
         stack.push(1);
+        Assert.areEqual(1, stack.length());
         stack.push(2);
+        Assert.areEqual(2, stack.length());
         Assert.areEqual(2, (Integer) stack.pop().get());
+        Assert.areEqual(1, stack.length());
         stack.push(3);
+        Assert.areEqual(2, stack.length());
         Assert.areEqual(3, (Integer) stack.pop().get());
+        Assert.areEqual(1, stack.length());
         Assert.areEqual(1, (Integer) stack.pop().get());
+        Assert.areEqual(0, stack.length());
         Assert.isFalse(stack.pop().isPresent());
+    }
+
+    @IsTest
+    private static void testPushAndShift() {
+        ArrayV1.Methods fifo = ArrayV1.over(new List<Integer>());
+        fifo.push(1);
+        Assert.areEqual(1, fifo.length());
+        fifo.push(2);
+        Assert.areEqual(2, fifo.length());
+        Assert.areEqual(1, (Integer) fifo.shift().get());
+        Assert.areEqual(1, fifo.length());
+        fifo.push(3);
+        Assert.areEqual(2, fifo.length());
+        Assert.areEqual(2, (Integer) fifo.shift().get());
+        Assert.areEqual(1, fifo.length());
+        Assert.areEqual(3, (Integer) fifo.shift().get());
+        Assert.areEqual(0, fifo.length());
+        Assert.isFalse(fifo.shift().isPresent());
+    }
+
+    @IsTest
+    private static void testLength() {
+        Assert.areEqual(0, ArrayV1.over(new List<Integer>()).length());
+        Assert.areEqual(1, ArrayV1.over(new List<Integer> { 1 }).length());
     }
 
     private with sharing class ForEachMultiplier extends ArrayV1.Callback {

@@ -45,7 +45,7 @@ public with sharing virtual class AsynchronousDAO implements API {
          *
          * @return The objects.
          */
-        Set<AsynchronousJob__c> getScheduledObjects(final Integer maxJobsToReturn);
+        List<AsynchronousJob__c> getScheduledObjects(final Integer maxJobsToReturn);
 
         /**
          * @description
@@ -144,19 +144,31 @@ public with sharing virtual class AsynchronousDAO implements API {
         public AsynchronousJob__c getObject(final Id asyncObjectId) {
             Assertion.isNotNull(asyncObjectId, 'argument: AsynchronousDAO.apiGetObject.asyncObjectId');
 
-            final List<AsynchronousJob__c> asyncObjects = [
-                    SELECT Id, OwnerId, Status__c, Reference__c, Runnable__c, MaximumRetries__c, RetryInterval__c,
-                            RetryNumber__c, ScheduledRunTime__c, LastRunTime__c, ApexJobId__c,
-                    (SELECT Content__c FROM AsynchronousJobState__r ORDER BY ChunkNumber__c)
-                    FROM AsynchronousJob__c
-                    WHERE Id = :asyncObjectId
-                    WITH USER_MODE
-                    LIMIT 1
-            ];
+            final Optional matches = QueryV1.of(AsynchronousJob__c.SObjectType)
+                    .security(AccessLevel.USER_MODE)
+                    .matching('Id = :asyncObjectId')
+                    .returning(new Set<SObjectField> {
+                            AsynchronousJob__c.OwnerId,
+                            AsynchronousJob__c.Status__c,
+                            AsynchronousJob__c.Reference__c,
+                            AsynchronousJob__c.Runnable__c,
+                            AsynchronousJob__c.MaximumRetries__c,
+                            AsynchronousJob__c.RetryInterval__c,
+                            AsynchronousJob__c.RetryNumber__c,
+                            AsynchronousJob__c.ScheduledRunTime__c,
+                            AsynchronousJob__c.LastRunTime__c,
+                            AsynchronousJob__c.ApexJobId__c
+                    })
+                    .children(
+                            QueryV1.of(AsynchronousJobState__c.SObjectType)
+                                    .returning(new Set<SObjectField> { AsynchronousJobState__c.Content__c })
+                                    .ascending(AsynchronousJobState__c.ChunkNumber__c)
+                    )
+                    .max(Optional.of(1))
+                    .execute(Optional.of(new Map<String, Object> { 'asyncObjectId' => asyncObjectId }));
 
-            Assertion.areEqual(1, asyncObjects.size(), 'Asynchronous object with Id ' + asyncObjectId + ' not found');
-
-            return asyncObjects[0];
+            Assertion.isTrue(matches.isPresent(), 'Asynchronous object with Id ' + asyncObjectId + ' not found');
+            return ((List<AsynchronousJob__c>) matches.get())[0];
         }
 
         /**
@@ -170,18 +182,22 @@ public with sharing virtual class AsynchronousDAO implements API {
          *
          * @return The objects.
          */
-        public Set<AsynchronousJob__c> getScheduledObjects(final Integer maxJobsToReturn) {
-            return new Set<AsynchronousJob__c>([
-                    SELECT Id, Runnable__c
-                    FROM AsynchronousJob__c
-                    WHERE OwnerId = :UserInfo.getUserId()
-                    AND ScheduledRunTime__c <= :Datetime.now()
-                    AND Runnable__c != :AsynchronousScheduler.RunNextAvailable.class.getName()
-                    AND Status__c = :AsynchronousV1.Status.QUEUED.name()
-                    WITH USER_MODE
-                    ORDER BY ScheduledRunTime__c
-                    LIMIT :maxJobsToReturn
-            ]);
+        public List<AsynchronousJob__c> getScheduledObjects(final Integer maxJobsToReturn) {
+            return (List<AsynchronousJob__c>) QueryV1.of(AsynchronousJob__c.SObjectType)
+                    .security(AccessLevel.USER_MODE)
+                    .matching('OwnerId = :ownerId AND ScheduledRunTime__c <= :now AND Runnable__c != :schedulerClass AND Status__c = :queued')
+                    .returning(new Set<SObjectField> { AsynchronousJob__c.Runnable__c })
+                    .ascending(AsynchronousJob__c.ScheduledRunTime__c)
+                    .max(Optional.of(maxJobsToReturn))
+                    .execute(Optional.of(
+                            new Map<String, Object> {
+                                    'ownerId' => UserInfo.getUserId(),
+                                    'now' => Datetime.now(),
+                                    'schedulerClass' => AsynchronousScheduler.RunNextAvailable.class.getName(),
+                                    'queued' => AsynchronousV1.Status.QUEUED.name()
+                            }
+                            ))
+                    .orElse(new List<AsynchronousJob__c>());
         }
 
         /**
@@ -193,19 +209,23 @@ public with sharing virtual class AsynchronousDAO implements API {
          * @return The number of objects that are scheduled or are running.
          */
         public Integer countSchedulableObjects() {
-            final Set<String> SCHEDULABLE_STATUSES = new Set<String> {
+            final Set<String> schedulableStatuses = new Set<String> {
                     AsynchronousV1.Status.QUEUED.name(),
                     AsynchronousV1.Status.RUNNING.name()
             };
 
-            return [
-                    SELECT COUNT()
-                    FROM AsynchronousJob__c
-                    WHERE OwnerId = :UserInfo.getUserId()
-                    AND Status__c IN :SCHEDULABLE_STATUSES
-                    AND Runnable__c != :AsynchronousScheduler.RunNextAvailable.class.getName()
-                    WITH USER_MODE
-            ];
+            return (Integer) QueryV1.of(AsynchronousJob__c.SObjectType)
+                    .security(AccessLevel.USER_MODE)
+                    .matching('OwnerId = :ownerId AND Status__c IN :schedulableStatuses AND Runnable__c != :schedulerClass')
+                    .count()
+                    .execute(Optional.of(
+                            new Map<String, Object> {
+                                    'ownerId' => UserInfo.getUserId(),
+                                    'schedulableStatuses' => schedulableStatuses,
+                                    'schedulerClass' => AsynchronousScheduler.RunNextAvailable.class.getName()
+                            }
+                    ))
+                    .orElse(0);
         }
 
         /**
@@ -221,14 +241,16 @@ public with sharing virtual class AsynchronousDAO implements API {
         public Integer countActiveObjects(final AsynchronousJob__c asyncObject) {
             Assertion.isNotNull(asyncObject, 'argument: AsynchronousDAO.apiCountActiveObjects.asyncObject');
 
-            return [
-                    SELECT COUNT()
-                    FROM AsynchronousJob__c
-                    WHERE OwnerId = :UserInfo.getUserId()
-                    AND Runnable__c = :asyncObject.Runnable__c
-                    AND Status__c = :AsynchronousV1.Status.RUNNING.name()
-                    WITH USER_MODE
-            ];
+            return (Integer) QueryV1.of(AsynchronousJob__c.SObjectType)
+                    .security(AccessLevel.USER_MODE)
+                    .matching('OwnerId = :ownerId AND Runnable__c = :runnableClass AND Status__c = :runningStatus')
+                    .count()
+                    .execute(Optional.of(new Map<String, Object> {
+                            'ownerId' => UserInfo.getUserId(),
+                            'runnableClass' => asyncObject.Runnable__c,
+                            'runningStatus' => AsynchronousV1.Status.RUNNING.name()
+                    }))
+                    .orElse(0);
         }
 
         /**
@@ -282,10 +304,11 @@ public with sharing virtual class AsynchronousDAO implements API {
                 newStates.addAll(AsynchronousHelper.API.encodeState(asynchronousObject, states[i]));
             }
 
-            Database.delete(
-                    [SELECT Id FROM AsynchronousJobState__c WHERE AsynchronousJob__c IN :allIds WITH USER_MODE],
-                    AccessLevel.USER_MODE
-            );
+            QueryV1.of(AsynchronousJobState__c.SObjectType)
+                    .security(AccessLevel.USER_MODE)
+                    .matching('AsynchronousJob__c IN :allIds')
+                    .execute(Optional.of(new Map<String, Object> { 'allIds' => allIds }))
+                    .call(new QueryHelper.SObjectDeleter(AccessLevel.USER_MODE));
 
             Database.upsert(newStates, AccessLevel.USER_MODE);
 
@@ -331,7 +354,7 @@ public with sharing virtual class AsynchronousDAO implements API {
      * @description
      * Method is solely for mocking use.
      */
-    public Set<AsynchronousJob__c> getScheduledObjects(final Integer maxJobsToReturn) {
+    public List<AsynchronousJob__c> getScheduledObjects(final Integer maxJobsToReturn) {
         throw new AsynchronousV1.APIException('Access denied');
     }
 

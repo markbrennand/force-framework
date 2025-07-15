@@ -23,7 +23,7 @@ public with sharing class TestHelper {
 
     @TestVisible
     private static Boolean textContains(final String expected, final String text) {
-        return text.replace('forcefw.', '').contains(expected);
+        return text.replace(CommonHelper.getApexNamespace(), '').contains(expected);
 
     }
 

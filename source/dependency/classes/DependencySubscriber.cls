@@ -23,10 +23,6 @@ public with sharing class DependencySubscriber {
      */
     private with sharing class Implementation implements TriggerV1.Subscriber {
 
-        public Set<TriggerV1.Operation> forOperations() {
-            return new Set<TriggerV1.Operation> { TriggerV1.Operation.INSERTING, TriggerV1.Operation.UPDATING };
-        }
-
         public void onEvent(final TriggerV1.Event event) {
             if (event.isAfter()) {
                 handle(event);

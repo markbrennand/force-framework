@@ -371,11 +371,11 @@ public with sharing class AsynchronousTests {
 
             Assert.areEqual(2, jobs.size());
             Assert.areEqual(new Set<String>{
-                    'Id', 'LastRunTime__c', 'MaximumRetries__c', 'Owner', 'OwnerId', 'Reference__c', 'RetryNumber__c', 'Retry__c', 'Runnable__c', 'ScheduledRunTime__c', 'Status__c'
+                    'Id', 'LastRunTime__c', 'MaximumRetries__c', 'Name', 'Owner', 'OwnerId', 'Reference__c', 'RetriesRemaining__c', 'RetryNumber__c', 'Runnable__c', 'ScheduledRunTime__c', 'Status__c'
             }, jobs[1].keySet());
 
             Assert.areEqual(new Set<String>{
-                    'Id', 'LastRunTime__c', 'MaximumRetries__c', 'Owner', 'OwnerId', 'Reference__c', 'RetryNumber__c', 'Retry__c', 'RunTime__c', 'Runnable__c', 'ScheduledRunTime__c', 'Status__c'
+                    'Id', 'LastRunTime__c', 'MaximumRetries__c', 'Name', 'Owner', 'OwnerId', 'Reference__c', 'RetriesRemaining__c', 'RetryNumber__c', 'RunTime__c', 'Runnable__c', 'ScheduledRunTime__c', 'Status__c'
             }, jobs[0].keySet());
 
             jobs = AsynchronousV1.getJobs(
@@ -391,11 +391,11 @@ public with sharing class AsynchronousTests {
 
             Assert.areEqual(2, jobs.size());
             Assert.areEqual(new Set<String>{
-                    'Id', 'LastRunTime__c', 'MaximumRetries__c', 'Owner', 'OwnerId', 'Reference__c', 'RetryNumber__c', 'Retry__c', 'Runnable__c', 'ScheduledRunTime__c', 'Status__c'
+                    'Id', 'LastRunTime__c', 'MaximumRetries__c', 'Name', 'Owner', 'OwnerId', 'Reference__c', 'RetryNumber__c', 'RetriesRemaining__c', 'Runnable__c', 'ScheduledRunTime__c', 'Status__c'
             }, jobs[1].keySet());
 
             Assert.areEqual(new Set<String>{
-                    'Id', 'LastRunTime__c', 'MaximumRetries__c', 'Owner', 'OwnerId', 'Reference__c', 'RetryNumber__c', 'Retry__c', 'RunTime__c', 'Runnable__c', 'ScheduledRunTime__c', 'Status__c'
+                    'Id', 'LastRunTime__c', 'MaximumRetries__c', 'Name', 'Owner', 'OwnerId', 'Reference__c', 'RetryNumber__c', 'RetriesRemaining__c', 'RunTime__c', 'Runnable__c', 'ScheduledRunTime__c', 'Status__c'
             }, jobs[0].keySet());
 
             TriggerV1.enable(AsynchronousJobSubscriber.Factory.class);

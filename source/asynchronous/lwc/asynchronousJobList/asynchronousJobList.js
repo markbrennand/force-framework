@@ -16,7 +16,7 @@ export default class AsynchronousJobList extends LightningElement {
     minColumnWidth = 120;
     maxColumnWidth = 275;
     showSpinner = false;
-    refreshRate = REFRESH_RATE;;
+    refreshRate = REFRESH_RATE;
 
     _selectedRows= [];
     _statusFilter = [ 'RUNNING', 'QUEUED' ];
@@ -25,12 +25,13 @@ export default class AsynchronousJobList extends LightningElement {
     _timerId;
 
     columns = [
+        { label: 'Name', fieldName: 'Name' },
         { label: 'Apex Job', fieldName: 'ApexJobId__c' },
         { label: 'Owner', fieldName: 'Owner' },
         { label: 'Reference', fieldName: 'Reference__c' },
         { label: 'Status', fieldName: 'Status__c', sortable: true },
         { label: 'Active (ms)', fieldName: 'RunTime__c' },
-        { label: 'Retry', fieldName: 'Retry__c' },
+        { label: 'Retries Remaining', fieldName: 'RetriesRemaining__c' },
         { label: 'Runnable', fieldName: 'Runnable__c' },
         { label: 'Scheduled Run Time', fieldName: 'ScheduledRunTime__c', type: 'datetime', sortable: true }
     ];

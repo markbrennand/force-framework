@@ -339,7 +339,7 @@ public with sharing virtual class AsynchronousAPI implements API {
             updatedJob.setState(((List<Map<String, String>>) shared().get())[index]);
 
             ((List<AsynchronousV1.Job>) currentValue.get()).add(updatedJob);
-            return Optional.of(currentValue.get());
+            return currentValue;
         }
     }
 

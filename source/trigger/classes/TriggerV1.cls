@@ -135,14 +135,6 @@ global with sharing class TriggerV1 {
          * @param event The trigger event.
          */
         void onEvent(final Event event);
-
-        /**
-         * @description
-         * Returns the operations the subscriber will accept.
-         *
-         * @return The operations.
-         */
-        Set<Operation> forOperations();
     }
 
     /**
@@ -224,15 +216,6 @@ global with sharing class TriggerV1 {
     global static Boolean isEnabled(final Type type) {
         return TriggerAPI.API.isEnabled(type);
     }
-    /**
-     * @description
-     * Definition a subscriber may use to indicate that it wishes to subscribe to all the trigger operations.
-     */
-    global static final Set<Operation> ALL_OPERATIONS = new Set<Operation> {
-            Operation.INSERTING,
-            Operation.UPDATING,
-            Operation.DELETING
-    };
 
     /**
      * @description

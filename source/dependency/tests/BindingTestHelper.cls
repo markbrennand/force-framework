@@ -75,12 +75,12 @@ public with sharing class BindingTestHelper {
     }
 
     @TestVisible
-    private static void testBindingFailure(Type forType, String action, Type withImpl, String expectedError) {
+    private static void testBindingFailure(Type forType, Optional action, Type withImpl, String expectedError) {
         try {
-            if (action == null) {
-                DependencyV1.bind(forType, withImpl);
+            if (action.isPresent()) {
+                DependencyV1.bind(forType, (String) action.get(), withImpl);
             } else {
-                DependencyV1.bind(forType, action, withImpl);
+                DependencyV1.bind(forType, withImpl);
             }
             Assert.fail();
         } catch(Exception e) {
@@ -88,10 +88,10 @@ public with sharing class BindingTestHelper {
         }
 
         try {
-            if (action == null) {
-                insert new Binding__c(Type__c = forType.getName(), Implementation__c = withImpl.getName());
+            if (action.isPresent()) {
+                insert new Binding__c(Type__c = forType.getName(), Action__c = (String) action.get(), Implementation__c = withImpl.getName());
             } else {
-                insert new Binding__c(Type__c = forType.getName(), Action__c = action, Implementation__c = withImpl.getName());
+                insert new Binding__c(Type__c = forType.getName(), Implementation__c = withImpl.getName());
             }
             Assert.fail();
         } catch(Exception e) {

@@ -17,7 +17,7 @@ public with sharing class ActionBindingTests {
     @IsTest
     static void testInstantiation() {
         System.runAs(BindingTestHelper.getManager()) {
-            BindingTestHelper.testBindingFailure(BindingTestHelper.TestInterface.class, 'Test', BindingTestHelper.AbstractTest.class, 'Implementation BindingTestHelper.AbstractTest must be instantiable');
+            BindingTestHelper.testBindingFailure(BindingTestHelper.TestInterface.class, Optional.of('Test'), BindingTestHelper.AbstractTest.class, 'Implementation BindingTestHelper.AbstractTest must be instantiable');
             DependencyV1.bind(BindingTestHelper.TestInterface.class, 'Test', BindingTestHelper.SingletonTest.class);
             DependencyV1.bind(BindingTestHelper.AbstractTest.class, 'Test', BindingTestHelper.SingletonTest.class);
             DependencyV1.bind(Integer.class, 'Test', BindingTestHelper.IntegerFactory.class);
@@ -40,10 +40,10 @@ public with sharing class ActionBindingTests {
     @IsTest
     static void testValidation() {
         System.runAs(BindingTestHelper.getManager()) {
-            BindingTestHelper.testBindingFailure(BindingTestHelper.TestInterface.class, 'Test', User.class, 'Class User does not implement TestInterface');
-            BindingTestHelper.testBindingFailure(BindingTestHelper.AbstractTest.class, 'Test', User.class, 'Class User does not extend AbstractTest');
-            BindingTestHelper.testBindingFailure(Integer.class, 'Test', User.class, 'Class User does not extend Integer');
-            BindingTestHelper.testBindingFailure(Map<String, Integer>.class, 'Test', Map<String, Double>.class, 'Class Map<String,Double> does not extend Map<String,Integer>');
+            BindingTestHelper.testBindingFailure(BindingTestHelper.TestInterface.class, Optional.of('Test'), User.class, 'Class User does not implement TestInterface');
+            BindingTestHelper.testBindingFailure(BindingTestHelper.AbstractTest.class, Optional.of('Test'), User.class, 'Class User does not extend AbstractTest');
+            BindingTestHelper.testBindingFailure(Integer.class, Optional.of('Test'), User.class, 'Class User does not extend Integer');
+            BindingTestHelper.testBindingFailure(Map<String, Integer>.class, Optional.of('Test'), Map<String, Double>.class, 'Class Map<String,Double> does not extend Map<String,Integer>');
             DependencyV1.bind(BindingTestHelper.TestInterface.class, 'Test', BindingTestHelper.SingletonTest.class);
             DependencyV1.bind(BindingTestHelper.AbstractTest.class, 'Test', BindingTestHelper.SingletonTest.class);
             DependencyV1.bind(Integer.class, 'Test', BindingTestHelper.IntegerFactory.class);
@@ -62,7 +62,7 @@ public with sharing class ActionBindingTests {
             DependencyV1.bind(Map<String, Object>.class, 'Test', MapStringObjectFactory.class);
             DependencyV1.bind(Map<String, String>.class, 'Test', MapStringStringFactory.class);
             DependencyV1.bind(Map<String, Integer>.class, 'Test', MapStringIntegerFactory.class);
-            BindingTestHelper.testBindingFailure(Map<String, List<Integer>>.class, 'Test', MapStringListIntegerFactory.class, 'Class Map<String,List<Integer>> has no registered bind checker');
+            BindingTestHelper.testBindingFailure(Map<String, List<Integer>>.class, Optional.of('Test'), MapStringListIntegerFactory.class, 'Class Map<String,List<Integer>> has no registered bind checker');
         }
     }
 

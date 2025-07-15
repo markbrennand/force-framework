@@ -534,16 +534,18 @@ public with sharing virtual class TriggerAPI implements API {
          * @description
          * For the given Trigger definition and Event, the Subscriber for the definition is loaded and the onEvent
          * of it is called.
-         * <br><br>
-         * The Subscriber's forOperations method is first called, to determine which operations the Subscriber
-         * will consume.
          *
          * @param triggerDefinition The Trigger custom metadata record registered to process event.
          * @param event The Event to publish.
          */
         private void processEvent(final Trigger__mdt triggerDefinition, final TriggerV1.Event event) {
+            if (!isSubscriberBoundToAction(triggerDefinition, event.getOperation(), event.isBefore())) {
+                return;
+            }
+
             final String subscriberClass = triggerDefinition.SubscriberClass__c;
             final TriggerV1.Subscriber subscriber;
+
             if (getPublishingInformation().parent.SUBSCRIBERS.containsKey(subscriberClass)) {
                 subscriber = getPublishingInformation().parent.SUBSCRIBERS.get(subscriberClass);
             } else {
@@ -553,15 +555,7 @@ public with sharing virtual class TriggerAPI implements API {
                 getPublishingInformation().parent.SUBSCRIBERS.put(subscriberClass, subscriber);
             }
 
-            final Set<TriggerV1.Operation> forOperations = subscriber.forOperations();
-
-            if (Trigger.isInsert && forOperations.contains(TriggerV1.Operation.INSERTING)) {
-                subscriber.onEvent(event);
-            } else if (Trigger.isUpdate && forOperations.contains(TriggerV1.Operation.UPDATING)) {
-                subscriber.onEvent(event);
-            } else if (Trigger.isDelete && forOperations.contains(TriggerV1.Operation.DELETING)) {
-                subscriber.onEvent(event);
-            }
+            subscriber.onEvent(event);
         }
 
         /**
@@ -594,6 +588,37 @@ public with sharing virtual class TriggerAPI implements API {
             this.objectKey = objectKey;
             this.event = event;
         }
+    }
+
+    /**
+     * @description
+     * Determines whether the subscriber defined by a trigger definition is bound to receive the event for the
+     * current trigger action.
+     *
+     * @param triggerDefinition The trigger definition to check.
+     * @param operation The operation being peformed.
+     * @param isBefore True if trigger before action is being called.
+     *
+     * @return True if the subscriber is bound the action.
+     */
+    @TestVisible
+    private static Boolean isSubscriberBoundToAction(
+            final Trigger__mdt triggerDefinition,
+            final TriggerV1.Operation operation,
+            final Boolean isBefore)
+    {
+        switch on operation {
+            when INSERTING {
+                return isBefore ? triggerDefinition.BeforeInsert__c : triggerDefinition.AfterInsert__c;
+            }
+            when UPDATING {
+                return isBefore ? triggerDefinition.BeforeUpdate__c : triggerDefinition.AfterUpdate__c;
+            }
+            when DELETING {
+                return isBefore ? triggerDefinition.BeforeDelete__c : triggerDefinition.AfterDelete__c;
+            }
+        }
+        return false;
     }
 
     /**

@@ -11,12 +11,30 @@
  */
 global with sharing class Optional {
 
-
     /**
      * @description
      * Exception thrown to indicate an attempt was made to use an un-assigned value.
      */
     global with sharing class NoSuchElementException extends Exception {}
+
+    /**
+     * @description
+     * Interface to allow Optional value to be processed.
+     */
+    global interface Function {
+
+        /**
+         * @description
+         * Method called to process the value of an Optional.
+         * <br><br>
+         * The implementor must return an Optional representing the result of the processing.
+         *
+         * @param value The Optional to be processed.
+         *
+         * @return The result of the processing.
+         */
+        Optional apply(final Optional value);
+    }
 
     /**
      * @description
@@ -119,5 +137,19 @@ global with sharing class Optional {
      */
     global Object orElse(final Object other) {
         return isPresent ? value : other;
+    }
+
+    /**
+     * @description
+     * Uses the given Function to process an Optional.
+     * <br><br>
+     * The method may be used to build a chain of functions to process an Optional.
+     *
+     * @param function The transformer to create the value.
+     *
+     * @return The value returned by the transformer.
+     */
+    global Optional call(final Function function) {
+        return function.apply(this);
     }
 }
