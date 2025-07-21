@@ -147,7 +147,7 @@ public with sharing virtual class TriggerAPI implements API {
          * @description
          * Record of all the active events for each object type.
          */
-        private final Map<String, List<TriggerV1.Event>> EVENTS = new Map<String, List<TriggerV1.Event>>();
+        private final Map<String, ArrayV1.Methods> EVENTS = new Map<String, ArrayV1.Methods>();
 
         /**
          * @description
@@ -269,10 +269,10 @@ public with sharing virtual class TriggerAPI implements API {
             if (TRIGGER_DEFINITIONS.containsKey(objectKey)) {
                 final TriggerV1.Event event = createEvent(objectKey);
 
-                if (EVENTS.containsKey(objectKey) && !EVENTS.get(objectKey).isEmpty()) {
-                    EVENTS.get(objectKey).add(0, event);
+                if (EVENTS.containsKey(objectKey)) {
+                    EVENTS.get(objectKey).push(event);
                 } else {
-                    EVENTS.put(objectKey, new List<TriggerV1.Event> { event });
+                    EVENTS.put(objectKey, ArrayV1.over(new List<TriggerV1.Event> { event }));
                 }
 
                 try {
@@ -281,7 +281,7 @@ public with sharing virtual class TriggerAPI implements API {
                             .forEach(new EventPublisher());
 
                 } finally {
-                    EVENTS.get(objectKey).remove(0);
+                    EVENTS.get(objectKey).pop();
                 }
 
             } else {
@@ -323,7 +323,7 @@ public with sharing virtual class TriggerAPI implements API {
                     Trigger.isInsert ? new Map<Id, SObject>() : Trigger.oldMap,
                     isBefore,
                     operation,
-                    EVENTS.containsKey(objectKey) ? EVENTS.get(objectKey).size() + 1 : 1
+                    EVENTS.containsKey(objectKey) ? EVENTS.get(objectKey).length() + 1 : 1
             );
         }
 
@@ -518,7 +518,7 @@ public with sharing virtual class TriggerAPI implements API {
         private RecursiveDepthAction checkRecursiveDepth(final String objectKey, final Trigger__mdt triggerDefinition) {
             final Integer maximumRecursiveCalls = (Integer) triggerDefinition.MaximumRecursiveDepth__c;
             if (maximumRecursiveCalls > 0) {
-                if (getPublishingInformation().parent.EVENTS.get(getPublishingInformation().objectKey).size() > maximumRecursiveCalls) {
+                if (getPublishingInformation().parent.EVENTS.get(getPublishingInformation().objectKey).length() > maximumRecursiveCalls) {
                     if (triggerDefinition.ThrowExceptionWhenRecursionExceeded__c) {
                         return RecursiveDepthAction.THROW_EXCEPTION;
                     } else {

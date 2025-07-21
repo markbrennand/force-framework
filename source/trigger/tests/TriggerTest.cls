@@ -243,6 +243,38 @@ public with sharing class TriggerTest {
         }
     }
 
+    @IsTest
+    private static void testIsSubscriberBoundToAction() {
+        Trigger__mdt triggerDefinition = new Trigger__mdt();
+        triggerDefinition.BeforeInsert__c = true;
+        triggerDefinition.AfterInsert__c  = false;
+        Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, true));
+        Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, false));
+        triggerDefinition.BeforeInsert__c = false;
+        triggerDefinition.AfterInsert__c = true;
+        Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, true));
+        Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, false));
+
+        triggerDefinition = new Trigger__mdt();
+        triggerDefinition.BeforeUpdate__c = true;
+        triggerDefinition.AfterUpdate__c  = false;
+        Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, true));
+        Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, false));
+        triggerDefinition.BeforeUpdate__c = false;
+        triggerDefinition.AfterUpdate__c = true;
+        Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, true));
+        Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, false));
+
+        triggerDefinition = new Trigger__mdt();
+        triggerDefinition.BeforeDelete__c = true;
+        triggerDefinition.AfterDelete__c  = false;
+        Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, true));
+        Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, false));
+        triggerDefinition.BeforeDelete__c = false;
+        triggerDefinition.AfterDelete__c = true;
+        Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, true));
+        Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, false));
+    }
 
     @IsTest
     private static void testBindingCheck() {
@@ -299,14 +331,12 @@ public with sharing class TriggerTest {
             Assert.areEqual('Access denied', ae.getMessage());
         }
 
-
         try {
             extended.enable(Subscriber1.class);
             Assert.fail();
         } catch (TriggerV1.APIException ae) {
             Assert.areEqual('Access denied', ae.getMessage());
         }
-
 
         try {
             extended.isEnabled(Subscriber1.class);

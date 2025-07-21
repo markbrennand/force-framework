@@ -336,6 +336,34 @@ public with sharing class ArrayTests {
         Assert.areEqual(1, ArrayV1.over(new List<Integer> { 1 }).length());
     }
 
+    @IsTest
+    private static void testSort() {
+        List<Integer> initial = new List<Integer> { 5, 2, 4, 3, 1 };
+        List<Integer> sorted = (List<Integer>) ArrayV1.over(initial).sort();
+        Assert.areEqual(5, initial[0]);
+        Assert.areEqual(1, sorted[0]);
+        Assert.areEqual(2, initial[1]);
+        Assert.areEqual(2, sorted[1]);
+        Assert.areEqual(4, initial[2]);
+        Assert.areEqual(3, sorted[2]);
+        Assert.areEqual(3, initial[3]);
+        Assert.areEqual(4, sorted[3]);
+        Assert.areEqual(1, initial[4]);
+        Assert.areEqual(5, sorted[4]);
+
+        sorted = (List<Integer>) ArrayV1.over(initial).sort(new ReverseComparator());
+        Assert.areEqual(5, initial[0]);
+        Assert.areEqual(5, sorted[0]);
+        Assert.areEqual(2, initial[1]);
+        Assert.areEqual(4, sorted[1]);
+        Assert.areEqual(4, initial[2]);
+        Assert.areEqual(3, sorted[2]);
+        Assert.areEqual(3, initial[3]);
+        Assert.areEqual(2, sorted[3]);
+        Assert.areEqual(1, initial[4]);
+        Assert.areEqual(1, sorted[4]);
+    }
+
     private with sharing class ForEachMultiplier extends ArrayV1.Callback {
         public override Optional function(Object element, Optional currentValue, Integer index) {
             ((List<Integer>) shared().get()).add(((Integer) element) * 2);
@@ -385,6 +413,12 @@ public with sharing class ArrayTests {
             AsynchronousJob__c cloned = ((AsynchronousJob__c) element).clone();
             cloned.RetryInterval__c = shared().isPresent() ?  (Integer) shared().get() : 1000;
             return Optional.of(cloned);
+        }
+    }
+
+    private with sharing class ReverseComparator implements Comparator<Object> {
+        public Integer compare(Object param1, Object param2) {
+            return (Integer) param2 - (Integer) param1;
         }
     }
 }

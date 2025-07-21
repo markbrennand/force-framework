@@ -10,61 +10,10 @@ global with sharing class QueryV1 {
 
     global enum Security { NONE, SECURITY_ENFORCED, USER_MODE }
 
-    global with sharing class AggregatedField {
-        public final SObjectField field { public get; private set; }
-        public final Optional returnAs  { public get; private set; }
-        public final Optional function  { public get; private set; }
-
-        global AggregatedField(final SObjectField field, final Optional function, final Optional returnAs) {
-            if (returnAs.isPresent() && ! (returnAs.get() instanceof String)) {
-                throw new QueryException('Return as qualifier for field must be a String');
-            }
-
-            if (function.isPresent() && ! (function.get() instanceof String)) {
-                throw new QueryException('Function must be a String');
-            }
-
-            this.field = field;
-            this.returnAs = returnAs;
-            this.function = function;
-        }
-
-        public override String toString() {
-            if (returnAs.isPresent()) {
-                if (function.isPresent()) {
-                    return ArrayV1.over(
-                            new List<String> {
-                                    (String) function.get(),
-                                    '(',
-                                    field.getDescribe().name,
-                                    ') ',
-                                    (String) returnAs.get()
-                            }
-                    ).join('');
-                } else {
-                    return ArrayV1.over(
-                            new List<String> {
-                                    field.getDescribe().name,
-                                    ' ',
-                                    (String) returnAs.get()
-                            }
-                    ).join('');
-                }
-            } else {
-                if (function.isPresent()) {
-                    return ArrayV1.over(
-                            new List<String> {
-                                    (String) function.get(),
-                                    '(',
-                                    field.getDescribe().name,
-                                    ')'
-                            }
-                    ).join('');
-                } else {
-                    return field.getDescribe().name;
-                }
-            }
-        }
+    global interface AggregatedField {
+        String getField();
+        String getAlias();
+        Optional getFunction();
     }
 
     global interface API {
@@ -72,6 +21,7 @@ global with sharing class QueryV1 {
         API type(final SObjectType type);
         API security(final AccessLevel security);
         API count();
+        API returningAll();
         API returning(final Set<SObjectField> fields);
         API returning(final SObjectField joinField, final Set<SObjectField> fields);
         API returning(final Set<AggregatedField> fields);
@@ -80,7 +30,9 @@ global with sharing class QueryV1 {
         API descending(final SObjectField field);
         API ascending(final SObjectField field, final Boolean nullsFirst);
         API descending(final SObjectField field, final Boolean nullsFirst);
-        API aggregated(final Set<SObjectField> fields);
+        API group(final Set<SObjectField> fields);
+        API group(final SObjectField joinField, final Set<SObjectField> fields);
+        API has(final String condition);
         API children(final API query);
         API max(final Optional max);
         API offset(final Optional offset);
@@ -89,5 +41,21 @@ global with sharing class QueryV1 {
 
     global static API of(final SObjectType type) {
         return QueryAPI.API.type(type);
+    }
+
+    global static AggregatedField aggregatedField(final SObjectField field, final String alias) {
+        return QueryAPI.aggregatedField(field, Optional.empty(), alias);
+    }
+
+    global static AggregatedField aggregatedField(final SObjectField joinField, final SObjectField field, final String alias) {
+        return QueryAPI.aggregatedField(joinField, field, Optional.empty(), alias);
+    }
+
+    global static AggregatedField aggregatedField(final SObjectField field, final String function, final String alias) {
+        return QueryAPI.aggregatedField(field, Optional.of(function), alias);
+    }
+
+    global static AggregatedField aggregatedField(final SObjectField joinField, final SObjectField field, final String function, final String alias) {
+        return QueryAPI.aggregatedField(joinField, field, Optional.of(function), alias);
     }
 }

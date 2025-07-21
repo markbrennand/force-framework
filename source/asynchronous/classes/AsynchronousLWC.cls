@@ -16,6 +16,8 @@
  * @author Mark Brennand
  */
 public with sharing virtual class AsynchronousLWC implements API {
+    private final static String STATUS_ALIAS = 'Status__c';
+    private final static String COUNT_ALIAS = 'Count__c';
 
     /**
      * Interface defining the calls that may be made from the Asynchronous Job LWC.
@@ -190,11 +192,11 @@ public with sharing virtual class AsynchronousLWC implements API {
                     .security(AccessLevel.USER_MODE)
                     .returning(
                             new Set<QueryV1.AggregatedField> {
-                                    new QueryV1.AggregatedField(AsynchronousJob__c.Status__c, Optional.empty(), Optional.empty()),
-                                    new QueryV1.AggregatedField(AsynchronousJob__c.Id, Optional.of('COUNT'),Optional.of('Total__c'))
+                                    QueryV1.aggregatedField(AsynchronousJob__c.Status__c, STATUS_ALIAS),
+                                    QueryV1.aggregatedField(AsynchronousJob__c.Id, 'COUNT', COUNT_ALIAS)
                             }
                     )
-                    .aggregated(new Set<SObjectField> { AsynchronousJob__c.Status__c })
+                    .group(new Set<SObjectField> { AsynchronousJob__c.Status__c })
                     .execute(Optional.empty())
                     .call(new TotalsTransformer())
                     .get()
@@ -318,12 +320,10 @@ public with sharing virtual class AsynchronousLWC implements API {
      * @description
      * Callback class to build totals for Job status.
      */
-    private with sharing class BuildTotals extends ArrayV1.Callback {
-        private final String statusField = AsynchronousJob__c.Status__c.getDescribe().name;
-
+   private with sharing class BuildTotals extends ArrayV1.Callback {
         public override Optional function(final Object element, final Optional currentValue, final Integer index) {
             final AggregateResult result = (AggregateResult) element;
-            ((Map<String, Integer>) currentValue.get()).put((String) result.get(statusField), (Integer) result.get('Total__c'));
+            ((Map<String, Integer>) currentValue.get()).put((String) result.get(STATUS_ALIAS), (Integer) result.get(COUNT_ALIAS));
             return currentValue;
         }
     }

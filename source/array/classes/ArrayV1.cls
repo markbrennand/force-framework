@@ -38,7 +38,7 @@ global with sharing class ArrayV1 {
          *
          * @param shared The data to be shared.
          */
-        private void sharing(final Object shared) {
+        global void sharing(final Object shared) {
             this.shared = Optional.ofNullable(shared);
         }
 
@@ -280,6 +280,24 @@ global with sharing class ArrayV1 {
          * @return The first element of the array.
          */
         Optional shift();
+
+        /**
+         * @description
+         * Sorts an array of Comparable objects.
+         *
+         * @return A new array containing the sorted objects.
+         */
+        List<Object> sort();
+
+        /**
+         * @description
+         * Sorts an array using the given Comparable
+         *
+         * @param comparator The Comparator to use to compare the objects.
+         *
+         * @return A new array containing the sorted objects.
+         */
+        List<Object> sort(final Comparator<Object> comparator);
     }
 
     /**
@@ -295,195 +313,6 @@ global with sharing class ArrayV1 {
      * @return The methods that may be called on the array.
      */
     global static Methods over(final List<Object> objects) {
-        return new MethodsImpl(objects);
-    }
-
-    private static void isListValid(final List<Object> objects) {
-        Assert.isNotNull(objects);
-    }
-
-    private with sharing class MethodsImpl implements Methods {
-        private Object shared;
-        private final List<Object> objects;
-        private Integer length;
-
-        public MethodsImpl(final List<Object> objects) {
-            isListValid(objects);
-            this.objects = objects;
-            this.length = objects.size();
-        }
-
-        public Integer length() {
-            return length;
-        }
-
-        public Methods sharing(final Object shared) {
-            this.shared = shared;
-            return this;
-        }
-
-        public void forEach(final Callback callback) {
-            callback.sharing(shared);
-            for (Integer i = 0; i < length; i++) {
-                callback.function(objects[i], Optional.empty(), i);
-            }
-        }
-
-        public Object reduce(final Callback callback) {
-            return reduce(callback, getOptionalForElement(0), 0, length - 1, 1).get();
-        }
-
-        public Object reduceRight(final Callback callback) {
-            return reduce(callback, getOptionalForElement(length -1), length - 1, 0, -1).get();
-        }
-
-        public Object reduce(final Callback callback, final Object initialValue) {
-            return reduce(callback, Optional.of(initialValue), -1, length -1, 1).get();
-        }
-
-        public Object reduceRight(final Callback callback, final Object initialValue) {
-            return reduce(callback, Optional.of(initialValue), length, 0, -1).get();
-        }
-
-        public List<Object> filter(final Callback callback) {
-            callback.sharing(shared);
-            final List<Object> filtered = newListOfSameType();
-            for (Integer i = 0; i < length; i++) {
-                final Optional retVal = callback.function(objects[i], null, i);
-                if (!retval.isPresent() || !(retval.get() instanceof Boolean)) {
-                    throw new APIException('Callback for filter() must return a Boolean');
-                }
-
-                if (retval.get() == true) {
-                    filtered.add(objects[i]);
-                }
-            }
-            return filtered;
-        }
-
-        public List<Object> transform(final Callback callback) {
-            callback.sharing(shared);
-            final List<Object> mapped = newListOfSameType();
-            for (Integer i = 0; i < length; i++) {
-                mapped.add(callback.function(objects[i], Optional.empty(), i).get());
-            }
-            return mapped;
-        }
-
-        public List<Object> concat(final List<Object> elements) {
-            final List<Object> cloned = newListOfSameType();
-            cloned.addAll(objects);
-            cloned.addAll(elements);
-            return cloned;
-        }
-
-        public Optional at(final Integer index) {
-            if ((index > 0 && index >= length) ||
-                    (index < 0 && (length + index) < 0))
-            {
-                return Optional.empty();
-            }
-            return (index >= 0) ? Optional.of(objects[index]) : Optional.of(objects[length + index]);
-        }
-
-        public String join(final String separator) {
-            return String.join(objects, separator);
-        }
-
-        public Boolean some(final Callback callback) {
-            callback.sharing(shared);
-            for (Integer i = 0; i < length; i++) {
-                final Optional retVal = callback.function(objects[i], Optional.empty(), i);
-                if (!retval.isPresent() || ! (retval.get() instanceof Boolean)) {
-                    throw new APIException('Callback for some() must return a Boolean');
-                }
-
-                if (retval.get() == true) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public Boolean every(final Callback callback) {
-            callback.sharing(shared);
-            for (Integer i = 0; i < length; i++) {
-                final Optional retVal = callback.function(objects[i], null, i);
-                if (!retval.isPresent() || !(retval.get() instanceof Boolean)) {
-                    throw new APIException('Callback for every() must return a Boolean');
-                }
-
-                if (retval.get() != true) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        public List<Object> reverse() {
-            final List<Object> cloned = newListOfSameType();
-            for (Integer i = length; i > 0; i--) {
-                cloned.add(objects[i-1]);
-            }
-            return cloned;
-        }
-
-        public void push(final Object obj) {
-            objects.add(obj);
-            length++;
-        }
-
-        public Optional pop() {
-            if (objects.size() == 0) {
-                return Optional.empty();
-            }
-
-            final Object lastElement = objects[--length];
-            objects.remove(length);
-
-            return Optional.of(lastElement);
-        }
-
-        public Optional shift() {
-            if (objects.size() == 0) {
-                return Optional.empty();
-            }
-
-            final Object firstElement = objects[0];
-            objects.remove(0);
-            --length;
-
-            return Optional.of(firstElement);
-        }
-
-
-        private List<Object> newListOfSameType() {
-            final List<Object> cloned = objects.clone();
-            cloned.clear();
-            return cloned;
-        }
-
-        private Optional reduce(
-                final Callback callback,
-                final Optional initialValue,
-                final Integer startIndex,
-                final Integer lastIndex,
-                final Integer increment
-        ) {
-            callback.sharing(shared);
-            Optional value = initialValue;
-            for (Integer i = startIndex; i != lastIndex;) {
-                i += increment;
-                value = callback.function(objects[i], value, i);
-            }
-            return value;
-        }
-
-        private Optional getOptionalForElement(final Integer index) {
-            if (length == 0) {
-                throw new ArrayV1.APIException('The reduce() method requires an array containing at least one element');
-            }
-            return Optional.of(objects[index]);
-        }
+        return ArrayImpl.newInstance(objects);
     }
 }

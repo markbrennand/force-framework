@@ -308,7 +308,16 @@ public with sharing virtual class DependencyAPI implements API {
          */
         private void addCustomBindings() {
             if (!customBindingsAdded) {
-                build([SELECT Type__c, Action__c, Implementation__c FROM Binding__c WITH USER_MODE]);
+                // The Query API is injected into the QueryV1 class. Its use would create a circularity, so use the base
+                // implementation.
+                build((List<Binding__c>)
+                    ((QueryV1.API) new QueryAPI.Factory().newInstance())
+                            .type(Binding__c.SObjectType)
+                            .security(AccessLevel.USER_MODE)
+                            .returning(new Set<SObjectField> { Binding__c.Type__c, Binding__c.Action__c, Binding__c.Implementation__c })
+                            .execute(Optional.empty())
+                            .orElse(new List<Binding__c>())
+                );
                 customBindingsAdded = true;
             }
         }
@@ -364,9 +373,7 @@ public with sharing virtual class DependencyAPI implements API {
          * @param bindings The custom bindings to add to the registry.
          */
         public void build(final List<Binding__c> bindings) {
-            ArrayV1.over(bindings)
-                    .sharing(this)
-                    .forEach(new AddBinding());
+            ArrayV1.over(bindings).sharing(this).forEach(new AddBinding());
         }
     }
 
@@ -381,9 +388,13 @@ public with sharing virtual class DependencyAPI implements API {
      * - A type with an action that is bound to more than one implementation.
      */
     public static void checkForDuplicates() {
-        ArrayV1.over([SELECT Type__c, Action__c FROM Binding__c WITH USER_MODE])
-                .sharing(new Set<String>())
-                .forEach(new DuplicateCheck());
+        // The Query API is injected into the QueryV1 class. Its use would create a circularity, so use the base
+        // implementation.
+        ((QueryV1.API) new QueryAPI.Factory().newInstance()).type(Binding__c.SObjectType)
+                .security(AccessLevel.USER_MODE)
+                .returning(new Set<SObjectField> { Binding__c.Type__c, Binding__c.Action__c })
+                .execute(Optional.empty())
+                .call(new DuplicateCheck());
     }
 
     /**
@@ -413,25 +424,31 @@ public with sharing virtual class DependencyAPI implements API {
      * @description
      * Callback class to check for a duplicate binding.
      */
-    private with sharing class DuplicateCheck extends ArrayV1.Callback {
-        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
-            final Binding__c binding = (Binding__c) element;
-            final Set<String> keys = (Set<String>) shared().get();
+    private with sharing class DuplicateCheck implements Optional.Function {
 
-            if (binding.Action__c == null) {
-                if (keys.contains(binding.Type__c)) {
-                    throw createException('Binding for', binding.Type__c, Optional.empty(), 'already exists');
-                }
-                keys.add(binding.Type__c);
-            } else {
-                final String key = binding.Type__c + ':' + binding.Action__c;
-                if (keys.contains(key)) {
-                    throw createException('Binding for', binding.Type__c, Optional.of(binding.Action__c), 'already exists');
-                }
-                keys.add(key);
+        public Optional apply(Optional value) {
+            if (!value.isPresent()) {
+                return value;
             }
 
-            return Optional.empty();
+            final Set<String> keys = new Set<String>();
+
+            for (Binding__c binding : (List<Binding__c>) value.get()) {
+                if (binding.Action__c == null) {
+                    if (keys.contains(binding.Type__c)) {
+                        throw createException('Binding for', binding.Type__c, Optional.empty(), 'already exists');
+                    }
+                    keys.add(binding.Type__c);
+                } else {
+                    final String key = binding.Type__c + ':' + binding.Action__c;
+                    if (keys.contains(key)) {
+                        throw createException('Binding for', binding.Type__c, Optional.of(binding.Action__c), 'already exists');
+                    }
+                    keys.add(key);
+                }
+            }
+
+            return value;
         }
     }
 
