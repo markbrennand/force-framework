@@ -331,7 +331,7 @@ public with sharing virtual class AsynchronousAPI implements API {
      * bgeen queued.
      */
     private with sharing class JobUpdater extends ArrayV1.Callback {
-        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
+        public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final AsynchronousJob__c asyncObject = (AsynchronousJob__c) element;
             Assertion.isNotNull(asyncObject.Id, 'Asynchronous.Job object has not been assigned an Id');
 

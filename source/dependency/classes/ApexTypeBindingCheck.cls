@@ -48,10 +48,7 @@ public with sharing class ApexTypeBindingCheck implements DependencyV1.BindingCh
                 return DependencyHelper.buildValidationResult(TypesV1.newInstance(withImpl) instanceof Map<String, Object>, false, forType, withImpl);
             }
             when else {
-                return new DependencyV1.ValidationResult(
-                        false,
-                        'Class ' + forType.getName() + ' is not registered for bind checking'
-                );
+                return DependencyV1.invalid('Class ' + forType.getName() + ' is not registered for bind checking');
             }
         }
     }

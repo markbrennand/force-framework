@@ -37,7 +37,7 @@ public with sharing class ArrayImpl {
         public void forEach(final ArrayV1.Callback callback) {
             callback.sharing(shared);
             for (Integer i = 0; i < length; i++) {
-                callback.function(objects[i], Optional.empty(), i);
+                callback.function(objects[i], OptionalV1.empty(), i);
             }
         }
 
@@ -50,18 +50,18 @@ public with sharing class ArrayImpl {
         }
 
         public Object reduce(final ArrayV1.Callback callback, final Object initialValue) {
-            return reduce(callback, Optional.of(initialValue), -1, length -1, 1).get();
+            return reduce(callback, OptionalV1.of(initialValue), -1, length -1, 1).get();
         }
 
         public Object reduceRight(final ArrayV1.Callback callback, final Object initialValue) {
-            return reduce(callback, Optional.of(initialValue), length, 0, -1).get();
+            return reduce(callback, OptionalV1.of(initialValue), length, 0, -1).get();
         }
 
         public List<Object> filter(final ArrayV1.Callback callback) {
             callback.sharing(shared);
             final List<Object> filtered = newListOfSameType();
             for (Integer i = 0; i < length; i++) {
-                final Optional retVal = callback.function(objects[i], null, i);
+                final OptionalV1 retVal = callback.function(objects[i], null, i);
                 if (!retval.isPresent() || !(retval.get() instanceof Boolean)) {
                     throw new ArrayV1.APIException('Callback for filter() must return a Boolean');
                 }
@@ -77,7 +77,7 @@ public with sharing class ArrayImpl {
             callback.sharing(shared);
             final List<Object> mapped = newListOfSameType();
             for (Integer i = 0; i < length; i++) {
-                mapped.add(callback.function(objects[i], Optional.empty(), i).get());
+                mapped.add(callback.function(objects[i], OptionalV1.empty(), i).get());
             }
             return mapped;
         }
@@ -89,13 +89,13 @@ public with sharing class ArrayImpl {
             return cloned;
         }
 
-        public Optional at(final Integer index) {
+        public OptionalV1 at(final Integer index) {
             if ((index > 0 && index >= length) ||
                     (index < 0 && (length + index) < 0))
             {
-                return Optional.empty();
+                return OptionalV1.empty();
             }
-            return (index >= 0) ? Optional.of(objects[index]) : Optional.of(objects[length + index]);
+            return (index >= 0) ? OptionalV1.of(objects[index]) : OptionalV1.of(objects[length + index]);
         }
 
         public String join(final String separator) {
@@ -105,7 +105,7 @@ public with sharing class ArrayImpl {
         public Boolean some(final ArrayV1.Callback callback) {
             callback.sharing(shared);
             for (Integer i = 0; i < length; i++) {
-                final Optional retVal = callback.function(objects[i], Optional.empty(), i);
+                final OptionalV1 retVal = callback.function(objects[i], OptionalV1.empty(), i);
                 if (!retval.isPresent() || ! (retval.get() instanceof Boolean)) {
                     throw new ArrayV1.APIException('Callback for some() must return a Boolean');
                 }
@@ -120,7 +120,7 @@ public with sharing class ArrayImpl {
         public Boolean every(final ArrayV1.Callback callback) {
             callback.sharing(shared);
             for (Integer i = 0; i < length; i++) {
-                final Optional retVal = callback.function(objects[i], null, i);
+                final OptionalV1 retVal = callback.function(objects[i], null, i);
                 if (!retval.isPresent() || !(retval.get() instanceof Boolean)) {
                     throw new ArrayV1.APIException('Callback for every() must return a Boolean');
                 }
@@ -145,27 +145,27 @@ public with sharing class ArrayImpl {
             length++;
         }
 
-        public Optional pop() {
+        public OptionalV1 pop() {
             if (objects.size() == 0) {
-                return Optional.empty();
+                return OptionalV1.empty();
             }
 
             final Object lastElement = objects[--length];
             objects.remove(length);
 
-            return Optional.of(lastElement);
+            return OptionalV1.of(lastElement);
         }
 
-        public Optional shift() {
+        public OptionalV1 shift() {
             if (objects.size() == 0) {
-                return Optional.empty();
+                return OptionalV1.empty();
             }
 
             final Object firstElement = objects[0];
             objects.remove(0);
             --length;
 
-            return Optional.of(firstElement);
+            return OptionalV1.of(firstElement);
         }
 
         public List<Object> sort() {
@@ -186,15 +186,15 @@ public with sharing class ArrayImpl {
             return cloned;
         }
 
-        private Optional reduce(
+        private OptionalV1 reduce(
                 final ArrayV1.Callback callback,
-                final Optional initialValue,
+                final OptionalV1 initialValue,
                 final Integer startIndex,
                 final Integer lastIndex,
                 final Integer increment
         ) {
             callback.sharing(shared);
-            Optional value = initialValue;
+            OptionalV1 value = initialValue;
             for (Integer i = startIndex; i != lastIndex;) {
                 i += increment;
                 value = callback.function(objects[i], value, i);
@@ -202,11 +202,11 @@ public with sharing class ArrayImpl {
             return value;
         }
 
-        private Optional getOptionalForElement(final Integer index) {
+        private OptionalV1 getOptionalForElement(final Integer index) {
             if (length == 0) {
                 throw new ArrayV1.APIException('The reduce() method requires an array containing at least one element');
             }
-            return Optional.of(objects[index]);
+            return OptionalV1.of(objects[index]);
         }
 
         private void isListValid(final List<Object> objects) {

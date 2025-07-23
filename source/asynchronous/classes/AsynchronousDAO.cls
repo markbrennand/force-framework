@@ -144,7 +144,7 @@ public with sharing virtual class AsynchronousDAO implements API {
         public AsynchronousJob__c getObject(final Id asyncObjectId) {
             Assertion.isNotNull(asyncObjectId, 'argument: AsynchronousDAO.apiGetObject.asyncObjectId');
 
-            final Optional matches = QueryV1.of(AsynchronousJob__c.SObjectType)
+            final OptionalV1 matches = QueryV1.of(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.USER_MODE)
                     .matching('Id = :asyncObjectId')
                     .returning(new Set<SObjectField> {
@@ -162,10 +162,10 @@ public with sharing virtual class AsynchronousDAO implements API {
                     .children(
                             QueryV1.of(AsynchronousJobState__c.SObjectType)
                                     .returning(new Set<SObjectField> { AsynchronousJobState__c.Content__c })
-                                    .ascending(AsynchronousJobState__c.ChunkNumber__c)
+                                    .ordered(QueryV1.ascending(AsynchronousJobState__c.ChunkNumber__c))
                     )
-                    .max(Optional.of(1))
-                    .execute(Optional.of(new Map<String, Object> { 'asyncObjectId' => asyncObjectId }));
+                    .max(1)
+                    .execute(OptionalV1.of(new Map<String, Object> { 'asyncObjectId' => asyncObjectId }));
 
             Assertion.isTrue(matches.isPresent(), 'Asynchronous object with Id ' + asyncObjectId + ' not found');
             return ((List<AsynchronousJob__c>) matches.get())[0];
@@ -187,9 +187,9 @@ public with sharing virtual class AsynchronousDAO implements API {
                     .security(AccessLevel.USER_MODE)
                     .matching('OwnerId = :ownerId AND ScheduledRunTime__c <= :now AND Runnable__c != :schedulerClass AND Status__c = :queued')
                     .returning(new Set<SObjectField> { AsynchronousJob__c.Runnable__c })
-                    .ascending(AsynchronousJob__c.ScheduledRunTime__c)
-                    .max(Optional.of(maxJobsToReturn))
-                    .execute(Optional.of(
+                    .ordered(QueryV1.ascending(AsynchronousJob__c.ScheduledRunTime__c))
+                    .max(maxJobsToReturn)
+                    .execute(OptionalV1.of(
                             new Map<String, Object> {
                                     'ownerId' => UserInfo.getUserId(),
                                     'now' => Datetime.now(),
@@ -218,7 +218,7 @@ public with sharing virtual class AsynchronousDAO implements API {
                     .security(AccessLevel.USER_MODE)
                     .matching('OwnerId = :ownerId AND Status__c IN :schedulableStatuses AND Runnable__c != :schedulerClass')
                     .count()
-                    .execute(Optional.of(
+                    .execute(OptionalV1.of(
                             new Map<String, Object> {
                                     'ownerId' => UserInfo.getUserId(),
                                     'schedulableStatuses' => schedulableStatuses,
@@ -245,7 +245,7 @@ public with sharing virtual class AsynchronousDAO implements API {
                     .security(AccessLevel.USER_MODE)
                     .matching('OwnerId = :ownerId AND Runnable__c = :runnableClass AND Status__c = :runningStatus')
                     .count()
-                    .execute(Optional.of(new Map<String, Object> {
+                    .execute(OptionalV1.of(new Map<String, Object> {
                             'ownerId' => UserInfo.getUserId(),
                             'runnableClass' => asyncObject.Runnable__c,
                             'runningStatus' => AsynchronousV1.Status.RUNNING.name()
@@ -307,7 +307,7 @@ public with sharing virtual class AsynchronousDAO implements API {
             QueryV1.of(AsynchronousJobState__c.SObjectType)
                     .security(AccessLevel.USER_MODE)
                     .matching('AsynchronousJob__c IN :allIds')
-                    .execute(Optional.of(new Map<String, Object> { 'allIds' => allIds }))
+                    .execute(OptionalV1.of(new Map<String, Object> { 'allIds' => allIds }))
                     .call(new QueryHelper.SObjectDeleter(AccessLevel.USER_MODE));
 
             Database.upsert(newStates, AccessLevel.USER_MODE);

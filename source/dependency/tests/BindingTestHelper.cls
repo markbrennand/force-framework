@@ -75,7 +75,7 @@ public with sharing class BindingTestHelper {
     }
 
     @TestVisible
-    private static void testBindingFailure(Type forType, Optional action, Type withImpl, String expectedError) {
+    private static void testBindingFailure(Type forType, OptionalV1 action, Type withImpl, String expectedError) {
         try {
             if (action.isPresent()) {
                 DependencyV1.bind(forType, (String) action.get(), withImpl);
@@ -165,10 +165,9 @@ public with sharing class BindingTestHelper {
             PROTOTYPE_INSTANCE = 0;
 
             if (instance instanceof AbstractTest) {
-                return new DependencyV1.ValidationResult(true, null);
+                return DependencyV1.valid();
             } else {
-                return new DependencyV1.ValidationResult(
-                        false,
+                return DependencyV1.invalid(
                         'Class ' + withImpl.getName() + ' does not extend AbstractTest'
                 );
             }
@@ -182,10 +181,9 @@ public with sharing class BindingTestHelper {
             PROTOTYPE_INSTANCE = 0;
 
             if (instance instanceof TestInterface) {
-                return new DependencyV1.ValidationResult(true, null);
+                return DependencyV1.valid();
             } else {
-                return new DependencyV1.ValidationResult(
-                        false,
+                return DependencyV1.invalid(
                         'Class ' + withImpl.getName() + ' does not implement TestInterface'
                 );
             }

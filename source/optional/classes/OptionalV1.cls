@@ -9,7 +9,7 @@
  *
  * @author Mark Brennand
  */
-global with sharing class Optional {
+global with sharing class OptionalV1 {
 
     /**
      * @description
@@ -33,7 +33,7 @@ global with sharing class Optional {
          *
          * @return The result of the processing.
          */
-        Optional apply(final Optional value);
+        OptionalV1 apply(final OptionalV1 value);
     }
 
     /**
@@ -52,7 +52,7 @@ global with sharing class Optional {
      * @description
      * Constructs an Optional which has no value.
      */
-    private Optional() {
+    private OptionalV1() {
         this.isPresent = false;
     }
 
@@ -62,7 +62,7 @@ global with sharing class Optional {
      *
      * @param value The value to assign to the Optional.
      */
-    private Optional(final Object value) {
+    private OptionalV1(final Object value) {
         this.value = value;
         this.isPresent = true;
     }
@@ -73,8 +73,8 @@ global with sharing class Optional {
      *
      * @return An un-assigned Optional.
      */
-    global static Optional empty() {
-        return new Optional();
+    global static OptionalV1 empty() {
+        return new OptionalV1();
     }
 
     /**
@@ -85,8 +85,8 @@ global with sharing class Optional {
      *
      * @return The assigned Optional.
      */
-    global static Optional of(final Object value) {
-        return new Optional(value);
+    global static OptionalV1 of(final Object value) {
+        return new OptionalV1(value);
     }
 
     /**
@@ -97,7 +97,7 @@ global with sharing class Optional {
      *
      * @return The assigned Optional.
      */
-    global static Optional ofNullable(Object value) {
+    global static OptionalV1 ofNullable(Object value) {
         return value == null ? empty() : of(value);
     }
 
@@ -149,7 +149,7 @@ global with sharing class Optional {
      *
      * @return The value returned by the transformer.
      */
-    global Optional call(final Function function) {
+    global OptionalV1 call(final Function function) {
         return function.apply(this);
     }
 }

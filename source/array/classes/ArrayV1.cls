@@ -30,7 +30,7 @@ global with sharing class ArrayV1 {
          * @description
          * Data shared on Iterator initiation.
          */
-        private Optional shared = Optional.empty();
+        private OptionalV1 shared = OptionalV1.empty();
 
         /**
          * @description
@@ -39,7 +39,7 @@ global with sharing class ArrayV1 {
          * @param shared The data to be shared.
          */
         global void sharing(final Object shared) {
-            this.shared = Optional.ofNullable(shared);
+            this.shared = OptionalV1.ofNullable(shared);
         }
 
         /**
@@ -48,7 +48,7 @@ global with sharing class ArrayV1 {
          *
          * @return The shared data.
          */
-        global Optional shared() {
+        global OptionalV1 shared() {
             return shared;
         }
 
@@ -68,7 +68,7 @@ global with sharing class ArrayV1 {
          *
          * @return A value representing the result of the processing.
          */
-        global abstract Optional function(final Object element, final Optional currentValue, final Integer index);
+        global abstract OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index);
     }
 
     /**
@@ -213,7 +213,7 @@ global with sharing class ArrayV1 {
          *
          * @return The new array.
          */
-        Optional at(final Integer index);
+        OptionalV1 at(final Integer index);
 
         /**
          * @description
@@ -271,7 +271,7 @@ global with sharing class ArrayV1 {
          *
          * @return The last element of the array.
          */
-        Optional pop();
+        OptionalV1 pop();
 
         /**
          * @description
@@ -279,7 +279,7 @@ global with sharing class ArrayV1 {
          *
          * @return The first element of the array.
          */
-        Optional shift();
+        OptionalV1 shift();
 
         /**
          * @description
@@ -314,5 +314,35 @@ global with sharing class ArrayV1 {
      */
     global static Methods over(final List<Object> objects) {
         return ArrayImpl.newInstance(objects);
+    }
+
+    /**
+     * @description
+     * Creates the iterator from an Object.
+     * <br><br>
+     * If the Object is Iterable a List is built from it, otherwise a List is used with a single element, the object.
+     * <br><br>
+     * The method to iterate the array with may then be called.
+     * <br><br>
+     * If data is to be shared between callbacks, call the shared() method before the iterator method.
+     *
+     * @param source The source object.
+     *
+     * @return The methods that may be called on the array.
+     */
+    global static Methods over(final Object source) {
+        final List<Object> toIterate;
+        if (source instanceof List<Object>) {
+            toIterate = (List<Object>) source;
+        } else if (source instanceof Iterable<Object>) {
+            toIterate = new List<Object>();
+            for (Object next : (Iterable<Object>) source) {
+                toIterate.add(next);
+            }
+        } else {
+            toIterate = new List<Object> { source };
+        }
+
+        return over(toIterate);
     }
 }

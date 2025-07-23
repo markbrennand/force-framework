@@ -151,7 +151,7 @@ public with sharing virtual class DependencyAPI implements API {
      * If the class  implements the Prototype interface then a new instance is created for each wiring of the binding.
      */
     private with sharing class Factory {
-        private Optional instance = Optional.empty();
+        private OptionalV1 instance = OptionalV1.empty();
         private final Type type;
 
         public Factory(final Type type) {
@@ -170,7 +170,7 @@ public with sharing virtual class DependencyAPI implements API {
                         ? TypesV1.newInstance(type)
                         : instance.get();
             } else {
-                instance = Optional.of(TypesV1.newInstance(type));
+                instance = OptionalV1.of(TypesV1.newInstance(type));
                 return instance.get();
             }
         }
@@ -212,7 +212,7 @@ public with sharing virtual class DependencyAPI implements API {
 
             final Key key = new Key(forType);
             if (!REGISTRY.containsKey(key)) {
-                throw createException('Binding for', forType.getName(), Optional.empty(), 'not found in registry');
+                throw createException('Binding for', forType.getName(), OptionalV1.empty(), 'not found in registry');
             }
 
             return REGISTRY.get(key).newInstance();
@@ -234,7 +234,7 @@ public with sharing virtual class DependencyAPI implements API {
 
             final Key key = new ActionKey(forType, action);
             if (!REGISTRY.containsKey(key)) {
-                throw createException('Binding for', forType.getName(), Optional.of(action), 'not found in registry');
+                throw createException('Binding for', forType.getName(), OptionalV1.of(action), 'not found in registry');
             }
 
             return REGISTRY.get(key).newInstance();
@@ -275,7 +275,7 @@ public with sharing virtual class DependencyAPI implements API {
          * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
          */
         public void bind(final Type forType, final Type withImpl) {
-            validateTypes(forType, Optional.empty(), withImpl);
+            validateTypes(forType, OptionalV1.empty(), withImpl);
             REGISTRY.put(new Key(forType), new Factory(withImpl));
         }
 
@@ -288,7 +288,7 @@ public with sharing virtual class DependencyAPI implements API {
          * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
          */
         public void bind(final Type forType, final String action, final Type withImpl) {
-            validateTypes(forType, Optional.of(action), withImpl);
+            validateTypes(forType, OptionalV1.of(action), withImpl);
             REGISTRY.put(new ActionKey(forType, action), new Factory(withImpl));
         }
 
@@ -315,7 +315,7 @@ public with sharing virtual class DependencyAPI implements API {
                             .type(Binding__c.SObjectType)
                             .security(AccessLevel.USER_MODE)
                             .returning(new Set<SObjectField> { Binding__c.Type__c, Binding__c.Action__c, Binding__c.Implementation__c })
-                            .execute(Optional.empty())
+                            .execute(OptionalV1.empty())
                             .orElse(new List<Binding__c>())
                 );
                 customBindingsAdded = true;
@@ -334,7 +334,7 @@ public with sharing virtual class DependencyAPI implements API {
          * @param action The action. Optional.empty() if not set.
          * @param withImpl The implementation to be validated.
          */
-        private void validateTypes(final Type forType, final Optional action, final Type withImpl) {
+        private void validateTypes(final Type forType, final OptionalV1 action, final Type withImpl) {
             if (!action.isPresent()) {
                 Boolean instantiable = false;
                 try {
@@ -344,25 +344,25 @@ public with sharing virtual class DependencyAPI implements API {
                 }
 
                 if (instantiable) {
-                    throw createException('Class', forType.getName(), Optional.empty(),  'must not be instantiable');
+                    throw createException('Class', forType.getName(), OptionalV1.empty(),  'must not be instantiable');
                 }
             }
 
             try {
                 TypesV1.newInstance(withImpl);
             } catch(Exception e) {
-                throw createException('Implementation', withImpl.getName(), Optional.empty(), 'must be instantiable');
+                throw createException('Implementation', withImpl.getName(), OptionalV1.empty(), 'must be instantiable');
             }
 
             if (CHECKS.containsKey(forType)) {
                 for (DependencyV1.BindingCheck check : CHECKS.get(forType)) {
-                    DependencyV1.ValidationResult result = check.validate(forType, withImpl);
+                    DependencyAPI.ValidationResultImpl result = (DependencyAPI.ValidationResultImpl) check.validate(forType, withImpl);
                     if (!result.isValid) {
                         throw new DependencyV1.APIException(result.errorMessage);
                     }
                 }
             } else {
-                throw createException('Class', forType.getName(), Optional.empty(), 'has no registered bind checker');
+                throw createException('Class', forType.getName(), OptionalV1.empty(), 'has no registered bind checker');
             }
         }
 
@@ -393,7 +393,7 @@ public with sharing virtual class DependencyAPI implements API {
         ((QueryV1.API) new QueryAPI.Factory().newInstance()).type(Binding__c.SObjectType)
                 .security(AccessLevel.USER_MODE)
                 .returning(new Set<SObjectField> { Binding__c.Type__c, Binding__c.Action__c })
-                .execute(Optional.empty())
+                .execute(OptionalV1.empty())
                 .call(new DuplicateCheck());
     }
 
@@ -405,6 +405,19 @@ public with sharing virtual class DependencyAPI implements API {
      */
     public static void validate(final List<Binding__c> bindings) {
         ArrayV1.over(bindings).sharing(new Implementation()).forEach(new BindingValidator());
+    }
+
+    /**
+     * @description
+     * Builds a new validation result.
+     *
+     * @param isValid True if the validation was successful.
+     * @param errorMessage Associated error if validation failed.
+     *
+     * @return The new validation result.
+     */
+    public static DependencyV1.ValidationResult newValidationResult(final Boolean isValid, final String errorMessage) {
+        return new ValidationResultImpl(isValid, errorMessage);
     }
 
     /**
@@ -424,9 +437,9 @@ public with sharing virtual class DependencyAPI implements API {
      * @description
      * Callback class to check for a duplicate binding.
      */
-    private with sharing class DuplicateCheck implements Optional.Function {
+    private with sharing class DuplicateCheck implements OptionalV1.Function {
 
-        public Optional apply(Optional value) {
+        public OptionalV1 apply(OptionalV1 value) {
             if (!value.isPresent()) {
                 return value;
             }
@@ -436,13 +449,13 @@ public with sharing virtual class DependencyAPI implements API {
             for (Binding__c binding : (List<Binding__c>) value.get()) {
                 if (binding.Action__c == null) {
                     if (keys.contains(binding.Type__c)) {
-                        throw createException('Binding for', binding.Type__c, Optional.empty(), 'already exists');
+                        throw createException('Binding for', binding.Type__c, OptionalV1.empty(), 'already exists');
                     }
                     keys.add(binding.Type__c);
                 } else {
                     final String key = binding.Type__c + ':' + binding.Action__c;
                     if (keys.contains(key)) {
-                        throw createException('Binding for', binding.Type__c, Optional.of(binding.Action__c), 'already exists');
+                        throw createException('Binding for', binding.Type__c, OptionalV1.of(binding.Action__c), 'already exists');
                     }
                     keys.add(key);
                 }
@@ -457,7 +470,7 @@ public with sharing virtual class DependencyAPI implements API {
      * Callback class to validate a Binding object.
      */
     private with sharing class BindingValidator extends ArrayV1.Callback {
-        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
+        public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final Binding__c binding = (Binding__c) element;
             final API api = (API) shared().get();
 
@@ -474,7 +487,7 @@ public with sharing virtual class DependencyAPI implements API {
                 binding.addError(e.getMessage());
             }
 
-            return Optional.empty();
+            return OptionalV1.empty();
         }
     }
 
@@ -483,7 +496,7 @@ public with sharing virtual class DependencyAPI implements API {
      * Callback class to add a Binding to the registry.
      */
     private with sharing class AddBinding extends ArrayV1.Callback {
-        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
+        public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final Binding__c binding = (Binding__c) element;
             try {
 
@@ -500,7 +513,7 @@ public with sharing virtual class DependencyAPI implements API {
                 binding.addError(e.getMessage());
             }
 
-            return Optional.empty();
+            return OptionalV1.empty();
         }
     }
 
@@ -511,7 +524,7 @@ public with sharing virtual class DependencyAPI implements API {
     private with sharing class AddBindingCheck extends ArrayV1.Callback {
         final Boolean isTest = Test.isRunningTest();
 
-        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
+        public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final BindingCheck__mdt check = (BindingCheck__mdt) element;
             final Map<Type, List<DependencyV1.BindingCheck>> checks = (Map<Type, List<DependencyV1.BindingCheck>>) currentValue.get();
 
@@ -522,7 +535,7 @@ public with sharing virtual class DependencyAPI implements API {
                 final Object checker = TypesV1.newInstance(TypesV1.load(check.BindingCheck__c));
 
                 if (! (checker instanceof DependencyV1.BindingCheck)) {
-                    throw createException('Class', check.BindingCheck__c, Optional.empty(), 'does not implement DependencyV1.BindingCheck');
+                    throw createException('Class', check.BindingCheck__c, OptionalV1.empty(), 'does not implement DependencyV1.BindingCheck');
                 }
 
                 if (!checks.containsKey(forType)) {
@@ -532,7 +545,7 @@ public with sharing virtual class DependencyAPI implements API {
                 }
             }
 
-            return Optional.of(checks);
+            return OptionalV1.of(checks);
         }
     }
 
@@ -581,6 +594,31 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * Class representing result of a binding validation check.
+     */
+    @TestVisible
+    private with sharing class ValidationResultImpl implements DependencyV1.ValidationResult {
+        public final Boolean isValid { public get; private set; }
+        public final String errorMessage { public get; private set; }
+
+        /**
+         * @description
+         * Constructs a validation result object which is used to inform the caller of the BindingCheck.validate
+         * method of the result of the validation.
+         *
+         * @param isValid True if the validation passed. False if not.
+         * @param errorMessage The error message to be recorded in the Exception thrown to record the failure.
+         */
+        private ValidationResultImpl(final Boolean isValid, final String errorMessage) {
+            Assertion.isNotNull(isValid, 'argument: DependencyV1.ValidationResult.isValid may not be null');
+            Assertion.isTrue(isValid || errorMessage != null, 'argument: DependencyAPI.ValidationResultImpl.errorMessage must be set');
+            this.isValid = isValid;
+            this.errorMessage = errorMessage;
+        }
+    }
+
+    /**
+     * @description
      * Builds an APIException with a common format.
      *
      * @param prefix Prefix from exception message.
@@ -593,7 +631,7 @@ public with sharing virtual class DependencyAPI implements API {
     private static DependencyV1.APIException createException(
             final String prefix,
             final String typeName,
-            final Optional action,
+            final OptionalV1 action,
             final String postfix
     ) {
         if (action.isPresent()) {

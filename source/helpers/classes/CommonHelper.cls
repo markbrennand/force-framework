@@ -27,4 +27,20 @@ public with sharing class CommonHelper {
     public static String getApexNamespace() {
         return getSObjectNamespace().replace('__', '.');
     }
+
+    /**
+     * @description
+     * Converts a List element to its String equivalent.
+     */
+    public with sharing class ToString extends ArrayV1.Callback {
+        public override OptionalV1 function(Object element, OptionalV1 currentValue, Integer index) {
+            final Object collection = currentValue.get();
+            if (collection instanceof List<String>) {
+                ((List<String>) collection).add(element.toString());
+            } else {
+                ((Set<String>) collection).add(element.toString());
+            }
+            return currentValue;
+        }
+    }
 }

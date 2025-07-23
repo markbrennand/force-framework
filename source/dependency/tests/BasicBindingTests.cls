@@ -17,8 +17,8 @@ public with sharing class BasicBindingTests {
     @IsTest
     static void testInstantiation() {
         System.runAs(BindingTestHelper.getManager()) {
-            BindingTestHelper.testBindingFailure(BindingTestHelper.SingletonTest.class, Optional.empty(), BindingTestHelper.SingletonTest.class, 'Class BindingTestHelper.SingletonTest must not be instantiable');
-            BindingTestHelper.testBindingFailure(BindingTestHelper.TestInterface.class, Optional.empty(), BindingTestHelper.AbstractTest.class, 'Implementation BindingTestHelper.AbstractTest must be instantiable');
+            BindingTestHelper.testBindingFailure(BindingTestHelper.SingletonTest.class, OptionalV1.empty(), BindingTestHelper.SingletonTest.class, 'Class BindingTestHelper.SingletonTest must not be instantiable');
+            BindingTestHelper.testBindingFailure(BindingTestHelper.TestInterface.class, OptionalV1.empty(), BindingTestHelper.AbstractTest.class, 'Implementation BindingTestHelper.AbstractTest must be instantiable');
             DependencyV1.bind(BindingTestHelper.TestInterface.class, BindingTestHelper.SingletonTest.class);
             DependencyV1.bind(BindingTestHelper.AbstractTest.class, BindingTestHelper.SingletonTest.class);
             insert new Binding__c(Type__c = BindingTestHelper.TestInterface.class.getName(), Implementation__c = BindingTestHelper.SingletonTest.class.getName());
@@ -29,8 +29,8 @@ public with sharing class BasicBindingTests {
     @IsTest
     static void testValidation() {
         System.runAs(BindingTestHelper.getManager()) {
-            BindingTestHelper.testBindingFailure(BindingTestHelper.TestInterface.class, Optional.empty(), User.class, 'Class User does not implement TestInterface');
-            BindingTestHelper.testBindingFailure(BindingTestHelper.AbstractTest.class, Optional.empty(), User.class, 'Class User does not extend AbstractTest');
+            BindingTestHelper.testBindingFailure(BindingTestHelper.TestInterface.class, OptionalV1.empty(), User.class, 'Class User does not implement TestInterface');
+            BindingTestHelper.testBindingFailure(BindingTestHelper.AbstractTest.class, OptionalV1.empty(), User.class, 'Class User does not extend AbstractTest');
             DependencyV1.bind(BindingTestHelper.TestInterface.class, BindingTestHelper.SingletonTest.class);
             DependencyV1.bind(BindingTestHelper.AbstractTest.class, BindingTestHelper.SingletonTest.class);
             insert new Binding__c(Type__c = BindingTestHelper.TestInterface.class.getName(), Implementation__c = BindingTestHelper.SingletonTest.class.getName());
@@ -41,7 +41,7 @@ public with sharing class BasicBindingTests {
     @IsTest
     static void testPropertyBinding() {
         System.runAs(BindingTestHelper.getManager()) {
-            BindingTestHelper.testBindingFailure(Map<String, Integer>.class, Optional.empty(), BindingTestHelper.MapFactory.class, 'Class Map<String,Integer> must not be instantiable');
+            BindingTestHelper.testBindingFailure(Map<String, Integer>.class, OptionalV1.empty(), BindingTestHelper.MapFactory.class, 'Class Map<String,Integer> must not be instantiable');
         }
     }
 

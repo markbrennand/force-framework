@@ -14,14 +14,15 @@ public with sharing class QueryHelper {
             throw new QueryException('Join field must be the Id field of the SObject to join');
         }
 
-        return (Set<String>) ArrayV1.over(
-                new List<SObjectField>(fields))
-                .sharing(relationshipName).reduce(new FieldJoiner(), new Set<String>());
+        return (Set<String>) ArrayV1.over(fields).sharing(relationshipName).reduce(
+                new FieldJoiner(),
+                new Set<String>()
+        );
     }
 
     private with sharing class FieldJoiner extends ArrayV1.Callback {
 
-        public override Optional function(Object element, Optional currentValue, Integer index) {
+        public override OptionalV1 function(Object element, OptionalV1 currentValue, Integer index) {
             final String relationshipName = (String) shared().get();
             final Set<String> fields = (Set<String>) currentValue.get();
             final SObjectField field = (SObjectField) element;
@@ -31,29 +32,29 @@ public with sharing class QueryHelper {
                             .join('.')
             );
 
-            return Optional.of(fields);
+            return OptionalV1.of(fields);
         }
     }
 
-    public with sharing class SObjectDeleter implements Optional.Function {
+    public with sharing class SObjectDeleter implements OptionalV1.Function {
         private final AccessLevel mode;
 
         public SObjectDeleter(final AccessLevel mode) {
             this.mode = mode;
         }
 
-        public Optional apply(final Optional value) {
+        public OptionalV1 apply(final OptionalV1 value) {
             if (!value.isPresent()) {
-                return Optional.of(new List<SObject>());
+                return OptionalV1.of(new List<SObject>());
             }
 
             final List<SObject> toDelete = (List<SObject>) value.get();
             Database.delete(toDelete, mode);
-            return Optional.of(toDelete);
+            return OptionalV1.of(toDelete);
         }
     }
 
-    public with sharing class SObjectTransformAndUpdate implements Optional.Function {
+    public with sharing class SObjectTransformAndUpdate implements OptionalV1.Function {
         private final ArrayV1.Callback callback;
         private final AccessLevel mode;
 
@@ -62,17 +63,14 @@ public with sharing class QueryHelper {
             this.mode = mode;
         }
 
-        public Optional apply(final Optional value) {
+        public OptionalV1 apply(final OptionalV1 value) {
             if (!value.isPresent()) {
-                return Optional.of(new List<SObject>());
+                return OptionalV1.of(new List<SObject>());
             }
 
-            final List<SObject> toUpdate =
-                    (List<SObject>) ArrayV1.over((List<SObject>) value.get())
-                            .transform(callback);
-
+            final List<SObject> toUpdate = (List<SObject>) ArrayV1.over(value.get()).transform(callback);
             Database.update(toUpdate, mode);
-            return Optional.of(toUpdate);
+            return OptionalV1.of(toUpdate);
         }
     }
 }

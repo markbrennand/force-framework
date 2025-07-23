@@ -122,8 +122,8 @@ public with sharing virtual class AsynchronousLWC implements API {
                             AsynchronousJob__c.LastRunTime__c
                     })
                     .returning(AsynchronousJob__c.OwnerId, new Set<SObjectField> { User.Name })
-                    .max(Optional.of(max))
-                    .offset(Optional.of(offset));
+                    .max(max)
+                    .offset(offset);
 
             final String[] parts = ordering.split(' ');
             if (parts.size() != 2) {
@@ -133,11 +133,11 @@ public with sharing virtual class AsynchronousLWC implements API {
             final Map<String, SObjectField> fields = AsynchronousJob__c.SObjectType.getDescribe().fields.getMap();
             final SObjectField orderField = fields.get(CommonHelper.getSObjectNamespace() + parts[0]);
 
-            final Optional matches;
+            final OptionalV1 matches;
             if (parts[1].toLowerCase() == 'asc') {
-                matches = query.ascending(orderField).execute(Optional.of(new Map<String, Object>()));
+                matches = query.ordered(QueryV1.ascending(orderField)).execute(OptionalV1.of(new Map<String, Object>()));
             } else {
-                matches = query.descending(orderField).execute(Optional.of(new Map<String, Object>()));
+                matches = query.ordered(QueryV1.descending(orderField)).execute(OptionalV1.of(new Map<String, Object>()));
             }
 
             return (List<Map<String, Object>>) matches.call(new JobMatchProcessor()).get();
@@ -154,7 +154,7 @@ public with sharing virtual class AsynchronousLWC implements API {
                     .security(AccessLevel.USER_MODE)
                     .matching('Id IN :jobIds')
                     .returning(new Set<SObjectField> { AsynchronousJob__c.Id })
-                    .execute(Optional.of(new Map<String, Object> { 'jobIds' => jobIds }))
+                    .execute(OptionalV1.of(new Map<String, Object> { 'jobIds' => jobIds }))
                     .call(new QueryHelper.SObjectDeleter(AccessLevel.USER_MODE));
         }
 
@@ -169,7 +169,7 @@ public with sharing virtual class AsynchronousLWC implements API {
                     .security(AccessLevel.USER_MODE)
                     .matching('Id IN :jobIds AND Runnable__c != :schedulerClassName')
                     .returning(new Set<SObjectField> { AsynchronousJob__c.Id })
-                    .execute(Optional.of(new Map<String, Object> {
+                    .execute(OptionalV1.of(new Map<String, Object> {
                             'jobIds' => jobIds,
                             'schedulerClassName' => AsynchronousScheduler.RunNextAvailable.class.getName()
                     }))
@@ -193,11 +193,11 @@ public with sharing virtual class AsynchronousLWC implements API {
                     .returning(
                             new Set<QueryV1.AggregatedField> {
                                     QueryV1.aggregatedField(AsynchronousJob__c.Status__c, STATUS_ALIAS),
-                                    QueryV1.aggregatedField(AsynchronousJob__c.Id, 'COUNT', COUNT_ALIAS)
+                                    QueryV1.aggregatedField('COUNT', AsynchronousJob__c.Id, COUNT_ALIAS)
                             }
                     )
                     .group(new Set<SObjectField> { AsynchronousJob__c.Status__c })
-                    .execute(Optional.empty())
+                    .execute(OptionalV1.empty())
                     .call(new TotalsTransformer())
                     .get()
             );
@@ -308,11 +308,11 @@ public with sharing virtual class AsynchronousLWC implements API {
     private with sharing class RequeueJob extends ArrayV1.Callback {
         private final Datetime now = Datetime.now();
 
-        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
+        public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final AsynchronousJob__c job = (AsynchronousJob__c) element;
             job.Status__c = AsynchronousV1.Status.PENDING.name();
             job.ScheduledRunTime__c = now;
-            return Optional.of(job);
+            return OptionalV1.of(job);
         }
     }
 
@@ -321,7 +321,7 @@ public with sharing virtual class AsynchronousLWC implements API {
      * Callback class to build totals for Job status.
      */
    private with sharing class BuildTotals extends ArrayV1.Callback {
-        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
+        public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final AggregateResult result = (AggregateResult) element;
             ((Map<String, Integer>) currentValue.get()).put((String) result.get(STATUS_ALIAS), (Integer) result.get(COUNT_ALIAS));
             return currentValue;
@@ -335,7 +335,7 @@ public with sharing virtual class AsynchronousLWC implements API {
     private with sharing class ResultBuilder extends ArrayV1.Callback {
         final Datetime now = Datetime.now();
 
-        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
+        public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final AsynchronousJob__c match = (AsynchronousJob__c) element;
             final Map<String, Object> fields = match.getPopulatedFieldsAsMap();
             Map<String, Object> returnObject = new Map<String, Object>();
@@ -362,15 +362,15 @@ public with sharing virtual class AsynchronousLWC implements API {
      * @description
      * Transformer class to build the List of jobs from the matches.
      */
-    private with sharing class JobMatchProcessor implements Optional.Function {
-        public Optional apply(final Optional value) {
+    private with sharing class JobMatchProcessor implements OptionalV1.Function {
+        public OptionalV1 apply(final OptionalV1 value) {
             if (!value.isPresent()) {
-                return Optional.of(new List<Map<String, Object>>());
+                return OptionalV1.of(new List<Map<String, Object>>());
             }
 
-            return Optional.of(
-                    ArrayV1.over((List<SObject>) value.get())
-                            .reduce(new ResultBuilder(), new List<Map<String, Object>>())
+            return OptionalV1.of(ArrayV1.over(value.get()).reduce(
+                    new ResultBuilder(),
+                    new List<Map<String, Object>>())
             );
         }
     }
@@ -379,15 +379,15 @@ public with sharing virtual class AsynchronousLWC implements API {
      * @description
      * Transformer to build Map of Status counts from the List of aggregate results.
      */
-    private with sharing class TotalsTransformer implements Optional.Function {
-        public Optional apply(final Optional value) {
+    private with sharing class TotalsTransformer implements OptionalV1.Function {
+        public OptionalV1 apply(final OptionalV1 value) {
             if (!value.isPresent()) {
-                return Optional.of(new Map<String, Integer>());
+                return OptionalV1.of(new Map<String, Integer>());
             }
 
-            return Optional.of(
-                    ArrayV1.over((List<AggregateResult>) value.get())
-                        .reduce(new BuildTotals(), new Map<String, Integer>())
+            return OptionalV1.of(ArrayV1.over(value.get()).reduce(
+                    new BuildTotals(),
+                    new Map<String, Integer>())
             );
         }
     }

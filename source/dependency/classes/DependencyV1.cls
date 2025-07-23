@@ -40,27 +40,9 @@ global with sharing class DependencyV1 {
 
     /**
      * @description
-     * Class representing result of a binding validation check.
+     * Result of a binding validation check.
      */
-    global with sharing class ValidationResult {
-        public final Boolean isValid { public get; private set; }
-        public final String errorMessage { public get; private set; }
-
-        /**
-         * @description
-         * Constructs a validation result object which is used to inform the caller of the BindingCheck.validate
-         * method of the result of the validation.
-         *
-         * @param isValid True if the validation passed. False if not.
-         * @param errorMessage The error message to be recorded in the Exception thrown to record the failure.
-         */
-        global ValidationResult(final Boolean isValid, final String errorMessage) {
-            Assertion.isNotNull(isValid, 'argument: DependencyV1.ValidationResult.isValid may not be null');
-            Assertion.isTrue(isValid || errorMessage != null, 'argument: DependencyV1.ValidationResult.errorMessage must be set');
-            this.isValid = isValid;
-            this.errorMessage = errorMessage;
-        }
-    }
+    global interface ValidationResult {}
 
     /**
      * @description
@@ -175,5 +157,13 @@ global with sharing class DependencyV1 {
      */
     global static void reload() {
         DependencyAPI.API.reload();
+    }
+
+    global static ValidationResult valid() {
+        return DependencyAPI.newValidationResult(true, null);
+    }
+
+    global static ValidationResult invalid(final String errorMessage) {
+        return DependencyAPI.newValidationResult(false, errorMessage);
     }
 }

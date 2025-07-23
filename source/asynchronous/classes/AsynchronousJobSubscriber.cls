@@ -54,7 +54,7 @@ public with sharing virtual class AsynchronousJobSubscriber {
     }
 
     private with sharing class JobPreProcessor extends ArrayV1.Callback {
-        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
+        public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final AsynchronousJob__c asyncObject = (AsynchronousJob__c) element;
 
             try {
@@ -72,12 +72,12 @@ public with sharing virtual class AsynchronousJobSubscriber {
                 asyncObject.addError(e.getMessage());
             }
 
-            return Optional.empty();
+            return OptionalV1.empty();
         }
     }
 
     private with sharing class JobsToDeleteBuilder extends ArrayV1.Callback {
-        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
+        public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final AsynchronousJob__c asyncObject = (AsynchronousJob__c) element;
             final TriggerV1.Event event = (TriggerV1.Event) shared().get();
 
@@ -98,9 +98,9 @@ public with sharing virtual class AsynchronousJobSubscriber {
     }
 
     private with sharing class SchedulerStartCheck extends ArrayV1.Callback {
-        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
+        public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final AsynchronousJob__c asyncObject = (AsynchronousJob__c) element;
-            return Optional.of(AsynchronousJob.fromSObject(asyncObject).getRunnable() instanceof AsynchronousScheduler);
+            return OptionalV1.of(AsynchronousJob.fromSObject(asyncObject).getRunnable() instanceof AsynchronousScheduler);
         }
     }
 }

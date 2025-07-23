@@ -27,10 +27,9 @@ public with sharing class DependencyHelper {
             final Type withImpl
     ) {
         if (isOfType) {
-            return new DependencyV1.ValidationResult(true, null);
+            return DependencyV1.valid();
         } else {
-            return new DependencyV1.ValidationResult(
-                    false,
+            return DependencyV1.invalid(
                     isForTypeAnInterface
                         ? 'Class ' + withImpl.getName() + ' does not implement ' + forType.getName()
                         : 'Class ' + withImpl.getName() + ' does not extend ' + forType.getName()

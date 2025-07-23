@@ -19,7 +19,7 @@ public with sharing class DependencyHelperTests {
 
         Type t3 = DependencyV1.Prototype.class;
 
-        DependencyV1.ValidationResult r1 = DependencyHelper.buildValidationResult(
+        DependencyAPI.ValidationResultImpl r1 = (DependencyAPI.ValidationResultImpl) DependencyHelper.buildValidationResult(
                 o1 instanceof Integer,
                 false,
                 t1,
@@ -29,7 +29,7 @@ public with sharing class DependencyHelperTests {
         Assert.isTrue(r1.isValid);
         Assert.isNull(r1.errorMessage);
 
-        DependencyV1.ValidationResult r2 = DependencyHelper.buildValidationResult(
+        DependencyAPI.ValidationResultImpl r2 = (DependencyAPI.ValidationResultImpl) DependencyHelper.buildValidationResult(
                 o2 instanceof Integer,
                 false,
                 t1,
@@ -39,7 +39,7 @@ public with sharing class DependencyHelperTests {
         Assert.isFalse(r2.isValid);
         Assert.areEqual('Class Double does not extend Integer', r2.errorMessage);
 
-        DependencyV1.ValidationResult r3 = DependencyHelper.buildValidationResult(
+        DependencyAPI.ValidationResultImpl r3 = (DependencyAPI.ValidationResultImpl) DependencyHelper.buildValidationResult(
                 o2 instanceof DependencyV1.Prototype,
                 true,
                 t3,

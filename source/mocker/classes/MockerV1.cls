@@ -433,10 +433,10 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
     global with sharing class Method extends MockerV1.Chainable {
         private final Arguments arguments;
         private final String methodName;
-        private Optional expectedCount = Optional.empty();
+        private OptionalV1 expectedCount = OptionalV1.empty();
         private Integer actualCount = 0;
-        private Optional returnValue = Optional.empty();
-        private Optional throws = Optional.empty();
+        private OptionalV1 returnValue = OptionalV1.empty();
+        private OptionalV1 throws = OptionalV1.empty();
 
         /**
          * @description
@@ -467,7 +467,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
         global MockerV1.Method called(final Integer expectedCount) {
             Assertion.isNotNull(expectedCount, 'argument: Mocker.Method.called.expectedCount');
 
-            this.expectedCount = Optional.ofNullable(expectedCount);
+            this.expectedCount = OptionalV1.ofNullable(expectedCount);
             return this;
         }
 
@@ -484,7 +484,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          */
         global MockerV1.Method returns(final Object returnValue) {
             Assertion.isTrue(!this.returnValue.isPresent(), 'Return value can only be set once');
-            this.returnValue = Optional.of(returnValue);
+            this.returnValue = OptionalV1.of(returnValue);
             return this;
         }
 
@@ -500,7 +500,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
             Assertion.isNotNull(throws, 'argument: Mocker.Method.whichThrows.throws');
             Assertion.isTrue(!this.throws.isPresent(), 'Exception to throw can only be set once');
 
-            this.throws = Optional.of(throws);
+            this.throws = OptionalV1.of(throws);
             return this;
         }
 

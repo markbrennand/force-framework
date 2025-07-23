@@ -272,7 +272,7 @@ public with sharing virtual class TriggerAPI implements API {
                 if (EVENTS.containsKey(objectKey)) {
                     EVENTS.get(objectKey).push(event);
                 } else {
-                    EVENTS.put(objectKey, ArrayV1.over(new List<TriggerV1.Event> { event }));
+                    EVENTS.put(objectKey, ArrayV1.over(event));
                 }
 
                 try {
@@ -444,7 +444,7 @@ public with sharing virtual class TriggerAPI implements API {
      * Builds the Map of object name to its associated Trigger metadata records.
      */
     private with sharing class TriggerDefinitionMapBuilder extends ArrayV1.Callback {
-        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
+        public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final Map<String, List<Trigger__mdt>> triggerDefinitions = (Map<String, List<Trigger__mdt>>) currentValue.get();
             final Trigger__mdt triggerDefinition  = (Trigger__mdt) element;
             final String objectKey = triggerDefinition.ObjectKey__c;
@@ -455,7 +455,7 @@ public with sharing virtual class TriggerAPI implements API {
                 triggerDefinitions.put(objectKey, new List<Trigger__mdt> { triggerDefinition });
             }
 
-            return Optional.of(triggerDefinitions);
+            return OptionalV1.of(triggerDefinitions);
         }
     }
 
@@ -477,17 +477,17 @@ public with sharing virtual class TriggerAPI implements API {
          *
          * @return Return value is ignored by caller.
          */
-        public override Optional function(final Object element, final Optional currentValue, final Integer index) {
+        public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final Trigger__mdt triggerDefinition = (Trigger__mdt) element;
 
             if (triggerDefinition.IsUnitTest__c != Test.isRunningTest()) {
-                return Optional.empty();
+                return OptionalV1.empty();
             }
 
             // Add any namespace to the class before checking.
             final Type subscriberType = TypesV1.load(triggerDefinition.SubscriberClass__c);
             if (getPublishingInformation().parent.DISABLED_SUBSCRIBERS.containsKey(subscriberType.getName())) {
-                return Optional.empty();
+                return OptionalV1.empty();
             }
 
             switch on checkRecursiveDepth(getPublishingInformation().objectKey, triggerDefinition) {
@@ -495,14 +495,14 @@ public with sharing virtual class TriggerAPI implements API {
                     throw new TriggerV1.APIException('Maximum recursive calls exceeded for ' + getPublishingInformation().objectKey + ' event');
                 }
                 when IGNORE_EVENT {
-                    return Optional.empty();
+                    return OptionalV1.empty();
                 }
                 when PROCESS_EVENT {
                     processEvent(triggerDefinition, getPublishingInformation().event);
                 }
             }
 
-            return Optional.empty();
+            return OptionalV1.empty();
         }
 
         /**
