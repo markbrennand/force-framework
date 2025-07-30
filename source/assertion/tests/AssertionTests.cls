@@ -11,6 +11,7 @@ public with sharing class AssertionTests {
 
     @IsTest
     private static void testIsNotNull() {
+        TestHelper.setNOW();
         Assertion.isNotNull(1, 'Should pass');
 
         try {
@@ -22,6 +23,7 @@ public with sharing class AssertionTests {
 
     @IsTest
     private static void testIsTrue() {
+        TestHelper.setNOW();
         Assertion.isTrue(true, 'Should pass');
 
         try {
@@ -34,6 +36,7 @@ public with sharing class AssertionTests {
 
     @IsTest
     private static void testAreEqual() {
+        TestHelper.setNOW();
         Assertion.areEqual(true, true, 'Should pass');
 
         try {
@@ -47,6 +50,7 @@ public with sharing class AssertionTests {
 
     @IsTest
     private static void testFail() {
+        TestHelper.setNOW();
         try {
             Assertion.fail('Should fail');
         } catch(Assertion.AssertionException ae) {

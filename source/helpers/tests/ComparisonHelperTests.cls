@@ -11,12 +11,14 @@ public with sharing class ComparisonHelperTests {
 
     @IsTest
     private static void testObjectComparison() {
+        TestHelper.setNOW();
         Assert.isTrue(ComparisonHelper.compare(1, 1));
         Assert.isFalse(ComparisonHelper.compare(1, 2));
     }
 
     @IsTest
     private static void testSObjectComparison() {
+        TestHelper.setNOW();
         Account a1 = new Account(Name = 'Bill');
         Account a2 = new Account(Name = 'Ted');
         Account a3 = new Account(Name = 'Bill', AccountNumber = '1');
@@ -38,6 +40,7 @@ public with sharing class ComparisonHelperTests {
 
     @IsTest
     private static void testListSObjectComparison() {
+        TestHelper.setNOW();
         Account a1 = new Account(Name = 'Bill');
         Account a2 = new Account(Name = 'Ted');
         Account a3 = new Account(Name = 'Bill', AccountNumber = '1');
@@ -60,6 +63,7 @@ public with sharing class ComparisonHelperTests {
 
     @IsTest
     private static void testSetSObjectComparison() {
+        TestHelper.setNOW();
         Account a1 = new Account(Name = 'Bill');
         Account a2 = new Account(Name = 'Ted');
         Account a3 = new Account(Name = 'Bill', AccountNumber = '1');
@@ -82,6 +86,7 @@ public with sharing class ComparisonHelperTests {
 
     @IsTest
     private static void testAdditionalComparator() {
+        TestHelper.setNOW();
         Exception exc1 = new DMLException('TEST');
 
         Assert.isFalse(ComparisonHelper.compare(exc1, new DependencyV1.APIException('TEST')));

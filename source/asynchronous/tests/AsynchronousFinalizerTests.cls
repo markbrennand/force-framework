@@ -16,6 +16,7 @@ public with sharing class AsynchronousFinalizerTests {
 
     @IsTest
     private static void testJobKeptOnSuccess() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
@@ -25,7 +26,7 @@ public with sharing class AsynchronousFinalizerTests {
                     RetryInterval__c = 0,
                     RetryNumber__c = 0,
                     Runnable__c = FinalizerTestRunnable.class.getName(),
-                    ScheduledRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now()
             );
 
             AsynchronousDAO.API = (AsynchronousDAO) mockForSuccess(asyncObject, false).mock();
@@ -36,6 +37,7 @@ public with sharing class AsynchronousFinalizerTests {
 
     @IsTest
     private static void testJobDeletedOnSuccess() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
@@ -45,7 +47,7 @@ public with sharing class AsynchronousFinalizerTests {
                     RetryInterval__c = 0,
                     RetryNumber__c = 0,
                     Runnable__c = FinalizerTestRunnable.class.getName(),
-                    ScheduledRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now()
             );
 
             AsynchronousDAO.API = (AsynchronousDAO) mockForSuccess(asyncObject, true).mock();
@@ -56,6 +58,7 @@ public with sharing class AsynchronousFinalizerTests {
 
     @IsTest
     private static void testExceptionInOnSuccess() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
@@ -65,7 +68,7 @@ public with sharing class AsynchronousFinalizerTests {
                     RetryInterval__c = 1, // Makes FinalizerTestRunnable.onSuccess throw an Exception.
                     RetryNumber__c = 0,
                     Runnable__c = FinalizerTestRunnable.class.getName(),
-                    ScheduledRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now()
             );
 
             AsynchronousDAO.API = (AsynchronousDAO) mockForException(asyncObject, false, 'onSuccess failed').mock();
@@ -76,6 +79,7 @@ public with sharing class AsynchronousFinalizerTests {
 
     @IsTest
     private static void testJobKeptOnFailure() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
@@ -85,7 +89,7 @@ public with sharing class AsynchronousFinalizerTests {
                     RetryInterval__c = 0,
                     RetryNumber__c = 0,
                     Runnable__c = FinalizerTestRunnable.class.getName(),
-                    ScheduledRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now()
             );
 
             Exception exc = new AsynchronousV1.APIException('Test');
@@ -98,6 +102,7 @@ public with sharing class AsynchronousFinalizerTests {
 
     @IsTest
     private static void testJobDeletedOnFailure() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
@@ -107,7 +112,7 @@ public with sharing class AsynchronousFinalizerTests {
                     RetryInterval__c = 0,
                     RetryNumber__c = 1,
                     Runnable__c = FinalizerTestRunnable.class.getName(),
-                    ScheduledRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now()
             );
 
             Exception exc = new AsynchronousV1.APIException('Test');
@@ -120,6 +125,7 @@ public with sharing class AsynchronousFinalizerTests {
 
     @IsTest
     private static void testExceptionInOnFailure() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
@@ -129,7 +135,7 @@ public with sharing class AsynchronousFinalizerTests {
                     RetryInterval__c = 1, // Makes FinalizerTestRunnable.onFailure throw an Exception.
                     RetryNumber__c = 0,
                     Runnable__c = FinalizerTestRunnable.class.getName(),
-                    ScheduledRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now()
             );
 
             Exception exc = new AsynchronousV1.APIException('Test');
@@ -142,6 +148,7 @@ public with sharing class AsynchronousFinalizerTests {
 
     @IsTest
     private static void testRequeue() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
@@ -151,7 +158,7 @@ public with sharing class AsynchronousFinalizerTests {
                     RetryInterval__c = 0,
                     RetryNumber__c = 2,
                     Runnable__c = FinalizerTestRunnable.class.getName(),
-                    ScheduledRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now()
             );
 
             Exception exc = new AsynchronousV1.APIException('Test');
@@ -164,6 +171,7 @@ public with sharing class AsynchronousFinalizerTests {
 
     @IsTest
     private static void testSchedulerQueued() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
@@ -173,7 +181,7 @@ public with sharing class AsynchronousFinalizerTests {
                     RetryInterval__c = 0,
                     RetryNumber__c = 0,
                     Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
-                    ScheduledRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now()
             );
 
             MockerV1 mocked = mockForSuccess(asyncObject, true);
@@ -201,6 +209,7 @@ public with sharing class AsynchronousFinalizerTests {
 
     @IsTest
     private static void testCancellationFromOnError() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
@@ -210,7 +219,7 @@ public with sharing class AsynchronousFinalizerTests {
                     RetryInterval__c = 2, // Makes Runnable.onError return CANCELLED.
                     RetryNumber__c = 2,
                     Runnable__c = FinalizerTestRunnable.class.getName(),
-                    ScheduledRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now()
             );
 
             Exception exc = new AsynchronousV1.APIException('Test');

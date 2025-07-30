@@ -159,7 +159,7 @@ public with sharing virtual class AsynchronousDAO implements API {
                             AsynchronousJob__c.LastRunTime__c,
                             AsynchronousJob__c.ApexJobId__c
                     })
-                    .children(
+                    .returning(
                             QueryV1.of(AsynchronousJobState__c.SObjectType)
                                     .returning(new Set<SObjectField> { AsynchronousJobState__c.Content__c })
                                     .ordered(QueryV1.ascending(AsynchronousJobState__c.ChunkNumber__c))
@@ -192,7 +192,7 @@ public with sharing virtual class AsynchronousDAO implements API {
                     .execute(OptionalV1.of(
                             new Map<String, Object> {
                                     'ownerId' => UserInfo.getUserId(),
-                                    'now' => Datetime.now(),
+                                    'now' => CommonHelper.now(),
                                     'schedulerClass' => AsynchronousScheduler.RunNextAvailable.class.getName(),
                                     'queued' => AsynchronousV1.Status.QUEUED.name()
                             }

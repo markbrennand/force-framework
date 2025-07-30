@@ -16,6 +16,7 @@ public with sharing class AsynchronousSchedulerTests {
 
     @IsTest
     private static void testNullJobArgument() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             try {
                 new AsynchronousScheduler().run(null, 'ApexJobId');
@@ -27,6 +28,7 @@ public with sharing class AsynchronousSchedulerTests {
 
     @IsTest
     private static void testDelayedWhenNoJobsToRun() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousV1.Job asyncJob = (AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class)
                     .whenNoArguments()
@@ -53,6 +55,7 @@ public with sharing class AsynchronousSchedulerTests {
 
     @IsTest
     private static void testJobToRun() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             Id asyncJobId1 = MockerV1.fakeId(AsynchronousJob__c.SObjectType);
             Id asyncJobId2 = MockerV1.fakeId(AsynchronousJob__c.SObjectType);
@@ -103,6 +106,7 @@ public with sharing class AsynchronousSchedulerTests {
 
     @IsTest
     private static void testSchedulerQueuedWhenJobsToStart() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             mockForRun(new List<AsynchronousJob__c>(), 1, new Set<Id>());
             AsynchronousScheduler.queue(new Set<String>());
@@ -112,6 +116,7 @@ public with sharing class AsynchronousSchedulerTests {
 
     @IsTest
     private static void testSingleConcurrency() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             List<AsynchronousJob__c> asyncObjects = new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(
@@ -149,6 +154,7 @@ public with sharing class AsynchronousSchedulerTests {
 
     @IsTest
     private static void testDoubleConcurrency() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             List<AsynchronousJob__c> asyncObjects = new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(
@@ -208,6 +214,7 @@ public with sharing class AsynchronousSchedulerTests {
 
     @IsTest
     private static void testMixedConcurrency() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             List<AsynchronousJob__c> asyncObjects = new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(
@@ -246,6 +253,7 @@ public with sharing class AsynchronousSchedulerTests {
 
     @IsTest
     private static void testMoreThanOneSchedulerCannotBeRun() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             Set<String> jobsToStart = new Set<String>{
                     MockerV1.fakeId(AsynchronousJob__c.SObjectType)
@@ -279,6 +287,7 @@ public with sharing class AsynchronousSchedulerTests {
 
     @IsTest
     private static void testGetMaximumActive() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousScheduler scheduler = new AsynchronousScheduler();
             Assert.areEqual(1, scheduler.getMaximumActive());
@@ -287,6 +296,7 @@ public with sharing class AsynchronousSchedulerTests {
 
     @IsTest
     private static void testRunnableReturnValues() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousScheduler scheduler = new AsynchronousScheduler();
             Assert.isFalse(scheduler.onSuccess((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock()));

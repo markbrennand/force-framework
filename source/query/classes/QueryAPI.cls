@@ -53,7 +53,6 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
         private OptionalV1 ordering = OptionalV1.empty();
         private OptionalV1 max = OptionalV1.empty();
         private OptionalV1 offset = OptionalV1.empty();
-        private OptionalV1 children = OptionalV1.empty();
         private Boolean isCount = false;
 
         public SObjectType type() {
@@ -75,7 +74,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
         public QueryV1.API returningAll() {
             throwExceptionIfCountQuery();
             throwExceptionIfAggregatedQuery();
-            return returning(new Set<SObjectField>(type.getDescribe().fields.getMap().values()));
+            return returning(new Set<SObjectField>(type.getDescribe(SObjectDescribeOptions.DEFERRED).fields.getMap().values()));
         }
 
         public QueryV1.API returning(final Set<SObjectField> fields) {
@@ -95,6 +94,18 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
             final Set<String> value = getValue(returning);
             value.addAll(QueryHelper.buildJoinFields(joinField, fields));
+
+            returning = OptionalV1.of(value);
+            return this;
+        }
+
+        public QueryV1.API returning(QueryV1.API query) {
+            throwExceptionIfCountQuery();
+            throwExceptionIfAggregatedQuery();
+
+            final Set<String> value = getValue(returning);
+            final Implementation impl = (Implementation) query;
+            ArrayV1.over(getChildRelationshipsNames(query.type())).sharing(query).reduce(new AddRelationship(), value);
 
             returning = OptionalV1.of(value);
             return this;
@@ -135,7 +146,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
             return this;
         }
 
-        public QueryV1.API ordered(final List<QueryV1.Order> order) {
+        public QueryV1.API ordered(final Set<QueryV1.Order> order) {
             throwExceptionIfCountQuery();
 
             final Set<String> value = getValue(ordering);
@@ -171,23 +182,6 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
             throwExceptionIfRegularQuery();
 
             has = OptionalV1.of(condition);
-            return this;
-        }
-
-
-        public QueryV1.API children(QueryV1.API query) {
-            throwExceptionIfCountQuery();
-            throwExceptionIfAggregatedQuery();
-
-            final Map<String, QueryV1.API> value = children.isPresent()
-                    ? (Map<String, QueryV1.API>) children.get()
-                    : new Map<String, QueryV1.API>();
-
-            for (String relationshipName : getChildRelationshipsNames(query.type())) {
-                value.put(relationshipName, query);
-            }
-
-            children = OptionalV1.of(value);
             return this;
         }
 
@@ -230,13 +224,6 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
                 if (returning.isPresent()) {
                     allFields.addAll((Set<String>) returning.get());
                 }
-
-                if (children.isPresent()) {
-                    final Map<String, QueryV1.API> childQueries = (Map<String, QueryV1.API>) children.get();
-                    for (String relationshipName : childQueries.keySet()) {
-                        allFields.add(((Implementation) childQueries.get(relationshipName)).buildInnerQuery(relationshipName));
-                    }
-                }
             } else {
                 allFields.addAll((Set<String>) aggregates.get());
             }
@@ -250,7 +237,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
                             'SELECT ',
                             isCount ? 'COUNT()' : ArrayV1.over(allFields).join(','),
                             ' FROM ',
-                            type.getDescribe().name,
+                            type.getDescribe(SObjectDescribeOptions.DEFERRED).name,
                             matching.isPresent() ? ' WHERE ' + (String) matching.get() : '',
                             groupBy.isPresent() ? ' GROUP BY ' + ArrayV1.over(groupBy.get()).join(',') : '',
                             has.isPresent() ? ' HAVING ' + has.get() : '',
@@ -306,12 +293,12 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
         }
 
         private List<String> getChildRelationshipsNames(final SObjectType childType) {
-            final List<String> relationships = (List<String>) ArrayV1.over(type.getDescribe().getChildRelationships())
+            final List<String> relationships = (List<String>) ArrayV1.over(type.getDescribe(SObjectDescribeOptions.FULL).getChildRelationships())
                     .sharing(childType)
                     .reduce(new GetRelationshipName(), new List<String>());
 
             if (relationships.isEmpty()) {
-                throw new QueryException('No relationship found to object ' + childType.getDescribe().name);
+                throw new QueryException('No relationship found to object ' + childType.getDescribe(SObjectDescribeOptions.DEFERRED).name);
             }
 
             return relationships;
@@ -360,16 +347,16 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
         }
     }
 
-    public static QueryV1.AggregatedField aggregatedField(final SObjectField field, final OptionalV1 function, final String alias) {
-        return new AggregatedFieldImpl(field, function, alias);
-    }
-
-    public static QueryV1.AggregatedField aggregatedField(final SObjectField joinField, final SObjectField field, final OptionalV1 function, final String alias) {
+    public static QueryV1.AggregatedField aggregatedField(final OptionalV1 joinField, final SObjectField field, final OptionalV1 function, final String alias) {
         return new AggregatedFieldImpl(joinField, field, function, alias);
     }
 
-    public static QueryV1.Order order(final SObjectField field, final Boolean isAscending, OptionalV1 joinField, OptionalV1 nullsFirst) {
+    public static QueryV1.Order order(OptionalV1 joinField, final SObjectField field, final Boolean isAscending, OptionalV1 nullsFirst) {
         return new OrderImpl(field, isAscending ? SortOrder.ASCENDING : SortOrder.DESCENDING, joinField, nullsFirst);
+    }
+
+    public static QueryV1.Order order(final QueryV1.AggregatedField aggrgegate, final Boolean isAscending, OptionalV1 nullsFirst) {
+        return new OrderImpl(aggrgegate, isAscending ? SortOrder.ASCENDING : SortOrder.DESCENDING, nullsFirst);
     }
 
     private with sharing class AggregatedFieldImpl implements QueryV1.AggregatedField {
@@ -377,25 +364,40 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
         private final String alias;
         private final OptionalV1 function;
 
-        private AggregatedFieldImpl(final SObjectField field, final OptionalV1 function, final String alias) {
+        private AggregatedFieldImpl(final OptionalV1 joinField, final SObjectField field, final OptionalV1 function, final String alias) {
             if (function.isPresent() && !(function.get() instanceof String)) {
                 throw new QueryException('Function must be a String');
             }
 
-            this.field = field.getDescribe().name;
-            this.alias = alias;
-            this.function = function;
+            if (joinField.isPresent() && !(joinField.get() instanceof SObjectField)) {
+                throw new QueryException('Join field must be an SObjectField');
+            }
+
+            if (joinField.isPresent()) {
+                final Set<String> joined = QueryHelper.buildJoinFields((SObjectField) joinField.get(), new Set<SObjectField>{ field });
+                this.field = joined.iterator().next();
+                this.alias = alias;
+                this.function = function;
+            } else {
+                this.field = field.getDescribe().name;
+                this.alias = alias;
+                this.function = function;
+            }
         }
 
-        private AggregatedFieldImpl(final SObjectField joinField, final SObjectField field, final OptionalV1 function, final String alias) {
-            if (function.isPresent() && !(function.get() instanceof String)) {
-                throw new QueryException('Function must be a String');
+        public String toOrderString() {
+            if (function.isPresent()) {
+                return ArrayV1.over(
+                        new List<String>{
+                                (String) function.get(),
+                                '(',
+                                field,
+                                ')'
+                        }
+                ).join('');
+            } else {
+                return field;
             }
-
-            final Set<String> joined = QueryHelper.buildJoinFields(joinField, new Set<SObjectField> { field });
-            this.field = joined.iterator().next();
-            this.alias = alias;
-            this.function = function;
         }
 
         public override String toString() {
@@ -417,6 +419,50 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
                                 alias
                         }
                 ).join('');
+            }
+        }
+    }
+
+    private with sharing class OrderImpl implements QueryV1.Order {
+        private final String field;
+        private final SortOrder order;
+        private final OptionalV1 nullsFirst;
+
+        public OrderImpl(final SObjectField field, final SortOrder order, final OptionalV1 joinField, final OptionalV1 nullsFirst) {
+            if (joinField.isPresent()) {
+                if (! (joinField.get() instanceof SObjectField)) {
+                    throw new QueryException('Join field must be an SObjectField');
+                }
+
+                this.field =
+                        QueryHelper.buildJoinFields((SObjectField) joinField.get(), new Set<SObjectField> { field })
+                                .iterator().next();
+            } else {
+                this.field = field.getDescribe().name;
+            }
+            this.order = order;
+            this.nullsFirst = nullsFirst;
+        }
+
+        public OrderImpl(final QueryV1.AggregatedField aggregatedField, final SortOrder order, final OptionalV1 nullsFirst) {
+            this.field = ((AggregatedFieldImpl) aggregatedField).toOrderString();
+            this.order = order;
+            this.nullsFirst = nullsFirst;
+        }
+
+        public override String toString() {
+            if (nullsFirst.isPresent()) {
+                return (Boolean) nullsFirst.get()
+                        ? order == SortOrder.ASCENDING
+                                ? field + ' ASC NULLS FIRST'
+                                : field + ' DESC NULLS FIRST'
+                        : order == SortOrder.ASCENDING
+                                ? field + ' ASC NULLS LAST'
+                                : field + ' DESC NULLS LAST';
+            } else {
+                return order == SortOrder.ASCENDING
+                        ? field + ' ASC'
+                        : field + ' DESC';
             }
         }
     }
@@ -447,41 +493,10 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
         }
     }
 
-    private with sharing class OrderImpl implements QueryV1.Order {
-        private final String field;
-        private final SortOrder order;
-        private final OptionalV1 nullsFirst;
-
-        public OrderImpl(final SObjectField field, final SortOrder order, final OptionalV1 joinField, final OptionalV1 nullsFirst) {
-            if (joinField.isPresent()) {
-                if (! (joinField.get() instanceof SObjectField)) {
-                    throw new QueryException('Join field must be an SObjectField');
-                }
-
-                this.field =
-                        QueryHelper.buildJoinFields((SObjectField) joinField.get(), new Set<SObjectField> { field })
-                            .iterator().next();
-            } else {
-                this.field = field.getDescribe().name;
-            }
-            this.order = order;
-            this.nullsFirst = nullsFirst;
-        }
-
-        public override String toString() {
-            if (nullsFirst.isPresent()) {
-                return (Boolean) nullsFirst.get()
-                        ? order == SortOrder.ASCENDING
-                                ? field + ' ASC NULLS FIRST'
-                                : field + ' DESC NULLS FIRST'
-                        : order == SortOrder.ASCENDING
-                                ? field + ' ASC NULLS LAST'
-                                : field + ' DESC NULLS LAST';
-            } else {
-                return order == SortOrder.ASCENDING
-                        ? field + ' ASC'
-                        : field + ' DESC';
-            }
+    private with sharing class AddRelationship extends ArrayV1.Callback {
+        public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
+            ((Set<String>) currentValue.get()).add(((Implementation) shared().get()).buildInnerQuery((String) element));
+            return currentValue;
         }
     }
 
@@ -513,6 +528,10 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
         throw new QueryException('Access denied');
     }
 
+    public QueryV1.API returning(final QueryV1.API query) {
+        throw new QueryException('Access denied');
+    }
+
     public QueryV1.API returning(final Set<QueryV1.AggregatedField> fields) {
         throw new QueryException('Access denied');
     }
@@ -525,7 +544,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
         throw new QueryException('Access denied');
     }
 
-    public QueryV1.API ordered(final List<QueryV1.Order> order) {
+    public QueryV1.API ordered(final Set<QueryV1.Order> order) {
         throw new QueryException('Access denied');
     }
 
@@ -538,10 +557,6 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
     }
 
     public QueryV1.API has(final String condition) {
-        throw new QueryException('Access denied');
-    }
-
-    public QueryV1.API children(final QueryV1.API query) {
         throw new QueryException('Access denied');
     }
 

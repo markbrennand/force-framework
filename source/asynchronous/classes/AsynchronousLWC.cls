@@ -130,7 +130,9 @@ public with sharing virtual class AsynchronousLWC implements API {
                 throw new AsynchronousV1.APIException('Invalid order by');
             }
 
-            final Map<String, SObjectField> fields = AsynchronousJob__c.SObjectType.getDescribe().fields.getMap();
+            final Map<String, SObjectField> fields =
+                    AsynchronousJob__c.SObjectType.getDescribe(SObjectDescribeOptions.DEFERRED).fields.getMap();
+
             final SObjectField orderField = fields.get(CommonHelper.getSObjectNamespace() + parts[0]);
 
             final OptionalV1 matches;
@@ -306,7 +308,7 @@ public with sharing virtual class AsynchronousLWC implements API {
      * Callback class to re-queue a job.
      */
     private with sharing class RequeueJob extends ArrayV1.Callback {
-        private final Datetime now = Datetime.now();
+        private final Datetime now = CommonHelper.now();
 
         public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final AsynchronousJob__c job = (AsynchronousJob__c) element;
@@ -333,7 +335,7 @@ public with sharing virtual class AsynchronousLWC implements API {
      * Callback class to build the Map representing a job and add it to the List to return.
      */
     private with sharing class ResultBuilder extends ArrayV1.Callback {
-        final Datetime now = Datetime.now();
+        final Datetime now = CommonHelper.now();
 
         public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final AsynchronousJob__c match = (AsynchronousJob__c) element;

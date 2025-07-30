@@ -11,7 +11,7 @@ public with sharing class QueryTestHelper {
 
     @TestVisible
     private static void createUsers() {
-        final Id profileId = [SELECT Id FROM Profile WHERE Name = 'System Administrator' LIMIT 1].Id;
+        final Id profileId = [SELECT Id FROM Profile WHERE Name = 'Minimum Access - Salesforce' LIMIT 1].Id;
 
         User user = new User(
                 Alias = 'user',

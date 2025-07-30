@@ -18,6 +18,7 @@ public with sharing class AsynchronousJobTests {
 
     @IsTest
     static void testAllStatuses() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             for (AsynchronousV1.Status status : AsynchronousV1.Status.values()) {
                 AsynchronousJob__c asynchronous = new AsynchronousJob__c(
@@ -28,7 +29,7 @@ public with sharing class AsynchronousJobTests {
                         MaximumRetries__c = 1,
                         RetryInterval__c = 1000,
                         RetryNumber__c = 0,
-                        ScheduledRunTime__c = Datetime.now()
+                        ScheduledRunTime__c = CommonHelper.now()
                 );
                 AsynchronousJob.fromSObject(asynchronous);
             }
@@ -37,6 +38,7 @@ public with sharing class AsynchronousJobTests {
 
     @IsTest
     private static void testMandatoryFields() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
@@ -45,7 +47,7 @@ public with sharing class AsynchronousJobTests {
                     MaximumRetries__c = 0,
                     RetryNumber__c = 0,
                     RetryInterval__c = 0,
-                    ScheduledRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now()
             );
 
             try {
@@ -109,6 +111,7 @@ public with sharing class AsynchronousJobTests {
 
     @IsTest
     static void testOptionalFields() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asynchronous = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
@@ -118,20 +121,21 @@ public with sharing class AsynchronousJobTests {
                     MaximumRetries__c = 1,
                     RetryInterval__c = 1000,
                     RetryNumber__c = 0,
-                    ScheduledRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now()
             );
             AsynchronousJob.fromSObject(asynchronous);
 
             asynchronous.Reference__c = 'Test';
             AsynchronousJob.fromSObject(asynchronous);
 
-            asynchronous.LastRunTime__c = Datetime.now();
+            asynchronous.LastRunTime__c = CommonHelper.now();
             AsynchronousJob.fromSObject(asynchronous);
         }
     }
 
     @IsTest
     private static void testFromSObject() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             try {
                 AsynchronousJob.fromSObject(null);
@@ -139,7 +143,7 @@ public with sharing class AsynchronousJobTests {
             } catch (Assertion.AssertionException ae) {
             }
 
-            Datetime now = Datetime.now();
+            Datetime now = CommonHelper.now();
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                     OwnerId = UserInfo.getUserId(),

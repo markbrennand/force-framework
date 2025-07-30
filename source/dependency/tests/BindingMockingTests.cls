@@ -14,7 +14,8 @@ public with sharing class BindingMockingTests {
     }
 
     @IsTest
-    static void testMocking() {
+    private static void testMocking() {
+        TestHelper.setNOW();
         System.runAs(BindingTestHelper.getUser()) {
             DependencyAPI mockInjection = createMock();
             DependencyAPI.API = mockInjection;

@@ -10,13 +10,15 @@
 public with sharing class TypesTests {
 
     @IsTest
-    static void testLoadValidClass() {
+    private static void testLoadValidClass() {
+        TestHelper.setNOW();
         Type t = TypesV1.load('Integer');
         Assert.areEqual('Integer', t.getName());
     }
 
     @IsTest
-    static void testLoadNonExistentClass() {
+    private static void testLoadNonExistentClass() {
+        TestHelper.setNOW();
         try {
             Type t = TypesV1.load('TypeHelperTests.NoSuchClass');
             Assert.fail();
@@ -26,13 +28,15 @@ public with sharing class TypesTests {
     }
 
     @IsTest
-    static void testNewInstanceOfValidClass() {
+    private static void testNewInstanceOfValidClass() {
+        TestHelper.setNOW();
         Object instance = TypesV1.newInstance(TestClass.class);
         Assert.isTrue(instance instanceof TestClass);
     }
 
     @IsTest
-    static void testNewInstanceOfInvalidClasses() {
+    private static void testNewInstanceOfInvalidClasses() {
+        TestHelper.setNOW();
         try {
             TypesV1.newInstance(Integer.class);
             Assert.fail();
@@ -56,7 +60,8 @@ public with sharing class TypesTests {
     }
 
     @IsTest
-    static void testFactory() {
+    private static void testFactory() {
+        TestHelper.setNOW();
         Assert.isTrue(TypesV1.newInstance(TestFactory.class) instanceof TestClass);
     }
 

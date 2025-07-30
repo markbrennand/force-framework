@@ -7,7 +7,7 @@
  * @author Mark Brennand
  */
 @IsTest
-public with sharing class TriggerTest {
+public with sharing class TriggerTests {
     private final static Map<String, Integer> INVOCATIONS = new Map<String, Integer>();
     private final static Map<String, List<Id>> INSERTED_IDS = new Map<String, List<Id>>();
     private final static Map<String, List<Id>> UPDATED_IDS = new Map<String, List<Id>>();
@@ -26,6 +26,7 @@ public with sharing class TriggerTest {
 
     @IsTest
     private static void testOperations() {
+        TestHelper.setNOW();
         System.runAs(TriggerTestHelper.getUser()) {
             TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
 
@@ -34,7 +35,7 @@ public with sharing class TriggerTest {
                     MaximumRetries__c = 0,
                     RetryNumber__c = 0,
                     RetryInterval__c = 0,
-                    ScheduledRunTime__c = Datetime.now(),
+                    ScheduledRunTime__c = CommonHelper.now(),
                     Status__c = AsynchronousV1.Status.SUCCEEDED.name()
             );
 
@@ -43,7 +44,7 @@ public with sharing class TriggerTest {
                     MaximumRetries__c = 0,
                     RetryNumber__c = 0,
                     RetryInterval__c = 0,
-                    ScheduledRunTime__c = Datetime.now(),
+                    ScheduledRunTime__c = CommonHelper.now(),
                     Status__c = AsynchronousV1.Status.SUCCEEDED.name()
             );
 
@@ -81,6 +82,7 @@ public with sharing class TriggerTest {
 
     @IsTest
     private static void testSubscriberNotCalledIfRecursiveDepthExceeded() {
+        TestHelper.setNOW();
         System.runAs(TriggerTestHelper.getUser()) {
             TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
             TriggerV1.disable(Subscriber2.class);
@@ -92,7 +94,7 @@ public with sharing class TriggerTest {
                     MaximumRetries__c = 0,
                     RetryNumber__c = 0,
                     RetryInterval__c = 0,
-                    ScheduledRunTime__c = Datetime.now(),
+                    ScheduledRunTime__c = CommonHelper.now(),
                     Status__c = AsynchronousV1.Status.SUCCEEDED.name()
             );
 
@@ -102,6 +104,7 @@ public with sharing class TriggerTest {
 
     @IsTest
     private static void testObjectEnablement() {
+        TestHelper.setNOW();
         System.runAs(TriggerTestHelper.getUser()) {
             Assert.isTrue(TriggerV1.isEnabled(AsynchronousJob__c.SObjectType));
             TriggerV1.disable(AsynchronousJob__c.SObjectType);
@@ -112,7 +115,7 @@ public with sharing class TriggerTest {
                     MaximumRetries__c = 0,
                     RetryNumber__c = 0,
                     RetryInterval__c = 0,
-                    ScheduledRunTime__c = Datetime.now(),
+                    ScheduledRunTime__c = CommonHelper.now(),
                     Status__c = AsynchronousV1.Status.SUCCEEDED.name()
             );
 
@@ -128,7 +131,7 @@ public with sharing class TriggerTest {
                     MaximumRetries__c = 0,
                     RetryNumber__c = 0,
                     RetryInterval__c = 0,
-                    ScheduledRunTime__c = Datetime.now(),
+                    ScheduledRunTime__c = CommonHelper.now(),
                     Status__c = AsynchronousV1.Status.SUCCEEDED.name()
             );
 
@@ -139,6 +142,7 @@ public with sharing class TriggerTest {
 
     @IsTest
     private static void testSubscriberEnablement() {
+        TestHelper.setNOW();
         System.runAs(TriggerTestHelper.getUser()) {
             Assert.isTrue(TriggerV1.isEnabled(Subscriber1.class));
             TriggerV1.disable(Subscriber1.class);
@@ -149,7 +153,7 @@ public with sharing class TriggerTest {
                     MaximumRetries__c = 0,
                     RetryNumber__c = 0,
                     RetryInterval__c = 0,
-                    ScheduledRunTime__c = Datetime.now(),
+                    ScheduledRunTime__c = CommonHelper.now(),
                     Status__c = AsynchronousV1.Status.SUCCEEDED.name()
             );
 
@@ -165,7 +169,7 @@ public with sharing class TriggerTest {
                     MaximumRetries__c = 0,
                     RetryNumber__c = 0,
                     RetryInterval__c = 0,
-                    ScheduledRunTime__c = Datetime.now(),
+                    ScheduledRunTime__c = CommonHelper.now(),
                     Status__c = AsynchronousV1.Status.SUCCEEDED.name()
             );
 
@@ -176,6 +180,7 @@ public with sharing class TriggerTest {
 
     @IsTest
     private static void testExceptionThrownIfRecursiveDepthExceeded() {
+        TestHelper.setNOW();
         System.runAs(TriggerTestHelper.getUser()) {
             TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
             TriggerV1.disable(Subscriber1.class);
@@ -188,7 +193,7 @@ public with sharing class TriggerTest {
                         MaximumRetries__c = 0,
                         RetryNumber__c = 0,
                         RetryInterval__c = 0,
-                        ScheduledRunTime__c = Datetime.now(),
+                        ScheduledRunTime__c = CommonHelper.now(),
                         Status__c = AsynchronousV1.Status.SUCCEEDED.name()
                 );
             } catch(DmlException de) {
@@ -199,6 +204,7 @@ public with sharing class TriggerTest {
 
     @IsTest
     private static void testMocking() {
+        TestHelper.setNOW();
         System.runAs(TriggerTestHelper.getUser()) {
             TriggerAPI.API = (TriggerAPI.API) MockerV1.of(TriggerAPI.class)
                     .whenNoArguments()
@@ -227,7 +233,7 @@ public with sharing class TriggerTest {
                     MaximumRetries__c = 0,
                     RetryNumber__c = 0,
                     RetryInterval__c = 0,
-                    ScheduledRunTime__c = Datetime.now(),
+                    ScheduledRunTime__c = CommonHelper.now(),
                     Status__c = AsynchronousV1.Status.SUCCEEDED.name()
             );
 
@@ -245,6 +251,7 @@ public with sharing class TriggerTest {
 
     @IsTest
     private static void testIsSubscriberBoundToAction() {
+        TestHelper.setNOW();
         Trigger__mdt triggerDefinition = new Trigger__mdt();
         triggerDefinition.BeforeInsert__c = true;
         triggerDefinition.AfterInsert__c  = false;
@@ -278,6 +285,7 @@ public with sharing class TriggerTest {
 
     @IsTest
     private static void testBindingCheck() {
+        TestHelper.setNOW();
         System.runAs(TriggerTestHelper.getUser()) {
             DependencyV1.bind(TriggerAPI.API.class, TriggerAPI.Factory.class);
             try {
@@ -294,6 +302,7 @@ public with sharing class TriggerTest {
 
     @IsTest
     private static void testExtendedClassIsInert() {
+        TestHelper.setNOW();
         ExtendedClass extended = new ExtendedClass();
 
         try {
@@ -378,7 +387,7 @@ public with sharing class TriggerTest {
                             MaximumRetries__c = 0,
                             RetryNumber__c = 0,
                             RetryInterval__c = 0,
-                            ScheduledRunTime__c = Datetime.now(),
+                            ScheduledRunTime__c = CommonHelper.now(),
                             Status__c = AsynchronousV1.Status.FAILED.name()
                     );
                 }
@@ -399,7 +408,7 @@ public with sharing class TriggerTest {
                         MaximumRetries__c = 0,
                         RetryNumber__c = 0,
                         RetryInterval__c = 0,
-                        ScheduledRunTime__c = Datetime.now(),
+                        ScheduledRunTime__c = CommonHelper.now(),
                         Status__c = AsynchronousV1.Status.FAILED.name()
                 );
             }

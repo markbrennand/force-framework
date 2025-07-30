@@ -159,10 +159,24 @@ global with sharing class DependencyV1 {
         DependencyAPI.API.reload();
     }
 
+    /**
+     * @description
+     * Creates a validation result representing success.
+     *
+     * @return A validation result representing success.
+     */
     global static ValidationResult valid() {
         return DependencyAPI.newValidationResult(true, null);
     }
 
+    /**
+     * @description
+     * Creates a validation result representing failure.
+     *
+     * @param errorMessage The validation failure error message.
+     *
+     * @return A validation result representing failure.
+     */
     global static ValidationResult invalid(final String errorMessage) {
         return DependencyAPI.newValidationResult(false, errorMessage);
     }

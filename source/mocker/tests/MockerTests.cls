@@ -11,6 +11,7 @@ public with sharing class MockerTests {
 
     @IsTest
     private static void testThrows() {
+        TestHelper.setNOW();
         try {
             MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                     .whenNoArguments()
@@ -27,6 +28,7 @@ public with sharing class MockerTests {
 
     @IsTest
     private static void testReturns() {
+        TestHelper.setNOW();
         MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                 .whenNoArguments()
                     .forMethod('mock')
@@ -60,6 +62,7 @@ public with sharing class MockerTests {
 
     @IsTest
     private static void testUnboundedCalls() {
+        TestHelper.setNOW();
         MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                 .whenNoArguments()
                     .forMethod('mock')
@@ -74,6 +77,7 @@ public with sharing class MockerTests {
 
     @IsTest
     private static void testBoundedCalls() {
+        TestHelper.setNOW();
         MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                 .whenNoArguments()
                     .forMethod('mock')
@@ -97,6 +101,7 @@ public with sharing class MockerTests {
 
     @IsTest
     private static void testSObjectMatching() {
+        TestHelper.setNOW();
         Account a1 = new Account(Id = MockerV1.fakeId(Account.SObjectType), Name='Bill');
         Account a2 = new Account(Id = a1.Id, Name='Bill', AccountNumber = '123');
         Account a3 = new Account(Id = a1.Id, Name='Ted');
@@ -139,6 +144,7 @@ public with sharing class MockerTests {
 
     @IsTest
     private static void testAnyMatching() {
+        TestHelper.setNOW();
         Account a1 = new Account(Id = MockerV1.fakeId(Account.SObjectType), Name='Bill');
         Account a2 = new Account(Id = a1.Id, Name='Bill', AccountNumber = '123');
         Account a3 = new Account(Id = a1.Id, Name='Ted');
@@ -182,6 +188,7 @@ public with sharing class MockerTests {
 
     @IsTest
     private static void testChaining() {
+        TestHelper.setNOW();
         Account a1 = new Account(Id = MockerV1.fakeId(Account.SObjectType), Name='Bill');
         Account a2 = new Account(Id = a1.Id, Name='Ted', AccountNumber = '123');
 
@@ -209,6 +216,7 @@ public with sharing class MockerTests {
 
     @IsTest
     private static void testFactory() {
+        TestHelper.setNOW();
         Account a1 = new Account(Id = MockerV1.fakeId(Account.SObjectType), Name='Bill');
         Account a2 = new Account(Id = a1.Id, Name='Ted', AccountNumber = '123');
 
@@ -240,6 +248,7 @@ public with sharing class MockerTests {
 
     @IsTest
     private static void testComparator() {
+        TestHelper.setNOW();
         Account a1 = new Account(Id = MockerV1.fakeId(Account.SObjectType), Name = 'Bill');
 
         MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
@@ -265,6 +274,7 @@ public with sharing class MockerTests {
 
     @IsTest
     private static void testFakeId() {
+        TestHelper.setNOW();
         Assert.isTrue(MockerV1.fakeId(User.SObjectType).endsWith('001'));
         Assert.isTrue(MockerV1.fakeId(Account.SObjectType).endsWith('001'));
         Assert.isTrue(MockerV1.fakeId(Account.SObjectType).endsWith('002'));

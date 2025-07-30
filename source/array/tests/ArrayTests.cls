@@ -11,6 +11,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testConcatList() {
+        TestHelper.setNOW();
         List<Object> result = ArrayV1.over(new List<Integer>{ 1, 2, 3 }).concat(new List<Integer>{4, 5});
         Assert.areEqual(5, result.size());
         for (Integer index = 0; index < 5; index++) {
@@ -20,6 +21,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testConcatSet() {
+        TestHelper.setNOW();
         List<Object> result = ArrayV1.over(new Set<Integer>{ 1, 2, 3 }).concat(new List<Integer>{ 4, 5 });
         Assert.areEqual(5, result.size());
         for (Integer index = 0; index < 5; index++) {
@@ -29,6 +31,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testConcatIterable() {
+        TestHelper.setNOW();
         List<Object> result = ArrayV1.over(new TestIterable(new List<Integer> { 1, 2, 3 })).concat(new List<Integer> { 4, 5 });
         Assert.areEqual(5, result.size());
         for (Integer index = 0; index < 5; index++) {
@@ -38,6 +41,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testForEachList() {
+        TestHelper.setNOW();
         List<Integer> result = new List<Integer>();
         ArrayV1.over(new List<Integer> { 1, 2, 3, 4, 5 }).sharing(result).forEach(new ForEachMultiplier());
         Assert.areEqual(5, result.size());
@@ -50,6 +54,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testForEachSet() {
+        TestHelper.setNOW();
         List<Integer> result = new List<Integer>();
         ArrayV1.over(new Set<Integer> { 1, 2, 3, 4, 5 }).sharing(result).forEach(new ForEachMultiplier());
         Assert.areEqual(5, result.size());
@@ -62,6 +67,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testForEachIterable() {
+        TestHelper.setNOW();
         List<Integer> result = new List<Integer>();
         ArrayV1.over(new TestIterable(new List<Integer> { 1, 2, 3, 4, 5 })).sharing(result).forEach(new ForEachMultiplier());
         Assert.areEqual(5, result.size());
@@ -74,6 +80,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testReduceList() {
+        TestHelper.setNOW();
         Assert.areEqual(-13, ArrayV1.over(new List<Integer>{ 1, 2, 3, 4, 5 }).reduce(new ReduceSubtractor()));
         Assert.areEqual(1, ArrayV1.over(new List<Integer> { 1 }).reduce(new ReduceSubtractor()));
         Assert.isTrue(((List<Integer>) ArrayV1.over(new List<Integer>()).reduce(new ReduceSubtractor(), new List<Integer>())).isEmpty());
@@ -122,6 +129,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testReduceSet() {
+        TestHelper.setNOW();
         Assert.areEqual(-13, ArrayV1.over(new Set<Integer>{ 1, 2, 3, 4, 5 }).reduce(new ReduceSubtractor()));
         Assert.areEqual(1, ArrayV1.over(new Set<Integer> { 1 }).reduce(new ReduceSubtractor()));
         Assert.isTrue(((List<Integer>) ArrayV1.over(new Set<Integer>()).reduce(new ReduceSubtractor(), new List<Integer>())).isEmpty());
@@ -170,6 +178,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testReduceIterable() {
+        TestHelper.setNOW();
         Assert.areEqual(-13, ArrayV1.over(new TestIterable(new List<Integer>{ 1, 2, 3, 4, 5 })).reduce(new ReduceSubtractor()));
         Assert.areEqual(1, ArrayV1.over(new TestIterable(new List<Integer> { 1 })).reduce(new ReduceSubtractor()));
         Assert.isTrue(((List<Integer>) ArrayV1.over(new TestIterable(new List<Integer>())).reduce(new ReduceSubtractor(), new List<Integer>())).isEmpty());
@@ -218,6 +227,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testReduceRightList() {
+        TestHelper.setNOW();
         Assert.areEqual(-5, ArrayV1.over(new List<Integer>{ 1, 2, 3, 4, 5 }).reduceRight(new ReduceSubtractor()));
         Assert.areEqual(1, ArrayV1.over(new List<Integer> { 1 }).reduceRight(new ReduceSubtractor()));
 
@@ -265,6 +275,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testReduceRightSet() {
+        TestHelper.setNOW();
         Assert.areEqual(-5, ArrayV1.over(new Set<Integer>{ 1, 2, 3, 4, 5 }).reduceRight(new ReduceSubtractor()));
         Assert.areEqual(1, ArrayV1.over(new Set<Integer> { 1 }).reduceRight(new ReduceSubtractor()));
 
@@ -312,6 +323,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testReduceRightIterable() {
+        TestHelper.setNOW();
         Assert.areEqual(-5, ArrayV1.over(new TestIterable(new List<Integer>{ 1, 2, 3, 4, 5 })).reduceRight(new ReduceSubtractor()));
         Assert.areEqual(1, ArrayV1.over(new TestIterable(new List<Integer> { 1 })).reduceRight(new ReduceSubtractor()));
 
@@ -359,6 +371,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testFilterList() {
+        TestHelper.setNOW();
         List<AsynchronousJob__c> results = (List<AsynchronousJob__c>) ArrayV1.over(new List<AsynchronousJob__c>{
                         new AsynchronousJob__c(Runnable__c = 'TEST1'),
                         new AsynchronousJob__c(Runnable__c = 'TEST2')
@@ -399,6 +412,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testFilterSet() {
+        TestHelper.setNOW();
         List<Object> results = ArrayV1.over(new Set<AsynchronousJob__c>{
                         new AsynchronousJob__c(Runnable__c = 'TEST1'),
                         new AsynchronousJob__c(Runnable__c = 'TEST2')
@@ -435,6 +449,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testFilterIterable() {
+        TestHelper.setNOW();
         List<Object> results = ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
                         new AsynchronousJob__c( Runnable__c = 'TEST1' ),
                         new AsynchronousJob__c(Runnable__c = 'TEST2')
@@ -471,90 +486,79 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testTransformList() {
-        List<AsynchronousJob__c> results = (List<AsynchronousJob__c>) ArrayV1.over(new List<AsynchronousJob__c>{
+        TestHelper.setNOW();
+        List<Object> results = (List<Object>) ArrayV1.over(new List<AsynchronousJob__c>{
                         new AsynchronousJob__c(Runnable__c = 'TEST1'),
                         new AsynchronousJob__c(Runnable__c = 'TEST2')
                 })
                 .transform(new Transformer());
 
         Assert.areEqual(2, results.size());
-        Assert.areEqual('TEST1', results[0].Runnable__c);
-        Assert.areEqual(1000, results[0].RetryInterval__c);
-        Assert.areEqual('TEST2', results[1].Runnable__c);
-        Assert.areEqual(1000, results[1].RetryInterval__c);
+        Assert.areEqual('TEST1', results[0]);
+        Assert.areEqual('TEST2', results[1]);
 
-        results = (List<AsynchronousJob__c>) ArrayV1.over(new List<AsynchronousJob__c>{
+        List<String> stringResults = (List<String>) ArrayV1.over(new List<AsynchronousJob__c>{
                         new AsynchronousJob__c(Runnable__c = 'TEST1'),
                         new AsynchronousJob__c(Runnable__c = 'TEST2')
                 })
-                .sharing(5000)
-                .transform(new Transformer());
+                .transform(new Transformer(), new List<String>());
 
-        Assert.areEqual(2, results.size());
-        Assert.areEqual('TEST1', results[0].Runnable__c);
-        Assert.areEqual(5000, results[0].RetryInterval__c);
-        Assert.areEqual('TEST2', results[1].Runnable__c);
-        Assert.areEqual(5000, results[1].RetryInterval__c);
+        Assert.areEqual(2, stringResults.size());
+        Assert.areEqual('TEST1', stringResults[0]);
+        Assert.areEqual('TEST2', stringResults[1]);
     }
 
     @IsTest
     private static void testTransformSet() {
-        List<Object> results = ArrayV1.over(new Set<AsynchronousJob__c>{
+        TestHelper.setNOW();
+        List<Object> results = (List<Object>) ArrayV1.over(new Set<AsynchronousJob__c>{
                         new AsynchronousJob__c(Runnable__c = 'TEST1'),
                         new AsynchronousJob__c(Runnable__c = 'TEST2')
                 })
                 .transform(new Transformer());
 
         Assert.areEqual(2, results.size());
-        Assert.areEqual('TEST1', ((AsynchronousJob__c) results[0]).Runnable__c);
-        Assert.areEqual(1000, ((AsynchronousJob__c) results[0]).RetryInterval__c);
-        Assert.areEqual('TEST2', ((AsynchronousJob__c) results[1]).Runnable__c);
-        Assert.areEqual(1000, ((AsynchronousJob__c) results[1]).RetryInterval__c);
+        Assert.areEqual('TEST1', results[0]);
+        Assert.areEqual('TEST2', results[1]);
 
-        results = ArrayV1.over(new Set<AsynchronousJob__c>{
+        List<String> stringResults = (List<String>) ArrayV1.over(new Set<AsynchronousJob__c>{
                         new AsynchronousJob__c(Runnable__c = 'TEST1'),
                         new AsynchronousJob__c(Runnable__c = 'TEST2')
                 })
-                .sharing(5000)
-                .transform(new Transformer());
+                .transform(new Transformer(), new List<String>());
 
-        Assert.areEqual(2, results.size());
-        Assert.areEqual('TEST1', ((AsynchronousJob__c) results[0]).Runnable__c);
-        Assert.areEqual(5000, ((AsynchronousJob__c) results[0]).RetryInterval__c);
-        Assert.areEqual('TEST2', ((AsynchronousJob__c) results[1]).Runnable__c);
-        Assert.areEqual(5000, ((AsynchronousJob__c) results[1]).RetryInterval__c);
+        Assert.areEqual(2, stringResults.size());
+        Assert.areEqual('TEST1', stringResults[0]);
+        Assert.areEqual('TEST2', stringResults[1]);
     }
 
     @IsTest
     private static void testTransformIterable() {
-        List<Object> results = ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
+        TestHelper.setNOW();
+        List<Object> results = (List<Object>) ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
                         new AsynchronousJob__c(Runnable__c = 'TEST1'),
                         new AsynchronousJob__c(Runnable__c = 'TEST2')
                 }))
                 .transform(new Transformer());
 
         Assert.areEqual(2, results.size());
-        Assert.areEqual('TEST1', ((AsynchronousJob__c) results[0]).Runnable__c);
-        Assert.areEqual(1000, ((AsynchronousJob__c) results[0]).RetryInterval__c);
-        Assert.areEqual('TEST2', ((AsynchronousJob__c) results[1]).Runnable__c);
-        Assert.areEqual(1000, ((AsynchronousJob__c) results[1]).RetryInterval__c);
+        Assert.areEqual('TEST1', results[0]);
+        Assert.areEqual('TEST2', results[1]);
 
-        results = ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
+        List<String> stringResults = (List<String>) ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
                         new AsynchronousJob__c(Runnable__c = 'TEST1'),
                         new AsynchronousJob__c(Runnable__c = 'TEST2')
                 }))
-                .sharing(5000)
-                .transform(new Transformer());
+                .transform(new Transformer(), new List<String>());
 
-        Assert.areEqual(2, results.size());
-        Assert.areEqual('TEST1', ((AsynchronousJob__c) results[0]).Runnable__c);
-        Assert.areEqual(5000, ((AsynchronousJob__c) results[0]).RetryInterval__c);
-        Assert.areEqual('TEST2', ((AsynchronousJob__c) results[1]).Runnable__c);
-        Assert.areEqual(5000, ((AsynchronousJob__c) results[1]).RetryInterval__c);
+        Assert.areEqual(2, stringResults.size());
+        Assert.areEqual('TEST1', stringResults[0]);
+        Assert.areEqual('TEST2', stringResults[1]);
     }
 
     @IsTest
     private static void testAtList() {
+        TestHelper.setNOW();
         ArrayV1.Methods methods = ArrayV1.over(new List<Integer> { 1, 2, 3, 4 });
 
         Assert.areEqual(1, methods.at(0).get());
@@ -567,6 +571,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testAtSet() {
+        TestHelper.setNOW();
         ArrayV1.Methods methods = ArrayV1.over(new Set<Integer> { 1, 2, 3, 4 });
 
         Assert.areEqual(1, methods.at(0).get());
@@ -579,6 +584,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testAtIterable() {
+        TestHelper.setNOW();
         ArrayV1.Methods methods = ArrayV1.over(new TestIterable(new List<Integer> { 1, 2, 3, 4 }));
 
         Assert.areEqual(1, methods.at(0).get());
@@ -591,21 +597,25 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testJoinList() {
+        TestHelper.setNOW();
         Assert.areEqual('1-2-3-4-5', ArrayV1.over(new List<Integer> { 1, 2, 3, 4, 5 }).join('-'));
     }
 
     @IsTest
     private static void testJoinSet() {
+        TestHelper.setNOW();
         Assert.areEqual('1-2-3-4-5', ArrayV1.over(new Set<Integer> { 1, 2, 3, 4, 5 }).join('-'));
     }
 
     @IsTest
     private static void testJoinIterable() {
+        TestHelper.setNOW();
         Assert.areEqual('1-2-3-4-5', ArrayV1.over(new TestIterable(new List<Integer> { 1, 2, 3, 4, 5 })).join('-'));
     }
 
     @IsTest
     private static void testSomeList() {
+        TestHelper.setNOW();
         List<AsynchronousJob__c> jobs1 = new List<AsynchronousJob__c> {
                 new AsynchronousJob__c(Runnable__c = 'TEST1'),
                 new AsynchronousJob__c(Runnable__c = 'TEST2'),
@@ -635,6 +645,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testSomeSet() {
+        TestHelper.setNOW();
         Set<AsynchronousJob__c> jobs1 = new Set<AsynchronousJob__c> {
                 new AsynchronousJob__c(Runnable__c = 'TEST1'),
                 new AsynchronousJob__c(Runnable__c = 'TEST2'),
@@ -664,6 +675,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testIterable() {
+        TestHelper.setNOW();
         TestIterable iter1 = new TestIterable(new List<AsynchronousJob__c> {
                 new AsynchronousJob__c(Runnable__c = 'TEST1'),
                 new AsynchronousJob__c(Runnable__c = 'TEST2'),
@@ -693,6 +705,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testEveryList() {
+        TestHelper.setNOW();
         List<AsynchronousJob__c> jobs1 = new List<AsynchronousJob__c> {
                 new AsynchronousJob__c(Runnable__c = 'TEST1'),
                 new AsynchronousJob__c(Runnable__c = 'TEST1')
@@ -716,6 +729,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testEverySet() {
+        TestHelper.setNOW();
         Set<AsynchronousJob__c> jobs1 = new Set<AsynchronousJob__c> {
                 new AsynchronousJob__c(Runnable__c = 'TEST1'),
                 new AsynchronousJob__c(Runnable__c = 'TEST1')
@@ -739,6 +753,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testEveryIterable() {
+        TestHelper.setNOW();
         TestIterable iter1 = new TestIterable(new List<AsynchronousJob__c> {
                 new AsynchronousJob__c(Runnable__c = 'TEST1'),
                 new AsynchronousJob__c(Runnable__c = 'TEST1')
@@ -762,6 +777,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testReverseList() {
+        TestHelper.setNOW();
         List<String> reversed = (List<String>) ArrayV1.over(new List<String> { 'one', 'two', 'three' }).reverse();
         Assert.areEqual(3, reversed.size());
         Assert.areEqual('three', reversed[0]);
@@ -771,6 +787,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testReverseSet() {
+        TestHelper.setNOW();
         List<Object> reversed = ArrayV1.over(new Set<String> { 'one', 'two', 'three' }).reverse();
         Assert.areEqual(3, reversed.size());
         Assert.areEqual('three', reversed[0]);
@@ -780,6 +797,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testReverseIterable() {
+        TestHelper.setNOW();
         List<Object> reversed = ArrayV1.over(new TestIterable(new List<String> { 'one', 'two', 'three' })).reverse();
         Assert.areEqual(3, reversed.size());
         Assert.areEqual('three', reversed[0]);
@@ -789,6 +807,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testPushAndPopList() {
+        TestHelper.setNOW();
         ArrayV1.Methods stack = ArrayV1.over(new List<Integer>());
         stack.push(1);
         Assert.areEqual(1, stack.length());
@@ -807,6 +826,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testPushAndPopSet() {
+        TestHelper.setNOW();
         ArrayV1.Methods stack = ArrayV1.over(new Set<Integer>());
         stack.push(1);
         Assert.areEqual(1, stack.length());
@@ -825,6 +845,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testPushAndPopIterable() {
+        TestHelper.setNOW();
         ArrayV1.Methods stack = ArrayV1.over(new TestIterable(new List<Integer>()));
         stack.push(1);
         Assert.areEqual(1, stack.length());
@@ -843,6 +864,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testPushAndShiftList() {
+        TestHelper.setNOW();
         ArrayV1.Methods fifo = ArrayV1.over(new List<Integer>());
         fifo.push(1);
         Assert.areEqual(1, fifo.length());
@@ -861,6 +883,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testPushAndShiftSet() {
+        TestHelper.setNOW();
         ArrayV1.Methods fifo = ArrayV1.over(new Set<Integer>());
         fifo.push(1);
         Assert.areEqual(1, fifo.length());
@@ -879,6 +902,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testPushAndShiftIterable() {
+        TestHelper.setNOW();
         ArrayV1.Methods fifo = ArrayV1.over(new TestIterable(new List<Integer>()));
         fifo.push(1);
         Assert.areEqual(1, fifo.length());
@@ -897,24 +921,28 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testLengthList() {
+        TestHelper.setNOW();
         Assert.areEqual(0, ArrayV1.over(new List<Integer>()).length());
         Assert.areEqual(1, ArrayV1.over(new List<Integer> { 1 }).length());
     }
 
     @IsTest
     private static void testLengthSet() {
+        TestHelper.setNOW();
         Assert.areEqual(0, ArrayV1.over(new Set<Integer>()).length());
         Assert.areEqual(1, ArrayV1.over(new Set<Integer> { 1 }).length());
     }
 
     @IsTest
     private static void testLengthIterable() {
+        TestHelper.setNOW();
         Assert.areEqual(0, ArrayV1.over(new TestIterable(new List<Integer>())).length());
         Assert.areEqual(1, ArrayV1.over(new TestIterable(new List<Integer> { 1 })).length());
     }
 
     @IsTest
     private static void testSortList() {
+        TestHelper.setNOW();
         List<Integer> initial = new List<Integer> { 5, 2, 4, 3, 1 };
         List<Integer> sorted = (List<Integer>) ArrayV1.over(initial).sort();
         Assert.areEqual(5, initial[0]);
@@ -943,6 +971,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testSortSet() {
+        TestHelper.setNOW();
         List<Object> initial = new List<Integer> { 5, 2, 4, 3, 1 };
         List<Object> sorted = ArrayV1.over(new Set<Object>(initial)).sort();
         Assert.areEqual(5, initial[0]);
@@ -971,6 +1000,7 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testSortIterable() {
+        TestHelper.setNOW();
         List<Integer> initial = new List<Integer> { 5, 2, 4, 3, 1 };
         TestIterable iter = new TestIterable(initial);
         List<Object> sorted = ArrayV1.over(iter).sort();
@@ -1044,9 +1074,7 @@ public with sharing class ArrayTests {
 
     private with sharing class Transformer extends ArrayV1.Callback {
         public override OptionalV1 function(Object element, OptionalV1 currentValue, Integer index) {
-            AsynchronousJob__c cloned = ((AsynchronousJob__c) element).clone();
-            cloned.RetryInterval__c = shared().isPresent() ?  (Integer) shared().get() : 1000;
-            return OptionalV1.of(cloned);
+            return OptionalV1.of(((AsynchronousJob__c) element).Runnable__c);
         }
     }
 

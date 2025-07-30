@@ -11,6 +11,7 @@ public with sharing class DependencyHelperTests {
 
     @IsTest
     private static void testAll() {
+        TestHelper.setNOW();
         Type t1 = Integer.class;
         Object o1 = 12;
 

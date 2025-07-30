@@ -64,7 +64,7 @@ public with sharing virtual class AsynchronousJobSubscriber {
 
                 } else if (asyncObject.Status__c == AsynchronousV1.Status.PENDING.name()) {
                     asyncObject.Status__c = AsynchronousV1.Status.QUEUED.name();
-                    asyncObject.ScheduledRunTime__c = Datetime.now();
+                    asyncObject.ScheduledRunTime__c = CommonHelper.now();
                     asyncObject.RetryNumber__c = 0;
                 }
 

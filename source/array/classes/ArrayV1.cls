@@ -186,12 +186,32 @@ global with sharing class ArrayV1 {
          * This is the equivalent of the Javascript map() function.
          * <br><br>
          * The callback function must apply the transformation and return the transformed object.
+         * <br><br>
+         * The list returned will be of type ANY and as a result may not be cast to the type the list contains.
          *
          * @param callback The callback class to be invoked for each array element.
          *
          * @return The list of transformed objects.
          */
         List<Object> transform(final Callback callback);
+
+        /**
+         * @description
+         * Builds a list of objects with a transformation applied.
+         * <br><br>
+         * This is the equivalent of the Javascript map() function.
+         * <br><br>
+         * The callback function must apply the transformation and return the transformed object.
+         * <br><br>
+         * The return list must be of the type of the transformed elements. This allows the returned list to
+         * be cast to the type of the element.
+         *
+         * @param callback The callback class to be invoked for each array element.
+         * @param returnList The list of the type the transformed elements.
+         *
+         * @return The list of transformed objects.
+         */
+        List<Object> transform(final Callback callback, final List<Object> returnList);
 
         /**
          * @description
@@ -313,7 +333,7 @@ global with sharing class ArrayV1 {
      * @return The methods that may be called on the array.
      */
     global static Methods over(final List<Object> objects) {
-        return ArrayImpl.newInstance(objects);
+        return ArrayAPI.newInstance(objects);
     }
 
     /**

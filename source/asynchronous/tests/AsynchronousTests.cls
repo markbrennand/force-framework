@@ -16,6 +16,7 @@ public with sharing class AsynchronousTests {
 
     @IsTest
     private static void testExtendedClassesAreInert() {
+        TestHelper.setNOW();
         ExtendedClass extended = new ExtendedClass();
 
         try {
@@ -65,6 +66,7 @@ public with sharing class AsynchronousTests {
 
     @IsTest
     private static void testCreateAndQueue() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             Map<String, String> state = new Map<String, String>{
                     'Key1' => 'Value1', 'Key2' => 'Value2'
@@ -124,6 +126,7 @@ public with sharing class AsynchronousTests {
 
     @IsTest
     private static void testMocking() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousAPI.API = createMock();
 
@@ -145,6 +148,7 @@ public with sharing class AsynchronousTests {
 
     @IsTest
     private static void testBindingCheck() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             DependencyV1.bind(AsynchronousAPI.API.class, AsynchronousAPI.Factory.class);
             try {
@@ -172,10 +176,11 @@ public with sharing class AsynchronousTests {
 
     @IsTest
     private static void testCancellation() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
-            TriggerV1.disable(TriggerTest.Subscriber1.class);
-            TriggerV1.disable(TriggerTest.Subscriber2.class);
+            TriggerV1.disable(TriggerTests.Subscriber1.class);
+            TriggerV1.disable(TriggerTests.Subscriber2.class);
 
             AsynchronousJob__c job1 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
@@ -185,8 +190,8 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST1',
-                    ScheduledRunTime__c = Datetime.now().addDays(-1),
-                    LastRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-1),
+                    LastRunTime__c = CommonHelper.now()
             );
 
             AsynchronousJob__c job2 = new AsynchronousJob__c(
@@ -197,8 +202,8 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST2',
-                    ScheduledRunTime__c = Datetime.now().addDays(-2),
-                    LastRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-2),
+                    LastRunTime__c = CommonHelper.now()
             );
 
             AsynchronousJob__c job3 = new AsynchronousJob__c(
@@ -209,8 +214,8 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST2',
-                    ScheduledRunTime__c = Datetime.now().addDays(-2),
-                    LastRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-2),
+                    LastRunTime__c = CommonHelper.now()
             );
 
             insert new List<AsynchronousJob__c> { job1, job2, job3 };
@@ -241,6 +246,7 @@ public with sharing class AsynchronousTests {
 
     @IsTest
     private static void testGetJobs() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
 
@@ -252,8 +258,8 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST1',
-                    ScheduledRunTime__c = Datetime.now().addDays(-1),
-                    LastRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-1),
+                    LastRunTime__c = CommonHelper.now()
             );
 
             AsynchronousJob__c job2 = new AsynchronousJob__c(
@@ -264,8 +270,8 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST2',
-                    ScheduledRunTime__c = Datetime.now().addDays(-2),
-                    LastRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-2),
+                    LastRunTime__c = CommonHelper.now()
             );
 
             AsynchronousJob__c job3 = new AsynchronousJob__c(
@@ -276,8 +282,8 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST3',
-                    ScheduledRunTime__c = Datetime.now().addDays(1),
-                    LastRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now().addDays(1),
+                    LastRunTime__c = CommonHelper.now()
             );
 
             AsynchronousJob__c job4 = new AsynchronousJob__c(
@@ -288,8 +294,8 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST4',
-                    ScheduledRunTime__c = Datetime.now().addDays(2),
-                    LastRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now().addDays(2),
+                    LastRunTime__c = CommonHelper.now()
             );
 
             AsynchronousJob__c job5 = new AsynchronousJob__c(
@@ -300,8 +306,8 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST5',
-                    ScheduledRunTime__c = Datetime.now().addDays(0),
-                    LastRunTime__c = Datetime.now()
+                    ScheduledRunTime__c = CommonHelper.now().addDays(0),
+                    LastRunTime__c = CommonHelper.now()
             );
 
             insert new List<AsynchronousJob__c>{
@@ -404,6 +410,7 @@ public with sharing class AsynchronousTests {
 
     @IsTest
     private static void testRunJobs() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
 
@@ -415,7 +422,7 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST1',
-                    ScheduledRunTime__c = Datetime.now().addDays(-1)
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-1)
             );
 
             AsynchronousJob__c job2 = new AsynchronousJob__c(
@@ -426,7 +433,7 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST2',
-                    ScheduledRunTime__c = Datetime.now().addDays(-2)
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-2)
             );
 
             insert new List<AsynchronousJob__c> { job1, job2 };
@@ -461,6 +468,7 @@ public with sharing class AsynchronousTests {
 
     @IsTest
     private static void testDeleteJobs() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
 
@@ -472,7 +480,7 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST1',
-                    ScheduledRunTime__c = Datetime.now().addDays(-1)
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-1)
             );
 
             AsynchronousJob__c job2 = new AsynchronousJob__c(
@@ -483,7 +491,7 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST2',
-                    ScheduledRunTime__c = Datetime.now().addDays(-2)
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-2)
             );
 
             AsynchronousJob__c job3 = new AsynchronousJob__c(
@@ -494,7 +502,7 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST3',
-                    ScheduledRunTime__c = Datetime.now().addDays(-2)
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-2)
             );
 
             AsynchronousJob__c job4 = new AsynchronousJob__c(
@@ -505,7 +513,7 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST4',
-                    ScheduledRunTime__c = Datetime.now().addDays(-2)
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-2)
             );
 
             AsynchronousJob__c job5 = new AsynchronousJob__c(
@@ -516,7 +524,7 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST5',
-                    ScheduledRunTime__c = Datetime.now().addDays(-2)
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-2)
             );
 
             insert new List<AsynchronousJob__c> { job1, job2, job3, job4, job5 };
@@ -535,6 +543,7 @@ public with sharing class AsynchronousTests {
 
     @IsTest
     private static void testGetJobTotals() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
 
@@ -546,7 +555,7 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST1',
-                    ScheduledRunTime__c = Datetime.now().addDays(-1)
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-1)
             );
 
             AsynchronousJob__c job2 = new AsynchronousJob__c(
@@ -557,7 +566,7 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST2',
-                    ScheduledRunTime__c = Datetime.now().addDays(-2)
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-2)
             );
 
             AsynchronousJob__c job3 = new AsynchronousJob__c(
@@ -568,7 +577,7 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST3',
-                    ScheduledRunTime__c = Datetime.now().addDays(-1)
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-1)
             );
 
             AsynchronousJob__c job4 = new AsynchronousJob__c(
@@ -579,7 +588,7 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST4',
-                    ScheduledRunTime__c = Datetime.now().addDays(-4)
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-4)
             );
 
             AsynchronousJob__c job5 = new AsynchronousJob__c(
@@ -590,7 +599,7 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST5',
-                    ScheduledRunTime__c = Datetime.now().addDays(-1)
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-1)
             );
 
             AsynchronousJob__c job6 = new AsynchronousJob__c(
@@ -601,7 +610,7 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST6',
-                    ScheduledRunTime__c = Datetime.now().addDays(-1)
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-1)
             );
 
             insert new List<AsynchronousJob__c> { job1, job2, job3, job4, job5, job6 };
@@ -653,6 +662,7 @@ public with sharing class AsynchronousTests {
 
     @IsTest
     private static void testPersistException() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c job = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
@@ -663,7 +673,7 @@ public with sharing class AsynchronousTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST1',
-                    ScheduledRunTime__c = Datetime.now().addDays(-1)
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-1)
             );
 
             insert job;
@@ -696,6 +706,7 @@ public with sharing class AsynchronousTests {
 
     @IsTest
     private static void testOnlyAPICanBeUsed() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             try {
                 AsynchronousHelper helper = (AsynchronousHelper) AsynchronousHelper.API;
@@ -734,6 +745,7 @@ public with sharing class AsynchronousTests {
 
     @IsTest
     private static void testJobValidation() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             try {
                 insert new AsynchronousJob__c(
@@ -744,7 +756,7 @@ public with sharing class AsynchronousTests {
                         RetryInterval__c = 2000,
                         RetryNumber__c = 1,
                         Reference__c = 'TEST2',
-                        ScheduledRunTime__c = Datetime.now().addDays(-2)
+                        ScheduledRunTime__c = CommonHelper.now().addDays(-2)
                 );
                 Assert.fail();
             } catch (DMLException de) {

@@ -264,7 +264,7 @@ public with sharing virtual class TriggerAPI implements API {
          * @param objectType The type of object the trigger has fired for.
          */
         private void publishEvent(final SObjectType objectType) {
-            final String objectKey = getObjectKey(objectType.getDescribe().name);
+            final String objectKey = getObjectKey(objectType.getDescribe(SObjectDescribeOptions.DEFERRED).name);
 
             if (TRIGGER_DEFINITIONS.containsKey(objectKey)) {
                 final TriggerV1.Event event = createEvent(objectKey);

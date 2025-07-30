@@ -40,7 +40,7 @@
     </values>
     <values>
         <field>SubscriberClass__c</field>
-        <value xsi:type="xsd:string">TriggerTest.Subscriber2</value>
+        <value xsi:type="xsd:string">TriggerTests.Subscriber2</value>
     </values>
     <values>
         <field>ThrowExceptionWhenRecursionExceeded__c</field>

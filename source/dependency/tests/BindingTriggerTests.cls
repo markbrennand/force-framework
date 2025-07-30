@@ -19,7 +19,8 @@ public with sharing class BindingTriggerTests {
     private static Binding__c binding4;
 
     @IsTest
-    static void testValidInserts() {
+    private static void testValidInserts() {
+        TestHelper.setNOW();
         System.runAs(BindingTestHelper.getUser()) {
             binding1 = new Binding__c(
                     Type__c = BindingTestHelper.TestInterface.class.getName(),
@@ -50,7 +51,8 @@ public with sharing class BindingTriggerTests {
     }
 
     @IsTest
-    static void testValidUpdates() {
+    private static void testValidUpdates() {
+        TestHelper.setNOW();
         System.runAs(BindingTestHelper.getUser()) {
             testValidInserts();
 
@@ -71,7 +73,8 @@ public with sharing class BindingTriggerTests {
     }
 
     @IsTest
-    static void testInvalidInserts() {
+    private static void testInvalidInserts() {
+        TestHelper.setNOW();
         testValidInserts();
 
         System.runAs(BindingTestHelper.getUser()) {
@@ -188,7 +191,8 @@ public with sharing class BindingTriggerTests {
     }
 
     @IsTest
-    static void testInvalidUpdates() {
+    private static void testInvalidUpdates() {
+        TestHelper.setNOW();
         testValidInserts();
 
         System.runAs(BindingTestHelper.getUser()) {
@@ -233,6 +237,7 @@ public with sharing class BindingTriggerTests {
 
     @IsTest
     private static void testReload() {
+        TestHelper.setNOW();
         System.runAs(BindingTestHelper.getUser()) {
             insert new Binding__c(
                     Type__c = BindingTestHelper.TestInterface.class.getName(),

@@ -27,10 +27,8 @@ public with sharing class QueryHelper {
             final Set<String> fields = (Set<String>) currentValue.get();
             final SObjectField field = (SObjectField) element;
 
-            fields.add(
-                    (String) ArrayV1.over(new List<String> { relationshipName, field.getDescribe().getName() })
-                            .join('.')
-            );
+            fields.add((String) ArrayV1.over(new List<String> { relationshipName, field.getDescribe().getName() })
+                    .join('.'));
 
             return OptionalV1.of(fields);
         }
@@ -68,7 +66,7 @@ public with sharing class QueryHelper {
                 return OptionalV1.of(new List<SObject>());
             }
 
-            final List<SObject> toUpdate = (List<SObject>) ArrayV1.over(value.get()).transform(callback);
+            final List<SObject> toUpdate = (List<SObject>) ArrayV1.over(value.get()).transform(callback, new List<SObject>());
             Database.update(toUpdate, mode);
             return OptionalV1.of(toUpdate);
         }

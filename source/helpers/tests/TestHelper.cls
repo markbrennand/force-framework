@@ -22,6 +22,12 @@ public with sharing class TestHelper {
     }
 
     @TestVisible
+    private static void setNOW() {
+        CommonHelper.NOW = Datetime.newInstance(2025, 1, 1, 1, 0 ,0);
+    }
+
+
+    @TestVisible
     private static Boolean textContains(final String expected, final String text) {
         return text.replace(CommonHelper.getApexNamespace(), '').contains(expected);
 

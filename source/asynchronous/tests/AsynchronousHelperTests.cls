@@ -16,6 +16,7 @@ public with sharing class AsynchronousHelperTests {
 
     @IsTest
     private static void testBindingCheck() {
+        TestHelper.setNOW();
         try {
             DependencyV1.bind(AsynchronousHelper.API.class, AsynchronousAPI.Factory.class);
         } catch(DependencyV1.APIException ae) {
@@ -28,6 +29,7 @@ public with sharing class AsynchronousHelperTests {
 
     @IsTest
     private static void testExtendedClassIsInert() {
+        TestHelper.setNOW();
         ExtendedClass extended = new ExtendedClass();
 
         try {
@@ -68,6 +70,7 @@ public with sharing class AsynchronousHelperTests {
 
     @IsTest
     private static void testRecordException() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
@@ -85,6 +88,7 @@ public with sharing class AsynchronousHelperTests {
 
     @IsTest
     private static void testInternalFailure() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
@@ -102,6 +106,7 @@ public with sharing class AsynchronousHelperTests {
 
     @IsTest
     private static void testState() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             Map<String, String> state = new Map<String, String>{
                     'property1' => 'value1',
@@ -126,6 +131,7 @@ public with sharing class AsynchronousHelperTests {
 
     @IsTest
     private static void testMocking() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             final AsynchronousJob__c asyncObject = new AsynchronousJob__c(Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType));
             final Exception exc = new DMLException('Test');

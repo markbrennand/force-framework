@@ -15,6 +15,7 @@ public with sharing class AsynchronousRunnableTests {
 
     @IsTest
     private static void testGetters() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousV1.Runnable runnable = new AsynchronousTestHelper.TestRunnable();
             Assert.areEqual(1, runnable.getMaximumActive());
@@ -27,6 +28,7 @@ public with sharing class AsynchronousRunnableTests {
 
     @IsTest
     private static void testForJob() {
+        TestHelper.setNOW();
         System.runAs(AsynchronousTestHelper.getUser()) {
             AsynchronousV1.Runnable runnable = new AsynchronousTestHelper.TestRunnable();
             AsynchronousV1.Job job = (AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock();

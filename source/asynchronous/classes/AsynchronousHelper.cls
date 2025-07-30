@@ -320,7 +320,7 @@ public with sharing virtual class AsynchronousHelper implements API {
         final AsynchronousAPI.ApexJobRunnable runnable = (AsynchronousAPI.ApexJobRunnable) asyncJob.getRunnable();
 
         asyncObject.Status__c = AsynchronousV1.Status.RUNNING.name();
-        asyncObject.LastRunTime__c = Datetime.now();
+        asyncObject.LastRunTime__c = CommonHelper.now();
 
         AsynchronousDAO.API.persistObjects(new List<AsynchronousJob__c> { asyncObject });
 

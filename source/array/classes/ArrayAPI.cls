@@ -8,7 +8,7 @@
  *
  * @author Mark Brennand
  */
-public with sharing class ArrayImpl {
+public with sharing class ArrayAPI {
 
     /**
      * @description
@@ -59,7 +59,7 @@ public with sharing class ArrayImpl {
 
         public List<Object> filter(final ArrayV1.Callback callback) {
             callback.sharing(shared);
-            final List<Object> filtered = newListOfSameType();
+            final List<Object> filtered = newListOfSameType(objects);
             for (Integer i = 0; i < length; i++) {
                 final OptionalV1 retVal = callback.function(objects[i], null, i);
                 if (!retval.isPresent() || !(retval.get() instanceof Boolean)) {
@@ -75,7 +75,16 @@ public with sharing class ArrayImpl {
 
         public List<Object> transform(final ArrayV1.Callback callback) {
             callback.sharing(shared);
-            final List<Object> mapped = newListOfSameType();
+            final List<Object> mapped = new List<Object>();
+            for (Integer i = 0; i < length; i++) {
+                mapped.add(callback.function(objects[i], OptionalV1.empty(), i).get());
+            }
+            return mapped;
+        }
+
+        public List<Object> transform(final ArrayV1.Callback callback, final List<Object> returnList) {
+            callback.sharing(shared);
+            final List<Object> mapped = newListOfSameType(returnList);
             for (Integer i = 0; i < length; i++) {
                 mapped.add(callback.function(objects[i], OptionalV1.empty(), i).get());
             }
@@ -83,7 +92,7 @@ public with sharing class ArrayImpl {
         }
 
         public List<Object> concat(final List<Object> elements) {
-            final List<Object> cloned = newListOfSameType();
+            final List<Object> cloned = newListOfSameType(objects);
             cloned.addAll(objects);
             cloned.addAll(elements);
             return cloned;
@@ -133,7 +142,7 @@ public with sharing class ArrayImpl {
         }
 
         public List<Object> reverse() {
-            final List<Object> cloned = newListOfSameType();
+            final List<Object> cloned = newListOfSameType(objects);
             for (Integer i = length; i > 0; i--) {
                 cloned.add(objects[i-1]);
             }
@@ -180,8 +189,8 @@ public with sharing class ArrayImpl {
             return cloned;
         }
 
-        private List<Object> newListOfSameType() {
-            final List<Object> cloned = objects.clone();
+        private List<Object> newListOfSameType(final List<Object> listToClone) {
+            final List<Object> cloned = listToClone.clone();
             cloned.clear();
             return cloned;
         }

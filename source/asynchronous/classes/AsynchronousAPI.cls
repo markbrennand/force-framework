@@ -139,7 +139,7 @@ public with sharing virtual class AsynchronousAPI implements API {
                     Reference__c = reference,
                     MaximumRetries__c = maximumRetries,
                     RetryInterval__c = retryInterval,
-                    ScheduledRunTime__c = Datetime.now(),
+                    ScheduledRunTime__c = CommonHelper.now(),
                     RetryNumber__c = 0
             );
 
@@ -229,7 +229,7 @@ public with sharing virtual class AsynchronousAPI implements API {
         public void execute(final QueueableContext context) {
             final AsynchronousJob__c asynchronousJob = AsynchronousJob.toSObject(asyncJob);
             asynchronousJob.ApexJobId__c = context.getJobId();
-            asynchronousJob.LastRunTime__c = Datetime.now();
+            asynchronousJob.LastRunTime__c = CommonHelper.now();
 
             System.attachFinalizer(AsynchronousFinalizer.createFinalizer(asynchronousJob.Id));
             run(asyncJob, context.getJobId());
