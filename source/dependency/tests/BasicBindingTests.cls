@@ -8,16 +8,18 @@
  */
 @IsTest
 public with sharing class BasicBindingTests {
+    private final static String TESTING = 'dependency';
 
     @TestSetup
     private static void createUsers() {
-        BindingTestHelper.createUsers();
+        TestHelper.createUsers(TESTING, new Set<String> { 'ForceFwDependencyInjectionPermissions' });
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testInstantiation() {
         TestHelper.setNOW();
-        System.runAs(BindingTestHelper.getManager()) {
+        System.runAs(TestHelper.getManager(TESTING)) {
             BindingTestHelper.testBindingFailure(BindingTestHelper.SingletonTest.class, OptionalV1.empty(), BindingTestHelper.SingletonTest.class, 'Class BindingTestHelper.SingletonTest must not be instantiable');
             BindingTestHelper.testBindingFailure(BindingTestHelper.TestInterface.class, OptionalV1.empty(), BindingTestHelper.AbstractTest.class, 'Implementation BindingTestHelper.AbstractTest must be instantiable');
             DependencyV1.bind(BindingTestHelper.TestInterface.class, BindingTestHelper.SingletonTest.class);
@@ -28,9 +30,10 @@ public with sharing class BasicBindingTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testValidation() {
         TestHelper.setNOW();
-        System.runAs(BindingTestHelper.getManager()) {
+        System.runAs(TestHelper.getManager(TESTING)) {
             BindingTestHelper.testBindingFailure(BindingTestHelper.TestInterface.class, OptionalV1.empty(), User.class, 'Class User does not implement TestInterface');
             BindingTestHelper.testBindingFailure(BindingTestHelper.AbstractTest.class, OptionalV1.empty(), User.class, 'Class User does not extend AbstractTest');
             DependencyV1.bind(BindingTestHelper.TestInterface.class, BindingTestHelper.SingletonTest.class);
@@ -41,9 +44,10 @@ public with sharing class BasicBindingTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testPropertyBinding() {
         TestHelper.setNOW();
-        System.runAs(BindingTestHelper.getManager()) {
+        System.runAs(TestHelper.getManager(TESTING)) {
             BindingTestHelper.testBindingFailure(Map<String, Integer>.class, OptionalV1.empty(), BindingTestHelper.MapFactory.class, 'Class Map<String,Integer> must not be instantiable');
         }
     }
@@ -51,7 +55,7 @@ public with sharing class BasicBindingTests {
     @IsTest
     private static void testNonExistentBinding() {
         TestHelper.setNOW();
-        System.runAs(BindingTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             try {
                 DependencyV1.inject(BindingTestHelper.TestInterface.class);
                 Assert.fail();
@@ -68,7 +72,7 @@ public with sharing class BasicBindingTests {
     private static void testSingletonBinding() {
         TestHelper.setNOW();
         setup(true);
-        System.runAs(BindingTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             Assert.areEqual('INSTANCE1', ((BindingTestHelper.TestInterface) DependencyV1.inject(BindingTestHelper.TestInterface.class)).getValue());
             Assert.areEqual('INSTANCE1', ((BindingTestHelper.TestInterface) DependencyV1.inject(BindingTestHelper.TestInterface.class)).getValue());
             Assert.areEqual('INSTANCE2', ((BindingTestHelper.TestInterface) DependencyV1.inject(BindingTestHelper.AbstractTest.class)).getValue());
@@ -80,7 +84,7 @@ public with sharing class BasicBindingTests {
     private static void testPrototypeBinding() {
         TestHelper.setNOW();
         setup(false);
-        System.runAs(BindingTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             Assert.areEqual('INSTANCE1', ((BindingTestHelper.TestInterface) DependencyV1.inject(BindingTestHelper.TestInterface.class)).getValue());
             Assert.areEqual('INSTANCE2', ((BindingTestHelper.TestInterface) DependencyV1.inject(BindingTestHelper.TestInterface.class)).getValue());
             Assert.areEqual('INSTANCE3', ((BindingTestHelper.TestInterface) DependencyV1.inject(BindingTestHelper.AbstractTest.class)).getValue());
@@ -92,7 +96,7 @@ public with sharing class BasicBindingTests {
     private static void testIsBound() {
         TestHelper.setNOW();
         setup(true);
-        System.runAs(BindingTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             Assert.isTrue(DependencyV1.isBound(BindingTestHelper.TestInterface.class));
             Assert.isTrue(DependencyV1.isBound(BindingTestHelper.AbstractTest.class));
             Assert.isFalse(DependencyV1.isBound(BindingTestHelper.TestInterface.class, 'Test'));
@@ -104,7 +108,7 @@ public with sharing class BasicBindingTests {
     private static void testCustomSingletonBindings() {
         TestHelper.setNOW();
         setup(true);
-        System.runAs(BindingTestHelper.getManager()) {
+        System.runAs(TestHelper.getManager(TESTING)) {
             insert new List<Binding__c> {
                     new Binding__c(
                             Type__c = BindingTestHelper.TestInterface.class.getName(),
@@ -122,7 +126,7 @@ public with sharing class BasicBindingTests {
 
         // The first inject call adds the 2 custom bindings, which will instantiate the implementation. Hence use
         // CUSTOM3 and CUSTOM4.
-        System.runAs(BindingTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             Assert.areEqual('CUSTOM1', ((BindingTestHelper.TestInterface) DependencyV1.inject(BindingTestHelper.TestInterface.class)).getValue());
             Assert.areEqual('CUSTOM1', ((BindingTestHelper.TestInterface) DependencyV1.inject(BindingTestHelper.TestInterface.class)).getValue());
             Assert.areEqual('CUSTOM2', ((BindingTestHelper.TestInterface) DependencyV1.inject(BindingTestHelper.AbstractTest.class)).getValue());
@@ -134,7 +138,7 @@ public with sharing class BasicBindingTests {
     private static void testCustomPrototypeBindings() {
         TestHelper.setNOW();
         setup(true);
-        System.runAs(BindingTestHelper.getManager()) {
+        System.runAs(TestHelper.getManager(TESTING)) {
             insert new List<Binding__c> {
                     new Binding__c(
                             Type__c = BindingTestHelper.TestInterface.class.getName(),
@@ -147,7 +151,7 @@ public with sharing class BasicBindingTests {
             };
         }
 
-        System.runAs(BindingTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             Assert.areEqual('CUSTOM1', ((BindingTestHelper.TestInterface) DependencyV1.inject(BindingTestHelper.TestInterface.class)).getValue());
             Assert.areEqual('CUSTOM2', ((BindingTestHelper.TestInterface) DependencyV1.inject(BindingTestHelper.TestInterface.class)).getValue());
             Assert.areEqual('CUSTOM3', ((BindingTestHelper.TestInterface) DependencyV1.inject(BindingTestHelper.AbstractTest.class)).getValue());
@@ -156,7 +160,7 @@ public with sharing class BasicBindingTests {
     }
 
     private static void setup(Boolean singleton) {
-        System.runAs(BindingTestHelper.getManager()) {
+        System.runAs(TestHelper.getManager(TESTING)) {
             if (singleton) {
                 DependencyV1.bind(BindingTestHelper.TestInterface.class, BindingTestHelper.SingletonTest.class);
                 DependencyV1.bind(BindingTestHelper.AbstractTest.class, BindingTestHelper.SingletonTest.class);

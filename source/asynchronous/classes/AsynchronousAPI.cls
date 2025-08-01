@@ -31,6 +31,7 @@ public with sharing virtual class AsynchronousAPI implements API {
      * The instance is test visible so it can be mocked.
      */
     @TestVisible
+    @SuppressWarnings('PMD.PropertyNamingConventions')
     public static API API {
         public get {
             if (Test.isRunningTest() && API != null) { // API has been mocked.
@@ -99,6 +100,7 @@ public with sharing virtual class AsynchronousAPI implements API {
      * <br><br>
      * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
      */
+    @SuppressWarnings('PMD.EmptyStatementBlock')
     protected AsynchronousAPI() {}
 
     /**
@@ -164,7 +166,7 @@ public with sharing virtual class AsynchronousAPI implements API {
          * @return The jobs queued for processing.
          */
         public List<AsynchronousV1.Job> queueJobs(final List<AsynchronousV1.Job> asyncJobs) {
-            Assertion.isNotNull(asyncJobs, 'argument: Asynchronous.queueJobs.asyncJobs');
+            AssertionV1.isNotNull(asyncJobs, 'argument: Asynchronous.queueJobs.asyncJobs');
 
             final List<AsynchronousJob__c> asyncObjects = new List<AsynchronousJob__c>();
             final List<Map<String, String>> states = new List<Map<String, String>>();
@@ -333,7 +335,7 @@ public with sharing virtual class AsynchronousAPI implements API {
     private with sharing class JobUpdater extends ArrayV1.Callback {
         public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final AsynchronousJob__c asyncObject = (AsynchronousJob__c) element;
-            Assertion.isNotNull(asyncObject.Id, 'Asynchronous.Job object has not been assigned an Id');
+            AssertionV1.isNotNull(asyncObject.Id, 'Asynchronous.Job object has not been assigned an Id');
 
             final AsynchronousV1.Job updatedJob = AsynchronousJob.fromSObject(asyncObject);
             updatedJob.setState(((List<Map<String, String>>) shared().get())[index]);

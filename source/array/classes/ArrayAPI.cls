@@ -19,22 +19,49 @@ public with sharing class ArrayAPI {
         private final List<Object> objects;
         private Integer length;
 
+        /**
+         * @description
+         * Constructs an instance of the class managing the given list.
+         *
+         * @param objects The objects comprising the array.
+         */
         public Implementation(final List<Object> objects) {
             isListValid(objects);
             this.objects = objects.clone();
             this.length = objects.size();
         }
 
+        /**
+         * @description
+         * Returns the number of elements of the array.
+         *
+         * @return The number of objects in the array.
+         */
         public Integer length() {
             return length;
         }
 
+        /**
+         * @description
+         * Sets the data to be shared in the callback.
+         *
+         * @param shared The object to be shared.
+         *
+         * @return The instance so it can be chained.
+         */
         public ArrayV1.Methods sharing(final Object shared) {
             this.shared = shared;
             return this;
         }
 
+        /**
+         * @description
+         * Iterates the elements of the array, invoking the callback for each.
+         *
+         * @param callback The callback to be invoked for each element.
+         */
         public void forEach(final ArrayV1.Callback callback) {
+            Assert.isNotNull(callback, 'Callback for method must be defined');
             callback.sharing(shared);
             for (Integer i = 0; i < length; i++) {
                 callback.function(objects[i], OptionalV1.empty(), i);
@@ -42,22 +69,27 @@ public with sharing class ArrayAPI {
         }
 
         public Object reduce(final ArrayV1.Callback callback) {
+            Assert.isNotNull(callback, 'Callback for method must be defined');
             return reduce(callback, getOptionalForElement(0), 0, length - 1, 1).get();
         }
 
         public Object reduceRight(final ArrayV1.Callback callback) {
+            Assert.isNotNull(callback, 'Callback for method must be defined');
             return reduce(callback, getOptionalForElement(length -1), length - 1, 0, -1).get();
         }
 
         public Object reduce(final ArrayV1.Callback callback, final Object initialValue) {
+            Assert.isNotNull(callback, 'Callback for method must be defined');
             return reduce(callback, OptionalV1.of(initialValue), -1, length -1, 1).get();
         }
 
         public Object reduceRight(final ArrayV1.Callback callback, final Object initialValue) {
+            Assert.isNotNull(callback, 'Callback for method must be defined');
             return reduce(callback, OptionalV1.of(initialValue), length, 0, -1).get();
         }
 
         public List<Object> filter(final ArrayV1.Callback callback) {
+            Assert.isNotNull(callback, 'Callback for method must be defined');
             callback.sharing(shared);
             final List<Object> filtered = newListOfSameType(objects);
             for (Integer i = 0; i < length; i++) {
@@ -74,6 +106,7 @@ public with sharing class ArrayAPI {
         }
 
         public List<Object> transform(final ArrayV1.Callback callback) {
+            Assert.isNotNull(callback, 'Callback for method must be defined');
             callback.sharing(shared);
             final List<Object> mapped = new List<Object>();
             for (Integer i = 0; i < length; i++) {
@@ -83,6 +116,7 @@ public with sharing class ArrayAPI {
         }
 
         public List<Object> transform(final ArrayV1.Callback callback, final List<Object> returnList) {
+            Assert.isNotNull(callback, 'Callback for method must be defined');
             callback.sharing(shared);
             final List<Object> mapped = newListOfSameType(returnList);
             for (Integer i = 0; i < length; i++) {
@@ -112,6 +146,7 @@ public with sharing class ArrayAPI {
         }
 
         public Boolean some(final ArrayV1.Callback callback) {
+            Assert.isNotNull(callback, 'Callback for method must be defined');
             callback.sharing(shared);
             for (Integer i = 0; i < length; i++) {
                 final OptionalV1 retVal = callback.function(objects[i], OptionalV1.empty(), i);
@@ -127,6 +162,7 @@ public with sharing class ArrayAPI {
         }
 
         public Boolean every(final ArrayV1.Callback callback) {
+            Assert.isNotNull(callback, 'Callback for method must be defined');
             callback.sharing(shared);
             for (Integer i = 0; i < length; i++) {
                 final OptionalV1 retVal = callback.function(objects[i], null, i);
@@ -195,6 +231,7 @@ public with sharing class ArrayAPI {
             return cloned;
         }
 
+        @SuppressWarnings('PMD.ExcessiveParameterList')
         private OptionalV1 reduce(
                 final ArrayV1.Callback callback,
                 final OptionalV1 initialValue,

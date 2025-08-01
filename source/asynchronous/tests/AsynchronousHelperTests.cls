@@ -8,70 +8,75 @@
  */
 @IsTest
 public with sharing class AsynchronousHelperTests {
+    private final static String TESTING = 'asynchronous';
 
     @TestSetup
-    private static void setup() {
-        AsynchronousTestHelper.createUsers();
+    private static void createUsers() {
+        TestHelper.createUsers(TESTING, new Set<String> { 'ForceFwDependencyInjectionPermissions', 'ForceFwAsynchronousPermissions' });
     }
 
     @IsTest
     private static void testBindingCheck() {
         TestHelper.setNOW();
-        try {
-            DependencyV1.bind(AsynchronousHelper.API.class, AsynchronousAPI.Factory.class);
-        } catch(DependencyV1.APIException ae) {
-            Assert.isTrue(
-                    TestHelper.exceptionContains( 'Class AsynchronousAPI.Factory does not implement AsynchronousHelper.API', ae),
-                    'Unexpected exception: ' + ae
-            );
+        System.runAs(TestHelper.getUser(TESTING)) {
+            try {
+                DependencyV1.bind(AsynchronousHelper.API.class, AsynchronousAPI.Factory.class);
+            } catch(DependencyV1.APIException ae) {
+                Assert.isTrue(
+                        TestHelper.exceptionContains( 'Class AsynchronousAPI.Factory does not implement AsynchronousHelper.API', ae),
+                        'Unexpected exception: ' + ae
+                );
+            }
         }
     }
 
     @IsTest
     private static void testExtendedClassIsInert() {
         TestHelper.setNOW();
-        ExtendedClass extended = new ExtendedClass();
+        System.runAs(TestHelper.getUser(TESTING)) {
+            ExtendedClass extended = new ExtendedClass();
 
-        try {
-            extended.encodeState(null, null);
-            Assert.fail();
-        } catch(AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
+            try {
+                extended.encodeState(null, null);
+                Assert.fail();
+            } catch(AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
 
-        try {
-            extended.recordException(null, null);
-            Assert.fail();
-        } catch(AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
+            try {
+                extended.recordException(null, null);
+                Assert.fail();
+            } catch(AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
 
-        try {
-            extended.recordInternalException(null, null);
-            Assert.fail();
-        } catch(AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
+            try {
+                extended.recordInternalException(null, null);
+                Assert.fail();
+            } catch(AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
 
-        try {
-            extended.decodeState(null);
-            Assert.fail();
-        } catch(AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
+            try {
+                extended.decodeState(null);
+                Assert.fail();
+            } catch(AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
 
-        try {
-            extended.queueJob(null);
-            Assert.fail();
-        } catch(AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
+            try {
+                extended.queueJob(null);
+                Assert.fail();
+            } catch(AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }        }
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testRecordException() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = AsynchronousV1.Status.RUNNING.name(),
@@ -87,9 +92,10 @@ public with sharing class AsynchronousHelperTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testInternalFailure() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = AsynchronousV1.Status.RUNNING.name(),
@@ -107,7 +113,7 @@ public with sharing class AsynchronousHelperTests {
     @IsTest
     private static void testState() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             Map<String, String> state = new Map<String, String>{
                     'property1' => 'value1',
                     'property2' => 'value2',
@@ -120,9 +126,9 @@ public with sharing class AsynchronousHelperTests {
             AsynchronousJob__c asynchronousObject = new AsynchronousJob__c(Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType));
 
             for (Integer size : new List<Integer>{
-                    AsynchronousHelper.MAX_CHUNK_SIZE, 1, 2, 4, 8, 16, 32, 62, 128, 256
+                    AsynchronousHelper.maxChunkSize, 1, 2, 4, 8, 16, 32, 62, 128, 256
             }) {
-                AsynchronousHelper.MAX_CHUNK_SIZE = size;
+                AsynchronousHelper.maxChunkSize = size;
                 List<AsynchronousJobState__c> chunks = AsynchronousHelper.API.encodeState(asynchronousObject, state);
                 Assert.areEqual(state, AsynchronousHelper.API.decodeState(chunks), 'Unexpected state for size ' + size);
             }
@@ -132,7 +138,7 @@ public with sharing class AsynchronousHelperTests {
     @IsTest
     private static void testMocking() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             final AsynchronousJob__c asyncObject = new AsynchronousJob__c(Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType));
             final Exception exc = new DMLException('Test');
 

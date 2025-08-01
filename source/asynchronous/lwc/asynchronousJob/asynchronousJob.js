@@ -6,7 +6,7 @@ import {LightningElement} from 'lwc';
 
 export default class AsynchronousJob extends LightningElement {
 
-    refreshList(event) {
+    refreshList() {
         this.dispatchEvent(new CustomEvent('refreshlist'));
     }
 }

@@ -8,78 +8,81 @@
  */
 @IsTest
 public with sharing class AsynchronousDAOTests {
+    private final static String TESTING = 'asynchronous';
 
     @TestSetup
-    private static void setup() {
-        AsynchronousTestHelper.createUsers();
+    private static void createUsers() {
+        TestHelper.createUsers(TESTING, new Set<String> { 'ForceFwDependencyInjectionPermissions', 'ForceFwAsynchronousPermissions' });
     }
 
     @IsTest
     private static void testExtendedClassIsInert() {
         TestHelper.setNOW();
-        ExtendedClass extended = new ExtendedClass();
+        System.runAs(TestHelper.getUser(TESTING)) {
+            ExtendedClass extended = new ExtendedClass();
 
-        try {
-            extended.getObject(null);
-            Assert.fail();
-        } catch(AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
+            try {
+                extended.getObject(null);
+                Assert.fail();
+            } catch(AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
 
-        try {
-            extended.getScheduledObjects(null);
-            Assert.fail();
-        } catch(AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
+            try {
+                extended.getScheduledObjects(null);
+                Assert.fail();
+            } catch(AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
 
-        try {
-            extended.countSchedulableObjects();
-            Assert.fail();
-        } catch(AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
+            try {
+                extended.countSchedulableObjects();
+                Assert.fail();
+            } catch(AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
 
-        try {
-            extended.countActiveObjects(null);
-            Assert.fail();
-        } catch(AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
+            try {
+                extended.countActiveObjects(null);
+                Assert.fail();
+            } catch(AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
 
-        try {
-            extended.persistObjects(null);
-            Assert.fail();
-        } catch(AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
+            try {
+                extended.persistObjects(null);
+                Assert.fail();
+            } catch(AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
 
-        try {
-            extended.persistObjects(null, null);
-            Assert.fail();
-        } catch(AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
+            try {
+                extended.persistObjects(null, null);
+                Assert.fail();
+            } catch(AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
 
-        try {
-            extended.removeObjects(null);
-            Assert.fail();
-        } catch(AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
+            try {
+                extended.removeObjects(null);
+                Assert.fail();
+            } catch(AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
 
-        try {
-            extended.persistException(null);
-            Assert.fail();
-        } catch(AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
+            try {
+                extended.persistException(null);
+                Assert.fail();
+            } catch(AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
         }
     }
 
     @IsTest
     private static void testJobCRUD() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousHelper.API = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
                     .whenArgument(new AsynchronousJob__c(Status__c = AsynchronousV1.Status.PENDING.name()))
                         .forMethod('queueJob').called(0)
@@ -132,7 +135,7 @@ public with sharing class AsynchronousDAOTests {
             try {
                 AsynchronousDAO.API.getObject(fetched1.Id);
                 Assert.fail();
-            } catch(Assertion.AssertionException ae) {
+            } catch(AssertionV1.AssertionException ae) {
                 Assert.isTrue(ae.getMessage().contains('not found'));
             }
 
@@ -152,9 +155,10 @@ public with sharing class AsynchronousDAOTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testJobAndStateCRUD() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousHelper.API = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
                     .whenArgument(new AsynchronousJob__c(Status__c = AsynchronousV1.Status.PENDING.name()))
                         .forMethod('queueJob').called(2)
@@ -226,7 +230,7 @@ public with sharing class AsynchronousDAOTests {
             try {
                 AsynchronousDAO.API.getObject(fetched1.Id);
                 Assert.fail();
-            } catch(Assertion.AssertionException ae) {
+            } catch(AssertionV1.AssertionException ae) {
                 Assert.isTrue(ae.getMessage().contains('not found'));
             }
 
@@ -260,7 +264,7 @@ public with sharing class AsynchronousDAOTests {
     @IsTest
     private static void testBindingCheck() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             DependencyV1.bind(AsynchronousDAO.API.class, AsynchronousDAO.Factory.class);
             try {
                 DependencyV1.bind(AsynchronousDAO.API.class, AsynchronousScheduler.RunNextAvailable.class);
@@ -277,7 +281,7 @@ public with sharing class AsynchronousDAOTests {
     @IsTest
     private static void testCountScheduledObjects() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
 
             AsynchronousJob__c job1 = new AsynchronousJob__c(
@@ -371,9 +375,10 @@ public with sharing class AsynchronousDAOTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testGetScheduledObjects() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousJob__c job1 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
@@ -477,7 +482,7 @@ public with sharing class AsynchronousDAOTests {
     @IsTest
     private static void testPersistException() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousJob__c job = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     ApexJobId__c = 'APEXJOB-1',

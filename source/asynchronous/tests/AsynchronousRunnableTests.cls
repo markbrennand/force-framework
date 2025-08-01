@@ -8,15 +8,17 @@
  */
 @IsTest
 public with sharing class AsynchronousRunnableTests {
+    private final static String TESTING = 'asynchronous';
+
     @TestSetup
-    private static void setup() {
-        AsynchronousTestHelper.createUsers();
+    private static void createUsers() {
+        TestHelper.createUsers(TESTING, new Set<String> { 'ForceFwDependencyInjectionPermissions', 'ForceFwAsynchronousPermissions' });
     }
 
     @IsTest
     private static void testGetters() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousV1.Runnable runnable = new AsynchronousTestHelper.TestRunnable();
             Assert.areEqual(1, runnable.getMaximumActive());
             Assert.isTrue(runnable.onSuccess((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock()));
@@ -29,7 +31,7 @@ public with sharing class AsynchronousRunnableTests {
     @IsTest
     private static void testForJob() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousV1.Runnable runnable = new AsynchronousTestHelper.TestRunnable();
             AsynchronousV1.Job job = (AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock();
             runnable.forJob(job);

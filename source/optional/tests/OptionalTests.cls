@@ -8,66 +8,86 @@
  */
 @IsTest
 public with sharing class OptionalTests {
+    private final static String TESTING = 'optional';
+
+    @TestSetup
+    private static void createUsers() {
+        TestHelper.createUsers(TESTING, new Set<String>());
+    }
 
     @IsTest
+    @SuppressWarnings('PMD.EmptyCatchBlock')
     private static void testEmpty() {
         TestHelper.setNOW();
-        OptionalV1 opt = OptionalV1.empty();
-        Assert.isFalse(opt.isPresent());
-        try {
-            opt.get();
-            Assert.fail();
-        } catch(OptionalV1.NoSuchElementException nsee) {}
+        System.runAs(TestHelper.getUser(TESTING)) {
+            OptionalV1 opt = OptionalV1.empty();
+            Assert.isFalse(opt.isPresent());
+            try {
+                opt.get();
+                Assert.fail();
+            } catch (OptionalV1.NoSuchElementException nsee) {
+            }
+        }
     }
 
     @IsTest
     private static void testOf() {
         TestHelper.setNOW();
-        String value = 'TEST';
-        OptionalV1 opt = OptionalV1.of(value);
-        Assert.isTrue(opt.isPresent());
-        Assert.areEqual('TEST', opt.get());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            String value = 'TEST';
+            OptionalV1 opt = OptionalV1.of(value);
+            Assert.isTrue(opt.isPresent());
+            Assert.areEqual('TEST', opt.get());
 
-        opt = OptionalV1.of(null);
-        Assert.isTrue(opt.isPresent());
-        Assert.isNull(opt.get());
+            opt = OptionalV1.of(null);
+            Assert.isTrue(opt.isPresent());
+            Assert.isNull(opt.get());
+        }
     }
 
     @IsTest
     private static void testOfNullable() {
         TestHelper.setNOW();
-        OptionalV1 opt = OptionalV1.ofNullable('TEST');
-        Assert.isTrue(opt.isPresent());
-        Assert.areEqual('TEST', opt.get());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            OptionalV1 opt = OptionalV1.ofNullable('TEST');
+            Assert.isTrue(opt.isPresent());
+            Assert.areEqual('TEST', opt.get());
 
-        opt = OptionalV1.ofNullable(null);
-        Assert.isFalse(opt.isPresent());
+            opt = OptionalV1.ofNullable(null);
+            Assert.isFalse(opt.isPresent());
+        }
     }
 
     @IsTest
     private static void testOrElse() {
         TestHelper.setNOW();
-        OptionalV1 opt = OptionalV1.of('TEST');
-        Assert.areEqual('TEST', opt.orElse('OTHER'));
+        System.runAs(TestHelper.getUser(TESTING)) {
+            OptionalV1 opt = OptionalV1.of('TEST');
+            Assert.areEqual('TEST', opt.orElse('OTHER'));
 
-        opt = OptionalV1.empty();
-        Assert.areEqual('OTHER', opt.orElse('OTHER'));
+            opt = OptionalV1.empty();
+            Assert.areEqual('OTHER', opt.orElse('OTHER'));
+        }
     }
 
     @IsTest
     private static void TestCall() {
         TestHelper.setNOW();
-        Assert.isFalse(OptionalV1.empty().call(new TestFunction()).isPresent());
-        Assert.areEqual(1, OptionalV1.of('one').call(new TestFunction()).get());
-        Assert.areEqual(2, OptionalV1.of('two').call(new TestFunction()).get());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            Assert.isFalse(OptionalV1.empty().call(new TestFunction()).isPresent());
+            Assert.areEqual(1, OptionalV1.of('one').call(new TestFunction()).get());
+            Assert.areEqual(2, OptionalV1.of('two').call(new TestFunction()).get());
+        }
     }
 
     @IsTest
     private static void TestCallChaining() {
         TestHelper.setNOW();
-        Assert.isFalse(OptionalV1.empty().call(new TestFunction()).call(new TestFunction()).isPresent());
-        Assert.areEqual(1, OptionalV1.of(1).call(new TestFunction()).call(new TestFunction()).get());
-        Assert.areEqual(2, OptionalV1.of(2).call(new TestFunction()).call(new TestFunction()).get());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            Assert.isFalse(OptionalV1.empty().call(new TestFunction()).call(new TestFunction()).isPresent());
+            Assert.areEqual(1, OptionalV1.of(1).call(new TestFunction()).call(new TestFunction()).get());
+            Assert.areEqual(2, OptionalV1.of(2).call(new TestFunction()).call(new TestFunction()).get());
+        }
     }
 
     private with sharing class TestFunction implements OptionalV1.Function {

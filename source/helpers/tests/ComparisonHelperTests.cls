@@ -8,100 +8,116 @@
  */
 @IsTest
 public with sharing class ComparisonHelperTests {
+    private final static String TESTING = 'helpers';
+
+    @TestSetup
+    private static void createUsers() {
+        TestHelper.createUsers(TESTING, new Set<String>());
+    }
 
     @IsTest
     private static void testObjectComparison() {
         TestHelper.setNOW();
-        Assert.isTrue(ComparisonHelper.compare(1, 1));
-        Assert.isFalse(ComparisonHelper.compare(1, 2));
+        System.runAs(TestHelper.getUser(TESTING)) {
+            Assert.isTrue(ComparisonHelper.compare(1, 1));
+            Assert.isFalse(ComparisonHelper.compare(1, 2));
+        }
     }
 
     @IsTest
     private static void testSObjectComparison() {
         TestHelper.setNOW();
-        Account a1 = new Account(Name = 'Bill');
-        Account a2 = new Account(Name = 'Ted');
-        Account a3 = new Account(Name = 'Bill', AccountNumber = '1');
+        System.runAs(TestHelper.getUser(TESTING)) {
+            Account a1 = new Account(Name = 'Bill');
+            Account a2 = new Account(Name = 'Ted');
+            Account a3 = new Account(Name = 'Bill', AccountNumber = '1');
 
-        Assert.isTrue(ComparisonHelper.compare(a1, a1));
-        Assert.isFalse(ComparisonHelper.compare(a1, a2));
-        Assert.isTrue(ComparisonHelper.compare(a1, a3));
+            Assert.isTrue(ComparisonHelper.compare(a1, a1));
+            Assert.isFalse(ComparisonHelper.compare(a1, a2));
+            Assert.isTrue(ComparisonHelper.compare(a1, a3));
 
-        Assert.isFalse(ComparisonHelper.compare(a2, a1));
-        Assert.isTrue(ComparisonHelper.compare(a2, a2));
-        Assert.isFalse(ComparisonHelper.compare(a2, a3));
+            Assert.isFalse(ComparisonHelper.compare(a2, a1));
+            Assert.isTrue(ComparisonHelper.compare(a2, a2));
+            Assert.isFalse(ComparisonHelper.compare(a2, a3));
 
-        Assert.isFalse(ComparisonHelper.compare(a3, a1));
-        Assert.isFalse(ComparisonHelper.compare(a3, a2));
-        Assert.isTrue(ComparisonHelper.compare(a3, a3));
+            Assert.isFalse(ComparisonHelper.compare(a3, a1));
+            Assert.isFalse(ComparisonHelper.compare(a3, a2));
+            Assert.isTrue(ComparisonHelper.compare(a3, a3));
 
-        Assert.isFalse(ComparisonHelper.compare(a1, 102));
+            Assert.isFalse(ComparisonHelper.compare(a1, 102));
+        }
     }
 
     @IsTest
     private static void testListSObjectComparison() {
         TestHelper.setNOW();
-        Account a1 = new Account(Name = 'Bill');
-        Account a2 = new Account(Name = 'Ted');
-        Account a3 = new Account(Name = 'Bill', AccountNumber = '1');
+        System.runAs(TestHelper.getUser(TESTING)) {
+            Account a1 = new Account(Name = 'Bill');
+            Account a2 = new Account(Name = 'Ted');
+            Account a3 = new Account(Name = 'Bill', AccountNumber = '1');
 
-        Assert.isTrue(ComparisonHelper.compare(new List<SObject> { a1, a2 }, new List<SObject> { a1, a2 } ));
-        Assert.isFalse(ComparisonHelper.compare(new List<SObject> { a1, a2 }, new List<SObject> { a1, a3 } ));
-        Assert.isTrue(ComparisonHelper.compare(new List<SObject> { a1, a2 }, new List<SObject> { a3, a2 } ));
+            Assert.isTrue(ComparisonHelper.compare(new List<SObject> { a1, a2 }, new List<SObject> { a1, a2 } ));
+            Assert.isFalse(ComparisonHelper.compare(new List<SObject> { a1, a2 }, new List<SObject> { a1, a3 } ));
+            Assert.isTrue(ComparisonHelper.compare(new List<SObject> { a1, a2 }, new List<SObject> { a3, a2 } ));
 
-        Assert.isTrue(ComparisonHelper.compare(new List<SObject> { a2, a1 }, new List<SObject> { a2, a1 } ));
-        Assert.isFalse(ComparisonHelper.compare(new List<SObject> { a2, a1 }, new List<SObject> { a3, a1 } ));
-        Assert.isTrue(ComparisonHelper.compare(new List<SObject> { a2, a1 }, new List<SObject> { a2, a3 } ));
+            Assert.isTrue(ComparisonHelper.compare(new List<SObject> { a2, a1 }, new List<SObject> { a2, a1 } ));
+            Assert.isFalse(ComparisonHelper.compare(new List<SObject> { a2, a1 }, new List<SObject> { a3, a1 } ));
+            Assert.isTrue(ComparisonHelper.compare(new List<SObject> { a2, a1 }, new List<SObject> { a2, a3 } ));
 
-        Assert.isTrue(ComparisonHelper.compare(new List<SObject> { a3, a2 }, new List<SObject> { a3, a2 } ));
-        Assert.isFalse(ComparisonHelper.compare(new List<SObject> { a3, a2 }, new List<SObject> { a1, a2 } ));
-        Assert.isFalse(ComparisonHelper.compare(new List<SObject> { a3, a2 }, new List<SObject> { a2, a2 } ));
+            Assert.isTrue(ComparisonHelper.compare(new List<SObject> { a3, a2 }, new List<SObject> { a3, a2 } ));
+            Assert.isFalse(ComparisonHelper.compare(new List<SObject> { a3, a2 }, new List<SObject> { a1, a2 } ));
+            Assert.isFalse(ComparisonHelper.compare(new List<SObject> { a3, a2 }, new List<SObject> { a2, a2 } ));
 
-        Assert.isFalse(ComparisonHelper.compare(new List<SObject> { a1, a2 }, a3));
-        Assert.isFalse(ComparisonHelper.compare(new List<SObject> { a1, a2 }, new List<Integer> { 1, 2 }));
+            Assert.isFalse(ComparisonHelper.compare(new List<SObject> { a1, a2 }, a3));
+            Assert.isFalse(ComparisonHelper.compare(new List<SObject> { a1, a2 }, new List<Integer> { 1, 2 }));
+        }
     }
 
     @IsTest
     private static void testSetSObjectComparison() {
         TestHelper.setNOW();
-        Account a1 = new Account(Name = 'Bill');
-        Account a2 = new Account(Name = 'Ted');
-        Account a3 = new Account(Name = 'Bill', AccountNumber = '1');
+        System.runAs(TestHelper.getUser(TESTING)) {
+            Account a1 = new Account(Name = 'Bill');
+            Account a2 = new Account(Name = 'Ted');
+            Account a3 = new Account(Name = 'Bill', AccountNumber = '1');
 
-        Assert.isTrue(ComparisonHelper.compare(new Set<SObject> { a1, a2 }, new Set<SObject> { a1, a2 } ));
-        Assert.isFalse(ComparisonHelper.compare(new Set<SObject> { a1, a2 }, new Set<SObject> { a1, a3 } ));
-        Assert.isTrue(ComparisonHelper.compare(new Set<SObject> { a1, a2 }, new Set<SObject> { a3, a2 } ));
+            Assert.isTrue(ComparisonHelper.compare(new Set<SObject> { a1, a2 }, new Set<SObject> { a1, a2 } ));
+            Assert.isFalse(ComparisonHelper.compare(new Set<SObject> { a1, a2 }, new Set<SObject> { a1, a3 } ));
+            Assert.isTrue(ComparisonHelper.compare(new Set<SObject> { a1, a2 }, new Set<SObject> { a3, a2 } ));
 
-        Assert.isTrue(ComparisonHelper.compare(new Set<SObject> { a2, a1 }, new Set<SObject> { a2, a1 } ));
-        Assert.isFalse(ComparisonHelper.compare(new Set<SObject> { a2, a1 }, new Set<SObject> { a3, a1 } ));
-        Assert.isTrue(ComparisonHelper.compare(new Set<SObject> { a2, a1 }, new Set<SObject> { a2, a3 } ));
+            Assert.isTrue(ComparisonHelper.compare(new Set<SObject> { a2, a1 }, new Set<SObject> { a2, a1 } ));
+            Assert.isFalse(ComparisonHelper.compare(new Set<SObject> { a2, a1 }, new Set<SObject> { a3, a1 } ));
+            Assert.isTrue(ComparisonHelper.compare(new Set<SObject> { a2, a1 }, new Set<SObject> { a2, a3 } ));
 
-        Assert.isTrue(ComparisonHelper.compare(new Set<SObject> { a3, a2 }, new Set<SObject> { a3, a2 } ));
-        Assert.isFalse(ComparisonHelper.compare(new Set<SObject> { a3, a2 }, new Set<SObject> { a1, a2 } ));
-        Assert.isFalse(ComparisonHelper.compare(new Set<SObject> { a3, a2 }, new Set<SObject> { a2, a2 } ));
+            Assert.isTrue(ComparisonHelper.compare(new Set<SObject> { a3, a2 }, new Set<SObject> { a3, a2 } ));
+            Assert.isFalse(ComparisonHelper.compare(new Set<SObject> { a3, a2 }, new Set<SObject> { a1, a2 } ));
+            Assert.isFalse(ComparisonHelper.compare(new Set<SObject> { a3, a2 }, new Set<SObject> { a2, a2 } ));
 
-        Assert.isFalse(ComparisonHelper.compare(new Set<SObject> { a1, a2 }, a3));
-        Assert.isFalse(ComparisonHelper.compare(new Set<SObject> { a1, a2 }, new Set<Integer> { 1, 2 }));
+            Assert.isFalse(ComparisonHelper.compare(new Set<SObject> { a1, a2 }, a3));
+            Assert.isFalse(ComparisonHelper.compare(new Set<SObject> { a1, a2 }, new Set<Integer> { 1, 2 }));
+        }
     }
 
     @IsTest
     private static void testAdditionalComparator() {
         TestHelper.setNOW();
-        Exception exc1 = new DMLException('TEST');
+        System.runAs(TestHelper.getUser(TESTING)) {
+            Exception exc1 = new DMLException('TEST');
 
-        Assert.isFalse(ComparisonHelper.compare(exc1, new DependencyV1.APIException('TEST')));
+            Assert.isFalse(ComparisonHelper.compare(exc1, new DependencyV1.APIException('TEST')));
 
-        Assert.isTrue(ComparisonHelper.compare(
-                new List<Comparator<Object>> { new ExceptionComparator() },
-                exc1,
-                new DependencyV1.APIException('TEST'))
-        );
+            Assert.isTrue(ComparisonHelper.compare(
+                    new List<Comparator<Object>> { new ExceptionComparator() },
+                    exc1,
+                    new DependencyV1.APIException('TEST'))
+            );
 
-        Assert.isFalse(ComparisonHelper.compare(
-                new List<Comparator<Object>> { new ExceptionComparator() },
-                exc1,
-                new DependencyV1.APIException('ANOTHER'))
-        );
+            Assert.isFalse(ComparisonHelper.compare(
+                    new List<Comparator<Object>> { new ExceptionComparator() },
+                    exc1,
+                    new DependencyV1.APIException('ANOTHER'))
+            );
+        }
     }
 
     private with sharing class ExceptionComparator implements Comparator<Object> {

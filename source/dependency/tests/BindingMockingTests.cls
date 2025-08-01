@@ -8,15 +8,74 @@
  */
 @IsTest
 public with sharing class BindingMockingTests {
+    private final static String TESTING = 'dependency';
+
     @TestSetup
-    private static void setup() {
-        BindingTestHelper.createUsers();
+    private static void createUsers() {
+        TestHelper.createUsers(TESTING, new Set<String> { 'ForceFwDependencyInjectionPermissions' });
+    }
+
+    @IsTest
+    private static void testExtendedClassesAreInert() {
+        TestHelper.setNOW();
+        System.runAs(TestHelper.getUser(TESTING)) {
+            ExtendedClass extended = new ExtendedClass();
+
+            try {
+                extended.inject(null);
+                Assert.fail();
+            } catch (DependencyV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
+
+            try {
+                extended.inject(null, null);
+                Assert.fail();
+            } catch (DependencyV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
+
+            try {
+                extended.isBound(null);
+                Assert.fail();
+            } catch (DependencyV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
+
+            try {
+                extended.isBound(null, null);
+                Assert.fail();
+            } catch (DependencyV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
+
+            try {
+                extended.bind(null, null);
+                Assert.fail();
+            } catch (DependencyV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
+
+            try {
+                extended.bind(null, null, null);
+                Assert.fail();
+            } catch (DependencyV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
+
+            try {
+                extended.reload();
+                Assert.fail();
+            } catch (DependencyV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
+        }
     }
 
     @IsTest
     private static void testMocking() {
         TestHelper.setNOW();
-        System.runAs(BindingTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             DependencyAPI mockInjection = createMock();
             DependencyAPI.API = mockInjection;
 
@@ -95,60 +154,6 @@ public with sharing class BindingMockingTests {
                     .throws(new DependencyV1.APIException('Binding for BindingTestHelper.AbstractTest for action NotTest is not defined'));
 
         return (DependencyAPI) mocked.mock();
-    }
-
-    @IsTest
-    private static void testExtendedClassesAreInert() {
-        ExtendedClass extended = new ExtendedClass();
-
-        try {
-            extended.inject(null);
-            Assert.fail();
-        } catch (DependencyV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
-
-        try {
-            extended.inject(null, null);
-            Assert.fail();
-        } catch (DependencyV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
-
-        try {
-            extended.isBound(null);
-            Assert.fail();
-        } catch (DependencyV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
-
-        try {
-            extended.isBound(null, null);
-            Assert.fail();
-        } catch (DependencyV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
-
-        try {
-            extended.bind(null, null);
-            Assert.fail();
-        } catch (DependencyV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
-
-        try {
-            extended.bind(null, null, null);
-            Assert.fail();
-        } catch (DependencyV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
-
-        try {
-            extended.reload();
-            Assert.fail();
-        } catch (DependencyV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
     }
 
     private with sharing class ExtendedClass extends DependencyAPI {}

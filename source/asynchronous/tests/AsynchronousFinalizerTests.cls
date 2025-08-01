@@ -8,16 +8,18 @@
  */
 @IsTest
 public with sharing class AsynchronousFinalizerTests {
+    private final static String TESTING = 'asynchronous';
 
     @TestSetup
-    private static void setup() {
-        AsynchronousTestHelper.createUsers();
+    private static void createUsers() {
+        TestHelper.createUsers(TESTING, new Set<String> { 'ForceFwDependencyInjectionPermissions', 'ForceFwAsynchronousPermissions' });
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testJobKeptOnSuccess() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = AsynchronousV1.Status.RUNNING.name(),
@@ -36,9 +38,10 @@ public with sharing class AsynchronousFinalizerTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testJobDeletedOnSuccess() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = AsynchronousV1.Status.RUNNING.name(),
@@ -57,9 +60,10 @@ public with sharing class AsynchronousFinalizerTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testExceptionInOnSuccess() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = AsynchronousV1.Status.RUNNING.name(),
@@ -78,9 +82,10 @@ public with sharing class AsynchronousFinalizerTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testJobKeptOnFailure() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = AsynchronousV1.Status.RUNNING.name(),
@@ -101,9 +106,10 @@ public with sharing class AsynchronousFinalizerTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testJobDeletedOnFailure() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = AsynchronousV1.Status.RUNNING.name(),
@@ -124,9 +130,10 @@ public with sharing class AsynchronousFinalizerTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testExceptionInOnFailure() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = AsynchronousV1.Status.RUNNING.name(),
@@ -147,9 +154,10 @@ public with sharing class AsynchronousFinalizerTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testRequeue() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = AsynchronousV1.Status.RUNNING.name(),
@@ -170,9 +178,10 @@ public with sharing class AsynchronousFinalizerTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testSchedulerQueued() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = AsynchronousV1.Status.RUNNING.name(),
@@ -208,9 +217,10 @@ public with sharing class AsynchronousFinalizerTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testCancellationFromOnError() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                     Status__c = AsynchronousV1.Status.RUNNING.name(),
@@ -372,6 +382,7 @@ public with sharing class AsynchronousFinalizerTests {
             return process(job, 'onCancellation');
         }
 
+        @SuppressWarnings('PMD.EmptyStatementBlock')
         public override void run(AsynchronousV1.Job asyncJob, String apexJobId) {}
 
         private Boolean process(AsynchronousV1.Job job, String method) {

@@ -73,6 +73,7 @@ public with sharing virtual class AsynchronousLWC implements API {
      * The instance is test visible so it can be mocked.
      */
     @TestVisible
+    @SuppressWarnings('PMD.PropertyNamingConventions')
     public static API API {
         public get {
             if (Test.isRunningTest() && API != null) { // API has been mocked.
@@ -83,6 +84,15 @@ public with sharing virtual class AsynchronousLWC implements API {
         }
         private set;
     }
+
+    /**
+     * @description
+     * Allow extension but not construction.
+     * <br><br>
+     * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
+     */
+    @SuppressWarnings('PMD.EmptyStatementBlock')
+    protected AsynchronousLWC() {}
 
     /**
      * @description

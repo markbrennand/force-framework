@@ -20,6 +20,7 @@
  *
  * @author Mark Brennand
  */
+@SuppressWarnings('PMD.AvoidGlobalModifier')
 global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
@@ -89,7 +90,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          * @param parent The owning Mocker.
          */
         private void setParent(final MockerV1 parent) {
-            Assertion.isNotNull(parent, 'argument: Mocker.WhenArguments.setParent.parent');
+            AssertionV1.isNotNull(parent, 'argument: Mocker.WhenArguments.setParent.parent');
 
             this.parent = parent;
         }
@@ -206,7 +207,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          * @return The object instance so it can be chained.
          */
         global MockerV1.Arguments whenListOfArguments(final List<Object> expectedArguments) {
-            Assertion.isNotNull(expectedArguments, 'argument: Mocker.WhenArguments.whenListOfArguments.expectedArguments');
+            AssertionV1.isNotNull(expectedArguments, 'argument: Mocker.WhenArguments.whenListOfArguments.expectedArguments');
 
             return new Arguments(parent, expectedArguments);
         }
@@ -250,7 +251,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
      * @param mockedObject The mocked object.
      */
     protected MockerV1(final Object mockedObject) {
-        Assertion.isNotNull(mockedObject, 'argument: Mocker.mockedObject');
+        AssertionV1.isNotNull(mockedObject, 'argument: Mocker.mockedObject');
 
         setParent(this);
         this.mockedObject = mockedObject;
@@ -265,7 +266,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
      * @return A Mocker which may be used to define a mocking scenario.
      */
     global static MockerV1 of(final Type forType) {
-        Assertion.isNotNull(forType, 'argument: Mocker.of.forType');
+        AssertionV1.isNotNull(forType, 'argument: Mocker.of.forType');
 
         final MockerV1 mocked = new MockerV1(Test.createStub(forType, MATCHER));
         return mocked;
@@ -282,7 +283,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
      * @return A Mocker which may be used to define a mocking scenario.
      */
     global static MockerV1 of(final Factory factory) {
-        Assertion.isNotNull(factory, 'argument: Mocker.of.factory');
+        AssertionV1.isNotNull(factory, 'argument: Mocker.of.factory');
 
         final MockerV1 mocked = new MockerV1(factory.stub(MATCHER));
         return mocked;
@@ -397,14 +398,14 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
                 final List<String> paramNames,
                 final List<Object> arguments
         ) {
-            Assertion.isNotNull(stubbedObject, 'argument: Mocker.MockMatcher.handleMethodCall.stubbedObject');
-            Assertion.isNotNull(stubbedMethodName, 'argument: Mocker.MockMatcher.handleMethodCall.stubbedMethodName');
-            Assertion.isNotNull(paramTypes, 'argument: Mocker.MockMatcher.handleMethodCall.paramTypes');
-            Assertion.isNotNull(paramNames, 'argument: Mocker.MockMatcher.handleMethodCall.paramNames');
-            Assertion.isNotNull(arguments, 'argument: Mocker.MockMatcher.handleMethodCall.arguments');
+            AssertionV1.isNotNull(stubbedObject, 'argument: Mocker.MockMatcher.handleMethodCall.stubbedObject');
+            AssertionV1.isNotNull(stubbedMethodName, 'argument: Mocker.MockMatcher.handleMethodCall.stubbedMethodName');
+            AssertionV1.isNotNull(paramTypes, 'argument: Mocker.MockMatcher.handleMethodCall.paramTypes');
+            AssertionV1.isNotNull(paramNames, 'argument: Mocker.MockMatcher.handleMethodCall.paramNames');
+            AssertionV1.isNotNull(arguments, 'argument: Mocker.MockMatcher.handleMethodCall.arguments');
 
             final List<Arguments> allArguments = STUBBED_OBJECTS.get(stubbedObject);
-            Assertion.isNotNull(allArguments, 'The are no arguments assigned to the stub ' + stubbedObject);
+            AssertionV1.isNotNull(allArguments, 'The are no arguments assigned to the stub ' + stubbedObject);
 
             for (Arguments argument : allArguments) {
                 if (argument.matches(arguments, paramTypes)) {
@@ -416,7 +417,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
                 }
             }
 
-            Assertion.fail(
+            AssertionV1.fail(
                     'Method ' + stubbedObject.toString().split(':')[0].split('__sfdc')[0] + '.' + stubbedMethodName +
                     + ' not found for arguments '
                     + arguments
@@ -446,8 +447,8 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          * @param methodName The name of the mocked method.
          */
         private Method(final Arguments arguments, final String methodName) {
-            Assertion.isNotNull(arguments, 'argument: Mocker.Method.arguments');
-            Assertion.isNotNull(methodName, 'argument: Mocker.Method.methodName');
+            AssertionV1.isNotNull(arguments, 'argument: Mocker.Method.arguments');
+            AssertionV1.isNotNull(methodName, 'argument: Mocker.Method.methodName');
 
             setParent(arguments.parent);
             this.arguments = arguments;
@@ -465,7 +466,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          * @return The object instance so it can be chained.
          */
         global MockerV1.Method called(final Integer expectedCount) {
-            Assertion.isNotNull(expectedCount, 'argument: Mocker.Method.called.expectedCount');
+            AssertionV1.isNotNull(expectedCount, 'argument: Mocker.Method.called.expectedCount');
 
             this.expectedCount = OptionalV1.ofNullable(expectedCount);
             return this;
@@ -483,7 +484,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          * @return The object instance so it can be chained.
          */
         global MockerV1.Method returns(final Object returnValue) {
-            Assertion.isTrue(!this.returnValue.isPresent(), 'Return value can only be set once');
+            AssertionV1.isTrue(!this.returnValue.isPresent(), 'Return value can only be set once');
             this.returnValue = OptionalV1.of(returnValue);
             return this;
         }
@@ -497,8 +498,8 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          * @return The object instance so it can be chained.
          */
         global MockerV1.Method throws(final Exception throws) {
-            Assertion.isNotNull(throws, 'argument: Mocker.Method.whichThrows.throws');
-            Assertion.isTrue(!this.throws.isPresent(), 'Exception to throw can only be set once');
+            AssertionV1.isNotNull(throws, 'argument: Mocker.Method.whichThrows.throws');
+            AssertionV1.isTrue(!this.throws.isPresent(), 'Exception to throw can only be set once');
 
             this.throws = OptionalV1.of(throws);
             return this;
@@ -530,7 +531,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          * @return True if the method names match.
          */
         private Boolean isMatch(final String methodName) {
-            Assertion.isNotNull(methodName, 'argument: Mocker.Method.isMatch.methodName');
+            AssertionV1.isNotNull(methodName, 'argument: Mocker.Method.isMatch.methodName');
 
             return this.methodName == methodName;
         }
@@ -571,7 +572,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          */
         private void validate() {
             if (expectedCount.isPresent()) {
-                Assertion.areEqual(
+                AssertionV1.areEqual(
                         (Integer) expectedCount.get(),
                         actualCount,
                         'Incorrect number of calls to ' + parent.mockedObject.toString().split(':')[0].split('__sfdc')[0] + '.' + methodName
@@ -600,8 +601,8 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          * @param expectedArguments The arguments that are expected.
          */
         private Arguments(final MockerV1 parent, final List<Object> expectedArguments) {
-            Assertion.isNotNull(parent, 'argument: Mocker.Arguments.parent');
-            Assertion.isNotNull(expectedArguments, 'argument: Mocker.Arguments.expectedArguments');
+            AssertionV1.isNotNull(parent, 'argument: Mocker.Arguments.parent');
+            AssertionV1.isNotNull(expectedArguments, 'argument: Mocker.Arguments.expectedArguments');
 
             setParent(parent);
             this.expectedArguments = expectedArguments;
@@ -654,7 +655,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          * @return True if the arguments match the expected arguments, or false if not.
          */
         private Boolean matches(final List<Object> actualArguments, final List<Type> actualTypes) {
-            Assertion.isNotNull(actualArguments, 'argument: Mocker.Arguments.matches.actualArguments');
+            AssertionV1.isNotNull(actualArguments, 'argument: Mocker.Arguments.matches.actualArguments');
 
             if (expectedArguments.size() != actualArguments.size()) {
                 return false;

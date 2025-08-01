@@ -8,66 +8,69 @@
  */
 @IsTest
 public with sharing class AsynchronousTests {
+    private final static String TESTING = 'asynchronous';
 
     @TestSetup
-    private static void setup() {
-        AsynchronousTestHelper.createUsers();
+    private static void createUsers() {
+        TestHelper.createUsers(TESTING, new Set<String> { 'ForceFwDependencyInjectionPermissions', 'ForceFwAsynchronousPermissions' });
     }
 
     @IsTest
     private static void testExtendedClassesAreInert() {
         TestHelper.setNOW();
-        ExtendedClass extended = new ExtendedClass();
+        System.runAs(TestHelper.getUser(TESTING)) {
+            ExtendedClass extended = new ExtendedClass();
 
-        try {
-            extended.createJob(null, null, null, null, null);
-            Assert.fail();
-        } catch (AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
+            try {
+                extended.createJob(null, null, null, null, null);
+                Assert.fail();
+            } catch (AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
 
-        try {
-            extended.queueJobs(null);
-            Assert.fail();
-        } catch (AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
+            try {
+                extended.queueJobs(null);
+                Assert.fail();
+            } catch (AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
 
-        LWCExtendedClass lwcExtended = new LWCExtendedClass();
+            LWCExtendedClass lwcExtended = new LWCExtendedClass();
 
-        try {
-            lwcExtended.getTotals();
-            Assert.fail();
-        } catch (AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
+            try {
+                lwcExtended.getTotals();
+                Assert.fail();
+            } catch (AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
 
-        try {
-            lwcExtended.runJobs(null);
-            Assert.fail();
-        } catch (AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
+            try {
+                lwcExtended.runJobs(null);
+                Assert.fail();
+            } catch (AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
 
-        try {
-            lwcExtended.deleteJobs(null);
-            Assert.fail();
-        } catch (AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
+            try {
+                lwcExtended.deleteJobs(null);
+                Assert.fail();
+            } catch (AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
 
-        try {
-            lwcExtended.getJobs(null, null, 0, 0);
-            Assert.fail();
-        } catch (AsynchronousV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
+            try {
+                lwcExtended.getJobs(null, null, 0, 0);
+                Assert.fail();
+            } catch (AsynchronousV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
         }
     }
 
     @IsTest
     private static void testCreateAndQueue() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             Map<String, String> state = new Map<String, String>{
                     'Key1' => 'Value1', 'Key2' => 'Value2'
             };
@@ -127,7 +130,7 @@ public with sharing class AsynchronousTests {
     @IsTest
     private static void testMocking() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousAPI.API = createMock();
 
             AsynchronousV1.Job job = AsynchronousAPI.API.createJob(
@@ -149,7 +152,7 @@ public with sharing class AsynchronousTests {
     @IsTest
     private static void testBindingCheck() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             DependencyV1.bind(AsynchronousAPI.API.class, AsynchronousAPI.Factory.class);
             try {
                 DependencyV1.bind(AsynchronousAPI.API.class, AsynchronousScheduler.RunNextAvailable.class);
@@ -177,7 +180,7 @@ public with sharing class AsynchronousTests {
     @IsTest
     private static void testCancellation() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
             TriggerV1.disable(TriggerTests.Subscriber1.class);
             TriggerV1.disable(TriggerTests.Subscriber2.class);
@@ -245,9 +248,10 @@ public with sharing class AsynchronousTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testGetJobs() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
 
             AsynchronousJob__c job1 = new AsynchronousJob__c(
@@ -411,7 +415,7 @@ public with sharing class AsynchronousTests {
     @IsTest
     private static void testRunJobs() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
 
             AsynchronousJob__c job1 = new AsynchronousJob__c(
@@ -469,7 +473,7 @@ public with sharing class AsynchronousTests {
     @IsTest
     private static void testDeleteJobs() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
 
             AsynchronousJob__c job1 = new AsynchronousJob__c(
@@ -542,9 +546,10 @@ public with sharing class AsynchronousTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testGetJobTotals() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
 
             AsynchronousJob__c job1 = new AsynchronousJob__c(
@@ -663,7 +668,7 @@ public with sharing class AsynchronousTests {
     @IsTest
     private static void testPersistException() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousJob__c job = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     ApexJobId__c = 'APEXJOB-1',
@@ -707,7 +712,7 @@ public with sharing class AsynchronousTests {
     @IsTest
     private static void testOnlyAPICanBeUsed() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             try {
                 AsynchronousHelper helper = (AsynchronousHelper) AsynchronousHelper.API;
                 Assert.fail();
@@ -746,7 +751,7 @@ public with sharing class AsynchronousTests {
     @IsTest
     private static void testJobValidation() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             try {
                 insert new AsynchronousJob__c(
                         OwnerId = UserInfo.getUserId(),
@@ -805,6 +810,7 @@ public with sharing class AsynchronousTests {
             return job.getMaximumRetries() == 0;
         }
 
+        @SuppressWarnings('PMD.EmptyStatementBlock')
         public override void run(AsynchronousV1.Job asyncJob, String apexJobId) {}
     }
 

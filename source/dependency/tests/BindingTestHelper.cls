@@ -16,65 +16,6 @@ public with sharing class BindingTestHelper {
     private static Integer PROTOTYPE_INSTANCE = 0;
 
     @TestVisible
-    private static void createUsers() {
-        final Id profileId = [SELECT Id FROM Profile WHERE Name = 'Minimum Access - Salesforce' LIMIT 1].Id;
-
-        User manager = new User(
-                Alias = 'manager',
-                ProfileId = profileId,
-                Username = 'manager@dependency.force-fw.test.com',
-                Email = 'manager@dependency.force-fw.test.com',
-                EmailEncodingKey = 'ISO-8859-1',
-                TimeZoneSidKey = 'Europe/London',
-                LocaleSidKey = 'en_US',
-                LanguageLocaleKey = 'en_US',
-                FirstName = 'Registry',
-                LastName = 'Manager'
-        );
-
-        User user = new User(
-                Alias = 'user',
-                ProfileId = profileId,
-                Username = 'user@dependency.force-fw.test.com',
-                Email = 'user@dependency.force-fw.test.com',
-                EmailEncodingKey = 'ISO-8859-1',
-                TimeZoneSidKey = 'Europe/London',
-                LocaleSidKey = 'en_US',
-                LanguageLocaleKey = 'en_US',
-                FirstName = 'Registry',
-                LastName = 'User'
-        );
-
-        insert new List<User> { manager, user };
-
-        Id userPermSetId = [SELECT Id FROM PermissionSet WHERE Name = 'ForceFwDependencyInjectionPermissions' LIMIT 1].Id;
-        Id managerPermSetId = [SELECT Id FROM PermissionSet WHERE Name = 'ForceFwManager' LIMIT 1].Id;
-        delete [SELECT Id FROM PermissionSetAssignment WHERE AssigneeId IN (:user.Id, :manager.Id) AND PermissionSetId IN (:userPermSetId, :managerPermSetId)];
-
-        PermissionSetAssignment managerAssignment = new PermissionSetAssignment(
-                AssigneeId = manager.Id,
-                PermissionSetId = managerPermSetId
-        );
-
-        PermissionSetAssignment userAssignment = new PermissionSetAssignment(
-                AssigneeId = user.Id,
-                PermissionSetId = userPermSetId
-        );
-
-        insert new List<PermissionSetAssignment> { managerAssignment, userAssignment };
-    }
-
-    @TestVisible
-    private static User getManager() {
-        return [SELECT Id FROM User WHERE Username = 'manager@dependency.force-fw.test.com' LIMIT 1];
-    }
-
-    @TestVisible
-    private static User getUser() {
-        return [SELECT Id FROM User WHERE Username = 'user@dependency.force-fw.test.com' LIMIT 1];
-    }
-
-    @TestVisible
     private static void testBindingFailure(Type forType, OptionalV1 action, Type withImpl, String expectedError) {
         try {
             if (action.isPresent()) {

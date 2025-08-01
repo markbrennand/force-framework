@@ -31,16 +31,6 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      */
     private final static String CONFIG_ACTION = 'AsynchronousScheduler';
 
-    /*
-     * Initialise the registry.
-     *
-     * We have to do this before the property wiring of the CONFIGURATION.
-     */
-    static {
-        DependencyV1.bind(Map<String, Integer>.class, CONFIG_ACTION, Configuration.class);
-        DependencyV1.reload();
-    }
-
     /**
      * @description
      * The number of milliseconds to wait if there are no jobs available to run.
@@ -57,14 +47,24 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
     @TestVisible
     private final static String MAXIMUM_JOBS_TO_START_PROPERTY = 'maximumJobsToStart';
 
+    /*
+     * Initialise the registry.
+     *
+     * We have to do this before the property wiring of the CONFIGURATION.
+     */
+    static {
+        DependencyV1.bind(Map<String, Integer>.class, CONFIG_ACTION, Configuration.class);
+        DependencyV1.reload();
+    }
+
     /**
      * @description
-     * Configuration options for thge Scheduler.
+     * Configuration options for the Scheduler.
      * <br><br>
      * Test visible to it can be overridden from unit tests.
      */
     @TestVisible
-    private static Map<String, Integer> CONFIGURATION =
+    private static Map<String, Integer> configuration =
             (Map<String, Integer>) DependencyV1.inject(Map<String, Integer>.class, CONFIG_ACTION);
 
     /**
@@ -76,8 +76,8 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
     @TestVisible
     private AsynchronousScheduler() {
         super(RunNextAvailable.class);
-        Assertion.isNotNull(CONFIGURATION.get(NO_JOBS_TO_RUN_DELAY_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + NO_JOBS_TO_RUN_DELAY_PROPERTY);
-        Assertion.isNotNull(CONFIGURATION.get(MAXIMUM_JOBS_TO_START_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + MAXIMUM_JOBS_TO_START_PROPERTY);
+        AssertionV1.isNotNull(configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + NO_JOBS_TO_RUN_DELAY_PROPERTY);
+        AssertionV1.isNotNull(configuration.get(MAXIMUM_JOBS_TO_START_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + MAXIMUM_JOBS_TO_START_PROPERTY);
     }
 
     /**
@@ -92,14 +92,15 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * @param asyncJob The Asynchronous job for the Scheduler.
      * @param apexJobId The Id of the Apex job for the Runnable.
      */
+    @SuppressWarnings('PMD.EmptyCatchBlock')
     public override void run(final AsynchronousV1.Job asyncJob, final String apexJobId) {
-        Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.run.asyncJob');
+        AssertionV1.isNotNull(asyncJob, 'argument: AsynchronousScheduler.run.asyncJob');
 
         final Set<String> jobsToStart = (Set<String>)
                 JSON.deserialize(asyncJob.getState().get(AsynchronousFinalizer.JOBS_TO_START), Set<String>.class);
 
         if (jobsToStart.isEmpty()) {
-            delayWhenNoJobsToRun(CONFIGURATION.get(NO_JOBS_TO_RUN_DELAY_PROPERTY));
+            delayWhenNoJobsToRun(configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY));
 
         } else {
             final String jobId = jobsToStart.iterator().next();
@@ -109,7 +110,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
                 asyncObject.ApexJobId__c = apexJobId;
                 AsynchronousHelper.API.queueJob(asyncObject);
 
-            } catch(Assertion.AssertionException ae) {
+            } catch(AssertionV1.AssertionException ae) {
                 // An assertion exception indicates a problem with the job, so just ignore it.
                 // The most likely cause is that the job has been deleted but was identified to start and so
                 // still in the list of jobs to start.
@@ -134,6 +135,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      *
      * @param delay The number of milliseconds to delay processing for.
      */
+    @SuppressWarnings('PMD.ApexCRUDViolation,PMD.UnusedLocalVariable')
     private void delayWhenNoJobsToRun(final Integer delay) {
         final Long startTime = System.currentTimeMillis();
         final Long endTime = startTime + delay;
@@ -176,7 +178,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * @return False to indicate that the Asynchronous__c for the job is to be deleted.
      */
     public override Boolean onSuccess(final AsynchronousV1.Job asyncJob) {
-        Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onSuccess.asyncJob');
+        AssertionV1.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onSuccess.asyncJob');
         return false;
     }
 
@@ -190,7 +192,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * @return True to indicate that the Asynchronous__c for the job is to be kept.
      */
     public override Boolean onFailure(final AsynchronousV1.Job asyncJob, final Exception exc) {
-        Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onFailure.asyncJob');
+        AssertionV1.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onFailure.asyncJob');
         return true;
     }
 
@@ -203,7 +205,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * @return False to indicate that the Asynchronous__c for the job is to be deleted.
      */
     public override Boolean onCancellation(final AsynchronousV1.Job asyncJob) {
-        Assertion.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onCancellation.asyncJob');
+        AssertionV1.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onCancellation.asyncJob');
         return false;
     }
 
@@ -229,7 +231,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
             );
 
         } else {
-            final Set<String> newJobsToStart = getJobIdsToStart(CONFIGURATION.get(MAXIMUM_JOBS_TO_START_PROPERTY));
+            final Set<String> newJobsToStart = getJobIdsToStart(configuration.get(MAXIMUM_JOBS_TO_START_PROPERTY));
             if (newJobsToStart.isEmpty() && (AsynchronousDAO.API.countSchedulableObjects() == 0)) {
                 return;
             }

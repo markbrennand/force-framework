@@ -16,18 +16,75 @@ public with sharing class TriggerTests {
             'Subscriber1' => 1,
             'Subscriber2' => 1
     };
-
+    private final static String TESTING = 'trigger';
     private static Integer INCREMENT = 0;
 
     @TestSetup
-    private static void setup() {
-        TriggerTestHelper.createUsers();
+    private static void createUsers() {
+        TestHelper.createUsers(TESTING, new Set<String> { 'ForceFwDependencyInjectionPermissions', 'ForceFwAsynchronousPermissions' });
+    }
+
+    @IsTest
+    private static void testExtendedClassIsInert() {
+        TestHelper.setNOW();
+        System.runAs(TestHelper.getUser(TESTING)) {
+            ExtendedClass extended = new ExtendedClass();
+
+            try {
+                extended.publish();
+                Assert.fail();
+            } catch (TriggerV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
+
+            try {
+                extended.disable(AsynchronousJob__c.SObjectType);
+                Assert.fail();
+            } catch (TriggerV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
+
+            try {
+                extended.enable(AsynchronousJob__c.SObjectType);
+                Assert.fail();
+            } catch (TriggerV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
+
+            try {
+                extended.isEnabled(AsynchronousJob__c.SObjectType);
+                Assert.fail();
+            } catch (TriggerV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
+
+            try {
+                extended.disable(Subscriber1.class);
+                Assert.fail();
+            } catch (TriggerV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
+
+            try {
+                extended.enable(Subscriber1.class);
+                Assert.fail();
+            } catch (TriggerV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
+
+            try {
+                extended.isEnabled(Subscriber1.class);
+                Assert.fail();
+            } catch (TriggerV1.APIException ae) {
+                Assert.areEqual('Access denied', ae.getMessage());
+            }
+        }
     }
 
     @IsTest
     private static void testOperations() {
         TestHelper.setNOW();
-        System.runAs(TriggerTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
 
             AsynchronousJob__c job1 = new AsynchronousJob__c(
@@ -83,7 +140,7 @@ public with sharing class TriggerTests {
     @IsTest
     private static void testSubscriberNotCalledIfRecursiveDepthExceeded() {
         TestHelper.setNOW();
-        System.runAs(TriggerTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
             TriggerV1.disable(Subscriber2.class);
 
@@ -105,7 +162,7 @@ public with sharing class TriggerTests {
     @IsTest
     private static void testObjectEnablement() {
         TestHelper.setNOW();
-        System.runAs(TriggerTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             Assert.isTrue(TriggerV1.isEnabled(AsynchronousJob__c.SObjectType));
             TriggerV1.disable(AsynchronousJob__c.SObjectType);
             Assert.isFalse(TriggerV1.isEnabled(AsynchronousJob__c.SObjectType));
@@ -143,7 +200,7 @@ public with sharing class TriggerTests {
     @IsTest
     private static void testSubscriberEnablement() {
         TestHelper.setNOW();
-        System.runAs(TriggerTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             Assert.isTrue(TriggerV1.isEnabled(Subscriber1.class));
             TriggerV1.disable(Subscriber1.class);
             Assert.isFalse(TriggerV1.isEnabled(Subscriber1.class));
@@ -181,7 +238,7 @@ public with sharing class TriggerTests {
     @IsTest
     private static void testExceptionThrownIfRecursiveDepthExceeded() {
         TestHelper.setNOW();
-        System.runAs(TriggerTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
             TriggerV1.disable(Subscriber1.class);
 
@@ -205,7 +262,7 @@ public with sharing class TriggerTests {
     @IsTest
     private static void testMocking() {
         TestHelper.setNOW();
-        System.runAs(TriggerTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             TriggerAPI.API = (TriggerAPI.API) MockerV1.of(TriggerAPI.class)
                     .whenNoArguments()
                     .forMethod('publish')
@@ -252,41 +309,43 @@ public with sharing class TriggerTests {
     @IsTest
     private static void testIsSubscriberBoundToAction() {
         TestHelper.setNOW();
-        Trigger__mdt triggerDefinition = new Trigger__mdt();
-        triggerDefinition.BeforeInsert__c = true;
-        triggerDefinition.AfterInsert__c  = false;
-        Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, true));
-        Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, false));
-        triggerDefinition.BeforeInsert__c = false;
-        triggerDefinition.AfterInsert__c = true;
-        Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, true));
-        Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, false));
+        System.runAs(TestHelper.getUser(TESTING)) {
+            Trigger__mdt triggerDefinition = new Trigger__mdt();
+            triggerDefinition.BeforeInsert__c = true;
+            triggerDefinition.AfterInsert__c  = false;
+            Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, true));
+            Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, false));
+            triggerDefinition.BeforeInsert__c = false;
+            triggerDefinition.AfterInsert__c = true;
+            Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, true));
+            Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, false));
 
-        triggerDefinition = new Trigger__mdt();
-        triggerDefinition.BeforeUpdate__c = true;
-        triggerDefinition.AfterUpdate__c  = false;
-        Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, true));
-        Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, false));
-        triggerDefinition.BeforeUpdate__c = false;
-        triggerDefinition.AfterUpdate__c = true;
-        Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, true));
-        Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, false));
+            triggerDefinition = new Trigger__mdt();
+            triggerDefinition.BeforeUpdate__c = true;
+            triggerDefinition.AfterUpdate__c  = false;
+            Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, true));
+            Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, false));
+            triggerDefinition.BeforeUpdate__c = false;
+            triggerDefinition.AfterUpdate__c = true;
+            Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, true));
+            Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, false));
 
-        triggerDefinition = new Trigger__mdt();
-        triggerDefinition.BeforeDelete__c = true;
-        triggerDefinition.AfterDelete__c  = false;
-        Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, true));
-        Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, false));
-        triggerDefinition.BeforeDelete__c = false;
-        triggerDefinition.AfterDelete__c = true;
-        Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, true));
-        Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, false));
+            triggerDefinition = new Trigger__mdt();
+            triggerDefinition.BeforeDelete__c = true;
+            triggerDefinition.AfterDelete__c  = false;
+            Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, true));
+            Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, false));
+            triggerDefinition.BeforeDelete__c = false;
+            triggerDefinition.AfterDelete__c = true;
+            Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, true));
+            Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, false));
+        }
     }
 
     @IsTest
     private static void testBindingCheck() {
         TestHelper.setNOW();
-        System.runAs(TriggerTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             DependencyV1.bind(TriggerAPI.API.class, TriggerAPI.Factory.class);
             try {
                 DependencyV1.bind(TriggerAPI.API.class, AsynchronousScheduler.RunNextAvailable.class);
@@ -297,61 +356,6 @@ public with sharing class TriggerTests {
                         'Unexpected exception: ' + ae
                 );
             }
-        }
-    }
-
-    @IsTest
-    private static void testExtendedClassIsInert() {
-        TestHelper.setNOW();
-        ExtendedClass extended = new ExtendedClass();
-
-        try {
-            extended.publish();
-            Assert.fail();
-        } catch (TriggerV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
-
-        try {
-            extended.disable(AsynchronousJob__c.SObjectType);
-            Assert.fail();
-        } catch (TriggerV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
-
-        try {
-            extended.enable(AsynchronousJob__c.SObjectType);
-            Assert.fail();
-        } catch (TriggerV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
-
-        try {
-            extended.isEnabled(AsynchronousJob__c.SObjectType);
-            Assert.fail();
-        } catch (TriggerV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
-
-        try {
-            extended.disable(Subscriber1.class);
-            Assert.fail();
-        } catch (TriggerV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
-
-        try {
-            extended.enable(Subscriber1.class);
-            Assert.fail();
-        } catch (TriggerV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
-        }
-
-        try {
-            extended.isEnabled(Subscriber1.class);
-            Assert.fail();
-        } catch (TriggerV1.APIException ae) {
-            Assert.areEqual('Access denied', ae.getMessage());
         }
     }
 
@@ -366,7 +370,7 @@ public with sharing class TriggerTests {
 
                 for (AsynchronousJob__c record : records) {
                     if (event.hasOldValue(record)) {
-                        if (((AsynchronousJob__c) event.getOldValue(record)).RetryInterval__c != record.RetryInterval__c - INCREMENT) {
+                        if (((AsynchronousJob__c) event.getOldValue(record).get()).RetryInterval__c != record.RetryInterval__c - INCREMENT) {
                             throw new DMLException('Retry interval was not incremented');
                         }
                     }

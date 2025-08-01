@@ -8,20 +8,22 @@
  */
 @IsTest
 public with sharing class AsynchronousSchedulerTests {
+    private final static String TESTING = 'asynchronous';
 
     @TestSetup
-    private static void setup() {
-        AsynchronousTestHelper.createUsers();
+    private static void createUsers() {
+        TestHelper.createUsers(TESTING, new Set<String> { 'ForceFwDependencyInjectionPermissions', 'ForceFwAsynchronousPermissions' });
     }
 
     @IsTest
+    @SuppressWarnings('PMD.EmptyCatchBlock')
     private static void testNullJobArgument() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             try {
                 new AsynchronousScheduler().run(null, 'ApexJobId');
                 Assert.fail();
-            } catch (Assertion.AssertionException ae) {
+            } catch (AssertionV1.AssertionException ae) {
             }
         }
     }
@@ -29,7 +31,7 @@ public with sharing class AsynchronousSchedulerTests {
     @IsTest
     private static void testDelayedWhenNoJobsToRun() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousV1.Job asyncJob = (AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class)
                     .whenNoArguments()
                         .forMethod('getState')
@@ -41,7 +43,7 @@ public with sharing class AsynchronousSchedulerTests {
 
 
             AsynchronousScheduler scheduler = new AsynchronousScheduler();
-            AsynchronousScheduler.CONFIGURATION = new Map<String, Integer>{
+            AsynchronousScheduler.configuration = new Map<String, Integer>{
                     AsynchronousScheduler.NO_JOBS_TO_RUN_DELAY_PROPERTY => 5000
             };
 
@@ -56,7 +58,7 @@ public with sharing class AsynchronousSchedulerTests {
     @IsTest
     private static void testJobToRun() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             Id asyncJobId1 = MockerV1.fakeId(AsynchronousJob__c.SObjectType);
             Id asyncJobId2 = MockerV1.fakeId(AsynchronousJob__c.SObjectType);
 
@@ -105,9 +107,10 @@ public with sharing class AsynchronousSchedulerTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testSchedulerQueuedWhenJobsToStart() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             mockForRun(new List<AsynchronousJob__c>(), 1, new Set<Id>());
             AsynchronousScheduler.queue(new Set<String>());
             MockerV1.validate();
@@ -115,9 +118,10 @@ public with sharing class AsynchronousSchedulerTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testSingleConcurrency() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             List<AsynchronousJob__c> asyncObjects = new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(
                             Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
@@ -153,9 +157,10 @@ public with sharing class AsynchronousSchedulerTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testDoubleConcurrency() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             List<AsynchronousJob__c> asyncObjects = new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(
                             Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
@@ -213,9 +218,10 @@ public with sharing class AsynchronousSchedulerTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testMixedConcurrency() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             List<AsynchronousJob__c> asyncObjects = new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(
                             Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
@@ -252,9 +258,10 @@ public with sharing class AsynchronousSchedulerTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testMoreThanOneSchedulerCannotBeRun() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             Set<String> jobsToStart = new Set<String>{
                     MockerV1.fakeId(AsynchronousJob__c.SObjectType)
             };
@@ -288,7 +295,7 @@ public with sharing class AsynchronousSchedulerTests {
     @IsTest
     private static void testGetMaximumActive() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousScheduler scheduler = new AsynchronousScheduler();
             Assert.areEqual(1, scheduler.getMaximumActive());
         }
@@ -297,7 +304,7 @@ public with sharing class AsynchronousSchedulerTests {
     @IsTest
     private static void testRunnableReturnValues() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousScheduler scheduler = new AsynchronousScheduler();
             Assert.isFalse(scheduler.onSuccess((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock()));
             Assert.isTrue(scheduler.onFailure((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock(), new DMLException('Test')));
@@ -375,7 +382,7 @@ public with sharing class AsynchronousSchedulerTests {
 
         AsynchronousDAO.API = (AsynchronousDAO) mocked.mock();
 
-        AsynchronousScheduler.CONFIGURATION = new Map<String, Integer> {
+        AsynchronousScheduler.configuration = new Map<String, Integer> {
                 AsynchronousScheduler.MAXIMUM_JOBS_TO_START_PROPERTY => maxJobsToStart,
                 AsynchronousScheduler.NO_JOBS_TO_RUN_DELAY_PROPERTY => 1000
         };
@@ -390,6 +397,7 @@ public with sharing class AsynchronousSchedulerTests {
             return 1;
         }
 
+        @SuppressWarnings('PMD.EmptyStatementBlock')
         public override void run(AsynchronousV1.Job asyncJob, String apexJobId) {}
     }
 
@@ -402,6 +410,7 @@ public with sharing class AsynchronousSchedulerTests {
             return 2;
         }
 
+        @SuppressWarnings('PMD.EmptyStatementBlock')
         public override void run(AsynchronousV1.Job asyncJob, String apexJobId) {}
     }
 }

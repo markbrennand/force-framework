@@ -82,6 +82,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      * Active API instance.
      */
     @TestVisible
+    @SuppressWarnings('PMD.PropertyNamingConventions')
     public static API API {
         public get {
             if (Test.isRunningTest() && API != null) { // API has been mocked.
@@ -100,7 +101,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      * The variable is not declared as final so it can be overridden by a unit test.
      */
     @TestVisible
-    private static Integer MAX_CHUNK_SIZE = 131072;
+    private static Integer maxChunkSize = 131072;
 
     /**
      * @description
@@ -108,6 +109,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      *
      * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
      */
+    @SuppressWarnings('PMD.EmptyStatementBlock')
     protected AsynchronousHelper() {}
 
     /**
@@ -126,8 +128,8 @@ public with sharing virtual class AsynchronousHelper implements API {
          * @param exc The wrapped exception to be recorded.
          */
         public void recordException(final AsynchronousJob__c asyncObject, final AsynchronousV1.APIException exc) {
-            Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.apiRecordException.asynchronousObject');
-            Assertion.isNotNull(exc, 'argument: AsynchronousHelper.apiRecordException.exc');
+            AssertionV1.isNotNull(asyncObject, 'argument: AsynchronousHelper.apiRecordException.asynchronousObject');
+            AssertionV1.isNotNull(exc, 'argument: AsynchronousHelper.apiRecordException.exc');
 
             final AsynchronousJobException__c asyncError = new AsynchronousJobException__c(
                     AsynchronousJob__c = asyncObject.Id,
@@ -169,7 +171,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          * @return The decoded state.
          */
         public Map<String, String> decodeState(final List<AsynchronousJobState__c> asyncStateObjects) {
-            Assertion.isNotNull(asyncStateObjects, 'argument: AsynchronousHelper.apiDecodeState.asyncStateObjects');
+            AssertionV1.isNotNull(asyncStateObjects, 'argument: AsynchronousHelper.apiDecodeState.asyncStateObjects');
 
             final List<String> chunks = new List<String>();
 
@@ -177,7 +179,7 @@ public with sharing virtual class AsynchronousHelper implements API {
                 chunks.add(chunk.Content__c);
             }
 
-            Assertion.isTrue(!chunks.isEmpty(), 'No asynchronous state chunks found for job');
+            AssertionV1.isTrue(!chunks.isEmpty(), 'No asynchronous state chunks found for job');
 
             return (Map<String, String>) JSON.deserialize(String.join(chunks, ''), Map<String, String>.class);
         }
@@ -195,23 +197,23 @@ public with sharing virtual class AsynchronousHelper implements API {
                 final AsynchronousJob__c asyncObject,
                 final Map<String, String> state
         ) {
-            Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.apiEncodeState.asyncObject');
-            Assertion.isNotNull(state, 'argument: AsynchronousHelper.apiEncodeState.state');
+            AssertionV1.isNotNull(asyncObject, 'argument: AsynchronousHelper.apiEncodeState.asyncObject');
+            AssertionV1.isNotNull(state, 'argument: AsynchronousHelper.apiEncodeState.state');
 
             final List<AsynchronousJobState__c> chunks = new List<AsynchronousJobState__c>();
             String stateJson = JSON.serialize(state);
             Integer size = stateJson.length();
             Integer chunkNumber = 0;
 
-            while (size > MAX_CHUNK_SIZE) {
+            while (size > maxChunkSize) {
                 chunks.add(new AsynchronousJobState__c(
                         AsynchronousJob__c = asyncObject.Id,
                         ChunkNumber__c = ++chunkNumber,
-                        Content__c = stateJSON.substring(0, MAX_CHUNK_SIZE)
+                        Content__c = stateJSON.substring(0, maxChunkSize)
                 ));
 
-                stateJson = stateJson.substring(MAX_CHUNK_SIZE);
-                size -= MAX_CHUNK_SIZE;
+                stateJson = stateJson.substring(maxChunkSize);
+                size -= maxChunkSize;
             }
 
             if (size > 0) {
@@ -234,7 +236,7 @@ public with sharing virtual class AsynchronousHelper implements API {
          * @param asyncObject The job to be queued.
          */
         public void queueJob(final AsynchronousJob__c asyncObject) {
-            Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.apiQueueJob.asyncObject');
+            AssertionV1.isNotNull(asyncObject, 'argument: AsynchronousHelper.apiQueueJob.asyncObject');
 
             try {
                 enqueueApexJob(asyncObject);
@@ -297,7 +299,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      */
     @Future
     private static void startAsynchronousJob(final String asyncObjectId) {
-        Assertion.isNotNull(asyncObjectId, 'argument: AsynchronousHelper.startAsynchronousJob.asyncObjectId');
+        AssertionV1.isNotNull(asyncObjectId, 'argument: AsynchronousHelper.startAsynchronousJob.asyncObjectId');
         final AsynchronousJob__c asyncObject = AsynchronousDAO.API.getObject(asyncObjectId);
 
         try {
@@ -314,7 +316,7 @@ public with sharing virtual class AsynchronousHelper implements API {
      * @param asyncObject The job to be started.
      */
     private static void enqueueApexJob(final AsynchronousJob__c asyncObject) {
-        Assertion.isNotNull(asyncObject, 'argument: AsynchronousHelper.enqueueApexJob.asyncObject');
+        AssertionV1.isNotNull(asyncObject, 'argument: AsynchronousHelper.enqueueApexJob.asyncObject');
 
         final AsynchronousJob asyncJob = (AsynchronousJob) AsynchronousJob.fromSObject(asyncObject);
         final AsynchronousAPI.ApexJobRunnable runnable = (AsynchronousAPI.ApexJobRunnable) asyncJob.getRunnable();

@@ -24,6 +24,7 @@
  *
  * @author Mark Brennand
  */
+@SuppressWarnings('PMD.AvoidGlobalModifier')
 global with sharing class TypesV1 {
 
     /**
@@ -61,7 +62,7 @@ global with sharing class TypesV1 {
      * @return The Type for the class. Or an exception if the class doesn't exist.
      */
     public static Type load(final String typeName) {
-        Assertion.isNotNull(typeName, 'argument: TypeHelper.loadType.typeName');
+        AssertionV1.isNotNull(typeName, 'argument: TypeHelper.loadType.typeName');
 
         Type type = Type.forName(typeName);
         if (type == null) {

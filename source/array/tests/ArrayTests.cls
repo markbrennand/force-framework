@@ -8,1024 +8,1120 @@
  */
 @IsTest
 public with sharing class ArrayTests {
+    private final static String TESTING = 'array';
+
+    @TestSetup
+    private static void createUsers() {
+        TestHelper.createUsers(TESTING, new Set<String>());
+    }
 
     @IsTest
     private static void testConcatList() {
-        TestHelper.setNOW();
-        List<Object> result = ArrayV1.over(new List<Integer>{ 1, 2, 3 }).concat(new List<Integer>{4, 5});
-        Assert.areEqual(5, result.size());
-        for (Integer index = 0; index < 5; index++) {
-            Assert.areEqual(index + 1, result[index]);
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<Object> result = ArrayV1.over(new List<Integer>{ 1, 2, 3 }).concat(new List<Integer>{ 4, 5 });
+            Assert.areEqual(5, result.size());
+            for (Integer index = 0; index < 5; index++) {
+                Assert.areEqual(index + 1, result[index]);
+            }
         }
     }
 
     @IsTest
     private static void testConcatSet() {
-        TestHelper.setNOW();
-        List<Object> result = ArrayV1.over(new Set<Integer>{ 1, 2, 3 }).concat(new List<Integer>{ 4, 5 });
-        Assert.areEqual(5, result.size());
-        for (Integer index = 0; index < 5; index++) {
-            Assert.areEqual(index + 1, result[index]);
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<Object> result = ArrayV1.over(new Set<Integer>{ 1, 2, 3 }).concat(new List<Integer>{ 4, 5 });
+            Assert.areEqual(5, result.size());
+            for (Integer index = 0; index < 5; index++) {
+                Assert.areEqual(index + 1, result[index]);
+            }
         }
     }
 
     @IsTest
     private static void testConcatIterable() {
-        TestHelper.setNOW();
-        List<Object> result = ArrayV1.over(new TestIterable(new List<Integer> { 1, 2, 3 })).concat(new List<Integer> { 4, 5 });
-        Assert.areEqual(5, result.size());
-        for (Integer index = 0; index < 5; index++) {
-            Assert.areEqual(index+1, result[index]);
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<Object> result = ArrayV1.over(new TestIterable(new List<Integer> { 1, 2, 3 })).concat(new List<Integer> { 4, 5 });
+            Assert.areEqual(5, result.size());
+            for (Integer index = 0; index < 5; index++) {
+                Assert.areEqual(index+1, result[index]);
+            }
         }
     }
 
     @IsTest
     private static void testForEachList() {
-        TestHelper.setNOW();
-        List<Integer> result = new List<Integer>();
-        ArrayV1.over(new List<Integer> { 1, 2, 3, 4, 5 }).sharing(result).forEach(new ForEachMultiplier());
-        Assert.areEqual(5, result.size());
-        Assert.areEqual(2, result[0]);
-        Assert.areEqual(4, result[1]);
-        Assert.areEqual(6, result[2]);
-        Assert.areEqual(8, result[3]);
-        Assert.areEqual(10, result[4]);
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<Integer> result = new List<Integer>();
+            ArrayV1.over(new List<Integer> { 1, 2, 3, 4, 5 }).sharing(result).forEach(new ForEachMultiplier());
+            Assert.areEqual(5, result.size());
+            Assert.areEqual(2, result[0]);
+            Assert.areEqual(4, result[1]);
+            Assert.areEqual(6, result[2]);
+            Assert.areEqual(8, result[3]);
+            Assert.areEqual(10, result[4]);
+        }
     }
 
     @IsTest
     private static void testForEachSet() {
-        TestHelper.setNOW();
-        List<Integer> result = new List<Integer>();
-        ArrayV1.over(new Set<Integer> { 1, 2, 3, 4, 5 }).sharing(result).forEach(new ForEachMultiplier());
-        Assert.areEqual(5, result.size());
-        Assert.areEqual(2, result[0]);
-        Assert.areEqual(4, result[1]);
-        Assert.areEqual(6, result[2]);
-        Assert.areEqual(8, result[3]);
-        Assert.areEqual(10, result[4]);
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<Integer> result = new List<Integer>();
+            ArrayV1.over(new Set<Integer> { 1, 2, 3, 4, 5 }).sharing(result).forEach(new ForEachMultiplier());
+            Assert.areEqual(5, result.size());
+            Assert.areEqual(2, result[0]);
+            Assert.areEqual(4, result[1]);
+            Assert.areEqual(6, result[2]);
+            Assert.areEqual(8, result[3]);
+            Assert.areEqual(10, result[4]);
+        }
     }
 
     @IsTest
     private static void testForEachIterable() {
-        TestHelper.setNOW();
-        List<Integer> result = new List<Integer>();
-        ArrayV1.over(new TestIterable(new List<Integer> { 1, 2, 3, 4, 5 })).sharing(result).forEach(new ForEachMultiplier());
-        Assert.areEqual(5, result.size());
-        Assert.areEqual(2, result[0]);
-        Assert.areEqual(4, result[1]);
-        Assert.areEqual(6, result[2]);
-        Assert.areEqual(8, result[3]);
-        Assert.areEqual(10, result[4]);
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<Integer> result = new List<Integer>();
+            ArrayV1.over(new TestIterable(new List<Integer> { 1, 2, 3, 4, 5 })).sharing(result).forEach(new ForEachMultiplier());
+            Assert.areEqual(5, result.size());
+            Assert.areEqual(2, result[0]);
+            Assert.areEqual(4, result[1]);
+            Assert.areEqual(6, result[2]);
+            Assert.areEqual(8, result[3]);
+            Assert.areEqual(10, result[4]);
+        }
     }
 
     @IsTest
     private static void testReduceList() {
-        TestHelper.setNOW();
-        Assert.areEqual(-13, ArrayV1.over(new List<Integer>{ 1, 2, 3, 4, 5 }).reduce(new ReduceSubtractor()));
-        Assert.areEqual(1, ArrayV1.over(new List<Integer> { 1 }).reduce(new ReduceSubtractor()));
-        Assert.isTrue(((List<Integer>) ArrayV1.over(new List<Integer>()).reduce(new ReduceSubtractor(), new List<Integer>())).isEmpty());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            Assert.areEqual(-13, ArrayV1.over(new List<Integer>{ 1, 2, 3, 4, 5 }).reduce(new ReduceSubtractor()));
+            Assert.areEqual(1, ArrayV1.over(new List<Integer> { 1 }).reduce(new ReduceSubtractor()));
+            Assert.isTrue(((List<Integer>) ArrayV1.over(new List<Integer>()).reduce(new ReduceSubtractor(), new List<Integer>())).isEmpty());
 
-        try {
-            Assert.areEqual(1, ArrayV1.over(new List<Integer>()).reduce(new ReduceSubtractor()));
-            Assert.fail();
-        } catch(ArrayV1.APIException ae) {
-            Assert.areEqual('The reduce() method requires an array containing at least one element', ae.getMessage());
+            try {
+                Assert.areEqual(1, ArrayV1.over(new List<Integer>()).reduce(new ReduceSubtractor()));
+                Assert.fail();
+            } catch(ArrayV1.APIException ae) {
+                Assert.areEqual('The reduce() method requires an array containing at least one element', ae.getMessage());
+            }
+
+            Map<String, Object> merged = (Map<String, Object>) ArrayV1.over(new List<AsynchronousJob__c>{
+                    new AsynchronousJob__c(
+                            Runnable__c = 'TEST',
+                            RetryInterval__c = 1000,
+                            Status__c = 'STATUS1'
+                    ),
+                    new AsynchronousJob__c(
+                            RetryNumber__c = 0,
+                            MaximumRetries__c = 100,
+                            Status__c = 'STATUS2'
+                    )
+            })
+                    .reduce(new ObjectMerger(), new Map<String, Object>());
+
+            Assert.areEqual(100, merged.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
+            Assert.areEqual(1000, merged.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
+            Assert.areEqual(0, merged.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
+            Assert.areEqual('TEST', merged.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
+            Assert.areEqual('STATUS2', merged.get(AsynchronousJob__c.Status__c.getDescribe().name));
+
+            Map<String, Object> values = (Map<String, Object>) ArrayV1.over(new List<SObjectField>{
+                    AsynchronousJob__c.MaximumRetries__c,
+                    AsynchronousJob__c.RetryInterval__c,
+                    AsynchronousJob__c.RetryNumber__c,
+                    AsynchronousJob__c.Runnable__c
+            })
+                    .sharing(merged)
+                    .reduce(new ValueExtractor(), new Map<String, Object>());
+
+            Assert.areEqual(100, values.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
+            Assert.areEqual(1000, values.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
+            Assert.areEqual(0, values.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
+            Assert.areEqual('TEST', values.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
         }
-
-        Map<String, Object> merged = (Map<String, Object>) ArrayV1.over(new List<AsynchronousJob__c>{
-                        new AsynchronousJob__c(
-                                Runnable__c = 'TEST',
-                                RetryInterval__c = 1000,
-                                Status__c = 'STATUS1'
-                        ),
-                        new AsynchronousJob__c(
-                                RetryNumber__c = 0,
-                                MaximumRetries__c = 100,
-                                Status__c = 'STATUS2'
-                        )
-                })
-                .reduce(new ObjectMerger(), new Map<String, Object>());
-
-        Assert.areEqual(100, merged.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
-        Assert.areEqual(1000, merged.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
-        Assert.areEqual(0, merged.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
-        Assert.areEqual('TEST', merged.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
-        Assert.areEqual('STATUS2', merged.get(AsynchronousJob__c.Status__c.getDescribe().name));
-
-        Map<String, Object> values = (Map<String, Object>) ArrayV1.over(new List<SObjectField>{
-                        AsynchronousJob__c.MaximumRetries__c,
-                        AsynchronousJob__c.RetryInterval__c,
-                        AsynchronousJob__c.RetryNumber__c,
-                        AsynchronousJob__c.Runnable__c
-                })
-                .sharing(merged)
-                .reduce(new ValueExtractor(), new Map<String, Object>());
-
-        Assert.areEqual(100, values.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
-        Assert.areEqual(1000, values.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
-        Assert.areEqual(0, values.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
-        Assert.areEqual('TEST', values.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
     }
 
     @IsTest
     private static void testReduceSet() {
-        TestHelper.setNOW();
-        Assert.areEqual(-13, ArrayV1.over(new Set<Integer>{ 1, 2, 3, 4, 5 }).reduce(new ReduceSubtractor()));
-        Assert.areEqual(1, ArrayV1.over(new Set<Integer> { 1 }).reduce(new ReduceSubtractor()));
-        Assert.isTrue(((List<Integer>) ArrayV1.over(new Set<Integer>()).reduce(new ReduceSubtractor(), new List<Integer>())).isEmpty());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            Assert.areEqual(-13, ArrayV1.over(new Set<Integer>{ 1, 2, 3, 4, 5 }).reduce(new ReduceSubtractor()));
+            Assert.areEqual(1, ArrayV1.over(new Set<Integer> { 1 }).reduce(new ReduceSubtractor()));
+            Assert.isTrue(((List<Integer>) ArrayV1.over(new Set<Integer>()).reduce(new ReduceSubtractor(), new List<Integer>())).isEmpty());
 
-        try {
-            Assert.areEqual(1, ArrayV1.over(new Set<Integer>()).reduce(new ReduceSubtractor()));
-            Assert.fail();
-        } catch(ArrayV1.APIException ae) {
-            Assert.areEqual('The reduce() method requires an array containing at least one element', ae.getMessage());
+            try {
+                Assert.areEqual(1, ArrayV1.over(new Set<Integer>()).reduce(new ReduceSubtractor()));
+                Assert.fail();
+            } catch(ArrayV1.APIException ae) {
+                Assert.areEqual('The reduce() method requires an array containing at least one element', ae.getMessage());
+            }
+
+            Map<String, Object> merged = (Map<String, Object>) ArrayV1.over(new Set<AsynchronousJob__c>{
+                    new AsynchronousJob__c(
+                            Runnable__c = 'TEST',
+                            RetryInterval__c = 1000,
+                            Status__c = 'STATUS1'
+                    ),
+                    new AsynchronousJob__c(
+                            RetryNumber__c = 0,
+                            MaximumRetries__c = 100,
+                            Status__c = 'STATUS2'
+                    )
+            })
+                    .reduce(new ObjectMerger(), new Map<String, Object>());
+
+            Assert.areEqual(100, merged.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
+            Assert.areEqual(1000, merged.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
+            Assert.areEqual(0, merged.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
+            Assert.areEqual('TEST', merged.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
+            Assert.areEqual('STATUS2', merged.get(AsynchronousJob__c.Status__c.getDescribe().name));
+
+            Map<String, Object> values = (Map<String, Object>) ArrayV1.over(new List<SObjectField>{
+                    AsynchronousJob__c.MaximumRetries__c,
+                    AsynchronousJob__c.RetryInterval__c,
+                    AsynchronousJob__c.RetryNumber__c,
+                    AsynchronousJob__c.Runnable__c
+            })
+                    .sharing(merged)
+                    .reduce(new ValueExtractor(), new Map<String, Object>());
+
+            Assert.areEqual(100, values.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
+            Assert.areEqual(1000, values.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
+            Assert.areEqual(0, values.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
+            Assert.areEqual('TEST', values.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
         }
-
-        Map<String, Object> merged = (Map<String, Object>) ArrayV1.over(new Set<AsynchronousJob__c>{
-                        new AsynchronousJob__c(
-                                Runnable__c = 'TEST',
-                                RetryInterval__c = 1000,
-                                Status__c = 'STATUS1'
-                        ),
-                        new AsynchronousJob__c(
-                                RetryNumber__c = 0,
-                                MaximumRetries__c = 100,
-                                Status__c = 'STATUS2'
-                        )
-                })
-                .reduce(new ObjectMerger(), new Map<String, Object>());
-
-        Assert.areEqual(100, merged.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
-        Assert.areEqual(1000, merged.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
-        Assert.areEqual(0, merged.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
-        Assert.areEqual('TEST', merged.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
-        Assert.areEqual('STATUS2', merged.get(AsynchronousJob__c.Status__c.getDescribe().name));
-
-        Map<String, Object> values = (Map<String, Object>) ArrayV1.over(new List<SObjectField>{
-                        AsynchronousJob__c.MaximumRetries__c,
-                        AsynchronousJob__c.RetryInterval__c,
-                        AsynchronousJob__c.RetryNumber__c,
-                        AsynchronousJob__c.Runnable__c
-                })
-                .sharing(merged)
-                .reduce(new ValueExtractor(), new Map<String, Object>());
-
-        Assert.areEqual(100, values.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
-        Assert.areEqual(1000, values.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
-        Assert.areEqual(0, values.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
-        Assert.areEqual('TEST', values.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
     }
 
     @IsTest
     private static void testReduceIterable() {
-        TestHelper.setNOW();
-        Assert.areEqual(-13, ArrayV1.over(new TestIterable(new List<Integer>{ 1, 2, 3, 4, 5 })).reduce(new ReduceSubtractor()));
-        Assert.areEqual(1, ArrayV1.over(new TestIterable(new List<Integer> { 1 })).reduce(new ReduceSubtractor()));
-        Assert.isTrue(((List<Integer>) ArrayV1.over(new TestIterable(new List<Integer>())).reduce(new ReduceSubtractor(), new List<Integer>())).isEmpty());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            Assert.areEqual(-13, ArrayV1.over(new TestIterable(new List<Integer>{ 1, 2, 3, 4, 5 })).reduce(new ReduceSubtractor()));
+            Assert.areEqual(1, ArrayV1.over(new TestIterable(new List<Integer> { 1 })).reduce(new ReduceSubtractor()));
+            Assert.isTrue(((List<Integer>) ArrayV1.over(new TestIterable(new List<Integer>())).reduce(new ReduceSubtractor(), new List<Integer>())).isEmpty());
 
-        try {
-            Assert.areEqual(1, ArrayV1.over(new TestIterable(new List<Integer>())).reduce(new ReduceSubtractor()));
-            Assert.fail();
-        } catch(ArrayV1.APIException ae) {
-            Assert.areEqual('The reduce() method requires an array containing at least one element', ae.getMessage());
+            try {
+                Assert.areEqual(1, ArrayV1.over(new TestIterable(new List<Integer>())).reduce(new ReduceSubtractor()));
+                Assert.fail();
+            } catch(ArrayV1.APIException ae) {
+                Assert.areEqual('The reduce() method requires an array containing at least one element', ae.getMessage());
+            }
+
+            Map<String, Object> merged = (Map<String, Object>) ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
+                    new AsynchronousJob__c(
+                            Runnable__c = 'TEST',
+                            RetryInterval__c = 1000,
+                            Status__c = 'STATUS1'
+                    ),
+                    new AsynchronousJob__c(
+                            RetryNumber__c = 0,
+                            MaximumRetries__c = 100,
+                            Status__c = 'STATUS2'
+                    )
+            }))
+                    .reduce(new ObjectMerger(), new Map<String, Object>());
+
+            Assert.areEqual(100, merged.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
+            Assert.areEqual(1000, merged.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
+            Assert.areEqual(0, merged.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
+            Assert.areEqual('TEST', merged.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
+            Assert.areEqual('STATUS2', merged.get(AsynchronousJob__c.Status__c.getDescribe().name));
+
+            Map<String, Object> values = (Map<String, Object>) ArrayV1.over(new TestIterable(new List<SObjectField>{
+                    AsynchronousJob__c.MaximumRetries__c,
+                    AsynchronousJob__c.RetryInterval__c,
+                    AsynchronousJob__c.RetryNumber__c,
+                    AsynchronousJob__c.Runnable__c
+            }))
+                    .sharing(merged)
+                    .reduce(new ValueExtractor(), new Map<String, Object>());
+
+            Assert.areEqual(100, values.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
+            Assert.areEqual(1000, values.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
+            Assert.areEqual(0, values.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
+            Assert.areEqual('TEST', values.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
         }
-
-        Map<String, Object> merged = (Map<String, Object>) ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
-                        new AsynchronousJob__c(
-                                Runnable__c = 'TEST',
-                                RetryInterval__c = 1000,
-                                Status__c = 'STATUS1'
-                        ),
-                        new AsynchronousJob__c(
-                                RetryNumber__c = 0,
-                                MaximumRetries__c = 100,
-                                Status__c = 'STATUS2'
-                        )
-                }))
-                .reduce(new ObjectMerger(), new Map<String, Object>());
-
-        Assert.areEqual(100, merged.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
-        Assert.areEqual(1000, merged.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
-        Assert.areEqual(0, merged.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
-        Assert.areEqual('TEST', merged.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
-        Assert.areEqual('STATUS2', merged.get(AsynchronousJob__c.Status__c.getDescribe().name));
-
-        Map<String, Object> values = (Map<String, Object>) ArrayV1.over(new TestIterable(new List<SObjectField>{
-                        AsynchronousJob__c.MaximumRetries__c,
-                        AsynchronousJob__c.RetryInterval__c,
-                        AsynchronousJob__c.RetryNumber__c,
-                        AsynchronousJob__c.Runnable__c
-                }))
-                .sharing(merged)
-                .reduce(new ValueExtractor(), new Map<String, Object>());
-
-        Assert.areEqual(100, values.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
-        Assert.areEqual(1000, values.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
-        Assert.areEqual(0, values.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
-        Assert.areEqual('TEST', values.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
     }
 
     @IsTest
     private static void testReduceRightList() {
-        TestHelper.setNOW();
-        Assert.areEqual(-5, ArrayV1.over(new List<Integer>{ 1, 2, 3, 4, 5 }).reduceRight(new ReduceSubtractor()));
-        Assert.areEqual(1, ArrayV1.over(new List<Integer> { 1 }).reduceRight(new ReduceSubtractor()));
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            Assert.areEqual(-5, ArrayV1.over(new List<Integer>{ 1, 2, 3, 4, 5 }).reduceRight(new ReduceSubtractor()));
+            Assert.areEqual(1, ArrayV1.over(new List<Integer> { 1 }).reduceRight(new ReduceSubtractor()));
 
-        try {
-            Assert.areEqual(1, ArrayV1.over(new List<Integer>()).reduceRight(new ReduceSubtractor()));
-            Assert.fail();
-        } catch(ArrayV1.APIException ae) {
-            Assert.areEqual('The reduce() method requires an array containing at least one element', ae.getMessage());
+            try {
+                Assert.areEqual(1, ArrayV1.over(new List<Integer>()).reduceRight(new ReduceSubtractor()));
+                Assert.fail();
+            } catch(ArrayV1.APIException ae) {
+                Assert.areEqual('The reduce() method requires an array containing at least one element', ae.getMessage());
+            }
+
+            Map<String, Object> merged = (Map<String, Object>) ArrayV1.over(new List<AsynchronousJob__c>{
+                    new AsynchronousJob__c(
+                            Runnable__c = 'TEST',
+                            RetryInterval__c = 1000,
+                            Status__c = 'STATUS1'
+                    ),
+                    new AsynchronousJob__c(
+                            RetryNumber__c = 0,
+                            MaximumRetries__c = 100,
+                            Status__c = 'STATUS2'
+                    )
+            })
+                    .reduceRight(new ObjectMerger(), new Map<String, Object>());
+
+            Assert.areEqual(100, merged.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
+            Assert.areEqual(1000, merged.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
+            Assert.areEqual(0, merged.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
+            Assert.areEqual('TEST', merged.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
+            Assert.areEqual('STATUS1', merged.get(AsynchronousJob__c.Status__c.getDescribe().name));
+
+            Map<String, Object> values = (Map<String, Object>) ArrayV1.over(new List<SObjectField>{
+                    AsynchronousJob__c.MaximumRetries__c,
+                    AsynchronousJob__c.RetryInterval__c,
+                    AsynchronousJob__c.RetryNumber__c,
+                    AsynchronousJob__c.Runnable__c
+            })
+                    .sharing(merged)
+                    .reduceRight(new ValueExtractor(), new Map<String, Object>());
+
+            Assert.areEqual(100, values.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
+            Assert.areEqual(1000, values.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
+            Assert.areEqual(0, values.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
+            Assert.areEqual('TEST', values.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
         }
-
-        Map<String, Object> merged = (Map<String, Object>) ArrayV1.over(new List<AsynchronousJob__c>{
-                        new AsynchronousJob__c(
-                                Runnable__c = 'TEST',
-                                RetryInterval__c = 1000,
-                                Status__c = 'STATUS1'
-                        ),
-                        new AsynchronousJob__c(
-                                RetryNumber__c = 0,
-                                MaximumRetries__c = 100,
-                                Status__c = 'STATUS2'
-                        )
-                })
-                .reduceRight(new ObjectMerger(), new Map<String, Object>());
-
-        Assert.areEqual(100, merged.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
-        Assert.areEqual(1000, merged.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
-        Assert.areEqual(0, merged.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
-        Assert.areEqual('TEST', merged.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
-        Assert.areEqual('STATUS1', merged.get(AsynchronousJob__c.Status__c.getDescribe().name));
-
-        Map<String, Object> values = (Map<String, Object>) ArrayV1.over(new List<SObjectField>{
-                        AsynchronousJob__c.MaximumRetries__c,
-                        AsynchronousJob__c.RetryInterval__c,
-                        AsynchronousJob__c.RetryNumber__c,
-                        AsynchronousJob__c.Runnable__c
-                })
-                .sharing(merged)
-                .reduceRight(new ValueExtractor(), new Map<String, Object>());
-
-        Assert.areEqual(100, values.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
-        Assert.areEqual(1000, values.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
-        Assert.areEqual(0, values.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
-        Assert.areEqual('TEST', values.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
     }
 
     @IsTest
     private static void testReduceRightSet() {
-        TestHelper.setNOW();
-        Assert.areEqual(-5, ArrayV1.over(new Set<Integer>{ 1, 2, 3, 4, 5 }).reduceRight(new ReduceSubtractor()));
-        Assert.areEqual(1, ArrayV1.over(new Set<Integer> { 1 }).reduceRight(new ReduceSubtractor()));
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            Assert.areEqual(-5, ArrayV1.over(new Set<Integer>{ 1, 2, 3, 4, 5 }).reduceRight(new ReduceSubtractor()));
+            Assert.areEqual(1, ArrayV1.over(new Set<Integer> { 1 }).reduceRight(new ReduceSubtractor()));
 
-        try {
-            Assert.areEqual(1, ArrayV1.over(new Set<Integer>()).reduceRight(new ReduceSubtractor()));
-            Assert.fail();
-        } catch(ArrayV1.APIException ae) {
-            Assert.areEqual('The reduce() method requires an array containing at least one element', ae.getMessage());
+            try {
+                Assert.areEqual(1, ArrayV1.over(new Set<Integer>()).reduceRight(new ReduceSubtractor()));
+                Assert.fail();
+            } catch(ArrayV1.APIException ae) {
+                Assert.areEqual('The reduce() method requires an array containing at least one element', ae.getMessage());
+            }
+
+            Map<String, Object> merged = (Map<String, Object>) ArrayV1.over(new Set<AsynchronousJob__c>{
+                    new AsynchronousJob__c(
+                            Runnable__c = 'TEST',
+                            RetryInterval__c = 1000,
+                            Status__c = 'STATUS1'
+                    ),
+                    new AsynchronousJob__c(
+                            RetryNumber__c = 0,
+                            MaximumRetries__c = 100,
+                            Status__c = 'STATUS2'
+                    )
+            })
+                    .reduceRight(new ObjectMerger(), new Map<String, Object>());
+
+            Assert.areEqual(100, merged.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
+            Assert.areEqual(1000, merged.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
+            Assert.areEqual(0, merged.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
+            Assert.areEqual('TEST', merged.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
+            Assert.areEqual('STATUS1', merged.get(AsynchronousJob__c.Status__c.getDescribe().name));
+
+            Map<String, Object> values = (Map<String, Object>) ArrayV1.over(new Set<SObjectField>{
+                    AsynchronousJob__c.MaximumRetries__c,
+                    AsynchronousJob__c.RetryInterval__c,
+                    AsynchronousJob__c.RetryNumber__c,
+                    AsynchronousJob__c.Runnable__c
+            })
+                    .sharing(merged)
+                    .reduceRight(new ValueExtractor(), new Map<String, Object>());
+
+            Assert.areEqual(100, values.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
+            Assert.areEqual(1000, values.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
+            Assert.areEqual(0, values.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
+            Assert.areEqual('TEST', values.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
         }
-
-        Map<String, Object> merged = (Map<String, Object>) ArrayV1.over(new Set<AsynchronousJob__c>{
-                        new AsynchronousJob__c(
-                                Runnable__c = 'TEST',
-                                RetryInterval__c = 1000,
-                                Status__c = 'STATUS1'
-                        ),
-                        new AsynchronousJob__c(
-                                RetryNumber__c = 0,
-                                MaximumRetries__c = 100,
-                                Status__c = 'STATUS2'
-                        )
-                })
-                .reduceRight(new ObjectMerger(), new Map<String, Object>());
-
-        Assert.areEqual(100, merged.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
-        Assert.areEqual(1000, merged.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
-        Assert.areEqual(0, merged.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
-        Assert.areEqual('TEST', merged.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
-        Assert.areEqual('STATUS1', merged.get(AsynchronousJob__c.Status__c.getDescribe().name));
-
-        Map<String, Object> values = (Map<String, Object>) ArrayV1.over(new Set<SObjectField>{
-                        AsynchronousJob__c.MaximumRetries__c,
-                        AsynchronousJob__c.RetryInterval__c,
-                        AsynchronousJob__c.RetryNumber__c,
-                        AsynchronousJob__c.Runnable__c
-                })
-                .sharing(merged)
-                .reduceRight(new ValueExtractor(), new Map<String, Object>());
-
-        Assert.areEqual(100, values.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
-        Assert.areEqual(1000, values.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
-        Assert.areEqual(0, values.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
-        Assert.areEqual('TEST', values.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
     }
 
     @IsTest
     private static void testReduceRightIterable() {
-        TestHelper.setNOW();
-        Assert.areEqual(-5, ArrayV1.over(new TestIterable(new List<Integer>{ 1, 2, 3, 4, 5 })).reduceRight(new ReduceSubtractor()));
-        Assert.areEqual(1, ArrayV1.over(new TestIterable(new List<Integer> { 1 })).reduceRight(new ReduceSubtractor()));
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            Assert.areEqual(-5, ArrayV1.over(new TestIterable(new List<Integer>{ 1, 2, 3, 4, 5 })).reduceRight(new ReduceSubtractor()));
+            Assert.areEqual(1, ArrayV1.over(new TestIterable(new List<Integer> { 1 })).reduceRight(new ReduceSubtractor()));
 
-        try {
-            Assert.areEqual(1, ArrayV1.over(new TestIterable(new List<Integer>())).reduceRight(new ReduceSubtractor()));
-            Assert.fail();
-        } catch(ArrayV1.APIException ae) {
-            Assert.areEqual('The reduce() method requires an array containing at least one element', ae.getMessage());
+            try {
+                Assert.areEqual(1, ArrayV1.over(new TestIterable(new List<Integer>())).reduceRight(new ReduceSubtractor()));
+                Assert.fail();
+            } catch(ArrayV1.APIException ae) {
+                Assert.areEqual('The reduce() method requires an array containing at least one element', ae.getMessage());
+            }
+
+            Map<String, Object> merged = (Map<String, Object>) ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
+                    new AsynchronousJob__c(
+                            Runnable__c = 'TEST',
+                            RetryInterval__c = 1000,
+                            Status__c = 'STATUS1'
+                    ),
+                    new AsynchronousJob__c(
+                            RetryNumber__c = 0,
+                            MaximumRetries__c = 100,
+                            Status__c = 'STATUS2'
+                    )
+            }))
+                    .reduceRight(new ObjectMerger(), new Map<String, Object>());
+
+            Assert.areEqual(100, merged.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
+            Assert.areEqual(1000, merged.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
+            Assert.areEqual(0, merged.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
+            Assert.areEqual('TEST', merged.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
+            Assert.areEqual('STATUS1', merged.get(AsynchronousJob__c.Status__c.getDescribe().name));
+
+            Map<String, Object> values = (Map<String, Object>) ArrayV1.over(new TestIterable(new List<SObjectField>{
+                    AsynchronousJob__c.MaximumRetries__c,
+                    AsynchronousJob__c.RetryInterval__c,
+                    AsynchronousJob__c.RetryNumber__c,
+                    AsynchronousJob__c.Runnable__c
+            }))
+                    .sharing(merged)
+                    .reduceRight(new ValueExtractor(), new Map<String, Object>());
+
+            Assert.areEqual(100, values.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
+            Assert.areEqual(1000, values.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
+            Assert.areEqual(0, values.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
+            Assert.areEqual('TEST', values.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
         }
-
-        Map<String, Object> merged = (Map<String, Object>) ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
-                        new AsynchronousJob__c(
-                                Runnable__c = 'TEST',
-                                RetryInterval__c = 1000,
-                                Status__c = 'STATUS1'
-                        ),
-                        new AsynchronousJob__c(
-                                RetryNumber__c = 0,
-                                MaximumRetries__c = 100,
-                                Status__c = 'STATUS2'
-                        )
-                }))
-                .reduceRight(new ObjectMerger(), new Map<String, Object>());
-
-        Assert.areEqual(100, merged.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
-        Assert.areEqual(1000, merged.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
-        Assert.areEqual(0, merged.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
-        Assert.areEqual('TEST', merged.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
-        Assert.areEqual('STATUS1', merged.get(AsynchronousJob__c.Status__c.getDescribe().name));
-
-        Map<String, Object> values = (Map<String, Object>) ArrayV1.over(new TestIterable(new List<SObjectField>{
-                        AsynchronousJob__c.MaximumRetries__c,
-                        AsynchronousJob__c.RetryInterval__c,
-                        AsynchronousJob__c.RetryNumber__c,
-                        AsynchronousJob__c.Runnable__c
-                }))
-                .sharing(merged)
-                .reduceRight(new ValueExtractor(), new Map<String, Object>());
-
-        Assert.areEqual(100, values.get(AsynchronousJob__c.MaximumRetries__c.getDescribe().name));
-        Assert.areEqual(1000, values.get(AsynchronousJob__c.RetryInterval__c.getDescribe().name));
-        Assert.areEqual(0, values.get(AsynchronousJob__c.RetryNumber__c.getDescribe().name));
-        Assert.areEqual('TEST', values.get(AsynchronousJob__c.Runnable__c.getDescribe().name));
     }
 
     @IsTest
     private static void testFilterList() {
-        TestHelper.setNOW();
-        List<AsynchronousJob__c> results = (List<AsynchronousJob__c>) ArrayV1.over(new List<AsynchronousJob__c>{
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<AsynchronousJob__c> results = (List<AsynchronousJob__c>) ArrayV1.over(new List<AsynchronousJob__c>{
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST2')
+            })
+                    .filter(new FilterTestRunnable());
+
+            Assert.areEqual(1, results.size());
+            Assert.areEqual('TEST1', results[0].Runnable__c);
+
+            results = (List<AsynchronousJob__c>) ArrayV1.over(new List<AsynchronousJob__c>{
+                    new AsynchronousJob__c(
+                            Runnable__c = 'TEST1'
+                    ),
+                    new AsynchronousJob__c(
+                            Runnable__c = 'TEST2'
+                    )
+            })
+                    .sharing('TEST2')
+                    .filter(new FilterTestRunnable());
+
+            Assert.areEqual(1, results.size());
+            Assert.areEqual('TEST2', results[0].Runnable__c);
+
+            try {
+                results = (List<AsynchronousJob__c>) ArrayV1.over(new List<AsynchronousJob__c>{
                         new AsynchronousJob__c(Runnable__c = 'TEST1'),
                         new AsynchronousJob__c(Runnable__c = 'TEST2')
                 })
-                .filter(new FilterTestRunnable());
+                        .sharing(123)
+                        .filter(new FilterTestRunnable());
 
-        Assert.areEqual(1, results.size());
-        Assert.areEqual('TEST1', results[0].Runnable__c);
+                Assert.fail();
 
-        results = (List<AsynchronousJob__c>) ArrayV1.over(new List<AsynchronousJob__c>{
-                        new AsynchronousJob__c(
-                                Runnable__c = 'TEST1'
-                        ),
-                        new AsynchronousJob__c(
-                                Runnable__c = 'TEST2'
-                        )
-                })
-                .sharing('TEST2')
-                .filter(new FilterTestRunnable());
-
-        Assert.areEqual(1, results.size());
-        Assert.areEqual('TEST2', results[0].Runnable__c);
-
-        try {
-            results = (List<AsynchronousJob__c>) ArrayV1.over(new List<AsynchronousJob__c>{
-                            new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                            new AsynchronousJob__c(Runnable__c = 'TEST2')
-                    })
-                    .sharing(123)
-                    .filter(new FilterTestRunnable());
-
-            Assert.fail();
-
-        } catch(ArrayV1.APIException ae) {
-            Assert.areEqual('Callback for filter() must return a Boolean', ae.getMessage());
+            } catch(ArrayV1.APIException ae) {
+                Assert.areEqual('Callback for filter() must return a Boolean', ae.getMessage());
+            }
         }
     }
 
     @IsTest
     private static void testFilterSet() {
-        TestHelper.setNOW();
-        List<Object> results = ArrayV1.over(new Set<AsynchronousJob__c>{
-                        new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                        new AsynchronousJob__c(Runnable__c = 'TEST2')
-                })
-                .filter(new FilterTestRunnable());
-
-        Assert.areEqual(1, results.size());
-        Assert.areEqual('TEST1', ((AsynchronousJob__c) results[0]).Runnable__c);
-
-        results = ArrayV1.over(new Set<AsynchronousJob__c>{
-                        new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                        new AsynchronousJob__c(Runnable__c = 'TEST2')
-                })
-                .sharing('TEST2')
-                .filter(new FilterTestRunnable());
-
-        Assert.areEqual(1, results.size());
-        Assert.areEqual('TEST2', ((AsynchronousJob__c) results[0]).Runnable__c);
-
-        try {
-            results = ArrayV1.over(new Set<AsynchronousJob__c>{
-                            new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                            new AsynchronousJob__c(Runnable__c = 'TEST2')
-                    })
-                    .sharing(123)
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<Object> results = ArrayV1.over(new Set<AsynchronousJob__c>{
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST2')
+            })
                     .filter(new FilterTestRunnable());
 
-            Assert.fail();
+            Assert.areEqual(1, results.size());
+            Assert.areEqual('TEST1', ((AsynchronousJob__c) results[0]).Runnable__c);
 
-        } catch(ArrayV1.APIException ae) {
-            Assert.areEqual('Callback for filter() must return a Boolean', ae.getMessage());
+            results = ArrayV1.over(new Set<AsynchronousJob__c>{
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST2')
+            })
+                    .sharing('TEST2')
+                    .filter(new FilterTestRunnable());
+
+            Assert.areEqual(1, results.size());
+            Assert.areEqual('TEST2', ((AsynchronousJob__c) results[0]).Runnable__c);
+
+            try {
+                results = ArrayV1.over(new Set<AsynchronousJob__c>{
+                        new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                        new AsynchronousJob__c(Runnable__c = 'TEST2')
+                })
+                        .sharing(123)
+                        .filter(new FilterTestRunnable());
+
+                Assert.fail();
+
+            } catch(ArrayV1.APIException ae) {
+                Assert.areEqual('Callback for filter() must return a Boolean', ae.getMessage());
+            }
         }
     }
 
     @IsTest
     private static void testFilterIterable() {
-        TestHelper.setNOW();
-        List<Object> results = ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
-                        new AsynchronousJob__c( Runnable__c = 'TEST1' ),
-                        new AsynchronousJob__c(Runnable__c = 'TEST2')
-                }))
-                .filter(new FilterTestRunnable());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<Object> results = ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
+                    new AsynchronousJob__c( Runnable__c = 'TEST1' ),
+                    new AsynchronousJob__c(Runnable__c = 'TEST2')
+            }))
+                    .filter(new FilterTestRunnable());
 
-        Assert.areEqual(1, results.size());
-        Assert.areEqual('TEST1', ((AsynchronousJob__c) results[0]).Runnable__c);
+            Assert.areEqual(1, results.size());
+            Assert.areEqual('TEST1', ((AsynchronousJob__c) results[0]).Runnable__c);
 
-        results = ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
+            results = ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST2')
+            }))
+                    .sharing('TEST2')
+                    .filter(new FilterTestRunnable());
+
+            Assert.areEqual(1, results.size());
+            Assert.areEqual('TEST2', ((AsynchronousJob__c) results[0]).Runnable__c);
+
+            try {
+                results = ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
                         new AsynchronousJob__c(Runnable__c = 'TEST1'),
                         new AsynchronousJob__c(Runnable__c = 'TEST2')
                 }))
-                .sharing('TEST2')
-                .filter(new FilterTestRunnable());
+                        .sharing(123)
+                        .filter(new FilterTestRunnable());
 
-        Assert.areEqual(1, results.size());
-        Assert.areEqual('TEST2', ((AsynchronousJob__c) results[0]).Runnable__c);
+                Assert.fail();
 
-        try {
-            results = ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
-                            new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                            new AsynchronousJob__c(Runnable__c = 'TEST2')
-                    }))
-                    .sharing(123)
-                    .filter(new FilterTestRunnable());
-
-            Assert.fail();
-
-        } catch(ArrayV1.APIException ae) {
-            Assert.areEqual('Callback for filter() must return a Boolean', ae.getMessage());
+            } catch(ArrayV1.APIException ae) {
+                Assert.areEqual('Callback for filter() must return a Boolean', ae.getMessage());
+            }
         }
     }
 
     @IsTest
     private static void testTransformList() {
-        TestHelper.setNOW();
-        List<Object> results = (List<Object>) ArrayV1.over(new List<AsynchronousJob__c>{
-                        new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                        new AsynchronousJob__c(Runnable__c = 'TEST2')
-                })
-                .transform(new Transformer());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<Object> results = (List<Object>) ArrayV1.over(new List<AsynchronousJob__c>{
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST2')
+            })
+                    .transform(new Transformer());
 
-        Assert.areEqual(2, results.size());
-        Assert.areEqual('TEST1', results[0]);
-        Assert.areEqual('TEST2', results[1]);
+            Assert.areEqual(2, results.size());
+            Assert.areEqual('TEST1', results[0]);
+            Assert.areEqual('TEST2', results[1]);
 
-        List<String> stringResults = (List<String>) ArrayV1.over(new List<AsynchronousJob__c>{
-                        new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                        new AsynchronousJob__c(Runnable__c = 'TEST2')
-                })
-                .transform(new Transformer(), new List<String>());
+            List<String> stringResults = (List<String>) ArrayV1.over(new List<AsynchronousJob__c>{
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST2')
+            })
+                    .transform(new Transformer(), new List<String>());
 
-        Assert.areEqual(2, stringResults.size());
-        Assert.areEqual('TEST1', stringResults[0]);
-        Assert.areEqual('TEST2', stringResults[1]);
+            Assert.areEqual(2, stringResults.size());
+            Assert.areEqual('TEST1', stringResults[0]);
+            Assert.areEqual('TEST2', stringResults[1]);
+        }
     }
 
     @IsTest
     private static void testTransformSet() {
-        TestHelper.setNOW();
-        List<Object> results = (List<Object>) ArrayV1.over(new Set<AsynchronousJob__c>{
-                        new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                        new AsynchronousJob__c(Runnable__c = 'TEST2')
-                })
-                .transform(new Transformer());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<Object> results = (List<Object>) ArrayV1.over(new Set<AsynchronousJob__c>{
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST2')
+            })
+                    .transform(new Transformer());
 
-        Assert.areEqual(2, results.size());
-        Assert.areEqual('TEST1', results[0]);
-        Assert.areEqual('TEST2', results[1]);
+            Assert.areEqual(2, results.size());
+            Assert.areEqual('TEST1', results[0]);
+            Assert.areEqual('TEST2', results[1]);
 
-        List<String> stringResults = (List<String>) ArrayV1.over(new Set<AsynchronousJob__c>{
-                        new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                        new AsynchronousJob__c(Runnable__c = 'TEST2')
-                })
-                .transform(new Transformer(), new List<String>());
+            List<String> stringResults = (List<String>) ArrayV1.over(new Set<AsynchronousJob__c>{
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST2')
+            })
+                    .transform(new Transformer(), new List<String>());
 
-        Assert.areEqual(2, stringResults.size());
-        Assert.areEqual('TEST1', stringResults[0]);
-        Assert.areEqual('TEST2', stringResults[1]);
+            Assert.areEqual(2, stringResults.size());
+            Assert.areEqual('TEST1', stringResults[0]);
+            Assert.areEqual('TEST2', stringResults[1]);
+        }
     }
 
     @IsTest
     private static void testTransformIterable() {
-        TestHelper.setNOW();
-        List<Object> results = (List<Object>) ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
-                        new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                        new AsynchronousJob__c(Runnable__c = 'TEST2')
-                }))
-                .transform(new Transformer());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<Object> results = (List<Object>) ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST2')
+            }))
+                    .transform(new Transformer());
 
-        Assert.areEqual(2, results.size());
-        Assert.areEqual('TEST1', results[0]);
-        Assert.areEqual('TEST2', results[1]);
+            Assert.areEqual(2, results.size());
+            Assert.areEqual('TEST1', results[0]);
+            Assert.areEqual('TEST2', results[1]);
 
-        List<String> stringResults = (List<String>) ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
-                        new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                        new AsynchronousJob__c(Runnable__c = 'TEST2')
-                }))
-                .transform(new Transformer(), new List<String>());
+            List<String> stringResults = (List<String>) ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST2')
+            }))
+                    .transform(new Transformer(), new List<String>());
 
-        Assert.areEqual(2, stringResults.size());
-        Assert.areEqual('TEST1', stringResults[0]);
-        Assert.areEqual('TEST2', stringResults[1]);
+            Assert.areEqual(2, stringResults.size());
+            Assert.areEqual('TEST1', stringResults[0]);
+            Assert.areEqual('TEST2', stringResults[1]);
+        }
     }
 
     @IsTest
     private static void testAtList() {
-        TestHelper.setNOW();
-        ArrayV1.Methods methods = ArrayV1.over(new List<Integer> { 1, 2, 3, 4 });
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            ArrayV1.Methods methods = ArrayV1.over(new List<Integer> { 1, 2, 3, 4 });
 
-        Assert.areEqual(1, methods.at(0).get());
-        Assert.areEqual(4, methods.at(3).get());
-        Assert.areEqual(3, methods.at(-2).get());
-        Assert.areEqual(1, methods.at(-4).get());
-        Assert.isFalse(methods.at(4).isPresent());
-        Assert.isFalse(methods.at(-5).isPresent());
+            Assert.areEqual(1, methods.at(0).get());
+            Assert.areEqual(4, methods.at(3).get());
+            Assert.areEqual(3, methods.at(-2).get());
+            Assert.areEqual(1, methods.at(-4).get());
+            Assert.isFalse(methods.at(4).isPresent());
+            Assert.isFalse(methods.at(-5).isPresent());
+        }
     }
 
     @IsTest
     private static void testAtSet() {
-        TestHelper.setNOW();
-        ArrayV1.Methods methods = ArrayV1.over(new Set<Integer> { 1, 2, 3, 4 });
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            ArrayV1.Methods methods = ArrayV1.over(new Set<Integer> { 1, 2, 3, 4 });
 
-        Assert.areEqual(1, methods.at(0).get());
-        Assert.areEqual(4, methods.at(3).get());
-        Assert.areEqual(3, methods.at(-2).get());
-        Assert.areEqual(1, methods.at(-4).get());
-        Assert.isFalse(methods.at(4).isPresent());
-        Assert.isFalse(methods.at(-5).isPresent());
+            Assert.areEqual(1, methods.at(0).get());
+            Assert.areEqual(4, methods.at(3).get());
+            Assert.areEqual(3, methods.at(-2).get());
+            Assert.areEqual(1, methods.at(-4).get());
+            Assert.isFalse(methods.at(4).isPresent());
+            Assert.isFalse(methods.at(-5).isPresent());
+        }
     }
 
     @IsTest
     private static void testAtIterable() {
-        TestHelper.setNOW();
-        ArrayV1.Methods methods = ArrayV1.over(new TestIterable(new List<Integer> { 1, 2, 3, 4 }));
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            ArrayV1.Methods methods = ArrayV1.over(new TestIterable(new List<Integer> { 1, 2, 3, 4 }));
 
-        Assert.areEqual(1, methods.at(0).get());
-        Assert.areEqual(4, methods.at(3).get());
-        Assert.areEqual(3, methods.at(-2).get());
-        Assert.areEqual(1, methods.at(-4).get());
-        Assert.isFalse(methods.at(4).isPresent());
-        Assert.isFalse(methods.at(-5).isPresent());
+            Assert.areEqual(1, methods.at(0).get());
+            Assert.areEqual(4, methods.at(3).get());
+            Assert.areEqual(3, methods.at(-2).get());
+            Assert.areEqual(1, methods.at(-4).get());
+            Assert.isFalse(methods.at(4).isPresent());
+            Assert.isFalse(methods.at(-5).isPresent());
+        }
     }
 
     @IsTest
     private static void testJoinList() {
-        TestHelper.setNOW();
-        Assert.areEqual('1-2-3-4-5', ArrayV1.over(new List<Integer> { 1, 2, 3, 4, 5 }).join('-'));
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            Assert.areEqual('1-2-3-4-5', ArrayV1.over(new List<Integer> { 1, 2, 3, 4, 5 }).join('-'));
+        }
     }
 
     @IsTest
     private static void testJoinSet() {
-        TestHelper.setNOW();
-        Assert.areEqual('1-2-3-4-5', ArrayV1.over(new Set<Integer> { 1, 2, 3, 4, 5 }).join('-'));
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            Assert.areEqual('1-2-3-4-5', ArrayV1.over(new Set<Integer> { 1, 2, 3, 4, 5 }).join('-'));
+        }
     }
 
     @IsTest
     private static void testJoinIterable() {
-        TestHelper.setNOW();
-        Assert.areEqual('1-2-3-4-5', ArrayV1.over(new TestIterable(new List<Integer> { 1, 2, 3, 4, 5 })).join('-'));
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            Assert.areEqual('1-2-3-4-5', ArrayV1.over(new TestIterable(new List<Integer> { 1, 2, 3, 4, 5 })).join('-'));
+        }
     }
 
     @IsTest
     private static void testSomeList() {
-        TestHelper.setNOW();
-        List<AsynchronousJob__c> jobs1 = new List<AsynchronousJob__c> {
-                new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                new AsynchronousJob__c(Runnable__c = 'TEST2'),
-                new AsynchronousJob__c(Runnable__c = 'TEST3'),
-                new AsynchronousJob__c(Runnable__c = 'TEST1')
-        };
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<AsynchronousJob__c> jobs1 = new List<AsynchronousJob__c> {
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST2'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST3'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST1')
+            };
 
-        List<AsynchronousJob__c> jobs2 = new List<AsynchronousJob__c>{
-                new AsynchronousJob__c(Runnable__c = 'TEST4'),
-                new AsynchronousJob__c(Runnable__c = 'TEST5')
-        };
+            List<AsynchronousJob__c> jobs2 = new List<AsynchronousJob__c>{
+                    new AsynchronousJob__c(Runnable__c = 'TEST4'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST5')
+            };
 
-        Assert.isTrue(ArrayV1.over(jobs1).some(new FilterTestRunnable()));
-        Assert.isFalse(ArrayV1.over(jobs2).some(new FilterTestRunnable()));
-        Assert.isTrue(ArrayV1.over(jobs1).sharing('TEST2').some(new FilterTestRunnable()));
-        Assert.isFalse(ArrayV1.over(jobs2).sharing('TEST2').some(new FilterTestRunnable()));
-        Assert.isFalse(ArrayV1.over(jobs1).sharing('TEST4').some(new FilterTestRunnable()));
-        Assert.isTrue(ArrayV1.over(jobs2).sharing('TEST4').some(new FilterTestRunnable()));
+            Assert.isTrue(ArrayV1.over(jobs1).some(new FilterTestRunnable()));
+            Assert.isFalse(ArrayV1.over(jobs2).some(new FilterTestRunnable()));
+            Assert.isTrue(ArrayV1.over(jobs1).sharing('TEST2').some(new FilterTestRunnable()));
+            Assert.isFalse(ArrayV1.over(jobs2).sharing('TEST2').some(new FilterTestRunnable()));
+            Assert.isFalse(ArrayV1.over(jobs1).sharing('TEST4').some(new FilterTestRunnable()));
+            Assert.isTrue(ArrayV1.over(jobs2).sharing('TEST4').some(new FilterTestRunnable()));
 
-        try {
-            Assert.isTrue(ArrayV1.over(jobs1).sharing(123).some(new FilterTestRunnable()));
-            Assert.fail();
-        } catch(ArrayV1.APIException ae) {
-            Assert.areEqual('Callback for some() must return a Boolean', ae.getMessage());
+            try {
+                Assert.isTrue(ArrayV1.over(jobs1).sharing(123).some(new FilterTestRunnable()));
+                Assert.fail();
+            } catch(ArrayV1.APIException ae) {
+                Assert.areEqual('Callback for some() must return a Boolean', ae.getMessage());
+            }
         }
     }
 
     @IsTest
     private static void testSomeSet() {
-        TestHelper.setNOW();
-        Set<AsynchronousJob__c> jobs1 = new Set<AsynchronousJob__c> {
-                new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                new AsynchronousJob__c(Runnable__c = 'TEST2'),
-                new AsynchronousJob__c(Runnable__c = 'TEST3'),
-                new AsynchronousJob__c(Runnable__c = 'TEST1')
-        };
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            Set<AsynchronousJob__c> jobs1 = new Set<AsynchronousJob__c> {
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST2'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST3'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST1')
+            };
 
-        Set<AsynchronousJob__c> jobs2 = new Set<AsynchronousJob__c>{
-                new AsynchronousJob__c(Runnable__c = 'TEST4'),
-                new AsynchronousJob__c(Runnable__c = 'TEST5')
-        };
+            Set<AsynchronousJob__c> jobs2 = new Set<AsynchronousJob__c>{
+                    new AsynchronousJob__c(Runnable__c = 'TEST4'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST5')
+            };
 
-        Assert.isTrue(ArrayV1.over(jobs1).some(new FilterTestRunnable()));
-        Assert.isFalse(ArrayV1.over(jobs2).some(new FilterTestRunnable()));
-        Assert.isTrue(ArrayV1.over(jobs1).sharing('TEST2').some(new FilterTestRunnable()));
-        Assert.isFalse(ArrayV1.over(jobs2).sharing('TEST2').some(new FilterTestRunnable()));
-        Assert.isFalse(ArrayV1.over(jobs1).sharing('TEST4').some(new FilterTestRunnable()));
-        Assert.isTrue(ArrayV1.over(jobs2).sharing('TEST4').some(new FilterTestRunnable()));
+            Assert.isTrue(ArrayV1.over(jobs1).some(new FilterTestRunnable()));
+            Assert.isFalse(ArrayV1.over(jobs2).some(new FilterTestRunnable()));
+            Assert.isTrue(ArrayV1.over(jobs1).sharing('TEST2').some(new FilterTestRunnable()));
+            Assert.isFalse(ArrayV1.over(jobs2).sharing('TEST2').some(new FilterTestRunnable()));
+            Assert.isFalse(ArrayV1.over(jobs1).sharing('TEST4').some(new FilterTestRunnable()));
+            Assert.isTrue(ArrayV1.over(jobs2).sharing('TEST4').some(new FilterTestRunnable()));
 
-        try {
-            Assert.isTrue(ArrayV1.over(jobs1).sharing(123).some(new FilterTestRunnable()));
-            Assert.fail();
-        } catch(ArrayV1.APIException ae) {
-            Assert.areEqual('Callback for some() must return a Boolean', ae.getMessage());
+            try {
+                Assert.isTrue(ArrayV1.over(jobs1).sharing(123).some(new FilterTestRunnable()));
+                Assert.fail();
+            } catch(ArrayV1.APIException ae) {
+                Assert.areEqual('Callback for some() must return a Boolean', ae.getMessage());
+            }
         }
     }
 
     @IsTest
     private static void testIterable() {
-        TestHelper.setNOW();
-        TestIterable iter1 = new TestIterable(new List<AsynchronousJob__c> {
-                new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                new AsynchronousJob__c(Runnable__c = 'TEST2'),
-                new AsynchronousJob__c(Runnable__c = 'TEST3'),
-                new AsynchronousJob__c(Runnable__c = 'TEST1')
-        });
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            TestIterable iter1 = new TestIterable(new List<AsynchronousJob__c> {
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST2'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST3'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST1')
+            });
 
-        TestIterable iter2 = new TestIterable(new List<AsynchronousJob__c>{
-                new AsynchronousJob__c(Runnable__c = 'TEST4'),
-                new AsynchronousJob__c(Runnable__c = 'TEST5')
-        });
+            TestIterable iter2 = new TestIterable(new List<AsynchronousJob__c>{
+                    new AsynchronousJob__c(Runnable__c = 'TEST4'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST5')
+            });
 
-        Assert.isTrue(ArrayV1.over(iter1).some(new FilterTestRunnable()));
-        Assert.isFalse(ArrayV1.over(iter2).some(new FilterTestRunnable()));
-        Assert.isTrue(ArrayV1.over(iter1).sharing('TEST2').some(new FilterTestRunnable()));
-        Assert.isFalse(ArrayV1.over(iter2).sharing('TEST2').some(new FilterTestRunnable()));
-        Assert.isFalse(ArrayV1.over(iter1).sharing('TEST4').some(new FilterTestRunnable()));
-        Assert.isTrue(ArrayV1.over(iter2).sharing('TEST4').some(new FilterTestRunnable()));
+            Assert.isTrue(ArrayV1.over(iter1).some(new FilterTestRunnable()));
+            Assert.isFalse(ArrayV1.over(iter2).some(new FilterTestRunnable()));
+            Assert.isTrue(ArrayV1.over(iter1).sharing('TEST2').some(new FilterTestRunnable()));
+            Assert.isFalse(ArrayV1.over(iter2).sharing('TEST2').some(new FilterTestRunnable()));
+            Assert.isFalse(ArrayV1.over(iter1).sharing('TEST4').some(new FilterTestRunnable()));
+            Assert.isTrue(ArrayV1.over(iter2).sharing('TEST4').some(new FilterTestRunnable()));
 
-        try {
-            Assert.isTrue(ArrayV1.over(iter1).sharing(123).some(new FilterTestRunnable()));
-            Assert.fail();
-        } catch(ArrayV1.APIException ae) {
-            Assert.areEqual('Callback for some() must return a Boolean', ae.getMessage());
+            try {
+                Assert.isTrue(ArrayV1.over(iter1).sharing(123).some(new FilterTestRunnable()));
+                Assert.fail();
+            } catch(ArrayV1.APIException ae) {
+                Assert.areEqual('Callback for some() must return a Boolean', ae.getMessage());
+            }
         }
     }
 
     @IsTest
     private static void testEveryList() {
-        TestHelper.setNOW();
-        List<AsynchronousJob__c> jobs1 = new List<AsynchronousJob__c> {
-                new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                new AsynchronousJob__c(Runnable__c = 'TEST1')
-        };
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<AsynchronousJob__c> jobs1 = new List<AsynchronousJob__c> {
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST1')
+            };
 
-        List<AsynchronousJob__c> jobs2 = new List<AsynchronousJob__c>{
-                new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                new AsynchronousJob__c(Runnable__c = 'TEST2')
-        };
+            List<AsynchronousJob__c> jobs2 = new List<AsynchronousJob__c>{
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST2')
+            };
 
-        Assert.isTrue(ArrayV1.over(jobs1).every(new FilterTestRunnable()));
-        Assert.isFalse(ArrayV1.over(jobs2).every(new FilterTestRunnable()));
+            Assert.isTrue(ArrayV1.over(jobs1).every(new FilterTestRunnable()));
+            Assert.isFalse(ArrayV1.over(jobs2).every(new FilterTestRunnable()));
 
-        try {
-            Assert.isTrue(ArrayV1.over(jobs1).sharing(123).every(new FilterTestRunnable()));
-            Assert.fail();
-        } catch(ArrayV1.APIException ae) {
-            Assert.areEqual('Callback for every() must return a Boolean', ae.getMessage());
+            try {
+                Assert.isTrue(ArrayV1.over(jobs1).sharing(123).every(new FilterTestRunnable()));
+                Assert.fail();
+            } catch(ArrayV1.APIException ae) {
+                Assert.areEqual('Callback for every() must return a Boolean', ae.getMessage());
+            }
         }
     }
 
     @IsTest
     private static void testEverySet() {
-        TestHelper.setNOW();
-        Set<AsynchronousJob__c> jobs1 = new Set<AsynchronousJob__c> {
-                new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                new AsynchronousJob__c(Runnable__c = 'TEST1')
-        };
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            Set<AsynchronousJob__c> jobs1 = new Set<AsynchronousJob__c> {
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST1')
+            };
 
-        Set<AsynchronousJob__c> jobs2 = new Set<AsynchronousJob__c>{
-                new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                new AsynchronousJob__c(Runnable__c = 'TEST2')
-        };
+            Set<AsynchronousJob__c> jobs2 = new Set<AsynchronousJob__c>{
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST2')
+            };
 
-        Assert.isTrue(ArrayV1.over(jobs1).every(new FilterTestRunnable()));
-        Assert.isFalse(ArrayV1.over(jobs2).every(new FilterTestRunnable()));
+            Assert.isTrue(ArrayV1.over(jobs1).every(new FilterTestRunnable()));
+            Assert.isFalse(ArrayV1.over(jobs2).every(new FilterTestRunnable()));
 
-        try {
-            Assert.isTrue(ArrayV1.over(jobs1).sharing(123).every(new FilterTestRunnable()));
-            Assert.fail();
-        } catch(ArrayV1.APIException ae) {
-            Assert.areEqual('Callback for every() must return a Boolean', ae.getMessage());
+            try {
+                Assert.isTrue(ArrayV1.over(jobs1).sharing(123).every(new FilterTestRunnable()));
+                Assert.fail();
+            } catch(ArrayV1.APIException ae) {
+                Assert.areEqual('Callback for every() must return a Boolean', ae.getMessage());
+            }
         }
     }
 
     @IsTest
     private static void testEveryIterable() {
-        TestHelper.setNOW();
-        TestIterable iter1 = new TestIterable(new List<AsynchronousJob__c> {
-                new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                new AsynchronousJob__c(Runnable__c = 'TEST1')
-        });
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            TestIterable iter1 = new TestIterable(new List<AsynchronousJob__c> {
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST1')
+            });
 
-        TestIterable iter2 = new TestIterable(new List<AsynchronousJob__c>{
-                new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                new AsynchronousJob__c(Runnable__c = 'TEST2')
-        });
+            TestIterable iter2 = new TestIterable(new List<AsynchronousJob__c>{
+                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                    new AsynchronousJob__c(Runnable__c = 'TEST2')
+            });
 
-        Assert.isTrue(ArrayV1.over(iter1).every(new FilterTestRunnable()));
-        Assert.isFalse(ArrayV1.over(iter2).every(new FilterTestRunnable()));
+            Assert.isTrue(ArrayV1.over(iter1).every(new FilterTestRunnable()));
+            Assert.isFalse(ArrayV1.over(iter2).every(new FilterTestRunnable()));
 
-        try {
-            Assert.isTrue(ArrayV1.over(iter1).sharing(123).every(new FilterTestRunnable()));
-            Assert.fail();
-        } catch(ArrayV1.APIException ae) {
-            Assert.areEqual('Callback for every() must return a Boolean', ae.getMessage());
+            try {
+                Assert.isTrue(ArrayV1.over(iter1).sharing(123).every(new FilterTestRunnable()));
+                Assert.fail();
+            } catch(ArrayV1.APIException ae) {
+                Assert.areEqual('Callback for every() must return a Boolean', ae.getMessage());
+            }
         }
     }
 
     @IsTest
     private static void testReverseList() {
-        TestHelper.setNOW();
-        List<String> reversed = (List<String>) ArrayV1.over(new List<String> { 'one', 'two', 'three' }).reverse();
-        Assert.areEqual(3, reversed.size());
-        Assert.areEqual('three', reversed[0]);
-        Assert.areEqual('two', reversed[1]);
-        Assert.areEqual('one', reversed[2]);
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<String> reversed = (List<String>) ArrayV1.over(new List<String> { 'one', 'two', 'three' }).reverse();
+            Assert.areEqual(3, reversed.size());
+            Assert.areEqual('three', reversed[0]);
+            Assert.areEqual('two', reversed[1]);
+            Assert.areEqual('one', reversed[2]);
+        }
     }
 
     @IsTest
     private static void testReverseSet() {
-        TestHelper.setNOW();
-        List<Object> reversed = ArrayV1.over(new Set<String> { 'one', 'two', 'three' }).reverse();
-        Assert.areEqual(3, reversed.size());
-        Assert.areEqual('three', reversed[0]);
-        Assert.areEqual('two', reversed[1]);
-        Assert.areEqual('one', reversed[2]);
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<Object> reversed = ArrayV1.over(new Set<String> { 'one', 'two', 'three' }).reverse();
+            Assert.areEqual(3, reversed.size());
+            Assert.areEqual('three', reversed[0]);
+            Assert.areEqual('two', reversed[1]);
+            Assert.areEqual('one', reversed[2]);
+        }
     }
 
     @IsTest
     private static void testReverseIterable() {
-        TestHelper.setNOW();
-        List<Object> reversed = ArrayV1.over(new TestIterable(new List<String> { 'one', 'two', 'three' })).reverse();
-        Assert.areEqual(3, reversed.size());
-        Assert.areEqual('three', reversed[0]);
-        Assert.areEqual('two', reversed[1]);
-        Assert.areEqual('one', reversed[2]);
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<Object> reversed = ArrayV1.over(new TestIterable(new List<String> { 'one', 'two', 'three' })).reverse();
+            Assert.areEqual(3, reversed.size());
+            Assert.areEqual('three', reversed[0]);
+            Assert.areEqual('two', reversed[1]);
+            Assert.areEqual('one', reversed[2]);
+        }
     }
 
     @IsTest
     private static void testPushAndPopList() {
-        TestHelper.setNOW();
-        ArrayV1.Methods stack = ArrayV1.over(new List<Integer>());
-        stack.push(1);
-        Assert.areEqual(1, stack.length());
-        stack.push(2);
-        Assert.areEqual(2, stack.length());
-        Assert.areEqual(2, (Integer) stack.pop().get());
-        Assert.areEqual(1, stack.length());
-        stack.push(3);
-        Assert.areEqual(2, stack.length());
-        Assert.areEqual(3, (Integer) stack.pop().get());
-        Assert.areEqual(1, stack.length());
-        Assert.areEqual(1, (Integer) stack.pop().get());
-        Assert.areEqual(0, stack.length());
-        Assert.isFalse(stack.pop().isPresent());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            ArrayV1.Methods stack = ArrayV1.over(new List<Integer>());
+            stack.push(1);
+            Assert.areEqual(1, stack.length());
+            stack.push(2);
+            Assert.areEqual(2, stack.length());
+            Assert.areEqual(2, (Integer) stack.pop().get());
+            Assert.areEqual(1, stack.length());
+            stack.push(3);
+            Assert.areEqual(2, stack.length());
+            Assert.areEqual(3, (Integer) stack.pop().get());
+            Assert.areEqual(1, stack.length());
+            Assert.areEqual(1, (Integer) stack.pop().get());
+            Assert.areEqual(0, stack.length());
+            Assert.isFalse(stack.pop().isPresent());
+        }
     }
 
     @IsTest
     private static void testPushAndPopSet() {
-        TestHelper.setNOW();
-        ArrayV1.Methods stack = ArrayV1.over(new Set<Integer>());
-        stack.push(1);
-        Assert.areEqual(1, stack.length());
-        stack.push(2);
-        Assert.areEqual(2, stack.length());
-        Assert.areEqual(2, (Integer) stack.pop().get());
-        Assert.areEqual(1, stack.length());
-        stack.push(3);
-        Assert.areEqual(2, stack.length());
-        Assert.areEqual(3, (Integer) stack.pop().get());
-        Assert.areEqual(1, stack.length());
-        Assert.areEqual(1, (Integer) stack.pop().get());
-        Assert.areEqual(0, stack.length());
-        Assert.isFalse(stack.pop().isPresent());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            ArrayV1.Methods stack = ArrayV1.over(new Set<Integer>());
+            stack.push(1);
+            Assert.areEqual(1, stack.length());
+            stack.push(2);
+            Assert.areEqual(2, stack.length());
+            Assert.areEqual(2, (Integer) stack.pop().get());
+            Assert.areEqual(1, stack.length());
+            stack.push(3);
+            Assert.areEqual(2, stack.length());
+            Assert.areEqual(3, (Integer) stack.pop().get());
+            Assert.areEqual(1, stack.length());
+            Assert.areEqual(1, (Integer) stack.pop().get());
+            Assert.areEqual(0, stack.length());
+            Assert.isFalse(stack.pop().isPresent());
+        }
     }
 
     @IsTest
     private static void testPushAndPopIterable() {
-        TestHelper.setNOW();
-        ArrayV1.Methods stack = ArrayV1.over(new TestIterable(new List<Integer>()));
-        stack.push(1);
-        Assert.areEqual(1, stack.length());
-        stack.push(2);
-        Assert.areEqual(2, stack.length());
-        Assert.areEqual(2, (Integer) stack.pop().get());
-        Assert.areEqual(1, stack.length());
-        stack.push(3);
-        Assert.areEqual(2, stack.length());
-        Assert.areEqual(3, (Integer) stack.pop().get());
-        Assert.areEqual(1, stack.length());
-        Assert.areEqual(1, (Integer) stack.pop().get());
-        Assert.areEqual(0, stack.length());
-        Assert.isFalse(stack.pop().isPresent());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            ArrayV1.Methods stack = ArrayV1.over(new TestIterable(new List<Integer>()));
+            stack.push(1);
+            Assert.areEqual(1, stack.length());
+            stack.push(2);
+            Assert.areEqual(2, stack.length());
+            Assert.areEqual(2, (Integer) stack.pop().get());
+            Assert.areEqual(1, stack.length());
+            stack.push(3);
+            Assert.areEqual(2, stack.length());
+            Assert.areEqual(3, (Integer) stack.pop().get());
+            Assert.areEqual(1, stack.length());
+            Assert.areEqual(1, (Integer) stack.pop().get());
+            Assert.areEqual(0, stack.length());
+            Assert.isFalse(stack.pop().isPresent());
+        }
     }
 
     @IsTest
     private static void testPushAndShiftList() {
-        TestHelper.setNOW();
-        ArrayV1.Methods fifo = ArrayV1.over(new List<Integer>());
-        fifo.push(1);
-        Assert.areEqual(1, fifo.length());
-        fifo.push(2);
-        Assert.areEqual(2, fifo.length());
-        Assert.areEqual(1, (Integer) fifo.shift().get());
-        Assert.areEqual(1, fifo.length());
-        fifo.push(3);
-        Assert.areEqual(2, fifo.length());
-        Assert.areEqual(2, (Integer) fifo.shift().get());
-        Assert.areEqual(1, fifo.length());
-        Assert.areEqual(3, (Integer) fifo.shift().get());
-        Assert.areEqual(0, fifo.length());
-        Assert.isFalse(fifo.shift().isPresent());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            ArrayV1.Methods fifo = ArrayV1.over(new List<Integer>());
+            fifo.push(1);
+            Assert.areEqual(1, fifo.length());
+            fifo.push(2);
+            Assert.areEqual(2, fifo.length());
+            Assert.areEqual(1, (Integer) fifo.shift().get());
+            Assert.areEqual(1, fifo.length());
+            fifo.push(3);
+            Assert.areEqual(2, fifo.length());
+            Assert.areEqual(2, (Integer) fifo.shift().get());
+            Assert.areEqual(1, fifo.length());
+            Assert.areEqual(3, (Integer) fifo.shift().get());
+            Assert.areEqual(0, fifo.length());
+            Assert.isFalse(fifo.shift().isPresent());
+        }
     }
 
     @IsTest
     private static void testPushAndShiftSet() {
-        TestHelper.setNOW();
-        ArrayV1.Methods fifo = ArrayV1.over(new Set<Integer>());
-        fifo.push(1);
-        Assert.areEqual(1, fifo.length());
-        fifo.push(2);
-        Assert.areEqual(2, fifo.length());
-        Assert.areEqual(1, (Integer) fifo.shift().get());
-        Assert.areEqual(1, fifo.length());
-        fifo.push(3);
-        Assert.areEqual(2, fifo.length());
-        Assert.areEqual(2, (Integer) fifo.shift().get());
-        Assert.areEqual(1, fifo.length());
-        Assert.areEqual(3, (Integer) fifo.shift().get());
-        Assert.areEqual(0, fifo.length());
-        Assert.isFalse(fifo.shift().isPresent());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            ArrayV1.Methods fifo = ArrayV1.over(new Set<Integer>());
+            fifo.push(1);
+            Assert.areEqual(1, fifo.length());
+            fifo.push(2);
+            Assert.areEqual(2, fifo.length());
+            Assert.areEqual(1, (Integer) fifo.shift().get());
+            Assert.areEqual(1, fifo.length());
+            fifo.push(3);
+            Assert.areEqual(2, fifo.length());
+            Assert.areEqual(2, (Integer) fifo.shift().get());
+            Assert.areEqual(1, fifo.length());
+            Assert.areEqual(3, (Integer) fifo.shift().get());
+            Assert.areEqual(0, fifo.length());
+            Assert.isFalse(fifo.shift().isPresent());
+        }
     }
 
     @IsTest
     private static void testPushAndShiftIterable() {
-        TestHelper.setNOW();
-        ArrayV1.Methods fifo = ArrayV1.over(new TestIterable(new List<Integer>()));
-        fifo.push(1);
-        Assert.areEqual(1, fifo.length());
-        fifo.push(2);
-        Assert.areEqual(2, fifo.length());
-        Assert.areEqual(1, (Integer) fifo.shift().get());
-        Assert.areEqual(1, fifo.length());
-        fifo.push(3);
-        Assert.areEqual(2, fifo.length());
-        Assert.areEqual(2, (Integer) fifo.shift().get());
-        Assert.areEqual(1, fifo.length());
-        Assert.areEqual(3, (Integer) fifo.shift().get());
-        Assert.areEqual(0, fifo.length());
-        Assert.isFalse(fifo.shift().isPresent());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            ArrayV1.Methods fifo = ArrayV1.over(new TestIterable(new List<Integer>()));
+            fifo.push(1);
+            Assert.areEqual(1, fifo.length());
+            fifo.push(2);
+            Assert.areEqual(2, fifo.length());
+            Assert.areEqual(1, (Integer) fifo.shift().get());
+            Assert.areEqual(1, fifo.length());
+            fifo.push(3);
+            Assert.areEqual(2, fifo.length());
+            Assert.areEqual(2, (Integer) fifo.shift().get());
+            Assert.areEqual(1, fifo.length());
+            Assert.areEqual(3, (Integer) fifo.shift().get());
+            Assert.areEqual(0, fifo.length());
+            Assert.isFalse(fifo.shift().isPresent());
+        }
     }
 
     @IsTest
     private static void testLengthList() {
-        TestHelper.setNOW();
-        Assert.areEqual(0, ArrayV1.over(new List<Integer>()).length());
-        Assert.areEqual(1, ArrayV1.over(new List<Integer> { 1 }).length());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            Assert.areEqual(0, ArrayV1.over(new List<Integer>()).length());
+            Assert.areEqual(1, ArrayV1.over(new List<Integer> { 1 }).length());
+        }
     }
 
     @IsTest
     private static void testLengthSet() {
-        TestHelper.setNOW();
-        Assert.areEqual(0, ArrayV1.over(new Set<Integer>()).length());
-        Assert.areEqual(1, ArrayV1.over(new Set<Integer> { 1 }).length());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            Assert.areEqual(0, ArrayV1.over(new Set<Integer>()).length());
+            Assert.areEqual(1, ArrayV1.over(new Set<Integer> { 1 }).length());
+        }
     }
 
     @IsTest
     private static void testLengthIterable() {
-        TestHelper.setNOW();
-        Assert.areEqual(0, ArrayV1.over(new TestIterable(new List<Integer>())).length());
-        Assert.areEqual(1, ArrayV1.over(new TestIterable(new List<Integer> { 1 })).length());
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            Assert.areEqual(0, ArrayV1.over(new TestIterable(new List<Integer>())).length());
+            Assert.areEqual(1, ArrayV1.over(new TestIterable(new List<Integer> { 1 })).length());
+        }
     }
 
     @IsTest
     private static void testSortList() {
-        TestHelper.setNOW();
-        List<Integer> initial = new List<Integer> { 5, 2, 4, 3, 1 };
-        List<Integer> sorted = (List<Integer>) ArrayV1.over(initial).sort();
-        Assert.areEqual(5, initial[0]);
-        Assert.areEqual(1, sorted[0]);
-        Assert.areEqual(2, initial[1]);
-        Assert.areEqual(2, sorted[1]);
-        Assert.areEqual(4, initial[2]);
-        Assert.areEqual(3, sorted[2]);
-        Assert.areEqual(3, initial[3]);
-        Assert.areEqual(4, sorted[3]);
-        Assert.areEqual(1, initial[4]);
-        Assert.areEqual(5, sorted[4]);
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<Integer> initial = new List<Integer> { 5, 2, 4, 3, 1 };
+            List<Integer> sorted = (List<Integer>) ArrayV1.over(initial).sort();
+            Assert.areEqual(5, initial[0]);
+            Assert.areEqual(1, sorted[0]);
+            Assert.areEqual(2, initial[1]);
+            Assert.areEqual(2, sorted[1]);
+            Assert.areEqual(4, initial[2]);
+            Assert.areEqual(3, sorted[2]);
+            Assert.areEqual(3, initial[3]);
+            Assert.areEqual(4, sorted[3]);
+            Assert.areEqual(1, initial[4]);
+            Assert.areEqual(5, sorted[4]);
 
-        sorted = (List<Integer>) ArrayV1.over(initial).sort(new ReverseComparator());
-        Assert.areEqual(5, initial[0]);
-        Assert.areEqual(5, sorted[0]);
-        Assert.areEqual(2, initial[1]);
-        Assert.areEqual(4, sorted[1]);
-        Assert.areEqual(4, initial[2]);
-        Assert.areEqual(3, sorted[2]);
-        Assert.areEqual(3, initial[3]);
-        Assert.areEqual(2, sorted[3]);
-        Assert.areEqual(1, initial[4]);
-        Assert.areEqual(1, sorted[4]);
+            sorted = (List<Integer>) ArrayV1.over(initial).sort(new ReverseComparator());
+            Assert.areEqual(5, initial[0]);
+            Assert.areEqual(5, sorted[0]);
+            Assert.areEqual(2, initial[1]);
+            Assert.areEqual(4, sorted[1]);
+            Assert.areEqual(4, initial[2]);
+            Assert.areEqual(3, sorted[2]);
+            Assert.areEqual(3, initial[3]);
+            Assert.areEqual(2, sorted[3]);
+            Assert.areEqual(1, initial[4]);
+            Assert.areEqual(1, sorted[4]);
+        }
     }
 
     @IsTest
     private static void testSortSet() {
-        TestHelper.setNOW();
-        List<Object> initial = new List<Integer> { 5, 2, 4, 3, 1 };
-        List<Object> sorted = ArrayV1.over(new Set<Object>(initial)).sort();
-        Assert.areEqual(5, initial[0]);
-        Assert.areEqual(1, sorted[0]);
-        Assert.areEqual(2, initial[1]);
-        Assert.areEqual(2, sorted[1]);
-        Assert.areEqual(4, initial[2]);
-        Assert.areEqual(3, sorted[2]);
-        Assert.areEqual(3, initial[3]);
-        Assert.areEqual(4, sorted[3]);
-        Assert.areEqual(1, initial[4]);
-        Assert.areEqual(5, sorted[4]);
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<Object> initial = new List<Integer> { 5, 2, 4, 3, 1 };
+            List<Object> sorted = ArrayV1.over(new Set<Object>(initial)).sort();
+            Assert.areEqual(5, initial[0]);
+            Assert.areEqual(1, sorted[0]);
+            Assert.areEqual(2, initial[1]);
+            Assert.areEqual(2, sorted[1]);
+            Assert.areEqual(4, initial[2]);
+            Assert.areEqual(3, sorted[2]);
+            Assert.areEqual(3, initial[3]);
+            Assert.areEqual(4, sorted[3]);
+            Assert.areEqual(1, initial[4]);
+            Assert.areEqual(5, sorted[4]);
 
-        sorted = ArrayV1.over(new Set<Object>(initial)).sort(new ReverseComparator());
-        Assert.areEqual(5, initial[0]);
-        Assert.areEqual(5, sorted[0]);
-        Assert.areEqual(2, initial[1]);
-        Assert.areEqual(4, sorted[1]);
-        Assert.areEqual(4, initial[2]);
-        Assert.areEqual(3, sorted[2]);
-        Assert.areEqual(3, initial[3]);
-        Assert.areEqual(2, sorted[3]);
-        Assert.areEqual(1, initial[4]);
-        Assert.areEqual(1, sorted[4]);
+            sorted = ArrayV1.over(new Set<Object>(initial)).sort(new ReverseComparator());
+            Assert.areEqual(5, initial[0]);
+            Assert.areEqual(5, sorted[0]);
+            Assert.areEqual(2, initial[1]);
+            Assert.areEqual(4, sorted[1]);
+            Assert.areEqual(4, initial[2]);
+            Assert.areEqual(3, sorted[2]);
+            Assert.areEqual(3, initial[3]);
+            Assert.areEqual(2, sorted[3]);
+            Assert.areEqual(1, initial[4]);
+            Assert.areEqual(1, sorted[4]);
+        }
     }
 
     @IsTest
     private static void testSortIterable() {
-        TestHelper.setNOW();
-        List<Integer> initial = new List<Integer> { 5, 2, 4, 3, 1 };
-        TestIterable iter = new TestIterable(initial);
-        List<Object> sorted = ArrayV1.over(iter).sort();
-        Assert.areEqual(5, initial[0]);
-        Assert.areEqual(1, sorted[0]);
-        Assert.areEqual(2, initial[1]);
-        Assert.areEqual(2, sorted[1]);
-        Assert.areEqual(4, initial[2]);
-        Assert.areEqual(3, sorted[2]);
-        Assert.areEqual(3, initial[3]);
-        Assert.areEqual(4, sorted[3]);
-        Assert.areEqual(1, initial[4]);
-        Assert.areEqual(5, sorted[4]);
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TestHelper.setNOW();
+            List<Integer> initial = new List<Integer> { 5, 2, 4, 3, 1 };
+            TestIterable iter = new TestIterable(initial);
+            List<Object> sorted = ArrayV1.over(iter).sort();
+            Assert.areEqual(5, initial[0]);
+            Assert.areEqual(1, sorted[0]);
+            Assert.areEqual(2, initial[1]);
+            Assert.areEqual(2, sorted[1]);
+            Assert.areEqual(4, initial[2]);
+            Assert.areEqual(3, sorted[2]);
+            Assert.areEqual(3, initial[3]);
+            Assert.areEqual(4, sorted[3]);
+            Assert.areEqual(1, initial[4]);
+            Assert.areEqual(5, sorted[4]);
 
-        sorted = ArrayV1.over(iter).sort(new ReverseComparator());
-        Assert.areEqual(5, initial[0]);
-        Assert.areEqual(5, sorted[0]);
-        Assert.areEqual(2, initial[1]);
-        Assert.areEqual(4, sorted[1]);
-        Assert.areEqual(4, initial[2]);
-        Assert.areEqual(3, sorted[2]);
-        Assert.areEqual(3, initial[3]);
-        Assert.areEqual(2, sorted[3]);
-        Assert.areEqual(1, initial[4]);
-        Assert.areEqual(1, sorted[4]);
+            sorted = ArrayV1.over(iter).sort(new ReverseComparator());
+            Assert.areEqual(5, initial[0]);
+            Assert.areEqual(5, sorted[0]);
+            Assert.areEqual(2, initial[1]);
+            Assert.areEqual(4, sorted[1]);
+            Assert.areEqual(4, initial[2]);
+            Assert.areEqual(3, sorted[2]);
+            Assert.areEqual(3, initial[3]);
+            Assert.areEqual(2, sorted[3]);
+            Assert.areEqual(1, initial[4]);
+            Assert.areEqual(1, sorted[4]);
+        }
     }
 
     private with sharing class ForEachMultiplier extends ArrayV1.Callback {

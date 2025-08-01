@@ -114,6 +114,7 @@ public with sharing virtual class AsynchronousDAO implements API {
      * The instance is injected from the Registry.
      */
     @TestVisible
+    @SuppressWarnings('PMD.PropertyNamingConventions')
     public static API API {
         public get {
             if (Test.isRunningTest() && API != null) { // API has been mocked.
@@ -125,6 +126,13 @@ public with sharing virtual class AsynchronousDAO implements API {
         private set;
     }
 
+    /**
+     * @description
+     * Allow extension but not construction.
+     * <br><br>
+     * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
+     */
+    @SuppressWarnings('PMD.EmptyStatementBlock')
     protected AsynchronousDAO() {}
 
     /**
@@ -142,7 +150,7 @@ public with sharing virtual class AsynchronousDAO implements API {
          * @return The object.
          */
         public AsynchronousJob__c getObject(final Id asyncObjectId) {
-            Assertion.isNotNull(asyncObjectId, 'argument: AsynchronousDAO.apiGetObject.asyncObjectId');
+            AssertionV1.isNotNull(asyncObjectId, 'argument: AsynchronousDAO.apiGetObject.asyncObjectId');
 
             final OptionalV1 matches = QueryV1.of(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.USER_MODE)
@@ -167,7 +175,7 @@ public with sharing virtual class AsynchronousDAO implements API {
                     .max(1)
                     .execute(OptionalV1.of(new Map<String, Object> { 'asyncObjectId' => asyncObjectId }));
 
-            Assertion.isTrue(matches.isPresent(), 'Asynchronous object with Id ' + asyncObjectId + ' not found');
+            AssertionV1.isTrue(matches.isPresent(), 'Asynchronous object with Id ' + asyncObjectId + ' not found');
             return ((List<AsynchronousJob__c>) matches.get())[0];
         }
 
@@ -239,7 +247,7 @@ public with sharing virtual class AsynchronousDAO implements API {
          * @return The concurrency for the object.
          */
         public Integer countActiveObjects(final AsynchronousJob__c asyncObject) {
-            Assertion.isNotNull(asyncObject, 'argument: AsynchronousDAO.apiCountActiveObjects.asyncObject');
+            AssertionV1.isNotNull(asyncObject, 'argument: AsynchronousDAO.apiCountActiveObjects.asyncObject');
 
             return (Integer) QueryV1.of(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.USER_MODE)
@@ -260,7 +268,7 @@ public with sharing virtual class AsynchronousDAO implements API {
          * @param asyncObjects The objects to persist.
          */
         public void persistObjects(final List<AsynchronousJob__c> asyncObjects) {
-            Assertion.isNotNull(asyncObjects, 'argument: AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
+            AssertionV1.isNotNull(asyncObjects, 'argument: AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
 
             final Boolean subscribersEnabled = TriggerV1.isEnabled(AsynchronousJobSubscriber.Factory.class);
             TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
@@ -287,9 +295,9 @@ public with sharing virtual class AsynchronousDAO implements API {
          * @param states The states to persist.
          */
         public void persistObjects(final List<AsynchronousJob__c> asyncObjects, final List<Map<String, String>> states) {
-            Assertion.isNotNull(asyncObjects, 'argument: AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
-            Assertion.isNotNull(states, 'argument: AsynchronousDAO.apiPersistAsynchronous.states');
-            Assertion.areEqual(asyncObjects.size(), states.size(), 'The number of Asynchronous objects does not match the number of states');
+            AssertionV1.isNotNull(asyncObjects, 'argument: AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
+            AssertionV1.isNotNull(states, 'argument: AsynchronousDAO.apiPersistAsynchronous.states');
+            AssertionV1.areEqual(asyncObjects.size(), states.size(), 'The number of Asynchronous objects does not match the number of states');
 
             final Boolean subscribersEnabled = TriggerV1.isEnabled(AsynchronousJobSubscriber.Factory.class);
             TriggerV1.enable(AsynchronousJobSubscriber.Factory.class);
@@ -326,7 +334,7 @@ public with sharing virtual class AsynchronousDAO implements API {
          * @param asyncObjects The objects to remove.
          */
         public void removeObjects(final List<AsynchronousJob__c> asyncObjects) {
-            Assertion.isNotNull(asyncObjects, 'argument: AsynchronousDAO.apiRemoveAsynchronous.asynchronousObjects');
+            AssertionV1.isNotNull(asyncObjects, 'argument: AsynchronousDAO.apiRemoveAsynchronous.asynchronousObjects');
             Database.delete(asyncObjects, AccessLevel.USER_MODE);
         }
 
@@ -337,7 +345,7 @@ public with sharing virtual class AsynchronousDAO implements API {
          * @param asyncErrorObject The exception object to persist.
          */
         public void persistException(final AsynchronousJobException__c asyncErrorObject) {
-            Assertion.isNotNull(asyncErrorObject, 'argument: AsynchronousDAO.apiPersistAsynchronousError.asyncErrorObject');
+            AssertionV1.isNotNull(asyncErrorObject, 'argument: AsynchronousDAO.apiPersistAsynchronousError.asyncErrorObject');
             Database.insert(asyncErrorObject, AccessLevel.USER_MODE);
         }
     }

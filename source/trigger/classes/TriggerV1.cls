@@ -13,6 +13,7 @@
  *
  * @author Mark Brennand
  */
+@SuppressWarnings('PMD.AvoidGlobalModifier')
 global with sharing class TriggerV1 {
 
     /**
@@ -31,6 +32,7 @@ global with sharing class TriggerV1 {
      * @description
      * Prevent construction.
      */
+    @SuppressWarnings('PMD.EmptyStatementBlock')
     private TriggerV1() {}
 
     /**
@@ -93,7 +95,7 @@ global with sharing class TriggerV1 {
          *
          * @return The old value of the record, or null if no old record found.
          */
-        SObject getOldValue(final SObject record);
+        OptionalV1 getOldValue(final SObject record);
 
         /**
          * @description

@@ -126,11 +126,11 @@ export default class AsynchronousJobList extends LightningElement {
         this.refresh(true);
     }
 
-    startSpinner(event) {
+    startSpinner() {
         this.showSpinner = true;
     }
 
-    stopSpinner(event) {
+    stopSpinner() {
         this.showSpinner = false;
     }
 }

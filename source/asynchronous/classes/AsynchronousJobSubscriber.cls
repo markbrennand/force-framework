@@ -8,12 +8,12 @@
  *
  * @author Mark Brennand
  */
-public with sharing virtual class AsynchronousJobSubscriber {
+public with sharing class AsynchronousJobSubscriber {
 
     /**
-     * @description
-     * Prevent re-use.
+     * Prevent construction outside class.
      */
+    @SuppressWarnings('PMD.EmptyStatementBlock')
     private AsynchronousJobSubscriber() {}
 
     private with sharing class Implementation implements TriggerV1.Subscriber {
@@ -83,7 +83,7 @@ public with sharing virtual class AsynchronousJobSubscriber {
 
             if (asyncObject.Status__c == AsynchronousV1.Status.CANCELLED.name()
                     && event.hasOldValue(asyncObject)
-                    && asyncObject.Status__c != ((AsynchronousJob__c) event.getOldValue(asyncObject)).Status__c
+                    && asyncObject.Status__c != ((AsynchronousJob__c) event.getOldValue(asyncObject).get()).Status__c
             ) {
                 final AsynchronousV1.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
                 if (!asyncJob.getRunnable().onCancellation(asyncJob)) {

@@ -37,7 +37,7 @@ export default class AsynchronousJobActions extends LightningElement {
         }
     }
 
-    async deleteSelected(event) {
+    async deleteSelected() {
         this.dispatchEvent(new CustomEvent('startspinner'));
         const idsToDelete = this._selectedRows.map(row => row.Id);
         deleteJobs({ jobIds: idsToDelete }).then(
@@ -59,7 +59,7 @@ export default class AsynchronousJobActions extends LightningElement {
         );
     }
 
-    async runSelected(event) {
+    async runSelected() {
         this.dispatchEvent(new CustomEvent('startspinner'));
         const idsToRun = this._selectedRows.map(row => row.Id);
         runJobs({ jobIds: idsToRun }).then(

@@ -27,15 +27,15 @@ export default class AsynchronousJobFilters extends LightningElement {
         this.dispatchEvent(new CustomEvent('change', { detail: { type: 'status', value: event.detail.selected } }));
     }
 
-    clearSelected(event) {
+    clearSelected() {
         this.dispatchEvent(new CustomEvent('clearselected'));
     }
 
-    startSpinner(event) {
+    startSpinner() {
         this.dispatchEvent(new CustomEvent('startspinner'));
     }
 
-    stopSpinner(event) {
+    stopSpinner() {
         this.dispatchEvent(new CustomEvent('stopspinner'));
     }
 

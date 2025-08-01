@@ -11,8 +11,9 @@
 public with sharing class DependencySubscriber {
 
     /**
-     * Prevent re-use.
+     * Prevent construction outside class.
      */
+    @SuppressWarnings('PMD.EmptyStatementBlock')
     private DependencySubscriber() {}
 
     /**

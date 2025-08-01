@@ -8,142 +8,145 @@
  */
 @IsTest
 public with sharing class QueryTests {
+    private final static String TESTING = 'query';
 
     @TestSetup
-    private static void setup() {
-        QueryTestHelper.createUsers();
+    private static void createUsers() {
+        TestHelper.createUsers(TESTING, new Set<String> { 'ForceFwDependencyInjectionPermissions' });
     }
 
     @IsTest
+    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testExtendedClassesAreInert() {
         TestHelper.setNOW();
-        ExtendedClass extended = new ExtendedClass();
+        System.runAs(TestHelper.getUser(TESTING)) {
+            ExtendedClass extended = new ExtendedClass();
 
-        try {
-            extended.type(Contact.SObjectType);
-            Assert.fail();
-        } catch (QueryException qe) {
-            Assert.areEqual('Access denied', qe.getMessage());
-        }
+            try {
+                extended.type(Contact.SObjectType);
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
 
-        try {
-            extended.type();
-            Assert.fail();
-        } catch (QueryException qe) {
-            Assert.areEqual('Access denied', qe.getMessage());
-        }
+            try {
+                extended.type();
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
 
-        try {
-            extended.security(AccessLevel.USER_MODE);
-            Assert.fail();
-        } catch (QueryException qe) {
-            Assert.areEqual('Access denied', qe.getMessage());
-        }
+            try {
+                extended.security(AccessLevel.USER_MODE);
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
 
-        try {
-            extended.count();
-            Assert.fail();
-        } catch (QueryException qe) {
-            Assert.areEqual('Access denied', qe.getMessage());
-        }
+            try {
+                extended.count();
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
 
-        try {
-            extended.returningAll();
-            Assert.fail();
-        } catch (QueryException qe) {
-            Assert.areEqual('Access denied', qe.getMessage());
-        }
+            try {
+                extended.returningAll();
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
 
-        try {
-            extended.returning(new Set<SObjectField>());
-            Assert.fail();
-        } catch (QueryException qe) {
-            Assert.areEqual('Access denied', qe.getMessage());
-        }
+            try {
+                extended.returning(new Set<SObjectField>());
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
 
-        try {
-            extended.returning(Contact.AccountId, new Set<SObjectField>());
-            Assert.fail();
-        } catch (QueryException qe) {
-            Assert.areEqual('Access denied', qe.getMessage());
-        }
+            try {
+                extended.returning(Contact.AccountId, new Set<SObjectField>());
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
 
+            try {
+                extended.returning((QueryV1.API) null);
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
 
-        try {
-            extended.returning((QueryV1.API) null);
-            Assert.fail();
-        } catch (QueryException qe) {
-            Assert.areEqual('Access denied', qe.getMessage());
-        }
+            try {
+                extended.returning(new Set<QueryV1.AggregatedField>());
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
 
-        try {
-            extended.returning(new Set<QueryV1.AggregatedField>());
-            Assert.fail();
-        } catch (QueryException qe) {
-            Assert.areEqual('Access denied', qe.getMessage());
-        }
+            try {
+                extended.matching(null);
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
 
-        try {
-            extended.matching(null);
-            Assert.fail();
-        } catch (QueryException qe) {
-            Assert.areEqual('Access denied', qe.getMessage());
-        }
+            try {
+                extended.ordered((QueryV1.Order) null);
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
 
-        try {
-            extended.ordered((QueryV1.Order) null);
-            Assert.fail();
-        } catch (QueryException qe) {
-            Assert.areEqual('Access denied', qe.getMessage());
-        }
+            try {
+                extended.ordered(new Set<QueryV1.Order>());
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
 
-        try {
-            extended.ordered(new Set<QueryV1.Order>());
-            Assert.fail();
-        } catch (QueryException qe) {
-            Assert.areEqual('Access denied', qe.getMessage());
-        }
+            try {
+                extended.group(new Set<SObjectField>());
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
 
-        try {
-            extended.group(new Set<SObjectField>());
-            Assert.fail();
-        } catch (QueryException qe) {
-            Assert.areEqual('Access denied', qe.getMessage());
-        }
+            try {
+                extended.group(Contact.AccountId, new Set<SObjectField>());
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
 
-        try {
-            extended.group(Contact.AccountId, new Set<SObjectField>());
-            Assert.fail();
-        } catch (QueryException qe) {
-            Assert.areEqual('Access denied', qe.getMessage());
-        }
+            try {
+                extended.has(null);
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
 
-        try {
-            extended.has(null);
-            Assert.fail();
-        } catch (QueryException qe) {
-            Assert.areEqual('Access denied', qe.getMessage());
-        }
+            try {
+                extended.execute(null);
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
 
-        try {
-            extended.execute(null);
-            Assert.fail();
-        } catch (QueryException qe) {
-            Assert.areEqual('Access denied', qe.getMessage());
-        }
+            try {
+                extended.max(null);
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
 
-        try {
-            extended.max(null);
-            Assert.fail();
-        } catch (QueryException qe) {
-            Assert.areEqual('Access denied', qe.getMessage());
-        }
-
-        try {
-            extended.offset(null);
-            Assert.fail();
-        } catch (QueryException qe) {
-            Assert.areEqual('Access denied', qe.getMessage());
+            try {
+                extended.offset(null);
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
         }
     }
 
@@ -151,7 +154,7 @@ public with sharing class QueryTests {
     private static void testMatching() {
         TestHelper.setNOW();
         createData();
-        System.runAs(QueryTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             List<Contact> contacts = (List<Contact>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
                     .returningAll()
@@ -182,10 +185,11 @@ public with sharing class QueryTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testAggregation() {
         TestHelper.setNOW();
         createData();
-        System.runAs(QueryTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             List<AggregateResult> aggregates = (List<AggregateResult>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
                     .returning(new Set<QueryV1.AggregatedField>{
@@ -345,7 +349,7 @@ public with sharing class QueryTests {
     private static void testHas() {
         TestHelper.setNOW();
         createData();
-        System.runAs(QueryTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             List<AggregateResult> aggregates = (List<AggregateResult>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
                     .returning(new Set<QueryV1.AggregatedField>{
@@ -385,10 +389,11 @@ public with sharing class QueryTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testRelationshipQuery() {
         TestHelper.setNOW();
         createData();
-        System.runAs(QueryTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             List<Account> accounts = (List<Account>) QueryV1.of(Account.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
                     .returning(new Set<SObjectField> { Account.Name })
@@ -492,7 +497,7 @@ public with sharing class QueryTests {
     private static void testMax() {
         TestHelper.setNOW();
         createData();
-        System.runAs(QueryTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             List<Contact> contacts = (List<Contact>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
                     .returningAll()
@@ -535,7 +540,7 @@ public with sharing class QueryTests {
     private static void testOffset() {
         TestHelper.setNOW();
         createData();
-        System.runAs(QueryTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             List<Contact> contacts = (List<Contact>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
                     .returning(new Set<SObjectField>{
@@ -586,7 +591,7 @@ public with sharing class QueryTests {
     private static void testJoin() {
         TestHelper.setNOW();
         createData();
-        System.runAs(QueryTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             List<Contact> contacts = (List<Contact>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
                     .returningAll()
@@ -633,7 +638,7 @@ public with sharing class QueryTests {
     private static void testCount() {
         TestHelper.setNOW();
         createData();
-        System.runAs(QueryTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             Assert.areEqual(7, QueryV1.of(Contact.SObjectType).security(AccessLevel.SYSTEM_MODE).count().execute(OptionalV1.empty()).get());
             Assert.areEqual(
                     4,
@@ -678,10 +683,11 @@ public with sharing class QueryTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testDefaultOrder() {
         TestHelper.setNOW();
         createData();
-        System.runAs(QueryTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             List<Contact> contacts = (List<Contact>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
                     .returningAll()
@@ -933,10 +939,11 @@ public with sharing class QueryTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testNullsFirstOrder() {
         TestHelper.setNOW();
         createData();
-        System.runAs(QueryTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             List<Contact> contacts = (List<Contact>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
                     .returningAll()
@@ -1188,10 +1195,11 @@ public with sharing class QueryTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testNullsLastOrder() {
         TestHelper.setNOW();
         createData();
-        System.runAs(QueryTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             List<Contact> contacts = (List<Contact>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
                     .returningAll()

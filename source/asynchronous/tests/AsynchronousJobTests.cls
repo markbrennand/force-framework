@@ -10,16 +10,18 @@
  */
 @IsTest
 public with sharing class AsynchronousJobTests {
+    private final static String TESTING = 'asynchronous';
 
     @TestSetup
-    private static void setup() {
-        AsynchronousTestHelper.createUsers();
+    private static void createUsers() {
+        TestHelper.createUsers(TESTING, new Set<String> { 'ForceFwDependencyInjectionPermissions', 'ForceFwAsynchronousPermissions' });
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     static void testAllStatuses() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             for (AsynchronousV1.Status status : AsynchronousV1.Status.values()) {
                 AsynchronousJob__c asynchronous = new AsynchronousJob__c(
                         OwnerId = UserInfo.getUserId(),
@@ -37,9 +39,10 @@ public with sharing class AsynchronousJobTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.EmptyCatchBlock')
     private static void testMandatoryFields() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Status__c = AsynchronousV1.Status.PENDING.name(),
@@ -56,7 +59,7 @@ public with sharing class AsynchronousJobTests {
                 AsynchronousJob.fromSObject(copyObject);
                 Assert.fail();
 
-            } catch (Assertion.AssertionException ae) {
+            } catch (AssertionV1.AssertionException ae) {
             }
 
             try {
@@ -64,7 +67,7 @@ public with sharing class AsynchronousJobTests {
                 copyObject.Status__c = null;
                 AsynchronousJob.fromSObject(copyObject);
                 Assert.fail();
-            } catch (Assertion.AssertionException ae) {
+            } catch (AssertionV1.AssertionException ae) {
             }
 
             try {
@@ -72,7 +75,7 @@ public with sharing class AsynchronousJobTests {
                 copyObject.Runnable__c = null;
                 AsynchronousJob.fromSObject(copyObject);
                 Assert.fail();
-            } catch (Assertion.AssertionException ae) {
+            } catch (AssertionV1.AssertionException ae) {
             }
 
             try {
@@ -80,7 +83,7 @@ public with sharing class AsynchronousJobTests {
                 copyObject.MaximumRetries__c = null;
                 AsynchronousJob.fromSObject(copyObject);
                 Assert.fail();
-            } catch (Assertion.AssertionException ae) {
+            } catch (AssertionV1.AssertionException ae) {
             }
 
             try {
@@ -88,7 +91,7 @@ public with sharing class AsynchronousJobTests {
                 copyObject.RetryNumber__c = null;
                 AsynchronousJob.fromSObject(copyObject);
                 Assert.fail();
-            } catch (Assertion.AssertionException ae) {
+            } catch (AssertionV1.AssertionException ae) {
             }
 
             try {
@@ -96,7 +99,7 @@ public with sharing class AsynchronousJobTests {
                 copyObject.RetryInterval__c = null;
                 AsynchronousJob.fromSObject(copyObject);
                 Assert.fail();
-            } catch (Assertion.AssertionException ae) {
+            } catch (AssertionV1.AssertionException ae) {
             }
 
             try {
@@ -104,15 +107,16 @@ public with sharing class AsynchronousJobTests {
                 copyObject.ScheduledRunTime__c = null;
                 AsynchronousJob.fromSObject(copyObject);
                 Assert.fail();
-            } catch (Assertion.AssertionException ae) {
+            } catch (AssertionV1.AssertionException ae) {
             }
         }
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     static void testOptionalFields() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousJob__c asynchronous = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
                     Status__c = AsynchronousV1.Status.PENDING.name(),
@@ -134,13 +138,14 @@ public with sharing class AsynchronousJobTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.EmptyCatchBlock')
     private static void testFromSObject() {
         TestHelper.setNOW();
-        System.runAs(AsynchronousTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             try {
                 AsynchronousJob.fromSObject(null);
                 Assert.fail();
-            } catch (Assertion.AssertionException ae) {
+            } catch (AssertionV1.AssertionException ae) {
             }
 
             Datetime now = CommonHelper.now();
@@ -176,6 +181,7 @@ public with sharing class AsynchronousJobTests {
             super(Runnable.class);
         }
 
+        @SuppressWarnings('PMD.EmptyStatementBlock')
         public override void run(AsynchronousV1.Job job, String apexJobId) {}
     }
 }

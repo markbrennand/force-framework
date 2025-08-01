@@ -41,6 +41,7 @@ public with sharing class QueryHelper {
             this.mode = mode;
         }
 
+        @SuppressWarnings('PMD.ApexCRUDViolation')
         public OptionalV1 apply(final OptionalV1 value) {
             if (!value.isPresent()) {
                 return OptionalV1.of(new List<SObject>());
@@ -61,6 +62,7 @@ public with sharing class QueryHelper {
             this.mode = mode;
         }
 
+        @SuppressWarnings('PMD.ApexCRUDViolation')
         public OptionalV1 apply(final OptionalV1 value) {
             if (!value.isPresent()) {
                 return OptionalV1.of(new List<SObject>());

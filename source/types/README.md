@@ -8,7 +8,7 @@ It supports a feature not available in the Apex _Type.newInstance_ method. This 
 _TypesV1.Factory_ interface. If the _Type_ passed to the _TypesV1.newInstance_ method is an instance of _Factory_,
 it will call the _newInstance_ method of the _Factory_ implementation to create the instance.
 
-See the reference [Apex docs](SfApexDocs/index.html) for the API. It is suggested that you keep a page open with
+See the reference [Apex docs](../../docs/types/SfApexDocs/typesv1.html) for the API. It is suggested that you keep a page open with
 the Apex docs  loaded for your reference whilst reading this page.
 
 If you wish to try the _Types_ example code , see [Geting Started](../../GETTINGSTARTED.md).
@@ -67,5 +67,3 @@ After deploying the code to an org, you can run the following Anonymous Apex to 
 ```
 System.debug(SimpleAddition.sum(new List<Integer> { 1, 2, 3 ,4 }));
 ```
-
-

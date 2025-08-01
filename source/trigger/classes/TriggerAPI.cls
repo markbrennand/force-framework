@@ -23,6 +23,7 @@ public with sharing virtual class TriggerAPI implements API {
      * The instance is test visible so it can be mocked.
      */
     @TestVisible
+    @SuppressWarnings('PMD.PropertyNamingConventions')
     public static API API {
         public get {
             if (Test.isRunningTest() && API != null) { // API has been mocked.
@@ -119,6 +120,7 @@ public with sharing virtual class TriggerAPI implements API {
      * <br><br>
      * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
      */
+    @SuppressWarnings('PMD.EmptyStatementBlock')
     protected TriggerAPI() {}
 
     /**
@@ -133,12 +135,12 @@ public with sharing virtual class TriggerAPI implements API {
          * @description
          * Cache of all the trigger definitions held in the custom metadata.
          */
-        private final Map<String, List<Trigger__mdt>> TRIGGER_DEFINITIONS {
+        private final Map<String, List<Trigger__mdt>> triggerDefinitions {
             private get {
-                if (TRIGGER_DEFINITIONS == null) {
-                    TRIGGER_DEFINITIONS = loadTriggerDefinitions();
+                if (triggerDefinitions == null) {
+                    triggerDefinitions = loadTriggerDefinitions();
                 }
-                return TRIGGER_DEFINITIONS;
+                return triggerDefinitions;
             }
             private set;
         }
@@ -147,25 +149,25 @@ public with sharing virtual class TriggerAPI implements API {
          * @description
          * Record of all the active events for each object type.
          */
-        private final Map<String, ArrayV1.Methods> EVENTS = new Map<String, ArrayV1.Methods>();
+        private final Map<String, ArrayV1.Methods> events = new Map<String, ArrayV1.Methods>();
 
         /**
          * @description
          * Cache of the Subscriber implementation for each object type.
          */
-        private final Map<String, TriggerV1.Subscriber> SUBSCRIBERS = new Map<String, TriggerV1.Subscriber>();
+        private final Map<String, TriggerV1.Subscriber> subscribers = new Map<String, TriggerV1.Subscriber>();
 
         /**
          * @description
          * Determines whether subscriber for an object type is enabled or not.
          */
-        private final Map<SObjectType, Boolean> DISABLED_OBJECT_TYPES = new Map<SObjectType, Boolean>();
+        private final Map<SObjectType, Boolean> disabledObjectTypes = new Map<SObjectType, Boolean>();
 
         /**
          * @description
          * Determines whether subscriber for an object type is enabled or not.
          */
-        private final Map<String, Boolean> DISABLED_SUBSCRIBERS = new Map<String, Boolean>();
+        private final Map<String, Boolean> disabledSubscribers = new Map<String, Boolean>();
 
         /**
          * @description
@@ -177,7 +179,7 @@ public with sharing virtual class TriggerAPI implements API {
                     ? Trigger.new[0].getSObjectType()
                     : Trigger.old[0].getSObjectType();
 
-            if (DISABLED_OBJECT_TYPES.containsKey(objectType) && DISABLED_OBJECT_TYPES.get(objectType) == true) {
+            if (disabledObjectTypes.containsKey(objectType) && disabledObjectTypes.get(objectType) == true) {
                 return;
             }
 
@@ -191,7 +193,7 @@ public with sharing virtual class TriggerAPI implements API {
          * @param type The object type whose subscribers are to be disabled.
          */
         public void disable(final SObjectType type) {
-            DISABLED_OBJECT_TYPES.put(type, true);
+            disabledObjectTypes.put(type, true);
         }
 
         /**
@@ -201,7 +203,7 @@ public with sharing virtual class TriggerAPI implements API {
          * @param type The object type whose subscribers are to be enabled.
          */
         public void enable(final SObjectType type) {
-            DISABLED_OBJECT_TYPES.remove(type);
+            disabledObjectTypes.remove(type);
         }
 
         /**
@@ -213,7 +215,7 @@ public with sharing virtual class TriggerAPI implements API {
          * @return True if the subscribers are enabled.
          */
         public Boolean isEnabled(final SObjectType type) {
-            return !DISABLED_OBJECT_TYPES.containsKey(type) || DISABLED_OBJECT_TYPES.get(type) != true;
+            return !disabledObjectTypes.containsKey(type) || disabledObjectTypes.get(type) != true;
         }
 
         /**
@@ -225,7 +227,7 @@ public with sharing virtual class TriggerAPI implements API {
          * @param type The Subscriber class to disable.
          */
         public void disable(final Type type) {
-            DISABLED_SUBSCRIBERS.put(type.getName(), true);
+            disabledSubscribers.put(type.getName(), true);
         }
 
         /**
@@ -237,7 +239,7 @@ public with sharing virtual class TriggerAPI implements API {
          * @param type The Subscriber class to enable.
          */
         public void enable(final Type type) {
-            DISABLED_SUBSCRIBERS.remove(type.getName());
+            disabledSubscribers.remove(type.getName());
         }
 
         /**
@@ -249,7 +251,7 @@ public with sharing virtual class TriggerAPI implements API {
          * @return True if the Subscriber class is enabled.
          */
         public Boolean isEnabled(final Type type) {
-            return !DISABLED_SUBSCRIBERS.containsKey(type.getName()) || DISABLED_SUBSCRIBERS.get(type.getName()) != true;
+            return !disabledSubscribers.containsKey(type.getName()) || disabledSubscribers.get(type.getName()) != true;
         }
 
         /**
@@ -266,22 +268,22 @@ public with sharing virtual class TriggerAPI implements API {
         private void publishEvent(final SObjectType objectType) {
             final String objectKey = getObjectKey(objectType.getDescribe(SObjectDescribeOptions.DEFERRED).name);
 
-            if (TRIGGER_DEFINITIONS.containsKey(objectKey)) {
+            if (triggerDefinitions.containsKey(objectKey)) {
                 final TriggerV1.Event event = createEvent(objectKey);
 
-                if (EVENTS.containsKey(objectKey)) {
-                    EVENTS.get(objectKey).push(event);
+                if (events.containsKey(objectKey)) {
+                    events.get(objectKey).push(event);
                 } else {
-                    EVENTS.put(objectKey, ArrayV1.over(event));
+                    events.put(objectKey, ArrayV1.over(event));
                 }
 
                 try {
-                    ArrayV1.over(TRIGGER_DEFINITIONS.get(objectKey))
+                    ArrayV1.over(triggerDefinitions.get(objectKey))
                             .sharing(new PublishingInformation(this, objectKey, event))
                             .forEach(new EventPublisher());
 
                 } finally {
-                    EVENTS.get(objectKey).pop();
+                    events.get(objectKey).pop();
                 }
 
             } else {
@@ -323,7 +325,7 @@ public with sharing virtual class TriggerAPI implements API {
                     Trigger.isInsert ? new Map<Id, SObject>() : Trigger.oldMap,
                     isBefore,
                     operation,
-                    EVENTS.containsKey(objectKey) ? EVENTS.get(objectKey).length() + 1 : 1
+                    events.containsKey(objectKey) ? events.get(objectKey).length() + 1 : 1
             );
         }
 
@@ -368,28 +370,67 @@ public with sharing virtual class TriggerAPI implements API {
             this.recursiveDepth = recursiveDepth;
         }
 
+        /**
+         * @description
+         * Is a before operation being performed.
+         *
+         * @return True if Event represents a before operation.
+         */
         public Boolean isBefore() {
             return isBefore;
         }
 
+        /**
+         * @description
+         * Is an after operation being performed.
+         *
+         * @return True if Event represents aa after operation.
+         */
         public Boolean isAfter() {
             return !isBefore();
         }
 
+        /**
+         * @description
+         * The type of DML operation being performed.
+         *
+         * @return The operastion being performed.
+         */
         public TriggerV1.Operation getOperation() {
             return operation;
         }
 
+        /**
+         * @description
+         * The objects the DML operation is being performed on.
+         *
+         * @return The objects the DML operation is being performed on.
+         */
         public List<SObject> getRecords() {
             return records;
         }
 
+        /**
+         * @description
+         * Tests whether the given object has a previous value.
+         * <br><br>
+         * This method will only return true for a DML update.
+         *
+         * @param record The object to check.
+         *
+         * @return True if the object has a previous value.
+         */
         public Boolean hasOldValue(final SObject record) {
             return this.oldRecords.containsKey(record.Id);
         }
 
-        public SObject getOldValue(final SObject record) {
-            return oldRecords.get(record.Id);
+        /**
+         * @param record The object to get the previous value of.
+         *
+         * @return The previous value of the object or an optioanl representing undefined.
+         */
+        public OptionalV1 getOldValue(final SObject record) {
+            return OptionalV1.ofNullable(oldRecords.get(record.Id));
         }
 
         public List<SObject> getOldValues() {
@@ -486,7 +527,7 @@ public with sharing virtual class TriggerAPI implements API {
 
             // Add any namespace to the class before checking.
             final Type subscriberType = TypesV1.load(triggerDefinition.SubscriberClass__c);
-            if (getPublishingInformation().parent.DISABLED_SUBSCRIBERS.containsKey(subscriberType.getName())) {
+            if (getPublishingInformation().parent.disabledSubscribers.containsKey(subscriberType.getName())) {
                 return OptionalV1.empty();
             }
 
@@ -517,14 +558,13 @@ public with sharing virtual class TriggerAPI implements API {
          */
         private RecursiveDepthAction checkRecursiveDepth(final String objectKey, final Trigger__mdt triggerDefinition) {
             final Integer maximumRecursiveCalls = (Integer) triggerDefinition.MaximumRecursiveDepth__c;
-            if (maximumRecursiveCalls > 0) {
-                if (getPublishingInformation().parent.EVENTS.get(getPublishingInformation().objectKey).length() > maximumRecursiveCalls) {
-                    if (triggerDefinition.ThrowExceptionWhenRecursionExceeded__c) {
-                        return RecursiveDepthAction.THROW_EXCEPTION;
-                    } else {
-                        return RecursiveDepthAction.IGNORE_EVENT;
-                    }
-                }
+            if ((maximumRecursiveCalls > 0) &&
+                    (getPublishingInformation().parent.events.get(getPublishingInformation().objectKey).length() >
+                            maximumRecursiveCalls)
+            ) {
+                return triggerDefinition.ThrowExceptionWhenRecursionExceeded__c
+                        ? RecursiveDepthAction.THROW_EXCEPTION
+                        :RecursiveDepthAction.IGNORE_EVENT;
             }
 
             return RecursiveDepthAction.PROCESS_EVENT;
@@ -546,13 +586,13 @@ public with sharing virtual class TriggerAPI implements API {
             final String subscriberClass = triggerDefinition.SubscriberClass__c;
             final TriggerV1.Subscriber subscriber;
 
-            if (getPublishingInformation().parent.SUBSCRIBERS.containsKey(subscriberClass)) {
-                subscriber = getPublishingInformation().parent.SUBSCRIBERS.get(subscriberClass);
+            if (getPublishingInformation().parent.subscribers.containsKey(subscriberClass)) {
+                subscriber = getPublishingInformation().parent.subscribers.get(subscriberClass);
             } else {
                 subscriber = (TriggerV1.Subscriber)
                         TypesV1.newInstance(TypesV1.load(triggerDefinition.SubscriberClass__c));
 
-                getPublishingInformation().parent.SUBSCRIBERS.put(subscriberClass, subscriber);
+                getPublishingInformation().parent.subscribers.put(subscriberClass, subscriber);
             }
 
             subscriber.onEvent(event);

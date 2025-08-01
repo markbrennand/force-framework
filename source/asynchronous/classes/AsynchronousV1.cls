@@ -13,6 +13,7 @@
  *
  * @author Mark Brennand
  */
+@SuppressWarnings('PMD.AvoidGlobalModifier')
 global with sharing virtual class AsynchronousV1 {
 
     /**

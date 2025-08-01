@@ -15,7 +15,14 @@
  *
  * @author Mark Brennand
  */
-global with sharing class Assertion {
+@SuppressWarnings('PMD.AvoidGlobalModifier')
+global with sharing class AssertionV1 {
+
+    /**
+     * @description
+     * Exception thrown when an assertion fails.
+     */
+    global with sharing class AssertionException extends Exception {}
 
     /**
      * @description
@@ -82,12 +89,6 @@ global with sharing class Assertion {
     public static void fail(final String errorMessage) {
         throw new AssertionException(buildMessage(errorMessage));
     }
-
-    /**
-     * @description
-     * Exception thrown when an assertion fails.
-     */
-    global with sharing class AssertionException extends Exception {}
 
     private static String asString(final Object value) {
         return value == null ? 'null' : String.valueOf(value);

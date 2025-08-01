@@ -27,6 +27,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
      * Any implementation must be of type DependencyV1.Prototype as state must be maintained.
      */
     @TestVisible
+    @SuppressWarnings('PMD.PropertyNamingConventions')
     public static QueryV1.API API {
         public get {
             if (Test.isRunningTest() && API != null) { // API has been mocked.
@@ -40,6 +41,13 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     private enum SortOrder { ASCENDING, DESCENDING }
 
+    /**
+     * @description
+     * Allow extension but not construction.
+     * <br><br>
+     * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
+     */
+    @SuppressWarnings('PMD.EmptyStatementBlock')
     protected QueryAPI() {}
 
     private with sharing class Implementation implements QueryV1.API, DependencyV1.Prototype {
@@ -104,7 +112,6 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
             throwExceptionIfAggregatedQuery();
 
             final Set<String> value = getValue(returning);
-            final Implementation impl = (Implementation) query;
             ArrayV1.over(getChildRelationshipsNames(query.type())).sharing(query).reduce(new AddRelationship(), value);
 
             returning = OptionalV1.of(value);

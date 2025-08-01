@@ -9,6 +9,7 @@
  *
  * @author Mark Brennand
  */
+@SuppressWarnings('PMD.AvoidGlobalModifier')
 global with sharing class OptionalV1 {
 
     /**

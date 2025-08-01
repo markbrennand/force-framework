@@ -32,6 +32,7 @@ public with sharing virtual class DependencyAPI implements API {
      * @description
      * Mapping from a binding Type to the Binding Check class to validate it.
      */
+    @SuppressWarnings('PMD.PropertyNamingConventions')
     private static final Map<Type, List<DependencyV1.BindingCheck>> CHECKS {
         private get {
             if (CHECKS == null) {
@@ -49,6 +50,7 @@ public with sharing virtual class DependencyAPI implements API {
      * The instance is test visible so it can be mocked.
      */
     @TestVisible
+    @SuppressWarnings('PMD.PropertyNamingConventions')
     public static API API {
         public get {
             if (Test.isRunningTest() && API != null) { // API has been mocked.
@@ -182,6 +184,7 @@ public with sharing virtual class DependencyAPI implements API {
      * <br><br>
      * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
      */
+    @SuppressWarnings('PMD.EmptyStatementBlock')
     protected DependencyAPI() {}
 
     /**
@@ -193,7 +196,7 @@ public with sharing virtual class DependencyAPI implements API {
          * @description
          * Registry containing bindings from interfaces and abstract classes to implementations.
          */
-        private final Map<Key, Factory> REGISTRY = new Map<Key, Factory>();
+        private final Map<Key, Factory> registry = new Map<Key, Factory>();
 
         private Boolean customBindingsAdded = false;
 
@@ -211,11 +214,11 @@ public with sharing virtual class DependencyAPI implements API {
             addCustomBindings();
 
             final Key key = new Key(forType);
-            if (!REGISTRY.containsKey(key)) {
+            if (!registry.containsKey(key)) {
                 throw createException('Binding for', forType.getName(), OptionalV1.empty(), 'not found in registry');
             }
 
-            return REGISTRY.get(key).newInstance();
+            return registry.get(key).newInstance();
         }
 
         /**
@@ -233,11 +236,11 @@ public with sharing virtual class DependencyAPI implements API {
             addCustomBindings();
 
             final Key key = new ActionKey(forType, action);
-            if (!REGISTRY.containsKey(key)) {
+            if (!registry.containsKey(key)) {
                 throw createException('Binding for', forType.getName(), OptionalV1.of(action), 'not found in registry');
             }
 
-            return REGISTRY.get(key).newInstance();
+            return registry.get(key).newInstance();
         }
 
         /**
@@ -250,7 +253,7 @@ public with sharing virtual class DependencyAPI implements API {
          */
         public Boolean isBound(final Type forType) {
             addCustomBindings();
-            return REGISTRY.containsKey(new Key(forType));
+            return registry.containsKey(new Key(forType));
         }
 
         /**
@@ -264,7 +267,7 @@ public with sharing virtual class DependencyAPI implements API {
          */
         public Boolean isBound(final Type forType, final String action) {
             addCustomBindings();
-            return REGISTRY.containsKey(new ActionKey(forType, action));
+            return registry.containsKey(new ActionKey(forType, action));
         }
 
         /**
@@ -276,7 +279,7 @@ public with sharing virtual class DependencyAPI implements API {
          */
         public void bind(final Type forType, final Type withImpl) {
             validateTypes(forType, OptionalV1.empty(), withImpl);
-            REGISTRY.put(new Key(forType), new Factory(withImpl));
+            registry.put(new Key(forType), new Factory(withImpl));
         }
 
         /**
@@ -289,7 +292,7 @@ public with sharing virtual class DependencyAPI implements API {
          */
         public void bind(final Type forType, final String action, final Type withImpl) {
             validateTypes(forType, OptionalV1.of(action), withImpl);
-            REGISTRY.put(new ActionKey(forType, action), new Factory(withImpl));
+            registry.put(new ActionKey(forType, action), new Factory(withImpl));
         }
 
         /**
@@ -334,6 +337,7 @@ public with sharing virtual class DependencyAPI implements API {
          * @param action The action. Optional.empty() if not set.
          * @param withImpl The implementation to be validated.
          */
+        @SuppressWarnings('PMD.EmptyCatchBlock')
         private void validateTypes(final Type forType, final OptionalV1 action, final Type withImpl) {
             if (!action.isPresent()) {
                 Boolean instantiable = false;
@@ -529,8 +533,8 @@ public with sharing virtual class DependencyAPI implements API {
             final Map<Type, List<DependencyV1.BindingCheck>> checks = (Map<Type, List<DependencyV1.BindingCheck>>) currentValue.get();
 
             if (check.IsUnitTest__c == isTest) {
-                Assertion.isNotNull(check.Type__C, 'Binding Check Metadata record ' + check.Label + ' has no Type defined');
-                Assertion.isNotNull(check.BindingCheck__c, 'Binding Check Metadata record ' + check.Label + ' has no BindingCheck class');
+                AssertionV1.isNotNull(check.Type__C, 'Binding Check Metadata record ' + check.Label + ' has no Type defined');
+                AssertionV1.isNotNull(check.BindingCheck__c, 'Binding Check Metadata record ' + check.Label + ' has no BindingCheck class');
                 final Type forType = TypesV1.load(check.Type__c);
                 final Object checker = TypesV1.newInstance(TypesV1.load(check.BindingCheck__c));
 
@@ -577,6 +581,7 @@ public with sharing virtual class DependencyAPI implements API {
      * To ensure a balanced Map, the action is not included in the hash code. This may need to be re-considered
      * if many actions are keyed for the same type.
      */
+    @SuppressWarnings('PMD.OverrideBothEqualsAndHashcode')
     private with sharing class ActionKey extends Key {
         private final String action;
 
@@ -610,8 +615,8 @@ public with sharing virtual class DependencyAPI implements API {
          * @param errorMessage The error message to be recorded in the Exception thrown to record the failure.
          */
         private ValidationResultImpl(final Boolean isValid, final String errorMessage) {
-            Assertion.isNotNull(isValid, 'argument: DependencyV1.ValidationResult.isValid may not be null');
-            Assertion.isTrue(isValid || errorMessage != null, 'argument: DependencyAPI.ValidationResultImpl.errorMessage must be set');
+            AssertionV1.isNotNull(isValid, 'argument: DependencyV1.ValidationResult.isValid may not be null');
+            AssertionV1.isTrue(isValid || errorMessage != null, 'argument: DependencyAPI.ValidationResultImpl.errorMessage must be set');
             this.isValid = isValid;
             this.errorMessage = errorMessage;
         }

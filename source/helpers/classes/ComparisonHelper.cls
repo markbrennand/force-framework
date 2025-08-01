@@ -113,6 +113,10 @@ public with sharing class ComparisonHelper {
             this.required = required;
         }
 
+        public override Integer hashCode() {
+            return super.hashCode();
+        }
+
         public Boolean equals(final Object other) {
             if (other instanceof SObject) {
                 final SObject match = (SObject) other;

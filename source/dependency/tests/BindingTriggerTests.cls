@@ -8,9 +8,11 @@
  */
 @IsTest
 public with sharing class BindingTriggerTests {
+    private final static String TESTING = 'dependency';
+
     @TestSetup
-    private static void setup() {
-        BindingTestHelper.createUsers();
+    private static void createUsers() {
+        TestHelper.createUsers(TESTING, new Set<String> { 'ForceFwDependencyInjectionPermissions' });
     }
 
     private static Binding__c binding1;
@@ -19,9 +21,10 @@ public with sharing class BindingTriggerTests {
     private static Binding__c binding4;
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testValidInserts() {
         TestHelper.setNOW();
-        System.runAs(BindingTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             binding1 = new Binding__c(
                     Type__c = BindingTestHelper.TestInterface.class.getName(),
                     Implementation__c = BindingTestHelper.SingletonTest.class.getName()
@@ -51,9 +54,10 @@ public with sharing class BindingTriggerTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testValidUpdates() {
         TestHelper.setNOW();
-        System.runAs(BindingTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             testValidInserts();
 
             binding1.Type__c = BindingTestHelper.AbstractTest.class.getName();
@@ -73,11 +77,12 @@ public with sharing class BindingTriggerTests {
     }
 
     @IsTest
+    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testInvalidInserts() {
         TestHelper.setNOW();
         testValidInserts();
 
-        System.runAs(BindingTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             try {
                 insert new Binding__c(
                         Type__c = BindingTestHelper.TestInterface.class.getName(),
@@ -195,7 +200,7 @@ public with sharing class BindingTriggerTests {
         TestHelper.setNOW();
         testValidInserts();
 
-        System.runAs(BindingTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             try {
                 binding1.Type__c = BindingTestHelper.AbstractTest.class.getName();
                 upsert binding1;
@@ -238,7 +243,7 @@ public with sharing class BindingTriggerTests {
     @IsTest
     private static void testReload() {
         TestHelper.setNOW();
-        System.runAs(BindingTestHelper.getUser()) {
+        System.runAs(TestHelper.getUser(TESTING)) {
             insert new Binding__c(
                     Type__c = BindingTestHelper.TestInterface.class.getName(),
                     Implementation__c = BindingTestHelper.SingletonTest.class.getName()
