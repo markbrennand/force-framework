@@ -167,6 +167,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
     }
 
     /**
+     * @description
      * Gets the runnable class providing the logic to be executed asynchronously.
      *
      * @return The runnable class.

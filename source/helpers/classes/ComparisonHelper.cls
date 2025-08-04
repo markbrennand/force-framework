@@ -46,11 +46,11 @@ public with sharing class ComparisonHelper {
      * The built in List of comparators is supplemented with the additional comparators. When checking for equality,
      * the additional comparators are used before the built ins.
      *
+     * @param additionalComparators Additional comparators to use when checking for equality.
      * @param expected The expect object.
      * @param actual The object to be compared.
-     * @param additionalComparators Additional comparators to use when checking for equality.
      *
-     * @return True of objects match.
+     * @return True if objects match.
      */
     public static Boolean compare(final List<Comparator<Object>> additionalComparators, final Object expected, final Object actual) {
         final List<Comparator<Object>> allComparators = additionalComparators.clone();
@@ -100,6 +100,7 @@ public with sharing class ComparisonHelper {
     }
 
     /**
+     * @description
      * Utility class for comparing two SObjects.
      * <br><br>
      * The object being compared to the required object.
@@ -109,14 +110,34 @@ public with sharing class ComparisonHelper {
     private with sharing class RequiredSObject {
         private final SObject required;
 
+        /**
+         * @description
+         * Constructs a matcher for the given object.
+         *
+         * @param required The object that must be matched.
+         */
         public RequiredSObject(final SObject required) {
             this.required = required;
         }
 
+        /**
+         * @description
+         * Determines a hash code for the matcher.
+         *
+         * @return The hash code.
+         */
         public override Integer hashCode() {
             return super.hashCode();
         }
 
+        /**
+         * @description
+         * Compares the given object to the one to be matched.
+         *
+         * @param other The object to be compared.
+         *
+         * @return True if the objects match.
+         */
         public Boolean equals(final Object other) {
             if (other instanceof SObject) {
                 final SObject match = (SObject) other;
@@ -142,6 +163,15 @@ public with sharing class ComparisonHelper {
      */
     public with sharing class SObjectComparator implements Comparator<Object> {
 
+        /**
+         * @description
+         * Compares one SObject to another.
+         *
+         * @param param1 The first object.
+         * @param param2 The second object.
+         *
+         * @return True if the objects match.
+         */
         public Integer compare(final Object param1, final Object param2) {
             return param1 instanceof SObject && !(param1 instanceof Iterable<Object>) &&
                     param2 instanceof SObject && !(param2 instanceof Iterable<Object>) &&
@@ -154,6 +184,16 @@ public with sharing class ComparisonHelper {
      * Default Comparator for two Objects.
      */
     private with sharing class ObjectComparator implements Comparator<Object> {
+
+        /**
+         * @description
+         * Determines whether one object matches another.
+         *
+         * @param param1 The first object.
+         * @param param2 The second object.
+         *
+         * @return True if the objects match.
+         */
         public Integer compare(final Object param1, final Object param2) {
             try {
                 return param1 == param2 ? 0 : -1;

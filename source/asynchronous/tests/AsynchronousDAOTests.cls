@@ -7,6 +7,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 public with sharing class AsynchronousDAOTests {
     private final static String TESTING = 'asynchronous';
 
@@ -155,7 +156,6 @@ public with sharing class AsynchronousDAOTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testJobAndStateCRUD() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -375,7 +375,6 @@ public with sharing class AsynchronousDAOTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testGetScheduledObjects() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {

@@ -79,6 +79,15 @@ public with sharing virtual class AsynchronousHelper implements API {
 
     /**
      * @description
+     * Maximum amount of data that can be stored in a chunk.
+     * <br><br>
+     * The variable is not declared as final so it can be overridden by a unit test.
+     */
+    @TestVisible
+    private static Integer maxChunkSize = 131072;
+
+    /**
+     * @description
      * Active API instance.
      */
     @TestVisible
@@ -93,15 +102,6 @@ public with sharing virtual class AsynchronousHelper implements API {
         }
         private set;
     }
-
-    /**
-     * @description
-     * Maximum amount of data that can be stored in a chunk.
-     * <br><br>
-     * The variable is not declared as final so it can be overridden by a unit test.
-     */
-    @TestVisible
-    private static Integer maxChunkSize = 131072;
 
     /**
      * @description
@@ -249,6 +249,9 @@ public with sharing virtual class AsynchronousHelper implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param asyncObject ignored.
+     * @param exc ignored.
      */
     public void recordException(final AsynchronousJob__c asyncObject, final AsynchronousV1.APIException exc) {
         throw new AsynchronousV1.APIException('Access denied');
@@ -257,6 +260,9 @@ public with sharing virtual class AsynchronousHelper implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param asyncObject ignored.
+     * @param exc ignored.
      */
     public void recordInternalException(final AsynchronousJob__c asyncObject, final AsynchronousV1.APIException exc) {
         throw new AsynchronousV1.APIException('Access denied');
@@ -265,6 +271,10 @@ public with sharing virtual class AsynchronousHelper implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param asyncStateObjects ignored.
+     *
+     * @return ignored.
      */
     public Map<String, String> decodeState(final List<AsynchronousJobState__c> asyncStateObjects) {
         throw new AsynchronousV1.APIException('Access denied');
@@ -273,6 +283,11 @@ public with sharing virtual class AsynchronousHelper implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param asyncObject ignored.
+     * @param state ignored.
+     *
+     * @return ignored.
      */
     public List<AsynchronousJobState__c> encodeState(
             final AsynchronousJob__c asyncObject,
@@ -284,6 +299,8 @@ public with sharing virtual class AsynchronousHelper implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param asyncObject ignored.
      */
     public void queueJob(final AsynchronousJob__c asyncObject) {
         throw new AsynchronousV1.APIException('Access denied');
@@ -342,6 +359,13 @@ public with sharing virtual class AsynchronousHelper implements API {
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
     public with sharing class Factory implements TypesV1.Factory {
+
+        /**
+         * @description
+         * Returns a new instance of the API implementation.
+         *
+         * @return The API implementation.
+         */
         public Object newInstance() {
             return new Implementation();
         }

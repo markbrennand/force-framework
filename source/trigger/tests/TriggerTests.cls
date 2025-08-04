@@ -7,6 +7,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 public with sharing class TriggerTests {
     private final static Map<String, Integer> INVOCATIONS = new Map<String, Integer>();
     private final static Map<String, List<Id>> INSERTED_IDS = new Map<String, List<Id>>();
@@ -369,16 +370,18 @@ public with sharing class TriggerTests {
                 Map<Id, AsynchronousJob__c> recordsMap = new Map<Id, AsynchronousJob__c>(records);
 
                 for (AsynchronousJob__c record : records) {
-                    if (event.hasOldValue(record)) {
-                        if (((AsynchronousJob__c) event.getOldValue(record).get()).RetryInterval__c != record.RetryInterval__c - INCREMENT) {
-                            throw new DMLException('Retry interval was not incremented');
-                        }
+                    if (!event.hasOldValue(record)) {
+                        continue;
+                    }
+
+                    if (((AsynchronousJob__c) event.getOldValue(record).get()).RetryInterval__c != record.RetryInterval__c - INCREMENT) {
+                        throw new DMLException('Retry interval was not incremented');
                     }
                 }
 
-                List<AsynchronousJob__c> oldRecords = (List<AsynchronousJob__c>) event.getOldValues();
-                if (!oldRecords.isEmpty()) {
-                    for (AsynchronousJob__c record : oldRecords) {
+                OptionalV1 oldRecords = event.getOldValues();
+                if (oldRecords.isPresent()) {
+                    for (SObject record : ((Map<Id, SObject>) oldRecords.get()).values()) {
                         if (!recordsMap.containsKey(record.Id)) {
                             throw new DMLException('Old records contains an additional record');
                         }

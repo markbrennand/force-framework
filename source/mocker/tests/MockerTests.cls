@@ -316,18 +316,21 @@ public with sharing class MockerTests {
         }
     }
 
+    @SuppressWarnings('PMD.ApexDoc')
     private with sharing class TestModifier implements MockerV1.Modifier {
         public Object process(List<Object> arguments) {
             return 456;
         }
     }
 
+    @SuppressWarnings('PMD.ApexDoc')
     private with sharing class TestComparator implements Comparator<Object> {
         public Integer compare(Object param1, Object param2) {
             return ((Account) param1).Name == ((Account) param2).Name ? 0 : -1;
         }
     }
 
+    @SuppressWarnings('PMD.ApexDoc')
     private with sharing class TestFactory implements MockerV1.Factory {
         public Object stub(StubProvider provider) {
             return Test.createStub(MockerV1.class, provider);

@@ -7,6 +7,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 public with sharing class AsynchronousSchedulerTests {
     private final static String TESTING = 'asynchronous';
 
@@ -16,7 +17,6 @@ public with sharing class AsynchronousSchedulerTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.EmptyCatchBlock')
     private static void testNullJobArgument() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -107,7 +107,6 @@ public with sharing class AsynchronousSchedulerTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testSchedulerQueuedWhenJobsToStart() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -118,7 +117,6 @@ public with sharing class AsynchronousSchedulerTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testSingleConcurrency() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -157,7 +155,6 @@ public with sharing class AsynchronousSchedulerTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testDoubleConcurrency() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -218,7 +215,6 @@ public with sharing class AsynchronousSchedulerTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testMixedConcurrency() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -258,7 +254,6 @@ public with sharing class AsynchronousSchedulerTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testMoreThanOneSchedulerCannotBeRun() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -397,7 +392,6 @@ public with sharing class AsynchronousSchedulerTests {
             return 1;
         }
 
-        @SuppressWarnings('PMD.EmptyStatementBlock')
         public override void run(AsynchronousV1.Job asyncJob, String apexJobId) {}
     }
 
@@ -410,7 +404,6 @@ public with sharing class AsynchronousSchedulerTests {
             return 2;
         }
 
-        @SuppressWarnings('PMD.EmptyStatementBlock')
         public override void run(AsynchronousV1.Job asyncJob, String apexJobId) {}
     }
 }

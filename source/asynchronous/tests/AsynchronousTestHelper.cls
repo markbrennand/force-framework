@@ -9,6 +9,7 @@
 @IsTest
 public with sharing class AsynchronousTestHelper {
 
+    @SuppressWarnings('PMD.ApexDoc')
     public with sharing class TestRunnable extends AsynchronousV1.Runnable {
         public TestRunnable() {
             super(TestRunnable.class);

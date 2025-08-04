@@ -25,6 +25,18 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
      * @description
+     * Map from the objects that have been mocked to their arguments list.
+     */
+    private final static Map<Object, List<Arguments>> STUBBED_OBJECTS = new Map<Object, List<Arguments>>();
+
+    /**
+     * @description
+     * The stub handler called for all mocked objects.
+     */
+    private final static Matcher MATCHER = new Matcher();
+
+    /**
+     * @description
      * Interface allowing a user of the Mocker.of method to be called back to create the stubbed object.
      * <br><br>
      * As stubbed objects cannot be created by the Mocker if they are in a different namespace, this interface
@@ -66,12 +78,17 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
         Object process(final List<Object> arguments);
     }
 
-
     /**
      * @description
      * Map containing the next Id number to use for each object type.
      */
     private final static Map<String, Integer> IDS = new Map<String, Integer>();
+
+    /**
+     * @description
+     * The mocked object created by this instance of the Mocker.
+     */
+    private final Object mockedObject;
 
     /**
      * @description
@@ -165,6 +182,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          *
          * @return The object instance so it can be chained.
          */
+        @SuppressWarnings('PMD.ExcessiveParameterList')
         global MockerV1.Arguments whenArguments(
                 final Object argument1,
                 final Object argument2,
@@ -188,6 +206,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          *
          * @return The object instance so it can be chained.
          */
+        @SuppressWarnings('PMD.ExcessiveParameterList')
         global MockerV1.Arguments whenArguments(
                 final Object argument1,
                 final Object argument2,
@@ -222,24 +241,6 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
             return parent.mockedObject;
         }
     }
-
-    /**
-     * @description
-     * Map from the objects that have been mocked to their arguments list.
-     */
-    private final static Map<Object, List<Arguments>> STUBBED_OBJECTS = new Map<Object, List<Arguments>>();
-
-    /**
-     * @description
-     * The stub handler called for all mocked objects.
-     */
-    private final static Matcher MATCHER = new Matcher();
-
-    /**
-     * @description
-     * The mocked object created by this instance of the Mocker.
-     */
-    private final Object mockedObject;
 
     /**
      * @description
@@ -308,6 +309,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
     }
 
     /**
+     * @description
      * Returns an argument which can be used in a whenArgument call to represent a method parameter which must be
      * of the given Type but whose value is not checked.
      * <br><br>
@@ -322,6 +324,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
     }
 
     /**
+     * @description
      * Returns an argument which can be used in a whenArgument call to represent a method parameter which must be
      * of the given Type but whose value is not checked.
      * <br><br>
@@ -390,6 +393,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          *
          * @return A method specific result.
          */
+        @SuppressWarnings('PMD.ExcessiveParameterList')
         public Object handleMethodCall(
                 final Object stubbedObject,
                 final String stubbedMethodName,
@@ -678,12 +682,20 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
     }
 
     /**
+     * @description
      * Class representing an argument to be matched by Type only.
      */
     private with sharing class AnyValue {
-        public final Type type { public get; private set; }
-        public final Boolean allowNull { public get; private set; }
+        private final Type type { private get; private set; }
+        private final Boolean allowNull { private get; private set; }
 
+        /**
+         * @description
+         * Constructs an instance representing an  argument for the given type.
+         *
+         * @param type The type to be matched.
+         * @param allowNull Can the argument for the type be null.
+         */
         public AnyValue(final Type type, final Boolean allowNull) {
             this.type = type;
             this.allowNull = allowNull;

@@ -156,6 +156,12 @@ public with sharing virtual class DependencyAPI implements API {
         private OptionalV1 instance = OptionalV1.empty();
         private final Type type;
 
+        /**
+         * @description
+         * Constructs a factory which may be called to create an instance of the given class.
+         *
+         * @param type The type the factory is to construct.
+         */
         public Factory(final Type type) {
             this.type = type;
         }
@@ -305,6 +311,16 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * Adds the given custom bindings to the registry.
+         *
+         * @param bindings The custom bindings to add to the registry.
+         */
+        public void build(final List<Binding__c> bindings) {
+            ArrayV1.over(bindings).sharing(this).forEach(new AddBinding());
+        }
+
+        /**
+         * @description
          * Selects all the custom bindings and adds them to the registry.
          * <br><br>
          * This method need only be called on the first call to inject a binding.
@@ -337,8 +353,23 @@ public with sharing virtual class DependencyAPI implements API {
          * @param action The action. Optional.empty() if not set.
          * @param withImpl The implementation to be validated.
          */
-        @SuppressWarnings('PMD.EmptyCatchBlock')
         private void validateTypes(final Type forType, final OptionalV1 action, final Type withImpl) {
+            checkInstantiation(forType, action, withImpl);
+
+            if (CHECKS.containsKey(forType)) {
+                for (DependencyV1.BindingCheck check : CHECKS.get(forType)) {
+                    DependencyAPI.ValidationResultImpl result = (DependencyAPI.ValidationResultImpl) check.validate(forType, withImpl);
+                    if (!result.isValid) {
+                        throw new DependencyV1.APIException(result.errorMessage);
+                    }
+                }
+            } else {
+                throw createException('Class', forType.getName(), OptionalV1.empty(), 'has no registered bind checker');
+            }
+        }
+
+        @SuppressWarnings('PMD.EmptyCatchBlock')
+        private void checkInstantiation(final Type forType, final OptionalV1 action, final Type withImpl) {
             if (!action.isPresent()) {
                 Boolean instantiable = false;
                 try {
@@ -357,27 +388,6 @@ public with sharing virtual class DependencyAPI implements API {
             } catch(Exception e) {
                 throw createException('Implementation', withImpl.getName(), OptionalV1.empty(), 'must be instantiable');
             }
-
-            if (CHECKS.containsKey(forType)) {
-                for (DependencyV1.BindingCheck check : CHECKS.get(forType)) {
-                    DependencyAPI.ValidationResultImpl result = (DependencyAPI.ValidationResultImpl) check.validate(forType, withImpl);
-                    if (!result.isValid) {
-                        throw new DependencyV1.APIException(result.errorMessage);
-                    }
-                }
-            } else {
-                throw createException('Class', forType.getName(), OptionalV1.empty(), 'has no registered bind checker');
-            }
-        }
-
-        /**
-         * @description
-         * Adds the given custom bindings to the registry.
-         *
-         * @param bindings The custom bindings to add to the registry.
-         */
-        public void build(final List<Binding__c> bindings) {
-            ArrayV1.over(bindings).sharing(this).forEach(new AddBinding());
         }
     }
 
@@ -442,30 +452,43 @@ public with sharing virtual class DependencyAPI implements API {
      * Callback class to check for a duplicate binding.
      */
     private with sharing class DuplicateCheck implements OptionalV1.Function {
+        private final Set<String> keys = new Set<String>();
 
+        /**
+         * @description
+         * Checks whether any of the bindings are duplicates of current ones in the Binding__c objects.
+         *
+         * @param value The bindings to be checked.
+         *
+         * @return The bindings.
+         */
         public OptionalV1 apply(OptionalV1 value) {
-            if (!value.isPresent()) {
-                return value;
-            }
-
-            final Set<String> keys = new Set<String>();
-
-            for (Binding__c binding : (List<Binding__c>) value.get()) {
-                if (binding.Action__c == null) {
-                    if (keys.contains(binding.Type__c)) {
-                        throw createException('Binding for', binding.Type__c, OptionalV1.empty(), 'already exists');
+            if (value.isPresent()) {
+                for (Binding__c binding : (List<Binding__c>) value.get()) {
+                    if (binding.Action__c == null) {
+                        checkType(binding);
+                    } else {
+                        checkTypeAndAction(binding);
                     }
-                    keys.add(binding.Type__c);
-                } else {
-                    final String key = binding.Type__c + ':' + binding.Action__c;
-                    if (keys.contains(key)) {
-                        throw createException('Binding for', binding.Type__c, OptionalV1.of(binding.Action__c), 'already exists');
-                    }
-                    keys.add(key);
                 }
             }
 
             return value;
+        }
+
+        private void checkType(final Binding__c binding) {
+            if (keys.contains(binding.Type__c)) {
+                throw createException('Binding for', binding.Type__c, OptionalV1.empty(), 'already exists');
+            }
+            keys.add(binding.Type__c);
+        }
+
+        private void checkTypeAndAction(final Binding__c binding) {
+            final String key = binding.Type__c + ':' + binding.Action__c;
+            if (keys.contains(key)) {
+                throw createException('Binding for', binding.Type__c, OptionalV1.of(binding.Action__c), 'already exists');
+            }
+            keys.add(key);
         }
     }
 
@@ -560,15 +583,36 @@ public with sharing virtual class DependencyAPI implements API {
     private with sharing virtual class Key {
         protected final Type type;
 
+        /**
+         * @description
+         * Constructs a key for the given type.
+         *
+         * @param type Type the key represents.
+         */
         public Key(final Type type) {
             this.type = type;
         }
 
+        /**
+         * @description
+         * Determines a hash code for the key.
+         *
+         * @return The hash code.
+         */
         public Integer hashCode() {
             return type.hashCode();
         }
 
-        // As ActionKey extends Key, when comparing keys ensure an ActionKey cannot be compared to a Key.
+        /**
+         * @description
+         * Determines whether current object and given object are equal.
+         * <br><br>
+         * As ActionKey extends Key, when comparing keys ensure an ActionKey cannot be compared to a Key.
+         *
+         * @param other The object to compare with.
+         *
+         * @return True if objects are equal.
+         */
         public virtual Boolean equals(final Object other) {
             return (other instanceof Key) && (! (other instanceof ActionKey)) && (type == ((Key) other).type);
         }
@@ -585,11 +629,27 @@ public with sharing virtual class DependencyAPI implements API {
     private with sharing class ActionKey extends Key {
         private final String action;
 
+        /**
+         * @description
+         * Constructs a key for the given type and action.
+         *
+         * @param type Type the key represents.
+         * @param action The action to be associated with the type.
+         */
         public ActionKey(final Type type, final String action) {
             super(type);
             this.action = action;
         }
-
+        /**
+         * @description
+         * Determines whether current object and given object are equal.
+         * <br><br>
+         * As ActionKey extends Key, when comparing keys ensure an ActionKey cannot be compared to a Key.
+         *
+         * @param other The object to compare with.
+         *
+         * @return True if objects are equal.
+         */
         public override Boolean equals(final Object other) {
             return (other instanceof ActionKey)
                     && (action == ((ActionKey) other).action)
@@ -603,8 +663,12 @@ public with sharing virtual class DependencyAPI implements API {
      */
     @TestVisible
     private with sharing class ValidationResultImpl implements DependencyV1.ValidationResult {
-        public final Boolean isValid { public get; private set; }
-        public final String errorMessage { public get; private set; }
+
+        @TestVisible
+        private final Boolean isValid { private get; private set; }
+
+        @TestVisible
+        private final String errorMessage { private get; private set; }
 
         /**
          * @description
@@ -631,7 +695,7 @@ public with sharing virtual class DependencyAPI implements API {
      * @param action The action the exception is for.
      * @param postfix Postfix for exception message.
      *
-     * @return A new APIException with a formatted mesgsage.
+     * @return A new APIException with a formatted message.
      */
     private static DependencyV1.APIException createException(
             final String prefix,
@@ -669,6 +733,10 @@ public with sharing virtual class DependencyAPI implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param forType ignored.
+     *
+     * @return ignored.
      */
     public Object inject(final Type forType) {
         throw new DependencyV1.APIException('Access denied');
@@ -677,6 +745,11 @@ public with sharing virtual class DependencyAPI implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param forType ignored.
+     * @param action ignored.
+     *
+     * @return ignored.
      */
     public Object inject(final Type forType, final String action) {
         throw new DependencyV1.APIException('Access denied');
@@ -685,6 +758,10 @@ public with sharing virtual class DependencyAPI implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param forType ignored.
+     *
+     * @return ignored.
      */
     public Boolean isBound(final Type forType) {
         throw new DependencyV1.APIException('Access denied');
@@ -693,6 +770,11 @@ public with sharing virtual class DependencyAPI implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param forType ignored.
+     * @param action ignored.
+     *
+     * @return ignored.
      */
     public Boolean isBound(final Type forType, final String action) {
         throw new DependencyV1.APIException('Access denied');
@@ -701,6 +783,9 @@ public with sharing virtual class DependencyAPI implements API {
     /**
     * @description
     * Method is solely for mocking use.
+     *
+     * @param forType ignored.
+     * @param withImpl ignored.
     */
     public void bind(final Type forType, final Type withImpl) {
         throw new DependencyV1.APIException('Access denied');
@@ -709,6 +794,10 @@ public with sharing virtual class DependencyAPI implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param forType ignored.
+     * @param action ignored.
+     * @param withImpl ignored.
      */
     public void bind(final Type forType, final String action, final Type withImpl) {
         throw new DependencyV1.APIException('Access denied');

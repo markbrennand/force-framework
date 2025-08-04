@@ -7,6 +7,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 public with sharing class BasicBindingTests {
     private final static String TESTING = 'dependency';
 
@@ -16,7 +17,6 @@ public with sharing class BasicBindingTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testInstantiation() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getManager(TESTING)) {
@@ -30,7 +30,6 @@ public with sharing class BasicBindingTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testValidation() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getManager(TESTING)) {
@@ -44,7 +43,6 @@ public with sharing class BasicBindingTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testPropertyBinding() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getManager(TESTING)) {
@@ -121,8 +119,8 @@ public with sharing class BasicBindingTests {
             };
         }
 
-        BindingTestHelper.SINGLETON_INSTANCE =
-        BindingTestHelper.PROTOTYPE_INSTANCE = 0;
+        BindingTestHelper.singletoInstance =
+        BindingTestHelper.prototypeInstance = 0;
 
         // The first inject call adds the 2 custom bindings, which will instantiate the implementation. Hence use
         // CUSTOM3 and CUSTOM4.
@@ -169,8 +167,8 @@ public with sharing class BasicBindingTests {
                 DependencyV1.bind(BindingTestHelper.AbstractTest.class, BindingTestHelper.PrototypeTest.class);
             }
 
-            BindingTestHelper.SINGLETON_INSTANCE =
-                    BindingTestHelper.PROTOTYPE_INSTANCE = 0;
+            BindingTestHelper.singletoInstance =
+                    BindingTestHelper.prototypeInstance = 0;
         }
     }
 }

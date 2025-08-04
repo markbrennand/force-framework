@@ -7,6 +7,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 public with sharing class TestHelper {
 
     @TestVisible

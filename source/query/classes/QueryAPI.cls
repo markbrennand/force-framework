@@ -123,10 +123,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
             throwExceptionIfRegularQuery();
 
             final Set<String> value = getValue(aggregates);
-            ArrayV1.over(fields).reduce(
-                    new CommonHelper.ToString(),
-                    value
-            );
+            ArrayV1.over(fields).reduce(new CommonHelper.ToString(), value);
 
             aggregates = OptionalV1.of(value);
             return this;

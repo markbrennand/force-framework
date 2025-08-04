@@ -7,6 +7,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 public with sharing class OptionalTests {
     private final static String TESTING = 'optional';
 
@@ -16,7 +17,6 @@ public with sharing class OptionalTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.EmptyCatchBlock')
     private static void testEmpty() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {

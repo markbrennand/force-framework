@@ -20,6 +20,7 @@ public with sharing virtual class AsynchronousLWC implements API {
     private final static String COUNT_ALIAS = 'Count__c';
 
     /**
+     * @description
      * Interface defining the calls that may be made from the Asynchronous Job LWC.
      */
     public interface API {
@@ -29,7 +30,7 @@ public with sharing virtual class AsynchronousLWC implements API {
          * Returns a List of the AsynchronousJob__c objects matching the filter criteria.
          *
          * @param filters Query filters to be applied.
-         * @param ordering The ordering to apply to the results.
+         * @param ordering The order to return the results in.
          * @param offset The record to return results from.
          * @param max  The maximum number of records to return.
          *
@@ -236,25 +237,9 @@ public with sharing virtual class AsynchronousLWC implements API {
                 Boolean hasValue = false;
 
                 if (value instanceof List<Object>) {
-                    String clause = (field += ' IN(');
-
-                    Boolean first = true;
-                    for (Object option : (List<Object>) value) {
-                        if (!first) {
-                            clause += ',';
-                        }
-
-                        if (option instanceof String) {
-                            clause += '\'' + String.escapeSingleQuotes((String) option) + '\'';
-                        } else {
-                            clause += option;
-                        }
-
-                        first = false;
-                        hasValue = true;
-                    }
-
-                    clauses.add(clause + ')');
+                    final String values = buildInValue((List<Object>) value);
+                    hasValue = !String.isEmpty(values);
+                    clauses.add(field + ' IN(' + values +')');
 
                 } else if (value instanceof String) {
                     clauses.add(field + ' LIKE ' + '\'' + String.escapeSingleQuotes((String) value) + '\'');
@@ -272,6 +257,26 @@ public with sharing virtual class AsynchronousLWC implements API {
             }
 
             return String.join(clauses, ' AND ');
+        }
+
+        private String buildInValue(List<Object> value) {
+            String values = '';
+            Boolean first = true;
+            for (Object option : value) {
+                if (!first) {
+                    values += ',';
+                }
+
+                if (option instanceof String) {
+                    values += '\'' + String.escapeSingleQuotes((String) option) + '\'';
+                } else {
+                    values += option;
+                }
+
+                first = false;
+            }
+
+            return values;
         }
     }
 
@@ -308,6 +313,13 @@ public with sharing virtual class AsynchronousLWC implements API {
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
     public with sharing class Factory implements TypesV1.Factory {
+
+        /**
+         * @description
+         * Constructs a new instance of tghe API implementation.
+         *
+         * @return The API implementation.
+         */
         public Object newInstance() {
             return new Implementation();
         }
@@ -375,6 +387,15 @@ public with sharing virtual class AsynchronousLWC implements API {
      * Transformer class to build the List of jobs from the matches.
      */
     private with sharing class JobMatchProcessor implements OptionalV1.Function {
+
+        /**
+         * @description
+         * Converts each matching job to a Map.
+         *
+         * @param value The matching jobs.
+         *
+         * @return The jobs converted to a list of Maps.
+         */
         public OptionalV1 apply(final OptionalV1 value) {
             if (!value.isPresent()) {
                 return OptionalV1.of(new List<Map<String, Object>>());
@@ -392,6 +413,15 @@ public with sharing virtual class AsynchronousLWC implements API {
      * Transformer to build Map of Status counts from the List of aggregate results.
      */
     private with sharing class TotalsTransformer implements OptionalV1.Function {
+
+        /**
+         * @description
+         * Converts the given totals to a Map which is keyed by the status name.
+         *
+         * @param value The total for each status.
+         *
+         * @return A Map keyed by the status name with the value recording the total.
+         */
         public OptionalV1 apply(final OptionalV1 value) {
             if (!value.isPresent()) {
                 return OptionalV1.of(new Map<String, Integer>());
@@ -407,6 +437,13 @@ public with sharing virtual class AsynchronousLWC implements API {
     /**
       * @description
       * Method is solely for mocking use.
+      *
+      * @param filters ignored.
+      * @param ordering ignored.
+      * @param offset ignored.
+      * @param max ignored.
+      *
+      * @return ignored.
       */
     public List<Map<String, Object>> getJobs(final Map<String, Object> filters, final String ordering, final Integer offset, final Integer max) {
         throw new AsynchronousV1.APIException('Access denied');
@@ -415,6 +452,8 @@ public with sharing virtual class AsynchronousLWC implements API {
     /**
       * @description
       * Method is solely for mocking use.
+      *
+      * @param jobIds ignored.
       */
     public void deleteJobs(final List<Id> jobIds) {
         throw new AsynchronousV1.APIException('Access denied');
@@ -423,6 +462,8 @@ public with sharing virtual class AsynchronousLWC implements API {
     /**
       * @description
       * Method is solely for mocking use.
+      *
+      * @param jobIds ignored.
       */
     public void runJobs(final List<Id> jobIds) {
         throw new AsynchronousV1.APIException('Access denied');
@@ -431,6 +472,8 @@ public with sharing virtual class AsynchronousLWC implements API {
     /**
       * @description
       * Method is solely for mocking use.
+      *
+      * @return ignored.
       */
     public Map<String, Integer> getTotals() {
         throw new AsynchronousV1.APIException('Access denied');

@@ -7,6 +7,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 public with sharing class TypesTests {
     private final static String TESTING = 'types';
 
@@ -88,7 +89,6 @@ public with sharing class TypesTests {
     public with sharing abstract class AbstractTestClass {}
 
     public with sharing class TestFactory implements TypesV1.Factory {
-
         public Object newInstance() {
             return new TestClass();
         }

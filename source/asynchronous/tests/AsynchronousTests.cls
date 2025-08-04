@@ -7,6 +7,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 public with sharing class AsynchronousTests {
     private final static String TESTING = 'asynchronous';
 
@@ -248,7 +249,6 @@ public with sharing class AsynchronousTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testGetJobs() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -546,7 +546,6 @@ public with sharing class AsynchronousTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testGetJobTotals() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -810,7 +809,6 @@ public with sharing class AsynchronousTests {
             return job.getMaximumRetries() == 0;
         }
 
-        @SuppressWarnings('PMD.EmptyStatementBlock')
         public override void run(AsynchronousV1.Job asyncJob, String apexJobId) {}
     }
 

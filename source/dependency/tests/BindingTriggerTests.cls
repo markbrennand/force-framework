@@ -7,6 +7,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 public with sharing class BindingTriggerTests {
     private final static String TESTING = 'dependency';
 
@@ -21,7 +22,6 @@ public with sharing class BindingTriggerTests {
     private static Binding__c binding4;
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testValidInserts() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -54,7 +54,6 @@ public with sharing class BindingTriggerTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testValidUpdates() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -77,7 +76,6 @@ public with sharing class BindingTriggerTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testInvalidInserts() {
         TestHelper.setNOW();
         testValidInserts();

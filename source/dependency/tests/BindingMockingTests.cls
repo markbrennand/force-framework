@@ -7,6 +7,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 public with sharing class BindingMockingTests {
     private final static String TESTING = 'dependency';
 
@@ -76,8 +77,7 @@ public with sharing class BindingMockingTests {
     private static void testMocking() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            DependencyAPI mockInjection = createMock();
-            DependencyAPI.API = mockInjection;
+            DependencyAPI.API = createMock();
 
             Assert.isTrue(DependencyV1.isBound(BindingTestHelper.TestInterface.class));
             Assert.isFalse(DependencyV1.isBound(BindingTestHelper.AbstractTest.class));

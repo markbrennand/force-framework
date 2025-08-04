@@ -133,20 +133,6 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
-         * Cache of all the trigger definitions held in the custom metadata.
-         */
-        private final Map<String, List<Trigger__mdt>> triggerDefinitions {
-            private get {
-                if (triggerDefinitions == null) {
-                    triggerDefinitions = loadTriggerDefinitions();
-                }
-                return triggerDefinitions;
-            }
-            private set;
-        }
-
-        /**
-         * @description
          * Record of all the active events for each object type.
          */
         private final Map<String, ArrayV1.Methods> events = new Map<String, ArrayV1.Methods>();
@@ -168,6 +154,20 @@ public with sharing virtual class TriggerAPI implements API {
          * Determines whether subscriber for an object type is enabled or not.
          */
         private final Map<String, Boolean> disabledSubscribers = new Map<String, Boolean>();
+
+        /**
+         * @description
+         * Cache of all the trigger definitions held in the custom metadata.
+         */
+        private final Map<String, List<Trigger__mdt>> triggerDefinitions {
+            private get {
+                if (triggerDefinitions == null) {
+                    triggerDefinitions = loadTriggerDefinitions();
+                }
+                return triggerDefinitions;
+            }
+            private set;
+        }
 
         /**
          * @description
@@ -322,7 +322,7 @@ public with sharing virtual class TriggerAPI implements API {
 
             return new Event(
                     records,
-                    Trigger.isInsert ? new Map<Id, SObject>() : Trigger.oldMap,
+                    Trigger.isInsert ? OptionalV1.empty() : OptionalV1.of(Trigger.oldMap),
                     isBefore,
                     operation,
                     events.containsKey(objectKey) ? events.get(objectKey).length() + 1 : 1
@@ -350,15 +350,25 @@ public with sharing virtual class TriggerAPI implements API {
      * Implementation of the Event interface.
      */
     private with sharing class Event implements TriggerV1.Event {
-        final List<SObject> records;
-        private final Map<Id, SObject> oldRecords;
+        private final List<SObject> records;
+        private final OptionalV1 oldRecords;
         private final Boolean isBefore;
         private final TriggerV1.Operation operation;
         private final Integer recursiveDepth;
 
+        /**
+         * @description
+         * Constructs an event representing the DML operation.
+         *
+         * @param records The new values for the records resulting from the DML.
+         * @param oldRecords  The original values for the records prior to the DML.
+         * @param isBefore If true, the event is for the DML operation prior to persisting the data.
+         * @param operation The DML operation being performed.
+         * @param recursiveDepth The number of times the trigger has been invoked as a result of the top level DML.
+         */
         public Event(
                 final List<SObject> records,
-                final Map<Id, SObject> oldRecords,
+                final OptionalV1 oldRecords,
                 final Boolean isBefore,
                 final TriggerV1.Operation operation,
                 final Integer recursiveDepth
@@ -421,22 +431,39 @@ public with sharing virtual class TriggerAPI implements API {
          * @return True if the object has a previous value.
          */
         public Boolean hasOldValue(final SObject record) {
-            return this.oldRecords.containsKey(record.Id);
+            return oldRecords.isPresent() && ((Map<Id, SObject>) oldRecords.get()).containsKey(record.Id);
         }
 
         /**
+         * @description
+         * Gets the original value of a record being updated.
+         *
          * @param record The object to get the previous value of.
          *
-         * @return The previous value of the object or an optioanl representing undefined.
+         * @return The previous value of the object or an optional representing undefined.
          */
         public OptionalV1 getOldValue(final SObject record) {
-            return OptionalV1.ofNullable(oldRecords.get(record.Id));
+            return oldRecords.isPresent()
+                    ? OptionalV1.ofNullable(((Map<Id, SObject>) oldRecords.get()).get(record.Id))
+                    : OptionalV1.empty();
         }
 
-        public List<SObject> getOldValues() {
-            return oldRecords.values();
+        /**
+         * @description
+         * Gets the values of the records prior to update.
+         *
+         * @return The Map of old record values, or an optional representing undefined.
+         */
+        public OptionalV1 getOldValues() {
+            return oldRecords;
         }
 
+        /**
+         * @description
+         * Gets the number of times the trigger has been called within the scope of the top level trigger invocation.
+         *
+         * @return The recursive depth.
+         */
         public Integer getRecursiveDepth() {
             return recursiveDepth;
         }
@@ -450,6 +477,13 @@ public with sharing virtual class TriggerAPI implements API {
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
     public with sharing class Factory implements TypesV1.Factory {
+
+        /**
+         * @description
+         * Constructs an instance of the API implementation.
+         *
+         * @return The API implementation.
+         */
         public Object newInstance() {
             return new Implementation();
         }
@@ -512,8 +546,7 @@ public with sharing virtual class TriggerAPI implements API {
          * Publishes the Event to the the Subscriber defined by the Trigger metadata record being processed.
          *
          * @param element The Trigger metadata record.
-         * @param currentValue Ignored.
-         * @param globalValue The publishing information.
+         * @param currentValue The publishing information.
          * @param index The positional index in the array of Trigger metadata records.
          *
          * @return Return value is ignored by caller.
@@ -614,10 +647,18 @@ public with sharing virtual class TriggerAPI implements API {
      * Class encapsulating all the information required to publish an event from an inner class called from forEach.
      */
     private with sharing class PublishingInformation {
-        public final Implementation parent { public get; private set; }
-        public final String objectKey { public get; private set; }
-        public final TriggerV1.Event event { public get; private set; }
+        private final Implementation parent { private get; private set; }
+        private final String objectKey { private get; private set; }
+        private final TriggerV1.Event event { private get; private set; }
 
+        /**
+         * @description
+         * Details of an event to be published.
+         *
+         * @param parent The API implementation publishing the event.
+         * @param objectKey The key for the object the event is being published for.
+         * @param event The event to publish.
+         */
         public PublishingInformation(
                 final Implementation parent,
                 final String objectKey,
@@ -672,6 +713,8 @@ public with sharing virtual class TriggerAPI implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param type ignored.
      */
     public void disable(final SObjectType type) {
         throw new TriggerV1.APIException('Access denied');
@@ -680,6 +723,8 @@ public with sharing virtual class TriggerAPI implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param type ignored.
      */
     public void enable(final SObjectType type) {
         throw new TriggerV1.APIException('Access denied');
@@ -688,6 +733,10 @@ public with sharing virtual class TriggerAPI implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param type ignored.
+     *
+     * @return ignored.
      */
     public Boolean isEnabled(final SObjectType type) {
         throw new TriggerV1.APIException('Access denied');
@@ -696,6 +745,8 @@ public with sharing virtual class TriggerAPI implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param type ignored.
      */
     public void disable(final Type type) {
         throw new TriggerV1.APIException('Access denied');
@@ -704,6 +755,8 @@ public with sharing virtual class TriggerAPI implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param type ignored.
      */
     public void enable(final Type type) {
         throw new TriggerV1.APIException('Access denied');
@@ -712,6 +765,10 @@ public with sharing virtual class TriggerAPI implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param type ignored.
+     *
+     * @return ignored.
      */
     public Boolean isEnabled(final Type type) {
         throw new TriggerV1.APIException('Access denied');

@@ -13,6 +13,7 @@ public with sharing class CommonHelper {
      * Mockable time.
      */
     @TestVisible
+    @SuppressWarnings('PMD.FieldNamingConventions')
     private static Datetime NOW;
 
     /**

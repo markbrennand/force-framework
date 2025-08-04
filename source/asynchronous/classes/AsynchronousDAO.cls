@@ -353,6 +353,10 @@ public with sharing virtual class AsynchronousDAO implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param asyncObjectId ignored.
+     *
+     * @return ignored.
      */
     public AsynchronousJob__c getObject(final Id asyncObjectId) {
         throw new AsynchronousV1.APIException('Access denied');
@@ -361,6 +365,10 @@ public with sharing virtual class AsynchronousDAO implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param maxJobsToReturn ignored.
+     *
+     * @return ignored.
      */
     public List<AsynchronousJob__c> getScheduledObjects(final Integer maxJobsToReturn) {
         throw new AsynchronousV1.APIException('Access denied');
@@ -369,6 +377,8 @@ public with sharing virtual class AsynchronousDAO implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @return ignored.
      */
     public Integer countSchedulableObjects() {
         throw new AsynchronousV1.APIException('Access denied');
@@ -377,6 +387,10 @@ public with sharing virtual class AsynchronousDAO implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param asyncJob ignored.
+     *
+     * @return ignored.
      */
     public Integer countActiveObjects(final AsynchronousJob__c asyncJob) {
         throw new AsynchronousV1.APIException('Access denied');
@@ -385,6 +399,8 @@ public with sharing virtual class AsynchronousDAO implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param asyncObjects ignored.
      */
     public void persistObjects(final List<AsynchronousJob__c> asyncObjects) {
         throw new AsynchronousV1.APIException('Access denied');
@@ -393,6 +409,9 @@ public with sharing virtual class AsynchronousDAO implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param asyncObjects ignored.
+     * @param states ignored.
      */
     public void persistObjects(final List<AsynchronousJob__c> asyncObjects, final List<Map<String, String>> states) {
         throw new AsynchronousV1.APIException('Access denied');
@@ -401,6 +420,8 @@ public with sharing virtual class AsynchronousDAO implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param asyncObjects ignored.
      */
     public void removeObjects(final List<AsynchronousJob__c> asyncObjects) {
         throw new AsynchronousV1.APIException('Access denied');
@@ -409,6 +430,8 @@ public with sharing virtual class AsynchronousDAO implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param asyncError ignored.
      */
     public void persistException(final AsynchronousJobException__c asyncError) {
         throw new AsynchronousV1.APIException('Access denied');
@@ -422,6 +445,13 @@ public with sharing virtual class AsynchronousDAO implements API {
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
     public with sharing class Factory implements TypesV1.Factory {
+
+        /**
+         * @description
+         * Returns an instance of the API implementation.
+         *
+         * @return The API implementation,
+         */
         public Object newInstance() {
             return new Implementation();
         }

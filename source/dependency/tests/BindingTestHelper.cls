@@ -10,12 +10,13 @@
 public with sharing class BindingTestHelper {
 
     @TestVisible
-    private static Integer SINGLETON_INSTANCE = 0;
+    private static Integer singletoInstance = 0;
 
     @TestVisible
-    private static Integer PROTOTYPE_INSTANCE = 0;
+    private static Integer prototypeInstance = 0;
 
     @TestVisible
+    @SuppressWarnings('PMD.ExcessiveParameterList')
     private static void testBindingFailure(Type forType, OptionalV1 action, Type withImpl, String expectedError) {
         try {
             if (action.isPresent()) {
@@ -49,61 +50,68 @@ public with sharing class BindingTestHelper {
         Assert.isTrue(TestHelper.exceptionContains(expectedError, exc), 'Unexpected exception: ' + exc);
     }
 
+    @SuppressWarnings('PMD.ApexDoc')
     public interface TestInterface {
         String getValue();
     }
 
+    @SuppressWarnings('PMD.ApexDoc')
     public abstract with sharing class AbstractTest implements TestInterface {}
 
+    @SuppressWarnings('PMD.ApexDoc')
     public with sharing class SingletonTest extends AbstractTest {
         private String value;
 
         public SingletonTest() {
-            value = 'INSTANCE' + (++SINGLETON_INSTANCE);
+            value = 'INSTANCE' + (++singletoInstance);
         }
         public String getValue() {
             return value;
         }
     }
 
+    @SuppressWarnings('PMD.ApexDoc')
     public with sharing class PrototypeTest extends AbstractTest implements DependencyV1.Prototype {
         private String value;
 
         public PrototypeTest() {
-            value = 'INSTANCE' + (++PROTOTYPE_INSTANCE);
+            value = 'INSTANCE' + (++prototypeInstance);
         }
         public String getValue() {
             return value;
         }
     }
 
+    @SuppressWarnings('PMD.ApexDoc')
     public with sharing class SingletonCustomTest extends AbstractTest  {
         private String value;
 
         public SingletonCustomTest() {
-            value = 'CUSTOM' + (++SINGLETON_INSTANCE);
+            value = 'CUSTOM' + (++singletoInstance);
         }
         public String getValue() {
             return value;
         }
     }
 
+    @SuppressWarnings('PMD.ApexDoc')
     public with sharing class PrototypeCustomTest extends AbstractTest implements DependencyV1.Prototype {
         private String value;
 
         public PrototypeCustomTest() {
-            value = 'CUSTOM' + (++PROTOTYPE_INSTANCE);
+            value = 'CUSTOM' + (++prototypeInstance);
         }
         public String getValue() {
             return value;
         }
     }
 
+    @SuppressWarnings('PMD.ApexDoc')
     public with sharing class AbstractTestBindingCheck implements DependencyV1.BindingCheck {
         public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
             Object instance = TypesV1.newInstance(withImpl);
-            SINGLETON_INSTANCE =
-            PROTOTYPE_INSTANCE = 0;
+            singletoInstance =
+            prototypeInstance = 0;
 
             if (instance instanceof AbstractTest) {
                 return DependencyV1.valid();
@@ -115,11 +123,12 @@ public with sharing class BindingTestHelper {
         }
     }
 
+    @SuppressWarnings('PMD.ApexDoc')
     public with sharing class TestInterfaceBindingCheck implements DependencyV1.BindingCheck {
         public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
             Object instance = TypesV1.newInstance(withImpl);
-            SINGLETON_INSTANCE =
-            PROTOTYPE_INSTANCE = 0;
+            singletoInstance =
+            prototypeInstance = 0;
 
             if (instance instanceof TestInterface) {
                 return DependencyV1.valid();
@@ -131,12 +140,14 @@ public with sharing class BindingTestHelper {
         }
     }
 
+    @SuppressWarnings('PMD.ApexDoc')
     public with sharing class IntegerFactory implements TypesV1.Factory {
         public Object newInstance() {
             return 123;
         }
     }
 
+    @SuppressWarnings('PMD.ApexDoc')
     public with sharing class MapFactory implements TypesV1.Factory {
         public Object newInstance() {
             return new Map<String, Integer> { 'a' => 456, 'b' => 789 };

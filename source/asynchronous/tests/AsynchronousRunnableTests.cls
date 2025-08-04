@@ -7,6 +7,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 public with sharing class AsynchronousRunnableTests {
     private final static String TESTING = 'asynchronous';
 

@@ -50,7 +50,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
     /*
      * Initialise the registry.
      *
-     * We have to do this before the property wiring of the CONFIGURATION.
+     * We have to do this before the property wiring of configuration.
      */
     static {
         DependencyV1.bind(Map<String, Integer>.class, CONFIG_ACTION, Configuration.class);
@@ -135,7 +135,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      *
      * @param delay The number of milliseconds to delay processing for.
      */
-    @SuppressWarnings('PMD.ApexCRUDViolation,PMD.UnusedLocalVariable')
+    @SuppressWarnings('PMD.ApexCRUDViolation,PMD.UnusedLocalVariable,PMD.OperationWithLimitsInLoop')
     private void delayWhenNoJobsToRun(final Integer delay) {
         final Long startTime = System.currentTimeMillis();
         final Long endTime = startTime + delay;

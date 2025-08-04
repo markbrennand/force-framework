@@ -103,7 +103,7 @@ global with sharing class TriggerV1 {
          *
          * @return All the old values.
          */
-        List<SObject> getOldValues();
+        OptionalV1 getOldValues();
 
         /**
          * @description

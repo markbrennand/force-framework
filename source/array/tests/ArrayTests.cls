@@ -7,6 +7,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 public with sharing class ArrayTests {
     private final static String TESTING = 'array';
 
@@ -17,83 +18,69 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testConcatList() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            List<Object> result = ArrayV1.over(new List<Integer>{ 1, 2, 3 }).concat(new List<Integer>{ 4, 5 });
-            Assert.areEqual(5, result.size());
-            for (Integer index = 0; index < 5; index++) {
-                Assert.areEqual(index + 1, result[index]);
-            }
+            testConcat(new List<Integer>{ 1, 2, 3 });
         }
     }
 
     @IsTest
     private static void testConcatSet() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            List<Object> result = ArrayV1.over(new Set<Integer>{ 1, 2, 3 }).concat(new List<Integer>{ 4, 5 });
-            Assert.areEqual(5, result.size());
-            for (Integer index = 0; index < 5; index++) {
-                Assert.areEqual(index + 1, result[index]);
-            }
+            testConcat(new Set<Integer>{ 1, 2, 3 });
         }
     }
 
     @IsTest
     private static void testConcatIterable() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            List<Object> result = ArrayV1.over(new TestIterable(new List<Integer> { 1, 2, 3 })).concat(new List<Integer> { 4, 5 });
-            Assert.areEqual(5, result.size());
-            for (Integer index = 0; index < 5; index++) {
-                Assert.areEqual(index+1, result[index]);
-            }
+            testConcat(new TestIterable(new List<Integer> { 1, 2, 3 }));
+        }
+    }
+
+    private static void testConcat(Object toTest) {
+        List<Object> result = ArrayV1.over(toTest).concat(new List<Integer>{ 4, 5 });
+        Assert.areEqual(5, result.size());
+        for (Integer index = 0; index < 5; index++) {
+            Assert.areEqual(index + 1, result[index]);
         }
     }
 
     @IsTest
     private static void testForEachList() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            List<Integer> result = new List<Integer>();
-            ArrayV1.over(new List<Integer> { 1, 2, 3, 4, 5 }).sharing(result).forEach(new ForEachMultiplier());
-            Assert.areEqual(5, result.size());
-            Assert.areEqual(2, result[0]);
-            Assert.areEqual(4, result[1]);
-            Assert.areEqual(6, result[2]);
-            Assert.areEqual(8, result[3]);
-            Assert.areEqual(10, result[4]);
+            testForEach(new List<Integer> { 1, 2, 3, 4, 5 });
         }
     }
 
     @IsTest
     private static void testForEachSet() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            List<Integer> result = new List<Integer>();
-            ArrayV1.over(new Set<Integer> { 1, 2, 3, 4, 5 }).sharing(result).forEach(new ForEachMultiplier());
-            Assert.areEqual(5, result.size());
-            Assert.areEqual(2, result[0]);
-            Assert.areEqual(4, result[1]);
-            Assert.areEqual(6, result[2]);
-            Assert.areEqual(8, result[3]);
-            Assert.areEqual(10, result[4]);
+            testForEach(new Set<Integer> { 1, 2, 3, 4, 5 });
         }
     }
 
     @IsTest
     private static void testForEachIterable() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            List<Integer> result = new List<Integer>();
-            ArrayV1.over(new TestIterable(new List<Integer> { 1, 2, 3, 4, 5 })).sharing(result).forEach(new ForEachMultiplier());
-            Assert.areEqual(5, result.size());
-            Assert.areEqual(2, result[0]);
-            Assert.areEqual(4, result[1]);
-            Assert.areEqual(6, result[2]);
-            Assert.areEqual(8, result[3]);
-            Assert.areEqual(10, result[4]);
+            testForEach(new TestIterable(new List<Integer> { 1, 2, 3, 4, 5 }));
         }
+    }
+
+    private static void testForEach(Object toTest) {
+        List<Integer> result = new List<Integer>();
+        ArrayV1.over(toTest).sharing(result).forEach(new ForEachMultiplier());
+        Assert.areEqual(5, result.size());
+        Assert.areEqual(2, result[0]);
+        Assert.areEqual(4, result[1]);
+        Assert.areEqual(6, result[2]);
+        Assert.areEqual(8, result[3]);
+        Assert.areEqual(10, result[4]);
     }
 
     @IsTest
@@ -401,606 +388,413 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testFilterList() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            List<AsynchronousJob__c> results = (List<AsynchronousJob__c>) ArrayV1.over(new List<AsynchronousJob__c>{
+            testFilter(new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(Runnable__c = 'TEST1'),
                     new AsynchronousJob__c(Runnable__c = 'TEST2')
-            })
-                    .filter(new FilterTestRunnable());
-
-            Assert.areEqual(1, results.size());
-            Assert.areEqual('TEST1', results[0].Runnable__c);
-
-            results = (List<AsynchronousJob__c>) ArrayV1.over(new List<AsynchronousJob__c>{
-                    new AsynchronousJob__c(
-                            Runnable__c = 'TEST1'
-                    ),
-                    new AsynchronousJob__c(
-                            Runnable__c = 'TEST2'
-                    )
-            })
-                    .sharing('TEST2')
-                    .filter(new FilterTestRunnable());
-
-            Assert.areEqual(1, results.size());
-            Assert.areEqual('TEST2', results[0].Runnable__c);
-
-            try {
-                results = (List<AsynchronousJob__c>) ArrayV1.over(new List<AsynchronousJob__c>{
-                        new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                        new AsynchronousJob__c(Runnable__c = 'TEST2')
-                })
-                        .sharing(123)
-                        .filter(new FilterTestRunnable());
-
-                Assert.fail();
-
-            } catch(ArrayV1.APIException ae) {
-                Assert.areEqual('Callback for filter() must return a Boolean', ae.getMessage());
-            }
+            });
         }
     }
 
     @IsTest
     private static void testFilterSet() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            List<Object> results = ArrayV1.over(new Set<AsynchronousJob__c>{
+            testFilter(new Set<AsynchronousJob__c>{
                     new AsynchronousJob__c(Runnable__c = 'TEST1'),
                     new AsynchronousJob__c(Runnable__c = 'TEST2')
-            })
-                    .filter(new FilterTestRunnable());
-
-            Assert.areEqual(1, results.size());
-            Assert.areEqual('TEST1', ((AsynchronousJob__c) results[0]).Runnable__c);
-
-            results = ArrayV1.over(new Set<AsynchronousJob__c>{
-                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST2')
-            })
-                    .sharing('TEST2')
-                    .filter(new FilterTestRunnable());
-
-            Assert.areEqual(1, results.size());
-            Assert.areEqual('TEST2', ((AsynchronousJob__c) results[0]).Runnable__c);
-
-            try {
-                results = ArrayV1.over(new Set<AsynchronousJob__c>{
-                        new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                        new AsynchronousJob__c(Runnable__c = 'TEST2')
-                })
-                        .sharing(123)
-                        .filter(new FilterTestRunnable());
-
-                Assert.fail();
-
-            } catch(ArrayV1.APIException ae) {
-                Assert.areEqual('Callback for filter() must return a Boolean', ae.getMessage());
-            }
+            });
         }
     }
 
     @IsTest
     private static void testFilterIterable() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            List<Object> results = ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
-                    new AsynchronousJob__c( Runnable__c = 'TEST1' ),
-                    new AsynchronousJob__c(Runnable__c = 'TEST2')
-            }))
-                    .filter(new FilterTestRunnable());
-
-            Assert.areEqual(1, results.size());
-            Assert.areEqual('TEST1', ((AsynchronousJob__c) results[0]).Runnable__c);
-
-            results = ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
+            testFilter(new TestIterable(new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(Runnable__c = 'TEST1'),
                     new AsynchronousJob__c(Runnable__c = 'TEST2')
-            }))
-                    .sharing('TEST2')
-                    .filter(new FilterTestRunnable());
+            }));
+        }
+    }
 
-            Assert.areEqual(1, results.size());
-            Assert.areEqual('TEST2', ((AsynchronousJob__c) results[0]).Runnable__c);
+    private static void testFilter(Object toTest) {
+        List<Object> results = ArrayV1.over(toTest).filter(new FilterTestRunnable());
+        Assert.areEqual(1, results.size());
+        Assert.areEqual('TEST1', ((AsynchronousJob__c) results[0]).Runnable__c);
 
-            try {
-                results = ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
-                        new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                        new AsynchronousJob__c(Runnable__c = 'TEST2')
-                }))
-                        .sharing(123)
-                        .filter(new FilterTestRunnable());
+        results = ArrayV1.over(toTest).sharing('TEST2').filter(new FilterTestRunnable());
+        Assert.areEqual(1, results.size());
+        Assert.areEqual('TEST2', ((AsynchronousJob__c) results[0]).Runnable__c);
 
-                Assert.fail();
+        try {
+            results = ArrayV1.over(toTest).sharing(123).filter(new FilterTestRunnable());
+            Assert.fail();
 
-            } catch(ArrayV1.APIException ae) {
-                Assert.areEqual('Callback for filter() must return a Boolean', ae.getMessage());
-            }
+        } catch (ArrayV1.APIException ae) {
+            Assert.areEqual('Callback must return a Boolean', ae.getMessage());
         }
     }
 
     @IsTest
     private static void testTransformList() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            List<Object> results = (List<Object>) ArrayV1.over(new List<AsynchronousJob__c>{
+            testTransform(new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(Runnable__c = 'TEST1'),
                     new AsynchronousJob__c(Runnable__c = 'TEST2')
-            })
-                    .transform(new Transformer());
-
-            Assert.areEqual(2, results.size());
-            Assert.areEqual('TEST1', results[0]);
-            Assert.areEqual('TEST2', results[1]);
-
-            List<String> stringResults = (List<String>) ArrayV1.over(new List<AsynchronousJob__c>{
-                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST2')
-            })
-                    .transform(new Transformer(), new List<String>());
-
-            Assert.areEqual(2, stringResults.size());
-            Assert.areEqual('TEST1', stringResults[0]);
-            Assert.areEqual('TEST2', stringResults[1]);
+            });
         }
     }
 
     @IsTest
     private static void testTransformSet() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            List<Object> results = (List<Object>) ArrayV1.over(new Set<AsynchronousJob__c>{
+            testTransform(new Set<AsynchronousJob__c>{
                     new AsynchronousJob__c(Runnable__c = 'TEST1'),
                     new AsynchronousJob__c(Runnable__c = 'TEST2')
-            })
-                    .transform(new Transformer());
-
-            Assert.areEqual(2, results.size());
-            Assert.areEqual('TEST1', results[0]);
-            Assert.areEqual('TEST2', results[1]);
-
-            List<String> stringResults = (List<String>) ArrayV1.over(new Set<AsynchronousJob__c>{
-                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST2')
-            })
-                    .transform(new Transformer(), new List<String>());
-
-            Assert.areEqual(2, stringResults.size());
-            Assert.areEqual('TEST1', stringResults[0]);
-            Assert.areEqual('TEST2', stringResults[1]);
+            });
         }
     }
 
     @IsTest
     private static void testTransformIterable() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            List<Object> results = (List<Object>) ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
+            testTransform(new TestIterable(new List<AsynchronousJob__c>{
                     new AsynchronousJob__c(Runnable__c = 'TEST1'),
                     new AsynchronousJob__c(Runnable__c = 'TEST2')
-            }))
-                    .transform(new Transformer());
-
-            Assert.areEqual(2, results.size());
-            Assert.areEqual('TEST1', results[0]);
-            Assert.areEqual('TEST2', results[1]);
-
-            List<String> stringResults = (List<String>) ArrayV1.over(new TestIterable(new List<AsynchronousJob__c>{
-                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST2')
-            }))
-                    .transform(new Transformer(), new List<String>());
-
-            Assert.areEqual(2, stringResults.size());
-            Assert.areEqual('TEST1', stringResults[0]);
-            Assert.areEqual('TEST2', stringResults[1]);
+            }));
         }
+    }
+
+    private static void testTransform(Object toTest) {
+        List<Object> results = (List<Object>) ArrayV1.over(toTest).transform(new Transformer());
+        Assert.areEqual(2, results.size());
+        Assert.areEqual('TEST1', results[0]);
+        Assert.areEqual('TEST2', results[1]);
+
+        List<String> stringResults = (List<String>) ArrayV1.over(toTest).transform(new Transformer(), new List<String>());
+        Assert.areEqual(2, stringResults.size());
+        Assert.areEqual('TEST1', stringResults[0]);
+        Assert.areEqual('TEST2', stringResults[1]);
     }
 
     @IsTest
     private static void testAtList() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            ArrayV1.Methods methods = ArrayV1.over(new List<Integer> { 1, 2, 3, 4 });
-
-            Assert.areEqual(1, methods.at(0).get());
-            Assert.areEqual(4, methods.at(3).get());
-            Assert.areEqual(3, methods.at(-2).get());
-            Assert.areEqual(1, methods.at(-4).get());
-            Assert.isFalse(methods.at(4).isPresent());
-            Assert.isFalse(methods.at(-5).isPresent());
+            testAt(new List<Integer> { 1, 2, 3, 4 });
         }
     }
 
     @IsTest
     private static void testAtSet() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            ArrayV1.Methods methods = ArrayV1.over(new Set<Integer> { 1, 2, 3, 4 });
-
-            Assert.areEqual(1, methods.at(0).get());
-            Assert.areEqual(4, methods.at(3).get());
-            Assert.areEqual(3, methods.at(-2).get());
-            Assert.areEqual(1, methods.at(-4).get());
-            Assert.isFalse(methods.at(4).isPresent());
-            Assert.isFalse(methods.at(-5).isPresent());
+            testAt(new Set<Integer> { 1, 2, 3, 4 });
         }
     }
 
     @IsTest
     private static void testAtIterable() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            ArrayV1.Methods methods = ArrayV1.over(new TestIterable(new List<Integer> { 1, 2, 3, 4 }));
-
-            Assert.areEqual(1, methods.at(0).get());
-            Assert.areEqual(4, methods.at(3).get());
-            Assert.areEqual(3, methods.at(-2).get());
-            Assert.areEqual(1, methods.at(-4).get());
-            Assert.isFalse(methods.at(4).isPresent());
-            Assert.isFalse(methods.at(-5).isPresent());
+            testAt(new TestIterable(new List<Integer> { 1, 2, 3, 4 }));
         }
+    }
+
+    private static void testAt(Object toTest) {
+        ArrayV1.Methods methods = ArrayV1.over(toTest);
+        Assert.areEqual(1, methods.at(0).get());
+        Assert.areEqual(4, methods.at(3).get());
+        Assert.areEqual(3, methods.at(-2).get());
+        Assert.areEqual(1, methods.at(-4).get());
+        Assert.isFalse(methods.at(4).isPresent());
+        Assert.isFalse(methods.at(-5).isPresent());
     }
 
     @IsTest
     private static void testJoinList() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            Assert.areEqual('1-2-3-4-5', ArrayV1.over(new List<Integer> { 1, 2, 3, 4, 5 }).join('-'));
+            testJoin(new List<Integer> { 1, 2, 3, 4, 5 });
         }
     }
 
     @IsTest
     private static void testJoinSet() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            Assert.areEqual('1-2-3-4-5', ArrayV1.over(new Set<Integer> { 1, 2, 3, 4, 5 }).join('-'));
+            testJoin(new Set<Integer> { 1, 2, 3, 4, 5 });
         }
     }
 
     @IsTest
     private static void testJoinIterable() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            Assert.areEqual('1-2-3-4-5', ArrayV1.over(new TestIterable(new List<Integer> { 1, 2, 3, 4, 5 })).join('-'));
+            testJoin(new TestIterable(new List<Integer> { 1, 2, 3, 4, 5 }));
         }
+    }
+
+    private static void testJoin(Object toTest) {
+        Assert.areEqual('1-2-3-4-5', ArrayV1.over(toTest).join('-'));
     }
 
     @IsTest
     private static void testSomeList() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            List<AsynchronousJob__c> jobs1 = new List<AsynchronousJob__c> {
-                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST2'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST3'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST1')
-            };
-
-            List<AsynchronousJob__c> jobs2 = new List<AsynchronousJob__c>{
-                    new AsynchronousJob__c(Runnable__c = 'TEST4'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST5')
-            };
-
-            Assert.isTrue(ArrayV1.over(jobs1).some(new FilterTestRunnable()));
-            Assert.isFalse(ArrayV1.over(jobs2).some(new FilterTestRunnable()));
-            Assert.isTrue(ArrayV1.over(jobs1).sharing('TEST2').some(new FilterTestRunnable()));
-            Assert.isFalse(ArrayV1.over(jobs2).sharing('TEST2').some(new FilterTestRunnable()));
-            Assert.isFalse(ArrayV1.over(jobs1).sharing('TEST4').some(new FilterTestRunnable()));
-            Assert.isTrue(ArrayV1.over(jobs2).sharing('TEST4').some(new FilterTestRunnable()));
-
-            try {
-                Assert.isTrue(ArrayV1.over(jobs1).sharing(123).some(new FilterTestRunnable()));
-                Assert.fail();
-            } catch(ArrayV1.APIException ae) {
-                Assert.areEqual('Callback for some() must return a Boolean', ae.getMessage());
-            }
+            testSome(
+                    new List<AsynchronousJob__c> {
+                            new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                            new AsynchronousJob__c(Runnable__c = 'TEST2'),
+                            new AsynchronousJob__c(Runnable__c = 'TEST3'),
+                            new AsynchronousJob__c(Runnable__c = 'TEST1')
+                    },
+                    new List<AsynchronousJob__c>{
+                            new AsynchronousJob__c(Runnable__c = 'TEST4'),
+                            new AsynchronousJob__c(Runnable__c = 'TEST5')
+                    }
+            );
         }
     }
 
     @IsTest
     private static void testSomeSet() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            Set<AsynchronousJob__c> jobs1 = new Set<AsynchronousJob__c> {
-                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST2'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST3'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST1')
-            };
-
-            Set<AsynchronousJob__c> jobs2 = new Set<AsynchronousJob__c>{
-                    new AsynchronousJob__c(Runnable__c = 'TEST4'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST5')
-            };
-
-            Assert.isTrue(ArrayV1.over(jobs1).some(new FilterTestRunnable()));
-            Assert.isFalse(ArrayV1.over(jobs2).some(new FilterTestRunnable()));
-            Assert.isTrue(ArrayV1.over(jobs1).sharing('TEST2').some(new FilterTestRunnable()));
-            Assert.isFalse(ArrayV1.over(jobs2).sharing('TEST2').some(new FilterTestRunnable()));
-            Assert.isFalse(ArrayV1.over(jobs1).sharing('TEST4').some(new FilterTestRunnable()));
-            Assert.isTrue(ArrayV1.over(jobs2).sharing('TEST4').some(new FilterTestRunnable()));
-
-            try {
-                Assert.isTrue(ArrayV1.over(jobs1).sharing(123).some(new FilterTestRunnable()));
-                Assert.fail();
-            } catch(ArrayV1.APIException ae) {
-                Assert.areEqual('Callback for some() must return a Boolean', ae.getMessage());
-            }
+            testSome(
+                    new Set<AsynchronousJob__c> {
+                            new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                            new AsynchronousJob__c(Runnable__c = 'TEST2'),
+                            new AsynchronousJob__c(Runnable__c = 'TEST3'),
+                            new AsynchronousJob__c(Runnable__c = 'TEST1')
+                    },
+                    new Set<AsynchronousJob__c>{
+                            new AsynchronousJob__c(Runnable__c = 'TEST4'),
+                            new AsynchronousJob__c(Runnable__c = 'TEST5')
+                    }
+            );
         }
     }
 
     @IsTest
-    private static void testIterable() {
+    private static void testSomeIterable() {
+        TestHelper.setNOW();
+        System.runAs(TestHelper.getUser(TESTING)) {
+            testSome(
+                    new TestIterable(new List<AsynchronousJob__c> {
+                            new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                            new AsynchronousJob__c(Runnable__c = 'TEST2'),
+                            new AsynchronousJob__c(Runnable__c = 'TEST3'),
+                            new AsynchronousJob__c(Runnable__c = 'TEST1')
+                    }),
+                    new TestIterable(new List<AsynchronousJob__c>{
+                            new AsynchronousJob__c(Runnable__c = 'TEST4'),
+                            new AsynchronousJob__c(Runnable__c = 'TEST5')
+                    })
+            );
+        }
+    }
+
+    private static void testSome(Object toTest1, Object toTest2) {
         System.runAs(TestHelper.getUser(TESTING)) {
             TestHelper.setNOW();
-            TestIterable iter1 = new TestIterable(new List<AsynchronousJob__c> {
-                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST2'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST3'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST1')
-            });
-
-            TestIterable iter2 = new TestIterable(new List<AsynchronousJob__c>{
-                    new AsynchronousJob__c(Runnable__c = 'TEST4'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST5')
-            });
-
-            Assert.isTrue(ArrayV1.over(iter1).some(new FilterTestRunnable()));
-            Assert.isFalse(ArrayV1.over(iter2).some(new FilterTestRunnable()));
-            Assert.isTrue(ArrayV1.over(iter1).sharing('TEST2').some(new FilterTestRunnable()));
-            Assert.isFalse(ArrayV1.over(iter2).sharing('TEST2').some(new FilterTestRunnable()));
-            Assert.isFalse(ArrayV1.over(iter1).sharing('TEST4').some(new FilterTestRunnable()));
-            Assert.isTrue(ArrayV1.over(iter2).sharing('TEST4').some(new FilterTestRunnable()));
+            Assert.isTrue(ArrayV1.over(toTest1).some(new FilterTestRunnable()));
+            Assert.isFalse(ArrayV1.over(toTest2).some(new FilterTestRunnable()));
+            Assert.isTrue(ArrayV1.over(toTest1).sharing('TEST2').some(new FilterTestRunnable()));
+            Assert.isFalse(ArrayV1.over(toTest2).sharing('TEST2').some(new FilterTestRunnable()));
+            Assert.isFalse(ArrayV1.over(toTest1).sharing('TEST4').some(new FilterTestRunnable()));
+            Assert.isTrue(ArrayV1.over(toTest2).sharing('TEST4').some(new FilterTestRunnable()));
 
             try {
-                Assert.isTrue(ArrayV1.over(iter1).sharing(123).some(new FilterTestRunnable()));
+                Assert.isTrue(ArrayV1.over(toTest1).sharing(123).some(new FilterTestRunnable()));
                 Assert.fail();
             } catch(ArrayV1.APIException ae) {
-                Assert.areEqual('Callback for some() must return a Boolean', ae.getMessage());
+                Assert.areEqual('Callback must return a Boolean', ae.getMessage());
             }
         }
     }
 
     @IsTest
     private static void testEveryList() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            List<AsynchronousJob__c> jobs1 = new List<AsynchronousJob__c> {
-                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST1')
-            };
-
-            List<AsynchronousJob__c> jobs2 = new List<AsynchronousJob__c>{
-                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST2')
-            };
-
-            Assert.isTrue(ArrayV1.over(jobs1).every(new FilterTestRunnable()));
-            Assert.isFalse(ArrayV1.over(jobs2).every(new FilterTestRunnable()));
-
-            try {
-                Assert.isTrue(ArrayV1.over(jobs1).sharing(123).every(new FilterTestRunnable()));
-                Assert.fail();
-            } catch(ArrayV1.APIException ae) {
-                Assert.areEqual('Callback for every() must return a Boolean', ae.getMessage());
-            }
+            testEvery(
+                    new List<AsynchronousJob__c> {
+                            new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                            new AsynchronousJob__c(Runnable__c = 'TEST1')
+                    },
+                    new List<AsynchronousJob__c>{
+                            new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                            new AsynchronousJob__c(Runnable__c = 'TEST2')
+                    }
+            );
         }
     }
 
     @IsTest
     private static void testEverySet() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            Set<AsynchronousJob__c> jobs1 = new Set<AsynchronousJob__c> {
-                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST1')
-            };
-
-            Set<AsynchronousJob__c> jobs2 = new Set<AsynchronousJob__c>{
-                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST2')
-            };
-
-            Assert.isTrue(ArrayV1.over(jobs1).every(new FilterTestRunnable()));
-            Assert.isFalse(ArrayV1.over(jobs2).every(new FilterTestRunnable()));
-
-            try {
-                Assert.isTrue(ArrayV1.over(jobs1).sharing(123).every(new FilterTestRunnable()));
-                Assert.fail();
-            } catch(ArrayV1.APIException ae) {
-                Assert.areEqual('Callback for every() must return a Boolean', ae.getMessage());
-            }
+            testEvery(
+                    new Set<AsynchronousJob__c> {
+                            new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                            new AsynchronousJob__c(Runnable__c = 'TEST1')
+                    },
+                    new Set<AsynchronousJob__c>{
+                            new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                            new AsynchronousJob__c(Runnable__c = 'TEST2')
+                    }
+            );
         }
     }
 
     @IsTest
     private static void testEveryIterable() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            TestIterable iter1 = new TestIterable(new List<AsynchronousJob__c> {
-                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST1')
-            });
+            testEvery(
+                    new TestIterable(new List<AsynchronousJob__c> {
+                            new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                            new AsynchronousJob__c(Runnable__c = 'TEST1')
+                    }),
+                    new TestIterable(new List<AsynchronousJob__c>{
+                            new AsynchronousJob__c(Runnable__c = 'TEST1'),
+                            new AsynchronousJob__c(Runnable__c = 'TEST2')
+                    })
+            );
+        }
+    }
 
-            TestIterable iter2 = new TestIterable(new List<AsynchronousJob__c>{
-                    new AsynchronousJob__c(Runnable__c = 'TEST1'),
-                    new AsynchronousJob__c(Runnable__c = 'TEST2')
-            });
+    private static void testEvery(Object toTest1, Object toTest2) {
+        Assert.isTrue(ArrayV1.over(toTest1).every(new FilterTestRunnable()));
+        Assert.isFalse(ArrayV1.over(toTest2).every(new FilterTestRunnable()));
 
-            Assert.isTrue(ArrayV1.over(iter1).every(new FilterTestRunnable()));
-            Assert.isFalse(ArrayV1.over(iter2).every(new FilterTestRunnable()));
-
-            try {
-                Assert.isTrue(ArrayV1.over(iter1).sharing(123).every(new FilterTestRunnable()));
-                Assert.fail();
-            } catch(ArrayV1.APIException ae) {
-                Assert.areEqual('Callback for every() must return a Boolean', ae.getMessage());
-            }
+        try {
+            Assert.isTrue(ArrayV1.over(toTest1).sharing(123).every(new FilterTestRunnable()));
+            Assert.fail();
+        } catch(ArrayV1.APIException ae) {
+            Assert.areEqual('Callback must return a Boolean', ae.getMessage());
         }
     }
 
     @IsTest
     private static void testReverseList() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            List<String> reversed = (List<String>) ArrayV1.over(new List<String> { 'one', 'two', 'three' }).reverse();
-            Assert.areEqual(3, reversed.size());
-            Assert.areEqual('three', reversed[0]);
-            Assert.areEqual('two', reversed[1]);
-            Assert.areEqual('one', reversed[2]);
+            testReverse(new List<String> { 'one', 'two', 'three' });
         }
     }
 
     @IsTest
     private static void testReverseSet() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            List<Object> reversed = ArrayV1.over(new Set<String> { 'one', 'two', 'three' }).reverse();
-            Assert.areEqual(3, reversed.size());
-            Assert.areEqual('three', reversed[0]);
-            Assert.areEqual('two', reversed[1]);
-            Assert.areEqual('one', reversed[2]);
+            testReverse(new Set<String> { 'one', 'two', 'three' });
         }
     }
 
     @IsTest
     private static void testReverseIterable() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            List<Object> reversed = ArrayV1.over(new TestIterable(new List<String> { 'one', 'two', 'three' })).reverse();
-            Assert.areEqual(3, reversed.size());
-            Assert.areEqual('three', reversed[0]);
-            Assert.areEqual('two', reversed[1]);
-            Assert.areEqual('one', reversed[2]);
+            testReverse(new TestIterable(new List<String> { 'one', 'two', 'three' }));
         }
+    }
+
+    private static void testReverse(Object toTest) {
+        List<Object> reversed = ArrayV1.over(toTest).reverse();
+        Assert.areEqual(3, reversed.size());
+        Assert.areEqual('three', reversed[0]);
+        Assert.areEqual('two', reversed[1]);
+        Assert.areEqual('one', reversed[2]);
     }
 
     @IsTest
     private static void testPushAndPopList() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            ArrayV1.Methods stack = ArrayV1.over(new List<Integer>());
-            stack.push(1);
-            Assert.areEqual(1, stack.length());
-            stack.push(2);
-            Assert.areEqual(2, stack.length());
-            Assert.areEqual(2, (Integer) stack.pop().get());
-            Assert.areEqual(1, stack.length());
-            stack.push(3);
-            Assert.areEqual(2, stack.length());
-            Assert.areEqual(3, (Integer) stack.pop().get());
-            Assert.areEqual(1, stack.length());
-            Assert.areEqual(1, (Integer) stack.pop().get());
-            Assert.areEqual(0, stack.length());
-            Assert.isFalse(stack.pop().isPresent());
+            testPushAndPop(new List<Integer>());
         }
     }
 
     @IsTest
     private static void testPushAndPopSet() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            ArrayV1.Methods stack = ArrayV1.over(new Set<Integer>());
-            stack.push(1);
-            Assert.areEqual(1, stack.length());
-            stack.push(2);
-            Assert.areEqual(2, stack.length());
-            Assert.areEqual(2, (Integer) stack.pop().get());
-            Assert.areEqual(1, stack.length());
-            stack.push(3);
-            Assert.areEqual(2, stack.length());
-            Assert.areEqual(3, (Integer) stack.pop().get());
-            Assert.areEqual(1, stack.length());
-            Assert.areEqual(1, (Integer) stack.pop().get());
-            Assert.areEqual(0, stack.length());
-            Assert.isFalse(stack.pop().isPresent());
+            testPushAndPop(new Set<Integer>());
         }
     }
 
     @IsTest
     private static void testPushAndPopIterable() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            ArrayV1.Methods stack = ArrayV1.over(new TestIterable(new List<Integer>()));
-            stack.push(1);
-            Assert.areEqual(1, stack.length());
-            stack.push(2);
-            Assert.areEqual(2, stack.length());
-            Assert.areEqual(2, (Integer) stack.pop().get());
-            Assert.areEqual(1, stack.length());
-            stack.push(3);
-            Assert.areEqual(2, stack.length());
-            Assert.areEqual(3, (Integer) stack.pop().get());
-            Assert.areEqual(1, stack.length());
-            Assert.areEqual(1, (Integer) stack.pop().get());
-            Assert.areEqual(0, stack.length());
-            Assert.isFalse(stack.pop().isPresent());
+            testPushAndPop(new TestIterable(new List<Integer>()));
         }
+    }
+
+    private static void testPushAndPop(Object toTest) {
+        ArrayV1.Methods stack = ArrayV1.over(toTest);
+        stack.push(1);
+        Assert.areEqual(1, stack.length());
+        stack.push(2);
+        Assert.areEqual(2, stack.length());
+        Assert.areEqual(2, (Integer) stack.pop().get());
+        Assert.areEqual(1, stack.length());
+        stack.push(3);
+        Assert.areEqual(2, stack.length());
+        Assert.areEqual(3, (Integer) stack.pop().get());
+        Assert.areEqual(1, stack.length());
+        Assert.areEqual(1, (Integer) stack.pop().get());
+        Assert.areEqual(0, stack.length());
+        Assert.isFalse(stack.pop().isPresent());
     }
 
     @IsTest
     private static void testPushAndShiftList() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            ArrayV1.Methods fifo = ArrayV1.over(new List<Integer>());
-            fifo.push(1);
-            Assert.areEqual(1, fifo.length());
-            fifo.push(2);
-            Assert.areEqual(2, fifo.length());
-            Assert.areEqual(1, (Integer) fifo.shift().get());
-            Assert.areEqual(1, fifo.length());
-            fifo.push(3);
-            Assert.areEqual(2, fifo.length());
-            Assert.areEqual(2, (Integer) fifo.shift().get());
-            Assert.areEqual(1, fifo.length());
-            Assert.areEqual(3, (Integer) fifo.shift().get());
-            Assert.areEqual(0, fifo.length());
-            Assert.isFalse(fifo.shift().isPresent());
+            testPushAndShift(new List<Integer>());
         }
     }
 
     @IsTest
     private static void testPushAndShiftSet() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            ArrayV1.Methods fifo = ArrayV1.over(new Set<Integer>());
-            fifo.push(1);
-            Assert.areEqual(1, fifo.length());
-            fifo.push(2);
-            Assert.areEqual(2, fifo.length());
-            Assert.areEqual(1, (Integer) fifo.shift().get());
-            Assert.areEqual(1, fifo.length());
-            fifo.push(3);
-            Assert.areEqual(2, fifo.length());
-            Assert.areEqual(2, (Integer) fifo.shift().get());
-            Assert.areEqual(1, fifo.length());
-            Assert.areEqual(3, (Integer) fifo.shift().get());
-            Assert.areEqual(0, fifo.length());
-            Assert.isFalse(fifo.shift().isPresent());
+            testPushAndShift(new Set<Integer>());
         }
     }
 
     @IsTest
     private static void testPushAndShiftIterable() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            ArrayV1.Methods fifo = ArrayV1.over(new TestIterable(new List<Integer>()));
-            fifo.push(1);
-            Assert.areEqual(1, fifo.length());
-            fifo.push(2);
-            Assert.areEqual(2, fifo.length());
-            Assert.areEqual(1, (Integer) fifo.shift().get());
-            Assert.areEqual(1, fifo.length());
-            fifo.push(3);
-            Assert.areEqual(2, fifo.length());
-            Assert.areEqual(2, (Integer) fifo.shift().get());
-            Assert.areEqual(1, fifo.length());
-            Assert.areEqual(3, (Integer) fifo.shift().get());
-            Assert.areEqual(0, fifo.length());
-            Assert.isFalse(fifo.shift().isPresent());
+            testPushAndShift(new TestIterable(new List<Integer>()));
         }
+    }
+
+    private static void testPushAndShift(Object toTest) {
+        ArrayV1.Methods fifo = ArrayV1.over(toTest);
+        fifo.push(1);
+        Assert.areEqual(1, fifo.length());
+        fifo.push(2);
+        Assert.areEqual(2, fifo.length());
+        Assert.areEqual(1, (Integer) fifo.shift().get());
+        Assert.areEqual(1, fifo.length());
+        fifo.push(3);
+        Assert.areEqual(2, fifo.length());
+        Assert.areEqual(2, (Integer) fifo.shift().get());
+        Assert.areEqual(1, fifo.length());
+        Assert.areEqual(3, (Integer) fifo.shift().get());
+        Assert.areEqual(0, fifo.length());
+        Assert.isFalse(fifo.shift().isPresent());
     }
 
     @IsTest
@@ -1032,96 +826,55 @@ public with sharing class ArrayTests {
 
     @IsTest
     private static void testSortList() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
             List<Integer> initial = new List<Integer> { 5, 2, 4, 3, 1 };
-            List<Integer> sorted = (List<Integer>) ArrayV1.over(initial).sort();
-            Assert.areEqual(5, initial[0]);
-            Assert.areEqual(1, sorted[0]);
-            Assert.areEqual(2, initial[1]);
-            Assert.areEqual(2, sorted[1]);
-            Assert.areEqual(4, initial[2]);
-            Assert.areEqual(3, sorted[2]);
-            Assert.areEqual(3, initial[3]);
-            Assert.areEqual(4, sorted[3]);
-            Assert.areEqual(1, initial[4]);
-            Assert.areEqual(5, sorted[4]);
-
-            sorted = (List<Integer>) ArrayV1.over(initial).sort(new ReverseComparator());
-            Assert.areEqual(5, initial[0]);
-            Assert.areEqual(5, sorted[0]);
-            Assert.areEqual(2, initial[1]);
-            Assert.areEqual(4, sorted[1]);
-            Assert.areEqual(4, initial[2]);
-            Assert.areEqual(3, sorted[2]);
-            Assert.areEqual(3, initial[3]);
-            Assert.areEqual(2, sorted[3]);
-            Assert.areEqual(1, initial[4]);
-            Assert.areEqual(1, sorted[4]);
+            testSort(initial, initial);
         }
     }
 
     @IsTest
     private static void testSortSet() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
-            List<Object> initial = new List<Integer> { 5, 2, 4, 3, 1 };
-            List<Object> sorted = ArrayV1.over(new Set<Object>(initial)).sort();
-            Assert.areEqual(5, initial[0]);
-            Assert.areEqual(1, sorted[0]);
-            Assert.areEqual(2, initial[1]);
-            Assert.areEqual(2, sorted[1]);
-            Assert.areEqual(4, initial[2]);
-            Assert.areEqual(3, sorted[2]);
-            Assert.areEqual(3, initial[3]);
-            Assert.areEqual(4, sorted[3]);
-            Assert.areEqual(1, initial[4]);
-            Assert.areEqual(5, sorted[4]);
-
-            sorted = ArrayV1.over(new Set<Object>(initial)).sort(new ReverseComparator());
-            Assert.areEqual(5, initial[0]);
-            Assert.areEqual(5, sorted[0]);
-            Assert.areEqual(2, initial[1]);
-            Assert.areEqual(4, sorted[1]);
-            Assert.areEqual(4, initial[2]);
-            Assert.areEqual(3, sorted[2]);
-            Assert.areEqual(3, initial[3]);
-            Assert.areEqual(2, sorted[3]);
-            Assert.areEqual(1, initial[4]);
-            Assert.areEqual(1, sorted[4]);
+            List<Integer> initial = new List<Integer> { 5, 2, 4, 3, 1 };
+            testSort(new Set<Integer>(initial), initial);
         }
     }
 
     @IsTest
     private static void testSortIterable() {
+        TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TestHelper.setNOW();
             List<Integer> initial = new List<Integer> { 5, 2, 4, 3, 1 };
-            TestIterable iter = new TestIterable(initial);
-            List<Object> sorted = ArrayV1.over(iter).sort();
-            Assert.areEqual(5, initial[0]);
-            Assert.areEqual(1, sorted[0]);
-            Assert.areEqual(2, initial[1]);
-            Assert.areEqual(2, sorted[1]);
-            Assert.areEqual(4, initial[2]);
-            Assert.areEqual(3, sorted[2]);
-            Assert.areEqual(3, initial[3]);
-            Assert.areEqual(4, sorted[3]);
-            Assert.areEqual(1, initial[4]);
-            Assert.areEqual(5, sorted[4]);
-
-            sorted = ArrayV1.over(iter).sort(new ReverseComparator());
-            Assert.areEqual(5, initial[0]);
-            Assert.areEqual(5, sorted[0]);
-            Assert.areEqual(2, initial[1]);
-            Assert.areEqual(4, sorted[1]);
-            Assert.areEqual(4, initial[2]);
-            Assert.areEqual(3, sorted[2]);
-            Assert.areEqual(3, initial[3]);
-            Assert.areEqual(2, sorted[3]);
-            Assert.areEqual(1, initial[4]);
-            Assert.areEqual(1, sorted[4]);
+            testSort(new TestIterable(initial), initial);
         }
+    }
+
+    private static void testSort(Object toTest, List<Integer> initial) {
+        List<Object> sorted = ArrayV1.over(toTest).sort();
+        Assert.areEqual(5, initial[0]);
+        Assert.areEqual(1, sorted[0]);
+        Assert.areEqual(2, initial[1]);
+        Assert.areEqual(2, sorted[1]);
+        Assert.areEqual(4, initial[2]);
+        Assert.areEqual(3, sorted[2]);
+        Assert.areEqual(3, initial[3]);
+        Assert.areEqual(4, sorted[3]);
+        Assert.areEqual(1, initial[4]);
+        Assert.areEqual(5, sorted[4]);
+
+        sorted = ArrayV1.over(toTest).sort(new ReverseComparator());
+        Assert.areEqual(5, initial[0]);
+        Assert.areEqual(5, sorted[0]);
+        Assert.areEqual(2, initial[1]);
+        Assert.areEqual(4, sorted[1]);
+        Assert.areEqual(4, initial[2]);
+        Assert.areEqual(3, sorted[2]);
+        Assert.areEqual(3, initial[3]);
+        Assert.areEqual(2, sorted[3]);
+        Assert.areEqual(1, initial[4]);
+        Assert.areEqual(1, sorted[4]);
     }
 
     private with sharing class ForEachMultiplier extends ArrayV1.Callback {

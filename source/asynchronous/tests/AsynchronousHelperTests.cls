@@ -7,6 +7,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 public with sharing class AsynchronousHelperTests {
     private final static String TESTING = 'asynchronous';
 
@@ -73,7 +74,6 @@ public with sharing class AsynchronousHelperTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testRecordException() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -92,7 +92,6 @@ public with sharing class AsynchronousHelperTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testInternalFailure() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {

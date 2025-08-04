@@ -14,8 +14,8 @@ public with sharing class DependencyHelper {
      * required type.
      *
      * @param isOfType True if the implementation is of the required type.
-     * @param forType The type the implementation is expected to be of.
      * @param isForTypeAnInterface True if the required type is an interface.
+     * @param forType The type the implementation is expected to be of.
      * @param withImpl The type of the implementation.
      *
      * @return The validation result.

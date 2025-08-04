@@ -7,6 +7,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 public with sharing class ActionBindingTests {
     private final static String TESTING = 'dependency';
 
@@ -40,7 +41,6 @@ public with sharing class ActionBindingTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testValidation() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getManager(TESTING)) {
@@ -206,8 +206,8 @@ public with sharing class ActionBindingTests {
             DependencyV1.bind(BindingTestHelper.AbstractTest.class, 'Test', BindingTestHelper.PrototypeTest.class);
         }
 
-        BindingTestHelper.SINGLETON_INSTANCE =
-                BindingTestHelper.PROTOTYPE_INSTANCE = 0;
+        BindingTestHelper.singletoInstance =
+                BindingTestHelper.prototypeInstance = 0;
     }
 
     public with sharing class StringFactory implements TypesV1.Factory {

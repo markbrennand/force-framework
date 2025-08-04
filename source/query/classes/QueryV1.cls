@@ -152,18 +152,58 @@ global with sharing class QueryV1 {
         return QueryAPI.order(OptionalV1.of(joinField), field, false, OptionalV1.of(nullsFirst));
     }
 
+    /**
+     * @description
+     * Builds a field which may be used to aggregate data in a query.
+     *
+     * @param field The field to aggregate the results by.
+     * @param alias The AggregateResult records returned will have the value keyed by the alias.
+     *
+     * @return An aggregate field which can be used in the query.
+     */
     global static AggregatedField aggregatedField(final SObjectField field, final String alias) {
         return QueryAPI.aggregatedField(OptionalV1.empty(), field, OptionalV1.empty(), alias);
     }
 
+    /**
+     * @description
+     * Builds a field from a related object which may be used to aggregate data in a query.
+     *
+     * @param joinField The field which links the related object.
+     * @param field The field in the related object to aggregate the results by.
+     * @param alias The AggregateResult records returned will have the value keyed by the alias.
+     *
+     * @return An aggregate field which can be used in the query.
+     */
     global static AggregatedField aggregatedField(final SObjectField joinField, final SObjectField field, final String alias) {
         return QueryAPI.aggregatedField(OptionalV1.of(joinField), field, OptionalV1.empty(), alias);
     }
 
+    /**
+     * @description
+     * Builds a field from a related object which may be used to aggregate data in a query.
+     *
+     * @param function The aggregation function to use, e.g. COUNT or SUM.
+     * @param field The field in the related object to aggregate the results by.
+     * @param alias The AggregateResult records returned will have the value keyed by the alias.
+     *
+     * @return An aggregate field which can be used in the query.
+     */
     global static AggregatedField aggregatedField(final String function, final SObjectField field, final String alias) {
         return QueryAPI.aggregatedField(OptionalV1.empty(), field, OptionalV1.of(function), alias);
     }
 
+    /**
+     * @description
+     * Builds a field from a related object which may be used to aggregate data in a query.
+     *
+     * @param joinField The field which links the related object.
+     * @param function The aggregation function to use, e.g. COUNT or SUM.
+     * @param field The field in the related object to aggregate the results by.
+     * @param alias The AggregateResult records returned will have the value keyed by the alias.
+     *
+     * @return An aggregate field which can be used in the query.
+     */
     global static AggregatedField aggregatedField(final SObjectField joinField, final String function, final SObjectField field, final String alias) {
         return QueryAPI.aggregatedField(OptionalV1.of(joinField), field, OptionalV1.of(function), alias);
     }

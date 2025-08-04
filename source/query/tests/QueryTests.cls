@@ -7,6 +7,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 public with sharing class QueryTests {
     private final static String TESTING = 'query';
 
@@ -16,7 +17,6 @@ public with sharing class QueryTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testExtendedClassesAreInert() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -185,7 +185,6 @@ public with sharing class QueryTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testAggregation() {
         TestHelper.setNOW();
         createData();
@@ -389,7 +388,6 @@ public with sharing class QueryTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testRelationshipQuery() {
         TestHelper.setNOW();
         createData();
@@ -683,7 +681,6 @@ public with sharing class QueryTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testDefaultOrder() {
         TestHelper.setNOW();
         createData();
@@ -939,7 +936,6 @@ public with sharing class QueryTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testNullsFirstOrder() {
         TestHelper.setNOW();
         createData();
@@ -1195,7 +1191,6 @@ public with sharing class QueryTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testNullsLastOrder() {
         TestHelper.setNOW();
         createData();

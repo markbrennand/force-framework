@@ -185,6 +185,7 @@ public with sharing virtual class AsynchronousAPI implements API {
     }
 
     /**
+     * @description
      * Class called from Queueable for Apex Job.
      * <br><br>
      * Override the run method from a super-class to code the logic of the job.
@@ -297,6 +298,13 @@ public with sharing virtual class AsynchronousAPI implements API {
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
     public with sharing class Factory implements TypesV1.Factory {
+
+        /**
+         * @description
+         * Returns the implementation of the API.
+         *
+         * @return The API implementation.
+         */
         public Object newInstance() {
             return new Implementation();
         }
@@ -348,6 +356,15 @@ public with sharing virtual class AsynchronousAPI implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param type ignored.
+     * @param reference ignored.
+     * @param maximumRetries ignored.
+     * @param retryInterval ignored.
+     * @param state ignored.
+     *
+     * @return ignored.
+     *
      */
     public AsynchronousV1.Job createJob(
             final Type type,
@@ -362,6 +379,10 @@ public with sharing virtual class AsynchronousAPI implements API {
     /**
      * @description
      * Method is solely for mocking use.
+     *
+     * @param asyncJobs ignored.
+     *
+     * @return ignored.
      */
     public List<AsynchronousV1.Job> queueJobs(final List<AsynchronousV1.Job> asyncJobs) {
         throw new AsynchronousV1.APIException('Access denied');

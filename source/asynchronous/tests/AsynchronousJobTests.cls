@@ -9,6 +9,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 public with sharing class AsynchronousJobTests {
     private final static String TESTING = 'asynchronous';
 
@@ -18,7 +19,6 @@ public with sharing class AsynchronousJobTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     static void testAllStatuses() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -39,7 +39,6 @@ public with sharing class AsynchronousJobTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.EmptyCatchBlock')
     private static void testMandatoryFields() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -113,7 +112,6 @@ public with sharing class AsynchronousJobTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     static void testOptionalFields() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -138,7 +136,6 @@ public with sharing class AsynchronousJobTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.EmptyCatchBlock')
     private static void testFromSObject() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -181,7 +178,6 @@ public with sharing class AsynchronousJobTests {
             super(Runnable.class);
         }
 
-        @SuppressWarnings('PMD.EmptyStatementBlock')
         public override void run(AsynchronousV1.Job job, String apexJobId) {}
     }
 }

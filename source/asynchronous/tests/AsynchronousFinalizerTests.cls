@@ -7,6 +7,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 public with sharing class AsynchronousFinalizerTests {
     private final static String TESTING = 'asynchronous';
 
@@ -16,7 +17,6 @@ public with sharing class AsynchronousFinalizerTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testJobKeptOnSuccess() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -38,7 +38,6 @@ public with sharing class AsynchronousFinalizerTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testJobDeletedOnSuccess() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -60,7 +59,6 @@ public with sharing class AsynchronousFinalizerTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testExceptionInOnSuccess() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -82,7 +80,6 @@ public with sharing class AsynchronousFinalizerTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testJobKeptOnFailure() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -106,7 +103,6 @@ public with sharing class AsynchronousFinalizerTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testJobDeletedOnFailure() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -130,7 +126,6 @@ public with sharing class AsynchronousFinalizerTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testExceptionInOnFailure() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -154,7 +149,6 @@ public with sharing class AsynchronousFinalizerTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testRequeue() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -178,7 +172,6 @@ public with sharing class AsynchronousFinalizerTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testSchedulerQueued() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -217,7 +210,6 @@ public with sharing class AsynchronousFinalizerTests {
     }
 
     @IsTest
-    @SuppressWarnings('PMD.ApexUnitTestClassShouldHaveAsserts')
     private static void testCancellationFromOnError() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -382,7 +374,6 @@ public with sharing class AsynchronousFinalizerTests {
             return process(job, 'onCancellation');
         }
 
-        @SuppressWarnings('PMD.EmptyStatementBlock')
         public override void run(AsynchronousV1.Job asyncJob, String apexJobId) {}
 
         private Boolean process(AsynchronousV1.Job job, String method) {
