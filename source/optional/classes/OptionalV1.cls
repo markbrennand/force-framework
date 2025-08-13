@@ -5,7 +5,7 @@
  * Class providing an implementation of Optional which should be used in preference to using null to indicate a
  * value is un-assigned.
  * <br><br>
- * See <a href=../README.md target="_blank">README</a> for full details of Optional.
+ * See <a href=../../source/optional/README.md target="_blank">README</a> for full details of Optional.
  *
  * @author Mark Brennand
  */

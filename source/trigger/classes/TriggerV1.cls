@@ -9,7 +9,7 @@
  * <br><br>
  * Each Subscriber implementation must register itself with a Trigger metadata record.
  * <br><br>
- * See <a href=../README.md target="_blank">README</a> for full details of the Trigger API.
+ * See <a href=../../source/trigger/README.md target="_blank">README</a> for full details of the Trigger API.
  *
  * @author Mark Brennand
  */

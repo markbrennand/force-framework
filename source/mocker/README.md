@@ -6,7 +6,7 @@ relies on the database to pass. A good unit test should use dependencies, such a
 abstracted. In that way it can exercise purely the functionality of the class under test. The abstracted
 dependencies should be mocked to provide the expected results for the test.
 
-See the reference [Apex docs](../../docs/mocker/SfApexDocs/mockerv1.html) for the API. It is suggested that you keep a page open
+See the reference [Apex docs](../../docs/SfApexDocs/mockerv1.html) for the API. It is suggested that you keep a page open
 with the Apex docs loaded for your reference whilst reading this page.
 
 If a failure occurs in the _MockerV1_ code, an _AssertionException_ is thrown. See

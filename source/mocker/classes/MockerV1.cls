@@ -16,7 +16,7 @@
  * The Modifier interface may be used to return a value from a mocked method based on the arguments to the call.
  * For example, this could be used to add a fake Id to custom objects being inserted.
  * <br><br>
- * See <a href=../README.md target="_blank">README</a> for full details of the Mocker API.
+ * See <a href=../../source/mocker/README.md target="_blank">README</a> for full details of the Mocker API.
  *
  * @author Mark Brennand
  */

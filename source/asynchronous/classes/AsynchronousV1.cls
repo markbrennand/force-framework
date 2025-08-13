@@ -9,7 +9,7 @@
  * Asynchronous jobs should first be created using the createJob method. They can then be run by calling the
  * queueJobs method.
  * <br><br>
- * See <a href=../README.md target="_blank">README</a> for full details of the Asynchronous API.
+ * See <a href=../../source/asynchronous/README.md target="_blank">README</a> for full details of the Asynchronous API.
  *
  * @author Mark Brennand
  */

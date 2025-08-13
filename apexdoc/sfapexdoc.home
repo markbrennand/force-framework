@@ -1,0 +1,20 @@
+<h2>Force Framework APIs</h2>
+<p>A suite of APIs to aid in Salesforce APEX development.</p>
+<h4>ArrayV1</h4>
+<p>Provides immutable array functionality similar to that offered by Javascript's forEach, map, filter, etc. methods. See <a href="../../source/array/README.md">README</a>.</p>
+<h4>AssertionV1</h4>
+<p>The Apex Assert class throws an uncatchable exception. A re-implementation of Assert private to theV1s throws an exception which may be caught.</p>
+<h4>AsynchronousV1</h4>
+<p>Provides a simplified way to run Apex jobs. Re-try on failure and concurrency is supported. See <a href="../../source/asynchronous/README.md">README</a>.</p>
+<h4>DependencyV1</h4>
+<p>Spring like dependency injection into Apex code. Uses TypesV1 to allow the injected class to be constructed from a <i>TypesV1.Factory</i> implementation. See <a href="../../source/dependency/README.md">README</a>.</p>
+<h4>MockerV1</h4>
+<p>A more logical approach to mocking, where the expected arguments are defined first and then the methods that expect those arguments. See <a href="../../source/mocker/README.md">README</a>.</p>
+<h4>OptionalV1</h4>
+<p>Using null to indicate a variable is undefined is dangerous. The <i>OptionalV1</i> class can be used to better represent an unassigned variable. See <a href="../../source/optional/README.md">README</a>.</p>
+<h4>QueryV1</h4>
+<p>Allows building and execution of SOQL queries. See <a href="../../source/query/README.md">README</a>.</p>
+<h4>TriggerV1</h4>
+<p>A pub/sub model for Apex triggers. See <a href="../../source/trigger/README.md">README</a>.</p>
+<h4>TypesV1</h4>
+<p>Allows loading and construction of APEX classes. Supports construction of class from a proxy class which implements the <i>TypesV1.Factory</i> interface. See <a href="../../source/types/README.md">README</a>.</p>

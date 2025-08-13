@@ -4,7 +4,7 @@
  * <br><br>
  * Class providing the Array API.
  * <br><br>
- * See <a href=../README.md target="_blank">README</a> for full details of the Array API.
+ * See <a href=../../source/array/README.md target="_blank">README</a> for full details of the Array API.
  *
  * @author Mark Brennand
  */

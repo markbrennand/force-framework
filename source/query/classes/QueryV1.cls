@@ -1,10 +1,10 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../../LICENSE target="_blank">MIT License</a>.
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../LICENSE target="_blank">MIT License</a>.
  * <br><br>
  * Class providing Query API.
  * <br><br>
- * See <a href=../README.md target="_blank">README</a> for full details of the Array API.
+ * See <a href=../../source/query/README.md target="_blank">README</a> for full details of the Query API.
  *
  * @author Mark Brennand
  */

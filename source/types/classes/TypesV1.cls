@@ -20,7 +20,7 @@
  * interface it
  * implements.
  * <br><br>
- * See <a href=../README.md target="_blank">README</a> for full details of the Types API.
+ * See <a href=../../source/types/README.md target="_blank">README</a> for full details of the Types API.
  *
  * @author Mark Brennand
  */

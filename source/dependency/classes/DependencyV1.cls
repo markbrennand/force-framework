@@ -19,7 +19,7 @@
  * To associate the Type with the BindingCheck, create and deploy a BindingCheck__mdt metadata record. Any attempt
  * to add a binding to the registry for a Type with no associated BindingCheck will throw an Exception.
  * <br><br>
- * See <a href=../README.md target="_blank">README</a> for full details of the Dependency Injection API.
+ * See <a href=../../source/dependency/README.md target="_blank">README</a> for full details of the Dependency Injection API.
  *
  * @author Mark Brennand
  */

@@ -28,6 +28,8 @@ for _Force Framework_ use, and set up the example code.
 # Framework APIs
 The Force Framework comprises the following APIs. 
 
+See the reference [Apex docs](docs/SfApexDocs/index.html) for all the APIs in the suite.
+
 ## Types
 The S of SOLID is Single Use Only. The API for access to Apex types allows classes to be developed which are not
 publicly accessible and allow only the use of the methods defined in the interface they implement.
