@@ -1,6 +1,6 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../../LICENSE target="_blank">MIT License</a>.
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  * <br><br>
  * Class providing an implementation of Optional which should be used in preference to using null to indicate a
  * value is un-assigned.

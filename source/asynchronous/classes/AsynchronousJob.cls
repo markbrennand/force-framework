@@ -1,6 +1,6 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../../LICENSE target="_blank">MIT License</a>.
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  * <br><br>
  * Implementation of the Asynchronous.Job interface for use by the default implementation of the framework.
  * <br><br>

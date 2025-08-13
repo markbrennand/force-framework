@@ -1,7 +1,7 @@
 
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../../LICENSE target="_blank">MIT License</a>.
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  * <br><br>
  * Class defining the API for all DML and SOQL operations required by the default Asynchronous API implementation.
  * <br><br>

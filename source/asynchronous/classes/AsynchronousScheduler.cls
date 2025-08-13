@@ -1,6 +1,6 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../../LICENSE target="_blank">MIT License</a>.
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  * <br><br>
  * The Scheduler is responsible for finding and starting the next job that can be run based on its scheduled time.
  * <br><br>
