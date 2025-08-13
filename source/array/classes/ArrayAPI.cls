@@ -82,7 +82,7 @@ public with sharing class ArrayAPI {
          */
         public Object reduce(final ArrayV1.Callback callback) {
             Assert.isNotNull(callback, 'Callback for method must be defined');
-            return reduce(copyOfList(objects, 1), callback, getOptionalForElement(objects, 0)).get();
+            return reduce(callback, getOptionalForElement(0), 1).get();
         }
 
         /**
@@ -99,8 +99,7 @@ public with sharing class ArrayAPI {
          */
         public Object reduceRight(final ArrayV1.Callback callback) {
             Assert.isNotNull(callback, 'Callback for method must be defined');
-            final List<Object> reversed = reverse(objects);
-            return reduce(copyOfList(reversed, 1), callback, getOptionalForElement(reversed, 0)).get();
+            return reduceRight(callback, getOptionalForElement(length -1), length - 1).get();
         }
 
         /**
@@ -118,7 +117,7 @@ public with sharing class ArrayAPI {
          */
         public Object reduce(final ArrayV1.Callback callback, final Object initialValue) {
             Assert.isNotNull(callback, 'Callback for method must be defined');
-            return reduce(copyOfList(objects), callback, OptionalV1.of(initialValue)).get();
+            return reduce(callback, OptionalV1.of(initialValue), 0).get();
         }
 
         /**
@@ -136,7 +135,7 @@ public with sharing class ArrayAPI {
          */
         public Object reduceRight(final ArrayV1.Callback callback, final Object initialValue) {
             Assert.isNotNull(callback, 'Callback for method must be defined');
-            return reduce(reverse(objects), callback, OptionalV1.of(initialValue)).get();
+            return reduceRight(callback, OptionalV1.of(initialValue), length).get();
         }
 
         /**
@@ -304,7 +303,11 @@ public with sharing class ArrayAPI {
          * @return The new array with the reversed elements.
          */
         public List<Object> reverse() {
-            return reverse(objects);
+            final List<Object> cloned = newListOfSameType(objects);
+            for (Integer i = length; i > 0; i--) {
+                cloned.add(objects[i-1]);
+            }
+            return cloned;
         }
 
         /**
@@ -379,34 +382,6 @@ public with sharing class ArrayAPI {
             return cloned;
         }
 
-        private List<Object> copyOfList(final List<Object> listToClone) {
-            return listToClone.clone();
-        }
-
-        private List<Object> copyOfList(final List<Object> listToClone, final Integer fromOffset) {
-            final List<Object> cloned = copyOfList(listToClone);
-            final Integer last = Math.min(cloned.size(), fromOffset);
-            for (Integer offset = 0; offset < last; offset++) {
-                cloned.remove(0);
-            }
-
-            return cloned;
-        }
-
-        private List<Object> reverse(final List<Object> listToReverse) {
-            final List<Object> cloned = newListOfSameType(listToReverse);
-            if (length == 0) {
-                return cloned;
-            }
-
-            cloned.add(objects[0]);
-            for (Integer i = 1; i < length; i++) {
-                cloned.add(0, objects[i]);
-            }
-
-            return cloned;
-        }
-
         private List<Object> newListOfSameType(final List<Object> listToClone) {
             final List<Object> cloned = listToClone.clone();
             cloned.clear();
@@ -414,15 +389,28 @@ public with sharing class ArrayAPI {
         }
 
         private OptionalV1 reduce(
-                final List<Object> objectsToReduce,
                 final ArrayV1.Callback callback,
-                final OptionalV1 initialValue
+                final OptionalV1 initialValue,
+                final Integer startIndex
         ) {
-            final Integer count = objectsToReduce.size();
             callback.sharing(shared);
             OptionalV1 value = initialValue;
-            for (Integer i = 0; i < count; i++) {
-                value = callback.function(objectsToReduce[i], value, i);
+            for (Integer i = startIndex; i < length; i++) {
+                value = callback.function(objects[i], value, i);
+            }
+            return value;
+        }
+
+        private OptionalV1 reduceRight(
+                final ArrayV1.Callback callback,
+                final OptionalV1 initialValue,
+                final Integer startIndex
+        ) {
+            callback.sharing(shared);
+            OptionalV1 value = initialValue;
+            for (Integer i = startIndex; i > 0; ) {
+                i--;
+                value = callback.function(objects[i], value, i);
             }
             return value;
         }
@@ -435,11 +423,11 @@ public with sharing class ArrayAPI {
             }
         }
 
-        private OptionalV1 getOptionalForElement(final List<Object> fromList, final Integer index) {
-            if (fromList.isEmpty()) {
+        private OptionalV1 getOptionalForElement(final Integer index) {
+            if (objects.isEmpty()) {
                 throw new ArrayV1.APIException('The reduce() method requires an array containing at least one element');
             }
-            return OptionalV1.of(fromList[index]);
+            return OptionalV1.of(objects[index]);
         }
 
         private void isListValid(final List<Object> objects) {

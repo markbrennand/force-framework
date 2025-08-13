@@ -20,20 +20,6 @@ public with sharing class QueryHelper {
         );
     }
 
-    private with sharing class FieldJoiner extends ArrayV1.Callback {
-
-        public override OptionalV1 function(Object element, OptionalV1 currentValue, Integer index) {
-            final String relationshipName = (String) shared().get();
-            final Set<String> fields = (Set<String>) currentValue.get();
-            final SObjectField field = (SObjectField) element;
-
-            fields.add((String) ArrayV1.over(new List<String> { relationshipName, field.getDescribe().getName() })
-                    .join('.'));
-
-            return OptionalV1.of(fields);
-        }
-    }
-
     public with sharing class SObjectDeleter implements OptionalV1.Function {
         private final AccessLevel mode;
 
@@ -64,13 +50,27 @@ public with sharing class QueryHelper {
 
         @SuppressWarnings('PMD.ApexCRUDViolation')
         public OptionalV1 apply(final OptionalV1 value) {
-            if (!value.isPresent()) {
-                return OptionalV1.of(new List<SObject>());
+            if (value.isPresent()) {
+                final List<SObject> toUpdate = (List<SObject>) ArrayV1.over(value.get()).transform(callback, new List<SObject>());
+                Database.update(toUpdate, mode);
+                return OptionalV1.of(toUpdate);
             }
 
-            final List<SObject> toUpdate = (List<SObject>) ArrayV1.over(value.get()).transform(callback, new List<SObject>());
-            Database.update(toUpdate, mode);
-            return OptionalV1.of(toUpdate);
+            return OptionalV1.empty();
+        }
+    }
+
+    private with sharing class FieldJoiner extends ArrayV1.Callback {
+
+        public override OptionalV1 function(Object element, OptionalV1 currentValue, Integer index) {
+            final String relationshipName = (String) shared().get();
+            final Set<String> fields = (Set<String>) currentValue.get();
+            final SObjectField field = (SObjectField) element;
+
+            fields.add((String) ArrayV1.over(new List<String> { relationshipName, field.getDescribe().getName() })
+                    .join('.'));
+
+            return OptionalV1.of(fields);
         }
     }
 }

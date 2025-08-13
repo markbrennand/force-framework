@@ -153,7 +153,7 @@ public with sharing virtual class AsynchronousLWC implements API {
                 matches = query.ordered(QueryV1.descending(orderField)).execute(OptionalV1.of(new Map<String, Object>()));
             }
 
-            return (List<Map<String, Object>>) matches.call(new JobMatchProcessor()).get();
+            return (List<Map<String, Object>>) matches.then(new JobMatchProcessor()).get();
         }
 
         /**
@@ -168,7 +168,7 @@ public with sharing virtual class AsynchronousLWC implements API {
                     .matching('Id IN :jobIds')
                     .returning(new Set<SObjectField> { AsynchronousJob__c.Id })
                     .execute(OptionalV1.of(new Map<String, Object> { 'jobIds' => jobIds }))
-                    .call(new QueryHelper.SObjectDeleter(AccessLevel.USER_MODE));
+                    .then(new QueryHelper.SObjectDeleter(AccessLevel.USER_MODE));
         }
 
         /**
@@ -186,7 +186,7 @@ public with sharing virtual class AsynchronousLWC implements API {
                             'jobIds' => jobIds,
                             'schedulerClassName' => AsynchronousScheduler.RunNextAvailable.class.getName()
                     }))
-                    .call(new QueryHelper.SObjectTransformAndUpdate(new RequeueJob(), AccessLevel.USER_MODE));
+                    .then(new QueryHelper.SObjectTransformAndUpdate(new RequeueJob(), AccessLevel.USER_MODE));
         }
 
         /**
@@ -211,7 +211,7 @@ public with sharing virtual class AsynchronousLWC implements API {
                     )
                     .group(new Set<SObjectField> { AsynchronousJob__c.Status__c })
                     .execute(OptionalV1.empty())
-                    .call(new TotalsTransformer())
+                    .then(new TotalsTransformer())
                     .get()
             );
 

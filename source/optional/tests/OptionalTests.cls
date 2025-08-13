@@ -74,9 +74,9 @@ public with sharing class OptionalTests {
     private static void TestCall() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            Assert.isFalse(OptionalV1.empty().call(new TestFunction()).isPresent());
-            Assert.areEqual(1, OptionalV1.of('one').call(new TestFunction()).get());
-            Assert.areEqual(2, OptionalV1.of('two').call(new TestFunction()).get());
+            Assert.isFalse(OptionalV1.empty().then(new TestFunction()).isPresent());
+            Assert.areEqual(1, OptionalV1.of('one').then(new TestFunction()).get());
+            Assert.areEqual(2, OptionalV1.of('two').then(new TestFunction()).get());
         }
     }
 
@@ -84,9 +84,9 @@ public with sharing class OptionalTests {
     private static void TestCallChaining() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            Assert.isFalse(OptionalV1.empty().call(new TestFunction()).call(new TestFunction()).isPresent());
-            Assert.areEqual(1, OptionalV1.of(1).call(new TestFunction()).call(new TestFunction()).get());
-            Assert.areEqual(2, OptionalV1.of(2).call(new TestFunction()).call(new TestFunction()).get());
+            Assert.isFalse(OptionalV1.empty().then(new TestFunction()).then(new TestFunction()).isPresent());
+            Assert.areEqual(1, OptionalV1.of(1).then(new TestFunction()).then(new TestFunction()).get());
+            Assert.areEqual(2, OptionalV1.of(2).then(new TestFunction()).then(new TestFunction()).get());
         }
     }
 

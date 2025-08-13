@@ -14,12 +14,6 @@ global with sharing class OptionalV1 {
 
     /**
      * @description
-     * Exception thrown to indicate an attempt was made to use an un-assigned value.
-     */
-    global with sharing class NoSuchElementException extends Exception {}
-
-    /**
-     * @description
      * Interface to allow Optional value to be processed.
      */
     global interface Function {
@@ -48,6 +42,12 @@ global with sharing class OptionalV1 {
      * The value of the Optional.
      */
     private final Object value;
+
+    /**
+     * @description
+     * Exception thrown to indicate an attempt was made to use an un-assigned value.
+     */
+    global with sharing class NoSuchElementException extends Exception {}
 
     /**
      * @description
@@ -150,7 +150,7 @@ global with sharing class OptionalV1 {
      *
      * @return The value returned by the transformer.
      */
-    global OptionalV1 call(final Function function) {
+    global OptionalV1 then(final Function function) {
         return function.apply(this);
     }
 }

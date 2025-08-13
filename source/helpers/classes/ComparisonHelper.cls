@@ -57,20 +57,7 @@ public with sharing class ComparisonHelper {
         allComparators.addAll(COMPARATORS);
 
         if (expected instanceof Iterable<Object> && actual instanceof Iterable<Object>) {
-            final Iterator<Object> expectedIter = ((Iterable<Object>) expected).iterator();
-            final Iterator<Object> actualIter = ((Iterable<Object>) actual).iterator();
-
-            while (expectedIter.hasNext()) {
-                if (!actualIter.hasNext()) {
-                    return false;
-                }
-
-                if (! compare(expectedIter.next(), actualIter.next())) {
-                    return false;
-                }
-            }
-
-            return !actualIter.hasNext();
+            return compareIterables(((Iterable<Object>) expected).iterator(),((Iterable<Object>) actual).iterator());
 
         } else {
             for (Comparator<Object> comparator : allComparators) {
@@ -83,20 +70,18 @@ public with sharing class ComparisonHelper {
         }
     }
 
-    /**
-     * @description
-     * Compares two SObjects.
-     * <br><br>
-     * Fields of actualSObject must match all of those in expectedSObject. Fields not defined in expectedSObject
-     * may be present in actualSObject.
-     *
-     * @param expectedSObject The expected SObject.
-     * @param actualSObject The SObject to compare it with.
-     *
-     * @return True if the actual matches the expected.
-     */
-    private static Boolean compareSObjects(final SObject expectedSObject, final SObject actualSObject) {
-        return new RequiredSObject(expectedSObject).equals(actualSObject);
+    private static Boolean compareIterables(final Iterator<Object> expectedIter, final Iterator<Object> actualIter) {
+        while (expectedIter.hasNext()) {
+            if (!actualIter.hasNext()) {
+                return false;
+            }
+
+            if (!compare(expectedIter.next(), actualIter.next())) {
+                return false;
+            }
+        }
+
+        return !actualIter.hasNext();
     }
 
     /**
@@ -175,7 +160,7 @@ public with sharing class ComparisonHelper {
         public Integer compare(final Object param1, final Object param2) {
             return param1 instanceof SObject && !(param1 instanceof Iterable<Object>) &&
                     param2 instanceof SObject && !(param2 instanceof Iterable<Object>) &&
-                    compareSObjects((SObject) param1, (SObject) param2) ? 0 : -1;
+                    new RequiredSObject((SObject) param1).equals((SObject) param2) ? 0 : -1;
         }
     }
 

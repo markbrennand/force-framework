@@ -309,6 +309,13 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * Default Scheduler configuration to be injected.
      */
     public with sharing class Configuration implements TypesV1.Factory {
+
+        /**
+         * @description
+         * Creates a new instance of the configuration.
+         *
+         * @return The new instance.
+         */
         public Object newInstance() {
             return new Map<String, Integer> {
                     NO_JOBS_TO_RUN_DELAY_PROPERTY => 2000,
@@ -324,6 +331,13 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * This allows the Scheduler class to be inaccessible from outside this class.
      */
     public with sharing class RunNextAvailable implements TypesV1.Factory {
+
+        /**
+         * @description
+         * Creates a new instance of the scheduler.
+         *
+         * @return The scheduler instance.
+         */
         public Object newInstance() {
             return new AsynchronousScheduler();
         }

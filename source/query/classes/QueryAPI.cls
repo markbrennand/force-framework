@@ -351,7 +351,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
         }
     }
 
-    public static QueryV1.AggregatedField aggregatedField(final OptionalV1 joinField, final SObjectField field, final OptionalV1 function, final String alias) {
+    public static QueryV1.AggregatedField aggregatedField(final OptionalV1 function, final OptionalV1 joinField, final SObjectField field, final String alias) {
         return new AggregatedFieldImpl(joinField, field, function, alias);
     }
 
@@ -359,8 +359,8 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
         return new OrderImpl(field, isAscending ? SortOrder.ASCENDING : SortOrder.DESCENDING, joinField, nullsFirst);
     }
 
-    public static QueryV1.Order order(final QueryV1.AggregatedField aggrgegate, final Boolean isAscending, OptionalV1 nullsFirst) {
-        return new OrderImpl(aggrgegate, isAscending ? SortOrder.ASCENDING : SortOrder.DESCENDING, nullsFirst);
+    public static QueryV1.Order order(final QueryV1.AggregatedField aggregate, final Boolean isAscending, OptionalV1 nullsFirst) {
+        return new OrderImpl(aggregate, isAscending ? SortOrder.ASCENDING : SortOrder.DESCENDING, nullsFirst);
     }
 
     private with sharing class AggregatedFieldImpl implements QueryV1.AggregatedField {
@@ -391,14 +391,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
         public String toOrderString() {
             if (function.isPresent()) {
-                return ArrayV1.over(
-                        new List<String>{
-                                (String) function.get(),
-                                '(',
-                                field,
-                                ')'
-                        }
-                ).join('');
+                return ArrayV1.over(new List<String>{ (String) function.get(), '(', field, ')' } ).join('');
             } else {
                 return field;
             }
@@ -406,23 +399,9 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
         public override String toString() {
             if (function.isPresent()) {
-                return ArrayV1.over(
-                        new List<String>{
-                                (String) function.get(),
-                                '(',
-                                field,
-                                ') ',
-                                alias
-                        }
-                ).join('');
+                return ArrayV1.over(new List<String>{(String) function.get(), '(', field, ') ', alias }).join('');
             } else {
-                return ArrayV1.over(
-                        new List<String>{
-                                field,
-                                ' ',
-                                alias
-                        }
-                ).join('');
+                return ArrayV1.over(new List<String>{ field, ' ', alias }).join('');
             }
         }
     }
@@ -457,16 +436,10 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
         public override String toString() {
             if (nullsFirst.isPresent()) {
                 return (Boolean) nullsFirst.get()
-                        ? order == SortOrder.ASCENDING
-                                ? field + ' ASC NULLS FIRST'
-                                : field + ' DESC NULLS FIRST'
-                        : order == SortOrder.ASCENDING
-                                ? field + ' ASC NULLS LAST'
-                                : field + ' DESC NULLS LAST';
+                        ? order == SortOrder.ASCENDING ? field + ' ASC NULLS FIRST' : field + ' DESC NULLS FIRST'
+                        : order == SortOrder.ASCENDING ? field + ' ASC NULLS LAST' : field + ' DESC NULLS LAST';
             } else {
-                return order == SortOrder.ASCENDING
-                        ? field + ' ASC'
-                        : field + ' DESC';
+                return order == SortOrder.ASCENDING ? field + ' ASC' : field + ' DESC';
             }
         }
     }
@@ -504,74 +477,214 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
         }
     }
 
+    /**
+     * @description
+     * Method is solely for mocking use.
+     *
+     * @param type ignored.
+     *
+     * @return ignored.
+     */
     public QueryV1.API type(final SObjectType type) {
         throw new QueryException('Access denied');
     }
 
+    /**
+     * @description
+     * Method is solely for mocking use.
+     *
+     * @return ignored.
+     */
     public SObjectType type() {
         throw new QueryException('Access denied');
     }
 
+    /**
+     * @description
+     * Method is solely for mocking use.
+     *
+     * @param security ignored.
+     *
+     * @return ignored.
+     */
     public QueryV1.API security(final AccessLevel security) {
         throw new QueryException('Access denied');
     }
 
+    /**
+     * @description
+     * Method is solely for mocking use.
+     *
+     * @return ignored.
+     */
     public QueryV1.API count() {
         throw new QueryException('Access denied');
     }
 
+    /**
+     * @description
+     * Method is solely for mocking use.
+     *
+     * @return ignored.
+     */
     public QueryV1.API returningAll() {
         throw new QueryException('Access denied');
     }
 
-    public QueryV1.API returning(final SObjectField linkField, final Set<SObjectField> fields) {
+    /**
+     * @description
+     * Method is solely for mocking use.
+     *
+     * @param joinField ignored.
+     * @param fields ignored.
+     *
+     * @return ignored.
+     */
+    public QueryV1.API returning(final SObjectField joinField, final Set<SObjectField> fields) {
         throw new QueryException('Access denied');
     }
 
+    /**
+     * @description
+     * Method is solely for mocking use.
+     *
+     * @param fields ignored.
+     *
+     * @return ignored.
+     */
     public QueryV1.API returning(final Set<SObjectField> fields) {
         throw new QueryException('Access denied');
     }
 
+    /**
+     * @description
+     * Method is solely for mocking use.
+     *
+     * @param query ignored.
+     *
+     * @return ignored.
+     */
     public QueryV1.API returning(final QueryV1.API query) {
         throw new QueryException('Access denied');
     }
 
+    /**
+     * @description
+     * Method is solely for mocking use.
+     *
+     * @param fields ignored.
+     *
+     * @return ignored.
+     */
     public QueryV1.API returning(final Set<QueryV1.AggregatedField> fields) {
         throw new QueryException('Access denied');
     }
 
+    /**
+     * @description
+     * Method is solely for mocking use.
+     *
+     * @param condition ignored.
+     *
+     * @return ignored.
+     */
     public QueryV1.API matching(final String condition) {
         throw new QueryException('Access denied');
     }
 
+    /**
+     * @description
+     * Method is solely for mocking use.
+     *
+     * @param order ignored.
+     *
+     * @return ignored.
+     */
     public QueryV1.API ordered(final QueryV1.Order order) {
         throw new QueryException('Access denied');
     }
 
+    /**
+     * @description
+     * Method is solely for mocking use.
+     *
+     * @param order ignored.
+     *
+     * @return ignored.
+     */
     public QueryV1.API ordered(final Set<QueryV1.Order> order) {
         throw new QueryException('Access denied');
     }
 
+    /**
+     * @description
+     * Method is solely for mocking use.
+     *
+     * @param fields ignored.
+     *
+     * @return ignored.
+     */
     public QueryV1.API group(final Set<SObjectField> fields) {
         throw new QueryException('Access denied');
     }
 
+    /**
+     * @description
+     * Method is solely for mocking use.
+     *
+     * @param joinField ignored.
+     * @param fields ignored.
+     *
+     * @return ignored.
+     */
     public QueryV1.API group(final SObjectField joinField, final Set<SObjectField> fields) {
         throw new QueryException('Access denied');
     }
 
+    /**
+     * @description
+     * Method is solely for mocking use.
+     *
+     * @param condition ignored.
+     *
+     * @return ignored.
+     */
     public QueryV1.API has(final String condition) {
         throw new QueryException('Access denied');
     }
 
+    /**
+     * @description
+     * Method is solely for mocking use.
+     *
+     * @param bindVars ignored.
+     *
+     * @return ignored.
+     */
     public OptionalV1 execute(final OptionalV1 bindVars) {
         throw new QueryException('Access denied');
     }
 
+    /**
+     * @description
+     * Method is solely for mocking use.
+     *
+     * @param max ignored.
+     *
+     * @return ignored.
+     */
     public QueryV1.API max(final Integer max) {
         throw new QueryException('Access denied');
     }
 
+    /**
+     * @description
+     * Method is solely for mocking use.
+     *
+     * @param offset ignored.
+     *
+     * @return ignored.
+     */
     public QueryV1.API offset(final Integer offset) {
         throw new QueryException('Access denied');
     }

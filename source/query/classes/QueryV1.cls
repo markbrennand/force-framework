@@ -104,6 +104,10 @@ global with sharing class QueryV1 {
         return QueryAPI.API.type(type);
     }
 
+    global static API count(final SObjectType type) {
+        return QueryAPI.API.type(type).count();
+    }
+
     global static Order ascending(final SObjectField field) {
         return QueryAPI.order(OptionalV1.empty(), field, true, OptionalV1.empty());
     }
@@ -162,7 +166,7 @@ global with sharing class QueryV1 {
      * @return An aggregate field which can be used in the query.
      */
     global static AggregatedField aggregatedField(final SObjectField field, final String alias) {
-        return QueryAPI.aggregatedField(OptionalV1.empty(), field, OptionalV1.empty(), alias);
+        return QueryAPI.aggregatedField(OptionalV1.empty(), OptionalV1.empty(), field, alias);
     }
 
     /**
@@ -176,7 +180,7 @@ global with sharing class QueryV1 {
      * @return An aggregate field which can be used in the query.
      */
     global static AggregatedField aggregatedField(final SObjectField joinField, final SObjectField field, final String alias) {
-        return QueryAPI.aggregatedField(OptionalV1.of(joinField), field, OptionalV1.empty(), alias);
+        return QueryAPI.aggregatedField(OptionalV1.empty(), OptionalV1.of(joinField), field, alias);
     }
 
     /**
@@ -190,21 +194,21 @@ global with sharing class QueryV1 {
      * @return An aggregate field which can be used in the query.
      */
     global static AggregatedField aggregatedField(final String function, final SObjectField field, final String alias) {
-        return QueryAPI.aggregatedField(OptionalV1.empty(), field, OptionalV1.of(function), alias);
+        return QueryAPI.aggregatedField(OptionalV1.of(function), OptionalV1.empty(), field, alias);
     }
 
     /**
      * @description
      * Builds a field from a related object which may be used to aggregate data in a query.
      *
-     * @param joinField The field which links the related object.
      * @param function The aggregation function to use, e.g. COUNT or SUM.
+     * @param joinField The field which links the related object.
      * @param field The field in the related object to aggregate the results by.
      * @param alias The AggregateResult records returned will have the value keyed by the alias.
      *
      * @return An aggregate field which can be used in the query.
      */
-    global static AggregatedField aggregatedField(final SObjectField joinField, final String function, final SObjectField field, final String alias) {
-        return QueryAPI.aggregatedField(OptionalV1.of(joinField), field, OptionalV1.of(function), alias);
+    global static AggregatedField aggregatedField(final String function, final SObjectField joinField, final SObjectField field, final String alias) {
+        return QueryAPI.aggregatedField(OptionalV1.of(function), OptionalV1.of(joinField), field, alias);
     }
 }

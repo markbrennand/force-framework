@@ -298,11 +298,11 @@ public with sharing class QueryTests {
             aggregates = (List<AggregateResult>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
                     .returning(new Set<QueryV1.AggregatedField>{
-                            QueryV1.aggregatedField(Contact.AccountId, 'SUM', Account.AnnualRevenue, 'Revenue'),
+                            QueryV1.aggregatedField('SUM', Contact.AccountId, Account.AnnualRevenue, 'Revenue'),
                             QueryV1.aggregatedField(Contact.FirstName, 'ContactFirstName')
                     })
                     .group(new Set<SObjectField> { Contact.FirstName })
-                    .ordered(QueryV1.ascending(QueryV1.aggregatedField(Contact.AccountId, 'SUM', Account.AnnualRevenue, 'Revenue')))
+                    .ordered(QueryV1.ascending(QueryV1.aggregatedField('SUM', Contact.AccountId, Account.AnnualRevenue, 'Revenue')))
                     .ordered(QueryV1.descending(QueryV1.aggregatedField(Contact.FirstName, 'ContactFirstName'), false))
                     .execute(OptionalV1.empty())
                     .get();
@@ -637,40 +637,39 @@ public with sharing class QueryTests {
         TestHelper.setNOW();
         createData();
         System.runAs(TestHelper.getUser(TESTING)) {
-            Assert.areEqual(7, QueryV1.of(Contact.SObjectType).security(AccessLevel.SYSTEM_MODE).count().execute(OptionalV1.empty()).get());
+            Assert.areEqual(7, QueryV1.count(Contact.SObjectType).security(AccessLevel.SYSTEM_MODE).execute(OptionalV1.empty()).get());
             Assert.areEqual(
                     4,
-                    QueryV1.of(Contact.SObjectType)
+                    QueryV1.count(Contact.SObjectType)
                             .security(AccessLevel.SYSTEM_MODE)
-                            .count()
                             .matching('LastName = :lastName')
                             .execute(OptionalV1.of(new Map<String, Object> { 'lastName' => '1' }))
                             .get()
             );
 
             try {
-                QueryV1.of(Contact.SObjectType).security(AccessLevel.SYSTEM_MODE).count().returningAll();
+                QueryV1.count(Contact.SObjectType).security(AccessLevel.SYSTEM_MODE).returningAll();
                 Assert.fail();
             } catch (QueryException qe) {
                 Assert.areEqual('Operation may not be performed on a count query', qe.getMessage());
             }
 
             try {
-                QueryV1.of(Contact.SObjectType).security(AccessLevel.SYSTEM_MODE).count().returning(new Set<SObjectField>{ Contact.Name });
+                QueryV1.count(Contact.SObjectType).security(AccessLevel.SYSTEM_MODE).returning(new Set<SObjectField>{ Contact.Name });
                 Assert.fail();
             } catch (QueryException qe) {
                 Assert.areEqual('Operation may not be performed on a count query', qe.getMessage());
             }
 
             try {
-                QueryV1.of(Contact.SObjectType).security(AccessLevel.SYSTEM_MODE).count().returning(Contact.AccountId, new Set<SObjectField>{ Account.Name });
+                QueryV1.count(Contact.SObjectType).security(AccessLevel.SYSTEM_MODE).returning(Contact.AccountId, new Set<SObjectField>{ Account.Name });
                 Assert.fail();
             } catch (QueryException qe) {
                 Assert.areEqual('Operation may not be performed on a count query', qe.getMessage());
             }
 
             try {
-                QueryV1.of(Contact.SObjectType).security(AccessLevel.SYSTEM_MODE).count().returning(new Set<QueryV1.AggregatedField>{
+                QueryV1.count(Contact.SObjectType).security(AccessLevel.SYSTEM_MODE).returning(new Set<QueryV1.AggregatedField>{
                         QueryV1.aggregatedField(Contact.Name, 'ContactName')
                 });
                 Assert.fail();

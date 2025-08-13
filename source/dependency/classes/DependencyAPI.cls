@@ -408,7 +408,7 @@ public with sharing virtual class DependencyAPI implements API {
                 .security(AccessLevel.USER_MODE)
                 .returning(new Set<SObjectField> { Binding__c.Type__c, Binding__c.Action__c })
                 .execute(OptionalV1.empty())
-                .call(new DuplicateCheck());
+                .then(new DuplicateCheck());
     }
 
     /**

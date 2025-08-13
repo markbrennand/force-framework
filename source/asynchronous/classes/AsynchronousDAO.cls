@@ -222,10 +222,9 @@ public with sharing virtual class AsynchronousDAO implements API {
                     AsynchronousV1.Status.RUNNING.name()
             };
 
-            return (Integer) QueryV1.of(AsynchronousJob__c.SObjectType)
+            return (Integer) QueryV1.count(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.USER_MODE)
                     .matching('OwnerId = :ownerId AND Status__c IN :schedulableStatuses AND Runnable__c != :schedulerClass')
-                    .count()
                     .execute(OptionalV1.of(
                             new Map<String, Object> {
                                     'ownerId' => UserInfo.getUserId(),
@@ -249,10 +248,9 @@ public with sharing virtual class AsynchronousDAO implements API {
         public Integer countActiveObjects(final AsynchronousJob__c asyncObject) {
             AssertionV1.isNotNull(asyncObject, 'argument: AsynchronousDAO.apiCountActiveObjects.asyncObject');
 
-            return (Integer) QueryV1.of(AsynchronousJob__c.SObjectType)
+            return (Integer) QueryV1.count(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.USER_MODE)
                     .matching('OwnerId = :ownerId AND Runnable__c = :runnableClass AND Status__c = :runningStatus')
-                    .count()
                     .execute(OptionalV1.of(new Map<String, Object> {
                             'ownerId' => UserInfo.getUserId(),
                             'runnableClass' => asyncObject.Runnable__c,
@@ -316,7 +314,7 @@ public with sharing virtual class AsynchronousDAO implements API {
                     .security(AccessLevel.USER_MODE)
                     .matching('AsynchronousJob__c IN :allIds')
                     .execute(OptionalV1.of(new Map<String, Object> { 'allIds' => allIds }))
-                    .call(new QueryHelper.SObjectDeleter(AccessLevel.USER_MODE));
+                    .then(new QueryHelper.SObjectDeleter(AccessLevel.USER_MODE));
 
             Database.upsert(newStates, AccessLevel.USER_MODE);
 
