@@ -1,8 +1,9 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
+ * <p>
  * Helper class providing utility methods for Query API.
+ * <p>
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */

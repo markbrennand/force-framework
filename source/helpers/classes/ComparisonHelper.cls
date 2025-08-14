@@ -1,12 +1,13 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
+ * <p>
  * Helper class providing utility methods for object comparison.
- * <br><br>
+ * <p>
  * If the objects are SObjects, or a Collection of SObjects, additional matching logic is applied. Fields of the
  * SObject being compared to the expected one must match all of those in the expected. Fields not defined in the
  * expected may be present in the one being compared.
+ * <p>
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */
@@ -14,6 +15,7 @@ public with sharing class ComparisonHelper {
 
     /**
      * @description
+     * <p>
      * Default object value comparators
      *
      * Each comparator will be called in turn to try to match two objects.
@@ -25,8 +27,9 @@ public with sharing class ComparisonHelper {
 
     /**
      * @description
+     * <p>
      * Compares two objects for equality.
-     * <br><br>
+     * <p>
      * A built in List of comparators is used to check. If a match is made by one of the comparators, the objects
      * are considered equal.
      *
@@ -41,8 +44,9 @@ public with sharing class ComparisonHelper {
 
     /**
      * @description
+     * <p>
      * Compares two objects for equality using additional comparators.
-     * <br><br>
+     * <p>
      * The built in List of comparators is supplemented with the additional comparators. When checking for equality,
      * the additional comparators are used before the built ins.
      *
@@ -86,8 +90,9 @@ public with sharing class ComparisonHelper {
 
     /**
      * @description
+     * <p>
      * Utility class for comparing two SObjects.
-     * <br><br>
+     * <p>
      * The object being compared to the required object.
      * - must have field values identical to those set in the required object.
      * - may have values for fields that do not have a value in the required object.
@@ -97,6 +102,7 @@ public with sharing class ComparisonHelper {
 
         /**
          * @description
+         * <p>
          * Constructs a matcher for the given object.
          *
          * @param required The object that must be matched.
@@ -107,6 +113,7 @@ public with sharing class ComparisonHelper {
 
         /**
          * @description
+         * <p>
          * Determines a hash code for the matcher.
          *
          * @return The hash code.
@@ -117,6 +124,7 @@ public with sharing class ComparisonHelper {
 
         /**
          * @description
+         * <p>
          * Compares the given object to the one to be matched.
          *
          * @param other The object to be compared.
@@ -144,12 +152,14 @@ public with sharing class ComparisonHelper {
 
     /**
      * @description
+     * <p>
      * Comparator for two SObjects.
      */
     public with sharing class SObjectComparator implements Comparator<Object> {
 
         /**
          * @description
+         * <p>
          * Compares one SObject to another.
          *
          * @param param1 The first object.
@@ -166,12 +176,14 @@ public with sharing class ComparisonHelper {
 
     /**
      * @description
+     * <p>
      * Default Comparator for two Objects.
      */
     private with sharing class ObjectComparator implements Comparator<Object> {
 
         /**
          * @description
+         * <p>
          * Determines whether one object matches another.
          *
          * @param param1 The first object.

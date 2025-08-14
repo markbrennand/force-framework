@@ -1,11 +1,12 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
+ * <p>
  * Implementation of the Asynchronous.Job interface for use by the default implementation of the framework.
- * <br><br>
+ * <p>
  * The class is virtual so other implementations may re-use it. The constructor, though, is protected so the
  * class may only be extended and never instantiated outside the default implementation.
+ * <p>
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */
@@ -13,6 +14,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * The Id of the AsynchronousJob__c object in the data store for the job.
      */
     @TestVisible
@@ -20,29 +22,33 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Current status of the job.
      */
     private AsynchronousV1.Status status;
 
     /**
      * @description
+     * <p>
      * The Id of the user the Asynchronous framework is managing the job for.
      */
     private String ownerId;
 
     /**
      * @description
+     * <p>
      * The runnable class providing the logic to be run asynchronously.
      */
     private AsynchronousV1.Runnable runnable;
 
     /**
      * @description
+     * <p>
      * The active state for the job.
-     * <br><br>
+     * <p>
      * The state is the work area for the job. It can be used to pass arguments to the job. Store data to be
      * saved on job completion. Modify data between retries. etc.
-     * <br><br>
+     * <p>
      * State can be updated by the Runnable. Any changes will be preserved on return of control to the Asynchronous
      * framework. The state will not be preserved if the Runnable throws an Exception.
      */
@@ -50,38 +56,44 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * The user assigned reference for the job.
      */
     private String reference;
 
     /**
      * @description
+     * <p>
      * The maximum number of retries that will be made to re-run the job after initial failure.
      */
     private Integer maximumRetries;
 
     /**
      * @description
+     * <p>
      * The number of milliseconds to wait between retries.
      */
     private Integer retryInterval;
 
     /**
      * @description
+     * <p>
      * The number of retries made or that will be made when the job is next run.
      */
     private Integer retryNumber;
 
     /**
      * @description
+     * <p>
      * The date and time at which the job is next scheduled to run.
      */
     private Datetime scheduledRunTime;
 
     /**
      * @description
+     * <p>
      * The date and time at which the job last ran.
-     * <br><br>
+     * <p>
      * The value in this field will be set by the Asynchronous Scheduler when the Apex job is queued. If the
      * Runnable called by the job does not throw an Exception, the value will be updated to the timestamp at
      * which the Runnable's run method was called.
@@ -90,6 +102,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Allow extension but not modification.
      */
     @SuppressWarnings('PMD.EmptyStatementBlock')
@@ -97,6 +110,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Gets the id of the AsynchronousJob__c object representing the job.
      *
      * @return The object Id.
@@ -107,6 +121,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Sets the id of the AsynchronousJob__c object representing the job.
      *
      * @param asyncObjectId The new job id.
@@ -120,6 +135,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Returns the current status of the job.
      *
      * @return The job status.
@@ -130,6 +146,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Sets the status of the job to new value.
      *
      * @param status The new status for the job.
@@ -144,6 +161,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Gets the Id of the user the Asynchronous framework is managing the job for.
      *
      * @return The Id of the user.
@@ -154,6 +172,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Sets the owner id of the job to new value.
      *
      * @param ownerId The new owner id for the job.
@@ -168,6 +187,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Gets the runnable class providing the logic to be executed asynchronously.
      *
      * @return The runnable class.
@@ -178,6 +198,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Sets the class providing the logic to be executed asynchronously.
      *
      * @param runnableTypeName The class providing the logic.
@@ -199,6 +220,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Gets the active state associated with the job.
      *
      * @return The active state.
@@ -209,6 +231,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Sets the active state for the job.
      *
      * @param state The state.
@@ -220,6 +243,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Gets the user assigned reference for the job.
      *
      * @return The reference.
@@ -230,6 +254,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Sets the user assigned reference for the job.
      *
      * @param reference The reference.
@@ -243,6 +268,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Gets the maximum number of retries that will be made to re-run the job after initial failure.
      *
      * @return The number of retries.
@@ -253,6 +279,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Sets the maximum number of retries that will be made to re-run the job after initial failure.`
      *
      * @param maximumRetries The number of retries.
@@ -268,6 +295,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Gets the number of milliseconds to wait between retries.
      *
      * @return The number of milliseconds.
@@ -278,6 +306,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Sets the number of milliseconds to wait between retries.
      *
      * @param retryInterval The number of milliseconds.
@@ -293,6 +322,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Gets number of retries made or that will be made when the job is next run.
      *
      * @return The number of retries made.
@@ -303,6 +333,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Sets the number of retries made or that will be made when the job is next run.
      *
      * @param retryNumber The number of retries made.
@@ -318,6 +349,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Determines the number of retries that remain to be made for the job.
      *
      * @return The number of retries that remain.
@@ -328,6 +360,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Gets the date and time at which the job is next scheduled to run.
      *
      * @return The date and time.
@@ -338,6 +371,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Sets the date and time at which the job is next scheduled to run.
      *
      * @param scheduledRunTime The date and time.
@@ -352,6 +386,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Gets the date and time at which the job last ran.
      *
      * @return The date and time.
@@ -362,6 +397,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Sets the date and time at which the job last ran.
      *
      * @param lastRunTime The date and time.
@@ -375,6 +411,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Given an AsynchronousJob__c object fetched from the data store and its associated state data, this method
      * return the equivalent internal representation.
      *
@@ -408,6 +445,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
 
     /**
      * @description
+     * <p>
      * Given an internal representation of a job, this method returns the equivalent AsynchronousJob__c object.
      *
      * @param asyncJob The internal representation of a job.

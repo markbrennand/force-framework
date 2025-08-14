@@ -1,10 +1,11 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
+ * <p>
  * Unit test for the AsynchronousJob class.
- * <br><br>
+ * <p>
  * As Assert throws an Exception which cannot be caught, valid values must be supplied for the fields.
+ * <p>
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */

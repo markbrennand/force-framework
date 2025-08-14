@@ -1,17 +1,18 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
+ * <p>
  * Class providing the default implementation of the Asynchronous LWC API.
- * <br><br>
+ * <p>
  * The implementation of the API is hidden in the private Implementation class. The class is hidden so an application
  * cannot access the class to mis-use it.
- * <br><br>
+ * <p>
  * All application access is restricted to the API instance variable API. This ensures the application can only
  * ever call the methods of the API interface.
- * <br><br>
+ * <p>
  * The outer class implements the API only to allow it to be mocked. Any calls to the API method implementations
  * in the outer class will throw an Exception.
+ * <p>
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */
@@ -21,12 +22,14 @@ public with sharing virtual class AsynchronousLWC implements API {
 
     /**
      * @description
+     * <p>
      * Interface defining the calls that may be made from the Asynchronous Job LWC.
      */
     public interface API {
 
         /**
          * @description
+         * <p>
          * Returns a List of the AsynchronousJob__c objects matching the filter criteria.
          *
          * @param filters Query filters to be applied.
@@ -40,6 +43,7 @@ public with sharing virtual class AsynchronousLWC implements API {
 
         /**
          * @description
+         * <p>
          * Deletes the given AsynchronousJob__c records.
          *
          * @param jobIds The ids of the jobs to delete.
@@ -48,6 +52,7 @@ public with sharing virtual class AsynchronousLWC implements API {
 
         /**
          * @description
+         * <p>
          * Re-runs the given AsynchronousJob__c records.
          *
          * @param jobIds The ids of the jobs to re-run.
@@ -56,6 +61,7 @@ public with sharing virtual class AsynchronousLWC implements API {
 
         /**
          * @description
+         * <p>
          * Calculates the total number of objects per status for the current user.
          *
          * @return The totals.
@@ -65,12 +71,13 @@ public with sharing virtual class AsynchronousLWC implements API {
 
     /**
      * @description
+     * <p>
      * Active LWC instance.
-     * <br><br>
+     * <p>
      * The instance is injected from the Registry. As the instance is injected, a development version of the
      * interface could be used to provide data to the LWC during development. This would allow the LWC to be
      * developed in isolation from the real implementation being developed.
-     * <br><br>
+     * <p>
      * The instance is test visible so it can be mocked.
      */
     @TestVisible
@@ -88,8 +95,9 @@ public with sharing virtual class AsynchronousLWC implements API {
 
     /**
      * @description
+     * <p>
      * Allow extension but not construction.
-     * <br><br>
+     * <p>
      * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
      */
     @SuppressWarnings('PMD.EmptyStatementBlock')
@@ -97,12 +105,14 @@ public with sharing virtual class AsynchronousLWC implements API {
 
     /**
      * @description
+     * <p>
      * Class providing the implementation of the LWC.
      */
     private with sharing class Implementation implements API {
 
         /**
          * @description
+         * <p>
          * Returns a List of the AsynchronousJob__c objects matching the filter criteria.
          *
          * @param filters Query filters to be applied.
@@ -158,6 +168,7 @@ public with sharing virtual class AsynchronousLWC implements API {
 
         /**
          * @description
+         * <p>
          * Deletes the given AsynchronousJob__c records.
          *
          * @param jobIds The ids of the jobs to delete.
@@ -173,6 +184,7 @@ public with sharing virtual class AsynchronousLWC implements API {
 
         /**
          * @description
+         * <p>
          * Re-runs the given AsynchronousJob__c records.
          *
          * @param jobIds The ids of the jobs to re-run.
@@ -191,6 +203,7 @@ public with sharing virtual class AsynchronousLWC implements API {
 
         /**
          * @description
+         * <p>
          * Calculates the total number of objects per status for the current user.
          *
          * @return The totals.
@@ -220,6 +233,7 @@ public with sharing virtual class AsynchronousLWC implements API {
 
         /**
          * @description
+         * <p>
          * Converts the filters argument from the LWC to a WHERE clause.
          *
          * @param filters The query filters.
@@ -282,12 +296,14 @@ public with sharing virtual class AsynchronousLWC implements API {
 
     /**
      * @description
+     * <p>
      * Class providing check on Binding made to AsynchronousV1.LWC.
      */
     public with sharing class BindingCheck implements DependencyV1.BindingCheck {
 
         /**
          * @description
+         * <p>
          * Checks that a valid binding has been made to AsynchronousV1.API.
          *
          * @param forType The type being bound to, AsynchronousV1.API.
@@ -307,8 +323,9 @@ public with sharing virtual class AsynchronousLWC implements API {
 
     /**
      * @description
+     * <p>
      * Creates the default LWC API implementation.
-     * <br><br>
+     * <p>
      * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
@@ -316,6 +333,7 @@ public with sharing virtual class AsynchronousLWC implements API {
 
         /**
          * @description
+         * <p>
          * Constructs a new instance of tghe API implementation.
          *
          * @return The API implementation.
@@ -327,6 +345,7 @@ public with sharing virtual class AsynchronousLWC implements API {
 
     /**
      * @description
+     * <p>
      * Callback class to re-queue a job.
      */
     private with sharing class RequeueJob extends ArrayV1.Callback {
@@ -342,6 +361,7 @@ public with sharing virtual class AsynchronousLWC implements API {
 
     /**
      * @description
+     * <p>
      * Callback class to build totals for Job status.
      */
    private with sharing class BuildTotals extends ArrayV1.Callback {
@@ -354,6 +374,7 @@ public with sharing virtual class AsynchronousLWC implements API {
 
     /**
      * @description
+     * <p>
      * Callback class to build the Map representing a job and add it to the List to return.
      */
     private with sharing class ResultBuilder extends ArrayV1.Callback {
@@ -384,12 +405,14 @@ public with sharing virtual class AsynchronousLWC implements API {
 
     /**
      * @description
+     * <p>
      * Transformer class to build the List of jobs from the matches.
      */
     private with sharing class JobMatchProcessor implements OptionalV1.Function {
 
         /**
          * @description
+         * <p>
          * Converts each matching job to a Map.
          *
          * @param value The matching jobs.
@@ -410,12 +433,14 @@ public with sharing virtual class AsynchronousLWC implements API {
 
     /**
      * @description
+     * <p>
      * Transformer to build Map of Status counts from the List of aggregate results.
      */
     private with sharing class TotalsTransformer implements OptionalV1.Function {
 
         /**
          * @description
+         * <p>
          * Converts the given totals to a Map which is keyed by the status name.
          *
          * @param value The total for each status.
@@ -436,6 +461,7 @@ public with sharing virtual class AsynchronousLWC implements API {
 
     /**
       * @description
+      * <p>
       * Method is solely for mocking use.
       *
       * @param filters ignored.
@@ -451,6 +477,7 @@ public with sharing virtual class AsynchronousLWC implements API {
 
     /**
       * @description
+      * <p>
       * Method is solely for mocking use.
       *
       * @param jobIds ignored.
@@ -461,6 +488,7 @@ public with sharing virtual class AsynchronousLWC implements API {
 
     /**
       * @description
+      * <p>
       * Method is solely for mocking use.
       *
       * @param jobIds ignored.
@@ -471,6 +499,7 @@ public with sharing virtual class AsynchronousLWC implements API {
 
     /**
       * @description
+      * <p>
       * Method is solely for mocking use.
       *
       * @return ignored.

@@ -1,15 +1,16 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
+ * <p>
  * Class defining the services offered by the Asynchronous API.
- * <br><br>
+ * <p>
  * All access to the API must be through this class.
- * <br><br>
+ * <p>
  * Asynchronous jobs should first be created using the createJob method. They can then be run by calling the
  * queueJobs method.
- * <br><br>
+ * <p>
  * See <a href=../../source/asynchronous/README.md target="_blank">README</a> for full details of the Asynchronous API.
+ * <p>
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */
@@ -18,26 +19,28 @@ global with sharing virtual class AsynchronousV1 {
 
     /**
      * @description
+     * <p>
      * Exception thrown when an operation in the Asynchronous API fails.
      */
     global with sharing class APIException extends Exception {}
 
     /**
      * @description
+     * <p>
      * Defines the status of an AsynchronousJob__c object under the control of this framework.
-     * <br><br>
+     * <p>
      * A job can only be in a single state at any one time.
-     * <br><br>
+     * <p>
      * PENDING - The job has been created but a job has not been queued for it.
-     * <br><br>
+     * <p>
      * QUEUED - The job has been queued for processing.
-     * <br><br>
+     * <p>
      * RUNNING - The job is running.
-     * <br><br>
+     * <p>
      * SUCCEEDED - The job ran to completion successfully.
-     * <br><br>
+     * <p>
      * FAILED - The last job failed to run and the maximum number of retries has been exceeded.
-     * <br><br>
+     * <p>
      * CANCELLED - The job has been cancelled.
      */
     global enum Status {
@@ -51,14 +54,16 @@ global with sharing virtual class AsynchronousV1 {
 
     /**
      * @description
+     * <p>
      * Information about a job being managed by the framework.
-     * <br><br>
+     * <p>
      * The implementation will be specific to the API implementation.
      */
     global interface Job {
 
         /**
          * @description
+         * <p>
          * Return the current status of the job managed by the API implementation.
          *
          * @return The jobs's status.
@@ -67,6 +72,7 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Returns the id of the user the job is being run for by the API implementation.
          *
          * @return The user id.
@@ -75,6 +81,7 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Returns the Runnable implementation for ths job managed by the API implementation.
          *
          * @return The Runnable implementation.
@@ -83,8 +90,9 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Returns the state information assigned to the job on creation by the API implementation.
-         * <br><br>
+         * <p>
          * The state may be updated by the call to Runnable.run for the job, though only when no Exception is thrown
          * by the method.
          *
@@ -94,8 +102,9 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Sets a new state for the job managed by the API implementation
-         * <br><br>
+         * <p>
          * New state will only be preserved if the Apex request it is set within does not throw an Exception.
          *
          * @param state The new state.
@@ -104,6 +113,7 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Returns the user's reference assigned to the job on creation by the API implementation.
          *
          * @return The reference.
@@ -112,9 +122,10 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Returns the maximum number of re-tries to be made to process the job by the API implementation if it fails
          * to run.
-         * <br><br>
+         * <p>
          * Each re-try will be made if the Runnable.run method throws an Exception.
          *
          * @return The maximum number.
@@ -123,8 +134,9 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * The current number of re-tries made by the API implementation for the job.
-         * <br><br>
+         * <p>
          * Re-try number 0 is the first attempt to run it.
          *
          * @return The current re-try number.
@@ -133,6 +145,7 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Returns the number of re-tries that are remaining to be made by the API implementation for the job.
          *
          * @return Number of re-tries remaining.
@@ -141,6 +154,7 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Returns the number of milliseconds that the implementation of the API will wait between re-try attempts.
          *
          * @return The number of milliseconds.
@@ -149,6 +163,7 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Returns the date and time at which the API implementation is next scheduled to run the job.
          *
          * @return The date and time.
@@ -157,6 +172,7 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Returns the date and time at which the API implementation last run the job.
          *
          * @return The date and time.
@@ -164,18 +180,18 @@ global with sharing virtual class AsynchronousV1 {
         Datetime getLastRunTime();
     }
 
-
     /**
      * @description
+     * <p>
      * Interface defining the logic specific to a job run by the framework.
-     * <br><br>
+     * <p>
      * When the job is run by the framework, the job specific implementation of this interface is created and
      * its run method is called. As a new Runnable instance is created each time the job is run, implementations
      * of this interface cannot preserve state in member variables. The Job's state can be used for that.
-     * <br><br>
+     * <p>
      * Concurrency is controlled by the maximum active value. Any implementation of the API must guarantee that
      * no more than this number of instances of the Runnable may be active at any one time.
-     * <br><br>
+     * <p>
      * The AsynchronousRunnable class provides a full implementation of this interface. If possible you should
      * use this class and only override the methods you need behaviour other than the default for.
      */
@@ -183,8 +199,9 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * The class of the RunnableJob's implementation.
-         * <br><br>
+         * <p>
          * The class can either be a Runnable or Types.Factory implementation. In the case of the latter,
          * the class returned by the newInstance method must implement Runnable.
          *
@@ -194,8 +211,9 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Concurrency is controlled by the RunnableJob's implementation.
-         * <br><br>
+         * <p>
          * The maximum active value defines how many instances of the RunnableJob's implementation may be active
          * concurrently. Any implementation of the API interface must guarantee that this value is enforced.
          *
@@ -205,8 +223,9 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Called when the job is run by the framework.
-         * <br><br>
+         * <p>
          * Any job specific data set in the state when the job was created can be accessed from the state in the job
          * argument.
          *
@@ -217,8 +236,9 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Called when a job has run to completion successfully in the framework.
-         * <br><br>
+         * <p>
          * The return value indicates whether the API implementation is to keep a record of the job or delete it.
          *
          * @param asyncJob The job that ran to completion.
@@ -229,8 +249,9 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Called when a job has failed to run and all is re-tries have been exhausted.
-         * <br><br>
+         * <p>
          * The return value indicates whether the API implementation is to keep a record of the job or delete it.
          *
          * @param asyncJob The job that failed.
@@ -242,8 +263,9 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Called when a job has been cancelled.
-         * <br><br>
+         * <p>
          * The return value indicates whether the API implementation is to keep a record of the job or delete it.
          *
          * @param asyncJob The job that has been cancelled.
@@ -254,13 +276,14 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * An API implementation must call this method each time an Exception is caught when running a job.
-         * <br><br>
+         * <p>
          * The Exception will be thrown from the RunnableJob.run method. A Status of QUEUED should be returned in
          * most circumstances to re-try the job. Say, for example though, that a particular type of Exception was
          * thrown that meant the job would always fail, a Status of CANCELLED could be returned to indicate no
          * further re-tries are to be performed.
-         * <br><br>
+         * <p>
          * The return value indicates new Status value to assign to the job.
          *
          * @param asyncJob The job that has been cancelled.
@@ -273,12 +296,13 @@ global with sharing virtual class AsynchronousV1 {
 
     /**
      * @description
+     * <p>
      * Implementation of RunnableJob that classes may extend to make coding the logic of a job simpler.
-     * <br><br>
+     * <p>
      * Default implementations of all the methods are coded in this class. They may be overridden.
-     * <br><br>
+     * <p>
      * The Asynchronous.ApexJobRunnable.run() method will need to be implemented to code the logic for the job.
-     * <br><br>
+     * <p>
      * Classes extending this class must have a no-op constructor which calls the constructor for this class with
      * the Type of the extending class.
      */
@@ -286,6 +310,7 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Constructs an instance of the class which is a proxy for the sub-class to be run.
          *
          * @param type The sub-class to be run.
@@ -296,8 +321,9 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Returns the maximum number of concurrent executions of the Runnable that are allowed.
-         * <br><br>
+         * <p>
          * If the concurrency is exceeded, a job will not be started.
          *
          * @return Maximum concurrent executions.
@@ -308,8 +334,9 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Called on successful completion of the Asynchronous__c object for the class.
-         * <br><br>
+         * <p>
          * To succeed, the class's run method must not have thrown an Exception when called.
          *
          * @param asyncJob The job that has succeeded.
@@ -322,8 +349,9 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Called on failure to run the job after exhausting the Asynchronous__c object's re-tries.
-         * <br><br>
+         * <p>
          * To fail, the class's run method must have thrown an Exception every time it was called.
          *
          * @param asyncJob The job that has failed.
@@ -337,6 +365,7 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Called when an Asynchronous__c object has its status changed to CANCELLED.
          *
          * @param asyncJob The job that has been cancelled.
@@ -349,9 +378,10 @@ global with sharing virtual class AsynchronousV1 {
 
         /**
          * @description
+         * <p>
          * Called when an Exception occurs during the running of an Asynchronous__c object and there are re-tries left to
          * be made.
-         * <br><br>
+         * <p>
          * The status value returned by this method determines what happens to the job. Return QUEUED to re-try the
          * job. Return CANCELLED if the job is not to be re-tried and no further processing of it is to be made. The
          * onCancellation method of this class will be called.
@@ -368,11 +398,12 @@ global with sharing virtual class AsynchronousV1 {
 
     /**
      * @description
+     * <p>
      * Creates a new instance of a job to be managed by the injected API implementation.
-     * <br><br>
+     * <p>
      * The Apex class must implement the Runnable interface. If it doesn't, the implementation will throw an
      * exception.
-     * <br><br>
+     * <p>
      * The state is data specific to the job. It is passed to the Runnable for the job when it is invoked. It
      * can contain any data an application chooses. For example, it may include arguments specific to the job.
      *
@@ -400,6 +431,7 @@ global with sharing virtual class AsynchronousV1 {
 
     /**
      * @description
+     * <p>
      * Schedules the given job for processing by the injected API implementation.
      *
      * @param asyncJobs The jobs to schedule for processing.
@@ -412,6 +444,7 @@ global with sharing virtual class AsynchronousV1 {
 
     /**
      * @description
+     * <p>
      * Returns a List of the AsynchronousJob__c objects matching the filter criteria.
      *
      * @param filters Query filters to be applied.
@@ -433,6 +466,7 @@ global with sharing virtual class AsynchronousV1 {
 
     /**
      * @description
+     * <p>
      * Deletes the given AsynchronousJob__c records.
      *
      * @param jobIds The ids of the jobs to delete.
@@ -444,6 +478,7 @@ global with sharing virtual class AsynchronousV1 {
 
     /**
      * @description
+     * <p>
      * Re-runs the given AsynchronousJob__c records.
      *
      * @param jobIds The ids of the jobs to re-run.
@@ -455,6 +490,7 @@ global with sharing virtual class AsynchronousV1 {
 
     /**
      * @description
+     * <p>
      * Calculates the total number of objects per status for the current user.
      *
      * @return The totals.

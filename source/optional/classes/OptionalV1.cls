@@ -1,11 +1,12 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
+ * <p>
  * Class providing an implementation of Optional which should be used in preference to using null to indicate a
  * value is un-assigned.
- * <br><br>
+ * <p>
  * See <a href=../../source/optional/README.md target="_blank">README</a> for full details of Optional.
+ * <p>
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */
@@ -14,14 +15,16 @@ global with sharing class OptionalV1 {
 
     /**
      * @description
+     * <p>
      * Interface to allow Optional value to be processed.
      */
     global interface Function {
 
         /**
          * @description
+         * <p>
          * Method called to process the value of an Optional.
-         * <br><br>
+         * <p>
          * The implementor must return an Optional representing the result of the processing.
          *
          * @param value The Optional to be processed.
@@ -33,24 +36,28 @@ global with sharing class OptionalV1 {
 
     /**
      * @description
+     * <p>
      * Does the Optional have a value.
      */
     private final Boolean isPresent;
 
     /**
      * @description
+     * <p>
      * The value of the Optional.
      */
     private final Object value;
 
     /**
      * @description
+     * <p>
      * Exception thrown to indicate an attempt was made to use an un-assigned value.
      */
     global with sharing class NoSuchElementException extends Exception {}
 
     /**
      * @description
+     * <p>
      * Constructs an Optional which has no value.
      */
     private OptionalV1() {
@@ -59,6 +66,7 @@ global with sharing class OptionalV1 {
 
     /**
      * @description
+     * <p>
      * Constructs an Optional with a value.
      *
      * @param value The value to assign to the Optional.
@@ -70,6 +78,7 @@ global with sharing class OptionalV1 {
 
     /**
      * @description
+     * <p>
      * Returns an un-assigned Optional.
      *
      * @return An un-assigned Optional.
@@ -80,6 +89,7 @@ global with sharing class OptionalV1 {
 
     /**
      * @description
+     * <p>
      * Returns an Optional assigned to a value.
      *
      * @param value The value to assign the the Optional.
@@ -92,6 +102,7 @@ global with sharing class OptionalV1 {
 
     /**
      * @description
+     * <p>
      * Returns an Optional assigned to a value or an unassigned Optional if the argument is null.
      *
      * @param value The value to assign the the Optional.
@@ -104,6 +115,7 @@ global with sharing class OptionalV1 {
 
     /**
      * @description
+     * <p>
      * Returns true if the Optional has a value, false if not.
      *
      * @return True if the Optional has a value.
@@ -114,8 +126,9 @@ global with sharing class OptionalV1 {
 
     /**
      * @description
+     * <p>
      * Returns the value assigned to the Optional.
-     * <br><br>
+     * <p>
      * If the Optional is un-assigned, a NoSuchElementException is thrown.
      *
      * @return The value assigned to the Optional.
@@ -130,6 +143,7 @@ global with sharing class OptionalV1 {
 
     /**
      * @description
+     * <p>
      * Returns the Optional's value if assigned, the value of the other argument if not.
      *
      * @param other The value to return if the Optional is un-assigned.
@@ -142,8 +156,9 @@ global with sharing class OptionalV1 {
 
     /**
      * @description
+     * <p>
      * Uses the given Function to process an Optional.
-     * <br><br>
+     * <p>
      * The method may be used to build a chain of functions to process an Optional.
      *
      * @param function The transformer to create the value.

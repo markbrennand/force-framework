@@ -1,28 +1,29 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
+ * <p>
  * Class providing the Dependency Injection API implementation.
- * <br><br>
+ * <p>
  * Dependencies can be injected into an application by their interface or abstract class.
- * <br><br>
+ * <p>
  * Variable and member variable values can also be injected into a class using the variable's class and an action.
- * <br><br>
+ * <p>
  * An optional action argument is supported to allow for the binding of the same interface or class with different
  * implementations.
- * <br><br>
+ * <p>
  * By default, the implementation created when injected will be a singleton. If the binding is required to create
  * a new implementation for each use an application, the implementing class should implement the Prototype
  * interface.
- * <br><br>
+ * <p>
  * The implementation of the API is hidden in the private Implementation class. The class is hidden so an application
  * cannot access the class to mis-use it.
- * <br><br>
+ * <p>
  * All application access is restricted to the API instance variable INSTANCE. This ensures the application can only
  * ever call the methods of the API interface.
- * <br><br>
+ * <p>
  * The outer class implements the API only to allow it to be mocked. Any calls to the API method implementations
  * in the outer class will throw an Exception.
+ * <p>
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */
@@ -30,6 +31,7 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Mapping from a binding Type to the Binding Check class to validate it.
      */
     @SuppressWarnings('PMD.PropertyNamingConventions')
@@ -45,8 +47,9 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Active API instance.
-     * <br><br>
+     * <p>
      * The instance is test visible so it can be mocked.
      */
     @TestVisible
@@ -66,16 +69,18 @@ public with sharing virtual class DependencyAPI implements API {
     }
     /**
      * @description
+     * <p>
      * Interface defining the API provided by this class.
-     * <br><br>
+     * <p>
      * It is public as it is not intended for re-implementation outside the package.
      */
     public interface API {
 
         /**
          * @description
+         * <p>
          * If the registry contains a binding for the given type, its implementation is returned.
-         * <br><br>
+         * <p>
          * Should no binding exist, an exception must be thrown.
          *
          * @param forType The type to be bound.
@@ -86,8 +91,9 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * If the registry contains a binding for the given type and action, its implementation is returned.
-         * <br><br>
+         * <p>
          * Should no binding exist, an exception must be thrown.
          *
          * @param forType The type to be bound.
@@ -99,6 +105,7 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Returns true if registry contains a binding for the given type and action, false if not.
          *
          * @param forType The type to be checked.
@@ -109,6 +116,7 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Returns true if registry contains a binding for the given type and action, false if not.
          *
          * @param forType The type to be checked.
@@ -120,6 +128,7 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Adds a binding to the registry.
          *
          * @param forType The type to be bound. Must be either an interface or abstract class.
@@ -129,6 +138,7 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Adds a binding to the registry.
          *
          * @param forType The type to be bound. Must be either an interface or abstract class.
@@ -139,6 +149,7 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Forces the custom bindings to be reloaded.
          */
         void reload();
@@ -146,10 +157,11 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Class that creates instances of the implementation class for the binding.
-     * <br><br>
+     * <p>
      * By default, a singleton instance is created on the first call to the new instance method.
-     * <br><br>
+     * <p>
      * If the class  implements the Prototype interface then a new instance is created for each wiring of the binding.
      */
     private with sharing class Factory {
@@ -158,6 +170,7 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Constructs a factory which may be called to create an instance of the given class.
          *
          * @param type The type the factory is to construct.
@@ -168,6 +181,7 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Constructs an instance of the implementation class for the binding.
          *
          * @return Either the singleton instance or a new instance if the class being constructed implements Prototype.
@@ -186,8 +200,9 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Allow extension but not construction.
-     * <br><br>
+     * <p>
      * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
      */
     @SuppressWarnings('PMD.EmptyStatementBlock')
@@ -195,11 +210,13 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Class providing the implementation of the API.
      */
     private class Implementation implements API {
         /**
          * @description
+         * <p>
          * Registry containing bindings from interfaces and abstract classes to implementations.
          */
         private final Map<Key, Factory> registry = new Map<Key, Factory>();
@@ -208,8 +225,9 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * If the registry contains a binding for the given type, its implementation is returned.
-         * <br><br>
+         * <p>
          * Should no binding exist, an exception is thrown.
          *
          * @param forType The type to be bound.
@@ -229,8 +247,9 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * If the registry contains a binding for the given type and action, its implementation is returned.
-         * <br><br>
+         * <p>
          * Should no binding exist, an exception is thrown.
          *
          * @param forType The type to be bound.
@@ -251,6 +270,7 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Returns true if registry contains a binding for the given type and action, false if not.
          *
          * @param forType The type to be checked.
@@ -264,6 +284,7 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Returns true if registry contains a binding for the given type and action, false if not.
          *
          * @param forType The type to be checked.
@@ -278,6 +299,7 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Adds a binding to the registry.
          *
          * @param forType The type to be bound. Must be either an interface or abstract class.
@@ -290,6 +312,7 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Adds a binding to the registry.
          *
          * @param forType The type to be bound. Must be either an interface or abstract class.
@@ -303,6 +326,7 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Forces the custom bindings to be reloaded.
          */
         public void reload() {
@@ -311,6 +335,7 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Adds the given custom bindings to the registry.
          *
          * @param bindings The custom bindings to add to the registry.
@@ -321,8 +346,9 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Selects all the custom bindings and adds them to the registry.
-         * <br><br>
+         * <p>
          * This method need only be called on the first call to inject a binding.
          */
         private void addCustomBindings() {
@@ -343,10 +369,11 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Performs basic checks on the type and implementation being bound.
-         * <br><br>
+         * <p>
          * The type must be an interface or abstract class. The check is that it cannot be instantiated.
-         * <br><br>
+         * <p>
          * The implementation must be a concrete class with a no-op constructor. The check is that it can be instantiated.
          *
          * @param forType The type to be validated.
@@ -393,8 +420,9 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Checks the custom bindings to see if there are any duplicates.
-     * <br><br>
+     * <p>
      * A duplicate is;
      * <br>
      * - A type without an action that is bound to more than one implementation.
@@ -413,6 +441,7 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Validates the given bindings.
      *
      * @param bindings The custom bindings to add to the registry.
@@ -423,6 +452,7 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Builds a new validation result.
      *
      * @param isValid True if the validation was successful.
@@ -436,6 +466,7 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Builds a Map from the Type set in a binding to a Binding Check that can be called to validate its
      * assignment.
      *
@@ -449,6 +480,7 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Callback class to check for a duplicate binding.
      */
     private with sharing class DuplicateCheck implements OptionalV1.Function {
@@ -456,6 +488,7 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Checks whether any of the bindings are duplicates of current ones in the Binding__c objects.
          *
          * @param value The bindings to be checked.
@@ -494,6 +527,7 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Callback class to validate a Binding object.
      */
     private with sharing class BindingValidator extends ArrayV1.Callback {
@@ -520,6 +554,7 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Callback class to add a Binding to the registry.
      */
     private with sharing class AddBinding extends ArrayV1.Callback {
@@ -546,6 +581,7 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Callback class to add a Binding Check from a Binding__mdt custom metadata record.
      */
     private with sharing class AddBindingCheck extends ArrayV1.Callback {
@@ -578,6 +614,7 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Class used as the basic key to the registry map.
      */
     private with sharing virtual class Key {
@@ -585,6 +622,7 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Constructs a key for the given type.
          *
          * @param type Type the key represents.
@@ -595,6 +633,7 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Determines a hash code for the key.
          *
          * @return The hash code.
@@ -605,8 +644,9 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Determines whether current object and given object are equal.
-         * <br><br>
+         * <p>
          * As ActionKey extends Key, when comparing keys ensure an ActionKey cannot be compared to a Key.
          *
          * @param other The object to compare with.
@@ -620,8 +660,9 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Class used as the basic key to the registry map.
-     * <br><br>
+     * <p>
      * To ensure a balanced Map, the action is not included in the hash code. This may need to be re-considered
      * if many actions are keyed for the same type.
      */
@@ -631,6 +672,7 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Constructs a key for the given type and action.
          *
          * @param type Type the key represents.
@@ -642,8 +684,9 @@ public with sharing virtual class DependencyAPI implements API {
         }
         /**
          * @description
+         * <p>
          * Determines whether current object and given object are equal.
-         * <br><br>
+         * <p>
          * As ActionKey extends Key, when comparing keys ensure an ActionKey cannot be compared to a Key.
          *
          * @param other The object to compare with.
@@ -659,6 +702,7 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Class representing result of a binding validation check.
      */
     @TestVisible
@@ -672,6 +716,7 @@ public with sharing virtual class DependencyAPI implements API {
 
         /**
          * @description
+         * <p>
          * Constructs a validation result object which is used to inform the caller of the BindingCheck.validate
          * method of the result of the validation.
          *
@@ -688,6 +733,7 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Builds an APIException with a common format.
      *
      * @param prefix Prefix from exception message.
@@ -732,6 +778,7 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param forType ignored.
@@ -744,6 +791,7 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param forType ignored.
@@ -757,6 +805,7 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param forType ignored.
@@ -769,6 +818,7 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param forType ignored.
@@ -781,18 +831,20 @@ public with sharing virtual class DependencyAPI implements API {
     }
 
     /**
-    * @description
-    * Method is solely for mocking use.
+     * @description
+     * <p>
+     * Method is solely for mocking use.
      *
      * @param forType ignored.
      * @param withImpl ignored.
-    */
+     */
     public void bind(final Type forType, final Type withImpl) {
         throw new DependencyV1.APIException('Access denied');
     }
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param forType ignored.
@@ -805,6 +857,7 @@ public with sharing virtual class DependencyAPI implements API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      */
     public void reload() {

@@ -1,22 +1,23 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
+ * <p>
  * Classes providing the Mocker API.
- * <br><br>
+ * <p>
  * Rather than defining fixed lists of functions and arguments to be mocked, this solution defines the arguments
  * first and then list all the methods that expect those arguments from the class or interface being mocked.
- * <br><br>
+ * <p>
  * Arguments are checked for matches using comparators. A default set of comparators are provided. Custom comparators
  * may be added for arguments to be matched.
- * <br><br>
+ * <p>
  * The default comparator for a custom object or collection of custom objects requires that only the fields set in the
  * object to be matched are set identically in the custom object(s) passed to the mocked method call.
- * <br><br>
+ * <p>
  * The Modifier interface may be used to return a value from a mocked method based on the arguments to the call.
  * For example, this could be used to add a fake Id to custom objects being inserted.
- * <br><br>
+ * <p>
  * See <a href=../../source/mocker/README.md target="_blank">README</a> for full details of the Mocker API.
+ * <p>
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */
@@ -25,20 +26,23 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
      * @description
+     * <p>
      * Map from the objects that have been mocked to their arguments list.
      */
     private final static Map<Object, List<Arguments>> STUBBED_OBJECTS = new Map<Object, List<Arguments>>();
 
     /**
      * @description
+     * <p>
      * The stub handler called for all mocked objects.
      */
     private final static Matcher MATCHER = new Matcher();
 
     /**
      * @description
+     * <p>
      * Interface allowing a user of the Mocker.of method to be called back to create the stubbed object.
-     * <br><br>
+     * <p>
      * As stubbed objects cannot be created by the Mocker if they are in a different namespace, this interface
      * can be used to create the stubbed object in the caller's namespace.
      */
@@ -46,8 +50,9 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
-         * Crates an instance of a stubbed object.
-         *
+         * <p>
+         * Creates an instance of a stubbed object.
+         * <p>
          * The implementation will be responsible for deciding the class of the object to stub.
          *
          * @param provider The provider to use for the new stubbed object.
@@ -59,9 +64,10 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
      * @description
+     * <p>
      * An implementation of the Modifier interface can be added as argument to Method.returns to make changes to the
      * method arguments when a match for the arguments is found and the registered method is called.
-     * <br><br>
+     * <p>
      * An example use case for this would be to add an Id to objects inserted through a call to a mocked method.
      *
      */
@@ -69,6 +75,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Called to make changes to the return value using the arguments passed into the Method.
          *
          * @param arguments The arguments passed to the Method.
@@ -80,20 +87,23 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
      * @description
+     * <p>
      * Map containing the next Id number to use for each object type.
      */
     private final static Map<String, Integer> IDS = new Map<String, Integer>();
 
     /**
      * @description
+     * <p>
      * The mocked object created by this instance of the Mocker.
      */
     private final Object mockedObject;
 
     /**
      * @description
+     * <p>
      * Argument setting class.
-     * <br><br>
+     * <p>
      * It is designed to be callable from both the Mocker, Arguments and Method classes. This is so all three can
      * perform chaining of calls.
      */
@@ -102,20 +112,21 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Sets the parent Mocker object.
          *
          * @param parent The owning Mocker.
          */
         private void setParent(final MockerV1 parent) {
             AssertionV1.isNotNull(parent, 'argument: Mocker.WhenArguments.setParent.parent');
-
             this.parent = parent;
         }
 
         /**
          * @description
+         * <p>
          * Creates an argument grouping which has no values.
-         * <br><br>
+         * <p>
          * This would represent a method with no arguments.
          *
          * @return The object instance so it can be chained.
@@ -126,8 +137,9 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Creates an argument grouping which has a single argument.
-         * <br><br>
+         * <p>
          * This would represent a mocked method which has one parameter.
          *
          * @param argument The expected parameter value.
@@ -140,8 +152,9 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Creates an argument grouping which has two arguments.
-         * <br><br>
+         * <p>
          * This would represent a mocked method which has two parameters.
          *
          * @param argument1 The expected value of the first parameter.
@@ -155,8 +168,9 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Creates an argument grouping which has three arguments.
-         * <br><br>
+         * <p>
          * This would represent a mocked method which has three parameters.
          *
          * @param argument1 The expected value of the first parameter.
@@ -171,8 +185,9 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Creates an argument grouping which has four arguments.
-         * <br><br>
+         * <p>
          * This would represent a mocked method which has four parameters.
          *
          * @param argument1 The expected value of the first parameter.
@@ -194,8 +209,9 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Creates an argument grouping which has five arguments.
-         * <br><br>
+         * <p>
          * This would represent a mocked method which has five parameters.
          *
          * @param argument1 The expected value of the first parameter.
@@ -219,6 +235,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Creates an argument grouping which has the given arguments.
          *
          * @param expectedArguments The arguments to be matched.
@@ -233,6 +250,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Gets the mocked object for the class being mocked.
          *
          * @return The mocked object.
@@ -244,8 +262,9 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
      * @description
+     * <p>
      * Creates an instance of this class.
-     * <br><br>
+     * <p>
      * The method is protected so the class can be mocked in the unit tests. It is not public, to prevent re-use
      * outside this class.
      *
@@ -260,6 +279,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
      * @description
+     * <p>
      * Creates a new Mocker that may be used to define a mocking scenario.
      *
      * @param forType The class to be mocked.
@@ -275,8 +295,9 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
      * @description
+     * <p>
      * Creates a new Mocker that may be used to define a mocking scenario.
-     * <br><br>
+     * <p>
      * The Factory argument will be called to create the stubbed object.
      *
      * @param factory Factory that will create the stubbed object.
@@ -292,10 +313,11 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
      * @description
+     * <p>
      * Validates that all the methods in the mocked objects have been called the required number of times.
-     * <br><br>
+     * <p>
      * If a method has not been called the correct number of times, an Assertion.AssertionException is thrown.
-     * <br><br>
+     * <p>
      * If the method has not set a called count value, it is not validated.
      */
     global static void validate() {
@@ -310,9 +332,10 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
      * @description
+     * <p>
      * Returns an argument which can be used in a whenArgument call to represent a method parameter which must be
      * of the given Type but whose value is not checked.
-     * <br><br>
+     * <p>
      * The parameter may be null if the types match.
      *
      * @param type The Type the argument is for.
@@ -325,9 +348,10 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
      * @description
+     * <p>
      * Returns an argument which can be used in a whenArgument call to represent a method parameter which must be
      * of the given Type but whose value is not checked.
-     * <br><br>
+     * <p>
      * The parameter must be non null if the types match.
      *
      * @param type The Type the argument is for.
@@ -340,6 +364,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
      * @description
+     * <p>
      * Generates a fake id for the given object type.
      *
      * @param objectType The object type to have a fake Id generated for.
@@ -371,16 +396,18 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
      * @description
+     * <p>
      * Class that calls the methods of the mocked classes.
      */
     private with sharing class Matcher implements StubProvider {
 
         /**
          * @description
+         * <p>
          * Method responsible for calling the methods assigned to mocked object.
-         * <br><br>
+         * <p>
          * The arguments are checked against all the registered arguments for the mocked objects.
-         * <br><br>
+         * <p>
          * If a match is found, the methods registered for the arguments are checked. If a method is found with
          * a name matching the stubbedMethodName, the method is called.
          *
@@ -433,6 +460,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
      * @description
+     * <p>
      * Method definition associated with an Argument.
      */
     global with sharing class Method extends MockerV1.Chainable {
@@ -445,6 +473,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Constructs aa new method associated with an argument definition.
          *
          * @param arguments The parent Arguments.
@@ -461,8 +490,9 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Sets the number of times the mocked object is expected to be called.
-         * <br><br>
+         * <p>
          * The check is performed when the Mocker.validate method is called.
          *
          * @param expectedCount The number of times the method is expected to be called.
@@ -478,8 +508,9 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Sets the return value from the method if the arguments are matched and it is called.
-         * <br><br>
+         * <p>
          * The return value may be set to an instance of Modifier to return a value based on the arguments passed
          * to the mocked method call.
          *
@@ -495,6 +526,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Sets the Exception to be thrown from the method if the arguments are matched and it is called.
          *
          * @param throws The Exception to throw if the arguments are matched and this method is called.
@@ -511,8 +543,9 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Registers a new method for the parent's arguments.
-         * <br><br>
+         * <p>
          * The method will be called when the arguments are matched.
          *
          * @param methodName The name of the method expected.
@@ -525,8 +558,9 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Checks whether the method name in this object matches the method name in the argument.
-         * <br><br>
+         * <p>
          * If the arguments match, the methods for the arguments are iterated. Each method is checked against
          * the method name of the method being called in the mocked object.
          *
@@ -542,11 +576,12 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Called to take the action defined for the method.
-         * <br><br>
+         * <p>
          * The arguments and method name must match from the mocked method call. If an Exception has been set
          * for the method, it is thrown. Otherwise, the return value set for the method is returned.
-         * <br><br>
+         * <p>
          * The call count is incremented to track that the method has been called.
          *
          * @param arguments The arguments passed to the mocked method.
@@ -572,6 +607,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Called to check that the method has been called the correct number of times.
          */
         private void validate() {
@@ -588,6 +624,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
      * @description
+     * <p>
      * Class representing a list of arguments for which mocked methods are to be registered.
      */
     global with sharing class Arguments extends MockerV1.Chainable {
@@ -597,8 +634,9 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Constructs an instance of the Arguments class.
-         * <br><br>
+         * <p>
          * The class represents the grouping of argument values for which a sequence of methods can be registered.
          *
          * @param parent The owning class.
@@ -620,8 +658,9 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Adds comparators to the default comparatros used when checking the arguments for equivalence.
-         * <br><br>
+         * <p>
          * Any additional comparators will be called before the default ones.
          *
          * @param comparators The additional comparators to be used when checking the expected arguments for equivalence.
@@ -635,8 +674,9 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Registers a new method for the expected arguments.
-         * <br><br>
+         * <p>
          * The method will be called when the arguments are matched.
          *
          * @param methodName The name of the method expected.
@@ -651,6 +691,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Checks whether the arguments passed to a mocked class's method match the expected arguments.
          *
          * @param actualArguments The arguments to be checked.
@@ -683,6 +724,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
      * @description
+     * <p>
      * Class representing an argument to be matched by Type only.
      */
     private with sharing class AnyValue {
@@ -691,6 +733,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
         /**
          * @description
+         * <p>
          * Constructs an instance representing an  argument for the given type.
          *
          * @param type The type to be matched.

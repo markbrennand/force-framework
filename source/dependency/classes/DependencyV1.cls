@@ -1,25 +1,26 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
+ * <p>
  * Class defining the external Dependency API.
- * <br><br>
+ * <p>
  * Dependencies can be injected into an application by their interface or abstract class.
- * <br><br>
+ * <p>
  * Variable and member variable values can also be injected into a class using the variable's class and an action.
- * <br><br>
+ * <p>
  * An optional action argument is supported to allow for the binding of the same interface or class with different
  * implementations.
- * <br><br>
+ * <p>
  * By default, the implementation created when injected will be a singleton. If the binding is required to create
  * a new implementation for each use an application, the implementing class should implement the Prototype
  * interface.
- * <br><br>
+ * <p>
  * All bound Types are stored in a registry. Each bound Type must have a BindingCheck implementation associated with it.
  * To associate the Type with the BindingCheck, create and deploy a BindingCheck__mdt metadata record. Any attempt
  * to add a binding to the registry for a Type with no associated BindingCheck will throw an Exception.
- * <br><br>
+ * <p>
  * See <a href=../../source/dependency/README.md target="_blank">README</a> for full details of the Dependency Injection API.
+ * <p>
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */
@@ -28,12 +29,14 @@ global with sharing class DependencyV1 {
 
     /**
      * @description
+     * <p>
      * Exception thrown when a dependency injection operation fails.
      */
     global with sharing class APIException extends Exception {}
 
     /**
      * @description
+     * <p>
      * A class implementing this interface will have a new instance of itself created each time it is in injected into
      * an application.
      */
@@ -41,29 +44,32 @@ global with sharing class DependencyV1 {
 
     /**
      * @description
+     * <p>
      * Result of a binding validation check.
      */
     global interface ValidationResult {}
 
     /**
      * @description
+     * <p>
      * Interface to be implemented to check a binding in the registry.
-     * <br><br>
+     * <p>
      * Each checker must be defined in a record in the Binding Check custom metadata.
      */
     global interface BindingCheck {
 
         /**
          * @description
+         * <p>
          * Given a type to be bound, a class implementing this method must check that the given implementation class
          * can be bound to it.
-         * <br><br>
+         * <p>
          * If the for type is an interface then an implementation of this method must check that the implementation
          * class implements the interface.
-         * <br><br>
+         * <p>
          * If the for type is an abstract class then an implementation of this method must check that the implementation
          * class extends the abstract class.
-         * <br><br>
+         * <p>
          * If the for type is a class then an implementation of this method must check that the implementation
          * class is of the same class or a super class of it.
          *
@@ -77,8 +83,9 @@ global with sharing class DependencyV1 {
 
     /**
      * @description
+     * <p>
      * If the registry contains a binding for the given type, its implementation is returned.
-     * <br><br>
+     * <p>
      * Should no binding exist, an exception is thrown.
      *
      * @param forType The type to be bound.
@@ -91,8 +98,9 @@ global with sharing class DependencyV1 {
 
     /**
      * @description
+     * <p>
      * If the registry contains a binding for the given type and action, its implementation is returned.
-     * <br><br>
+     * <p>
      * Should no binding exist, an exception is thrown.
      *
      * @param forType The type to be bound.
@@ -106,6 +114,7 @@ global with sharing class DependencyV1 {
 
     /**
      * @description
+     * <p>
      * Returns true if registry contains a binding for the given type and action, false if not.
      *
      * @param forType The type to be checked.
@@ -118,6 +127,7 @@ global with sharing class DependencyV1 {
 
     /**
      * @description
+     * <p>
      * Returns true if registry contains a binding for the given type and action, false if not.
      *
      * @param forType The type to be checked.
@@ -131,6 +141,7 @@ global with sharing class DependencyV1 {
 
     /**
      * @description
+     * <p>
      * Adds a binding to the registry.
      *
      * @param forType The type to be bound. Must be either an interface or abstract class.
@@ -142,6 +153,7 @@ global with sharing class DependencyV1 {
 
     /**
      * @description
+     * <p>
      * Adds a binding to the registry.
      *
      * @param forType The type to be bound. Must be either an interface or abstract class.
@@ -154,6 +166,7 @@ global with sharing class DependencyV1 {
 
     /**
      * @description
+     * <p>
      * Forces the custom bindings to be reloaded.
      */
     global static void reload() {
@@ -162,6 +175,7 @@ global with sharing class DependencyV1 {
 
     /**
      * @description
+     * <p>
      * Creates a validation result representing success.
      *
      * @return A validation result representing success.
@@ -172,6 +186,7 @@ global with sharing class DependencyV1 {
 
     /**
      * @description
+     * <p>
      * Creates a validation result representing failure.
      *
      * @param errorMessage The validation failure error message.

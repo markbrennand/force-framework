@@ -1,10 +1,11 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../LICENSE target="_blank">MIT License</a>.
- * <br><br>
+ * <p>
  * Class providing Query API.
- * <br><br>
+ * <p>
  * See <a href=../../source/query/README.md target="_blank">README</a> for full details of the Query API.
+ * <p>
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */
@@ -13,20 +14,23 @@ global with sharing class QueryV1 {
 
     /**
      * @description
+     * <p>
      * Implementation dependent representation  of an aggregated field.
      */
     global interface AggregatedField {}
 
     /**
      * @description
+     * <p>
      * Implementation dependent representation of a SOQL order clause.
      */
     global interface Order {}
 
     /**
      * @description
+     * <p>
      * Interface defining the actions required for querying.
-     * <br><br>
+     * <p>
      * A new implementation of the Query API must implement all the methods of this interface. It can then add a
      * Dependency Injection Binding to inject it as the implementation used in the QueryAPI class.
      */
@@ -34,6 +38,7 @@ global with sharing class QueryV1 {
 
         /**
          * @description
+         * <p>
          * Yields the type of the object being queried.
          *
          * @return The type of object.
@@ -42,6 +47,7 @@ global with sharing class QueryV1 {
 
         /**
          * @description
+         * <p>
          * Sets the type of object to query.
          *
          * @param type The object type.
@@ -53,8 +59,9 @@ global with sharing class QueryV1 {
 
         /**
          * @description
+         * <p>
          * Sets the access level for the query.
-         * <br><br>
+         * <p>
          * In SYSTEM mode, no CRUD or FLS checks should be performed. In USER mode, CRUD and FLS checks must be performed.
          *
          * @param security The access level for the query.
@@ -65,8 +72,9 @@ global with sharing class QueryV1 {
 
         /**
          * @description
+         * <p>
          * Marks the query as a count.
-         * <br><br>
+         * <p>
          * The OptionalV1 returned by the execute method will contain an Integer with the result.
          *
          * @return The current API instance so it can be chained.
@@ -75,10 +83,11 @@ global with sharing class QueryV1 {
 
         /**
          * @description
+         * <p>
          * Selects all the fields in the object being queried for return.
-         * <br><br>
+         * <p>
          * Only the fields the user has FLS read access to are returned.
-         * <br><br>
+         * <p>
          * No fields in joined objects or child relationships are returned.
          *
          * @return The current API instance so it can be chained.
@@ -158,6 +167,7 @@ global with sharing class QueryV1 {
 
     /**
      * @description
+     * <p>
      * Builds a field which may be used to aggregate data in a query.
      *
      * @param field The field to aggregate the results by.
@@ -171,6 +181,7 @@ global with sharing class QueryV1 {
 
     /**
      * @description
+     * <p>
      * Builds a field from a related object which may be used to aggregate data in a query.
      *
      * @param joinField The field which links the related object.
@@ -185,6 +196,7 @@ global with sharing class QueryV1 {
 
     /**
      * @description
+     * <p>
      * Builds a field from a related object which may be used to aggregate data in a query.
      *
      * @param function The aggregation function to use, e.g. COUNT or SUM.
@@ -199,6 +211,7 @@ global with sharing class QueryV1 {
 
     /**
      * @description
+     * <p>
      * Builds a field from a related object which may be used to aggregate data in a query.
      *
      * @param function The aggregation function to use, e.g. COUNT or SUM.

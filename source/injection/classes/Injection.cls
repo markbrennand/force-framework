@@ -1,9 +1,10 @@
 /**
  * @deprecated
  * @description
+ * <p>
+ * This class has been deprecated and replaced by the DependencyV1 class.
+ * <p>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
- * This class has been deprecated and replaced by the Dependency class.
  *
  * @author Mark Brennand
  */

@@ -1,16 +1,16 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
  * Class providing the default implementation of the Query API.
- * <br><br>
+ * <p>
  * All application access is restricted to the API instance variable API. This ensures the application can only
  * ever call the methods of the API interface.
- * <br><br>
+ * <p>
  * The outer class implements the API only to allow it to be mocked. Any calls to the API method implementations
  * in the outer class will throw an Exception.
- * <br><br>
+ * <p>
  * See <a href=../README.md target="_blank">README</a> for full details of the Query API.
+ * <p>
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */
@@ -18,12 +18,13 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Active API instance.
-     * <br><br>
+     * <p>
      * The instance is injected from the Registry.
-     * <br><br>
+     * <p>
      * The instance is test visible so it can be mocked.
-     * <br><br>
+     * <p>
      * Any implementation must be of type DependencyV1.Prototype as state must be maintained.
      */
     @TestVisible
@@ -43,8 +44,9 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Allow extension but not construction.
-     * <br><br>
+     * <p>
      * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
      */
     @SuppressWarnings('PMD.EmptyStatementBlock')
@@ -315,8 +317,9 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Creates the default API implementation.
-     * <br><br>
+     * <p>
      * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
@@ -328,12 +331,14 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Class providing check on Binding made to AsynchronousAPI.API.
      */
     public with sharing class BindingCheck implements DependencyV1.BindingCheck {
 
         /**
          * @description
+         * <p>
          * Checks that a valid binding has been made to QueryAPI.API.
          *
          * @param forType The type being bound to, QueryAPI.API.
@@ -479,6 +484,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param type ignored.
@@ -491,6 +497,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @return ignored.
@@ -501,6 +508,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param security ignored.
@@ -513,6 +521,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @return ignored.
@@ -523,6 +532,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @return ignored.
@@ -533,6 +543,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param joinField ignored.
@@ -546,6 +557,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param fields ignored.
@@ -558,6 +570,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param query ignored.
@@ -570,6 +583,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param fields ignored.
@@ -582,6 +596,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param condition ignored.
@@ -594,6 +609,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param order ignored.
@@ -606,6 +622,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param order ignored.
@@ -618,6 +635,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param fields ignored.
@@ -630,6 +648,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param joinField ignored.
@@ -643,6 +662,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param condition ignored.
@@ -655,6 +675,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param bindVars ignored.
@@ -667,6 +688,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param max ignored.
@@ -679,6 +701,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param offset ignored.

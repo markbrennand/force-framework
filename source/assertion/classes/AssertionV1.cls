@@ -1,17 +1,18 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
+ * <p>
  * Class providing programmatic Assertions.
- * <br><br>
+ * <p>
  * The Salesforce Assert class is great, but it throws an Exception which cannot be caught. So, in reality, is only
  * useful for unit tests.
- * <br><br>
+ * <p>
  * Ancestor methods should be able to catch assertion errors so they can be handled. For example, the Asynchronous
  * API must be able to catch any assertion failures during the processing of a job so it can record the caught
  * Exception. With the Salesforce assertion Exception, that is not possible.
- * <br><br>
+ * <p>
  * The APIs in the Force Framework all use this class to check assertions, allowing any Exception to be caught.
+ * <p>
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */

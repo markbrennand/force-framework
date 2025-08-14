@@ -1,8 +1,9 @@
 /**
  * @description
+ * <p>
+ * Unit tests for AssertionV1 class.
+ * <p>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
- * Unit tests for Assertions.
  *
  * @author Mark Brennand
  */

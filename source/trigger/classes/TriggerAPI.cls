@@ -1,14 +1,14 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
  * Class providing the Trigger API.
- * <br><br>
+ * <p>
  * The Trigger custom metadata records define the subscribers for each object type. Each Trigger invocation
  * is turned into its representation as an Event. The event is then published to each subscriber
  * bound to the type of object the trigger has fired for.
- * <br><br>
+ * <p>
  * See <a href=../README.md target="_blank">README</a> for full details of the Trigger API.
+ * <p>
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */
@@ -16,10 +16,11 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * <p>
      * Active API instance.
-     * <br><br>
+     * <p>
      * The instance is injected from the Registry.
-     * <br><br>
+     * <p>
      * The instance is test visible so it can be mocked.
      */
     @TestVisible
@@ -37,14 +38,16 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * <p>
      * Action to be taken as a result of the check on the recursive depth.
      */
     private enum RecursiveDepthAction { PROCESS_EVENT, THROW_EXCEPTION, IGNORE_EVENT }
 
     /**
      * @description
+     * <p>
      * The API for trigger processing.
-     * <br><br>
+     * <p>
      * The Trigger API will publish an Event representing the detail of the trigger. The Event will be consumed by
      * all the subscribers bound to the object type of the trigger that fired.
      */
@@ -52,6 +55,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * This method must create an Event representing the trigger being fired and send it to all the subscribers
          * bound to the object type of the trigger that fired.
          */
@@ -59,6 +63,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Disables the subscribers for the given object type.
          *
          * @param type The object type whose subscribers are to be disabled.
@@ -67,6 +72,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Enables the subscribers for the given object type.
          *
          * @param type The object type whose subscribers are to be enabled.
@@ -75,6 +81,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Determines whether subscribers are enabled for the given object type.
          *
          * @param type The object type whose subscription status is to be checked.
@@ -85,8 +92,9 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Disables the given Subscriber class.
-         * <br><br>
+         * <p>
          * No further events will be published to the associated subscriber.
          *
          * @param type The Subscriber class to disable.
@@ -95,8 +103,9 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Enables the given Subscriber class.
-         * <br><br>
+         * <p>
          * Events will be published to the associated subscriber.
          *
          * @param type The Subscriber class to enable.
@@ -105,6 +114,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Determines whether the given Subscriber class is enabled.
          *
          * @param type The Subscriber class to be checked.
@@ -116,8 +126,9 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * <p>
      * Allow extension but not construction.
-     * <br><br>
+     * <p>
      * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
      */
     @SuppressWarnings('PMD.EmptyStatementBlock')
@@ -125,38 +136,44 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * <p>
      * Class providing the implementation of the API.
-     * <br><br>
+     * <p>
      * The class is private to prevent its re-use.
      */
     private with sharing class Implementation implements API {
 
         /**
          * @description
+         * <p>
          * Record of all the active events for each object type.
          */
         private final Map<String, ArrayV1.Methods> events = new Map<String, ArrayV1.Methods>();
 
         /**
          * @description
+         * <p>
          * Cache of the Subscriber implementation for each object type.
          */
         private final Map<String, TriggerV1.Subscriber> subscribers = new Map<String, TriggerV1.Subscriber>();
 
         /**
          * @description
+         * <p>
          * Determines whether subscriber for an object type is enabled or not.
          */
         private final Map<SObjectType, Boolean> disabledObjectTypes = new Map<SObjectType, Boolean>();
 
         /**
          * @description
+         * <p>
          * Determines whether subscriber for an object type is enabled or not.
          */
         private final Map<String, Boolean> disabledSubscribers = new Map<String, Boolean>();
 
         /**
          * @description
+         * <p>
          * Cache of all the trigger definitions held in the custom metadata.
          */
         private final Map<String, List<Trigger__mdt>> triggerDefinitions {
@@ -171,6 +188,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Publishes an Event representing the Trigger invocation to each subscriber bound to the object type
          * that fired the Trigger.
          */
@@ -188,6 +206,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Disables the subscribers for the given object type.
          *
          * @param type The object type whose subscribers are to be disabled.
@@ -198,6 +217,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Enables the subscribers for the given object type.
          *
          * @param type The object type whose subscribers are to be enabled.
@@ -208,6 +228,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Determines whether subscribers are enabled for the given object type.
          *
          * @param type The object type whose subscription status is to be checked.
@@ -220,8 +241,9 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Disables the given Subscriber class.
-         * <br><br>
+         * <p>
          * No further events will be published to the associated subscriber.
          *
          * @param type The Subscriber class to disable.
@@ -232,8 +254,9 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Enables the given Subscriber class.
-         * <br><br>
+         * <p>
          * Events will be published to the associated subscriber.
          *
          * @param type The Subscriber class to enable.
@@ -244,6 +267,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Determines whether the given Subscriber class is enabled.
          *
          * @param type The Subscriber class to be checked.
@@ -256,9 +280,10 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Finds the Trigger custom metadata for the given object type and publishes an event representing the Trigger
          * invocation to each subscriber defined in the custom metadata.
-         * <br><br>
+         * <p>
          * A check is performed on the recursive depth of the current trigger invocation. If the depth exceeds
          * the maximum value defined in the Trigger custom metadata record, then an Exception is thrown or
          * the Trigger invocation is ignored. The Trigger custom metadata record defines which action is taken.
@@ -293,6 +318,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Builds the canonical key to match the Trigger_mdt.ObjectKey__c field.
          *
          * @param name The object type.
@@ -305,6 +331,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Builds an Event representing the Trigger invocation.
          *
          * @param objectKey The canonical key of the object the Trigger has fired for.
@@ -331,8 +358,9 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Builds a cache of the Trigger custom metadata records.
-         * <br><br>
+         * <p>
          * Each cache entry is keyed by the canonical object type and the value is the list of Trigger custom
          * metadata records registered for that type.
          *
@@ -347,6 +375,7 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * <p>
      * Implementation of the Event interface.
      */
     private with sharing class Event implements TriggerV1.Event {
@@ -358,6 +387,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Constructs an event representing the DML operation.
          *
          * @param records The new values for the records resulting from the DML.
@@ -382,6 +412,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Is a before operation being performed.
          *
          * @return True if Event represents a before operation.
@@ -392,6 +423,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Is an after operation being performed.
          *
          * @return True if Event represents aa after operation.
@@ -402,6 +434,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * The type of DML operation being performed.
          *
          * @return The operastion being performed.
@@ -412,6 +445,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * The objects the DML operation is being performed on.
          *
          * @return The objects the DML operation is being performed on.
@@ -422,8 +456,9 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Tests whether the given object has a previous value.
-         * <br><br>
+         * <p>
          * This method will only return true for a DML update.
          *
          * @param record The object to check.
@@ -436,6 +471,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Gets the original value of a record being updated.
          *
          * @param record The object to get the previous value of.
@@ -450,6 +486,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Gets the values of the records prior to update.
          *
          * @return The Map of old record values, or an optional representing undefined.
@@ -460,6 +497,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Gets the number of times the trigger has been called within the scope of the top level trigger invocation.
          *
          * @return The recursive depth.
@@ -471,8 +509,9 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * <p>
      * Creates the default API implementation.
-     * <br><br>
+     * <p>
      * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
@@ -480,6 +519,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Constructs an instance of the API implementation.
          *
          * @return The API implementation.
@@ -491,12 +531,14 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * <p>
      * Class providing check on Binding made to TriggerAPI.API.
      */
     public with sharing class BindingCheck implements DependencyV1.BindingCheck {
 
         /**
          * @description
+         * <p>
          * Checks that a valid binding has been made to TriggerAPI.API.
          *
          * @param forType The type being bound to, TriggerAPI.API.
@@ -516,6 +558,7 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * <p>
      * Builds the Map of object name to its associated Trigger metadata records.
      */
     private with sharing class TriggerDefinitionMapBuilder extends ArrayV1.Callback {
@@ -536,6 +579,7 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * <p>
      * Class called from forEach to publish event to each Subscriber defined in the Trigger metadata records for
      * the object.
      */
@@ -543,6 +587,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Publishes the Event to the the Subscriber defined by the Trigger metadata record being processed.
          *
          * @param element The Trigger metadata record.
@@ -581,6 +626,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * For the given canonical key and Trigger custom metadata records, the current recursive depth is checked
          * against the maximum value set in the custom metadata record.
          *
@@ -605,6 +651,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * For the given Trigger definition and Event, the Subscriber for the definition is loaded and the onEvent
          * of it is called.
          *
@@ -633,6 +680,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Gets the publishing information for the Event.
          *
          * @return The publishing information.
@@ -644,6 +692,7 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * <p>
      * Class encapsulating all the information required to publish an event from an inner class called from forEach.
      */
     private with sharing class PublishingInformation {
@@ -653,6 +702,7 @@ public with sharing virtual class TriggerAPI implements API {
 
         /**
          * @description
+         * <p>
          * Details of an event to be published.
          *
          * @param parent The API implementation publishing the event.
@@ -673,6 +723,7 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * <p>
      * Determines whether the subscriber defined by a trigger definition is bound to receive the event for the
      * current trigger action.
      *
@@ -704,6 +755,7 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      */
     public void publish() {
@@ -712,6 +764,7 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param type ignored.
@@ -722,6 +775,7 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param type ignored.
@@ -732,6 +786,7 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param type ignored.
@@ -744,6 +799,7 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param type ignored.
@@ -754,6 +810,7 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param type ignored.
@@ -764,6 +821,7 @@ public with sharing virtual class TriggerAPI implements API {
 
     /**
      * @description
+     * <p>
      * Method is solely for mocking use.
      *
      * @param type ignored.

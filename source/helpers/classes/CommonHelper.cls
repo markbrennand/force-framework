@@ -1,8 +1,9 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
+ * <p>
  * Helper class providing common utility methods.
+ * <p>
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */
@@ -10,6 +11,7 @@ public with sharing class CommonHelper {
 
     /**
      * @description
+     * <p>
      * Mockable time.
      */
     @TestVisible
@@ -18,6 +20,7 @@ public with sharing class CommonHelper {
 
     /**
      * @description
+     * <p>
      * Returns the namespace prefix for objects in the source code for the framework.
      *
      * @return The namespace of the objects, including the __.
@@ -28,6 +31,7 @@ public with sharing class CommonHelper {
 
     /**
      * @description
+     * <p>
      * Returns the namespace prefix for Apex in the source code for the framework.
      *
      * @return The namespace of the Apex, including the .
@@ -38,8 +42,9 @@ public with sharing class CommonHelper {
 
     /**
      * @description
+     * <p>
      * Returns the current date and time.
-     * <br><br>
+     * <p>
      * The value can be mocked in a unit test by setting the when variable.
      *
      * @return The current date time.
@@ -50,6 +55,7 @@ public with sharing class CommonHelper {
 
     /**
      * @description
+     * <p>
      * Converts a List element to its String equivalent.
      */
     public with sharing class ToString extends ArrayV1.Callback {

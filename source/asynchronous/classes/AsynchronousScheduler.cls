@@ -1,25 +1,26 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
+ * <p>
  * The Scheduler is responsible for finding and starting the next job that can be run based on its scheduled time.
- * <br><br>
+ * <p>
  * The Scheduler queue method is the controller for the concurrency. The Scheduler selects the jobs that are runnable.
  * The number of active instances of each job is checked against its maximum concurrency. If there is concurrency
  * available the Id of the job is added to a Set jobs to start. A Scheduler job is started passing in the Set
  * as an argument.
- * <br><br>
+ * <p>
  * The Scheduler job starts the first job in the Set and removes the Id of the job from the Set. The new Set is
  * saved in the Set.
- * <br><br>
+ * <p>
  * The Finalizer, if finalizing, a Scheduler, extracts the Set from the job. It calls the Scheduler's queue method
  * passing the Set as argument. If the Set is not empty, a new Scheduler is started, passing in the new Set as
  * argument. This pattern is repeated till the Set is empty.
- * <br><br>
+ * <p>
  * When an empty Set is passed to the queue method, the Scheduler builds the next Set of job ids that can be run.
- * <br><br>
+ * <p>
  * Due to the Queueable limit of only 1 Apex job being allowed to be started, a Scheduler will be run for every
  * job that is started.
+ * <p>
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */
@@ -27,14 +28,16 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
 
     /**
      * @description
+     * <p>
      * The action in the Registry for the configuration Dependency injection.
      */
     private final static String CONFIG_ACTION = 'AsynchronousScheduler';
 
     /**
      * @description
+     * <p>
      * The number of milliseconds to wait if there are no jobs available to run.
-     * <br><br>
+     * <p>
      * Be careful of the value used here as a large value will cause the CPU governor limit to be hit.
      */
     @TestVisible
@@ -42,6 +45,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
 
     /**
      * @description
+     * <p>
      * The number of jobs to be run that the Scheduler should select in the queue method.
      */
     @TestVisible
@@ -59,8 +63,9 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
 
     /**
      * @description
+     * <p>
      * Configuration options for the Scheduler.
-     * <br><br>
+     * <p>
      * Test visible to it can be overridden from unit tests.
      */
     @TestVisible
@@ -69,8 +74,9 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
 
     /**
      * @description
+     * <p>
      * Constructor for the Scheduler.
-     * <br><br>
+     * <p>
      * The constructor is private to prevent construction from anywhere other than the factory (QueueNext class).
      */
     @TestVisible
@@ -82,10 +88,11 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
 
     /**
      * @description
+     * <p>
      * Called to queue the next, non Scheduler job, to be run.
-     * <br><br>
+     * <p>
      * If there are no jobs to run, a pause is taken before qetting the next job to run.
-     * <br><br>
+     * <p>
      * Synchronisation is performed in the next job query to ensure that no more than one Scheduler tries to start
      * the same job.
      *
@@ -128,8 +135,9 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
 
     /**
      * @description
+     * <p>
      * A simple implementation of sleep.
-     * <br><br>
+     * <p>
      * Apex lacks a sleep method. To prevent having to go into a tight loop, a query that takes 20+ ms to complete
      * is run as often as possible.
      *
@@ -159,8 +167,9 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
 
     /**
      * @description
+     * <p>
      * Returns the maximum number of Schedulers that may be active for the user at any one time.
-     * <br><br>
+     * <p>
      * Running more than one Scheduler concurrently would break the synchronisation, so always use 1.
      *
      * @return The Scheduler concurrency.
@@ -171,6 +180,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
 
     /**
      * @description
+     * <p>
      * Called on successful execution of the Apex job for the Scheduler.
      *
      * @param asyncJob The Asynchronous job for the Scheduler.
@@ -184,6 +194,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
 
     /**
      * @description
+     * <p>
      * Called on failed execution of the Apex job for the Scheduler.
      *
      * @param asyncJob The Asynchronous job for the Scheduler.
@@ -198,6 +209,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
 
     /**
      * @description
+     * <p>
      * Called if the Scheduler job is cancelled.
      *
      * @param asyncJob The Asynchronous job for the Scheduler.
@@ -211,8 +223,9 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
 
     /**
      * @description
+     * <p>
      * Creates and queues for processing a new Scheduler job.
-     * <br><br>
+     * <p>
      * The processing logic for the Scheduler requires that the Asynchronous__c object for the new Scheduler job
      * is only persisted if an Apex job could be created for it.
      *
@@ -258,8 +271,9 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
 
     /**
      * @description
+     * <p>
      * Returns the ids of all the jobs that can be started.
-     * <br><br>
+     * <p>
      * The concurrency of the jobs is used to determine whether the job can be started.
      *
      * @param maxToStart The maximum number of jobs to return.
@@ -306,12 +320,14 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
 
     /**
      * @description
+     * <p>
      * Default Scheduler configuration to be injected.
      */
     public with sharing class Configuration implements TypesV1.Factory {
 
         /**
          * @description
+         * <p>
          * Creates a new instance of the configuration.
          *
          * @return The new instance.
@@ -326,14 +342,16 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
 
     /**
      * @description
+     * <p>
      * Load the Scheduler from a factory.
-     * <br><br>
+     * <p>
      * This allows the Scheduler class to be inaccessible from outside this class.
      */
     public with sharing class RunNextAvailable implements TypesV1.Factory {
 
         /**
          * @description
+         * <p>
          * Creates a new instance of the scheduler.
          *
          * @return The scheduler instance.

@@ -1,8 +1,9 @@
 /**
  * @description
+ * <p>
+ * Unit tests for ArrayV1 class.
+ * <p>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
- * Unit tests for ArrayIterator class.
  *
  * @author Mark Brennand
  */

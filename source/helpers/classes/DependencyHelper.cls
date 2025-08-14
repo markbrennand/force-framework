@@ -1,8 +1,9 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
+ * <p>
  * Helper class providing utility methods for dependency API.
+ * <p>
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */
@@ -10,6 +11,7 @@ public with sharing class DependencyHelper {
 
     /**
      * @description
+     * <p>
      * Return a validation result based on whether the isOfType parameter indicates that the implementation is of the
      * required type.
      *

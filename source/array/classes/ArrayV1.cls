@@ -1,10 +1,11 @@
 /**
  * @description
- * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <br><br>
+ * <p>
  * Class providing the Array API.
- * <br><br>
+ * <p>
  * See <a href=../../source/array/README.md target="_blank">README</a> for full details of the Array API.
+ * <p>
+ * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */
@@ -19,10 +20,11 @@ global with sharing class ArrayV1 {
 
     /**
      * @description
+     * <p>
      * Class representing a callback to process each iterated array element.
-     * <br><br>
+     * <p>
      * The function() method must be overridden to code the logic to be performed on the array element.
-     * <br><br>
+     * <p>
      * Data shared on initiation of the iterator is accessed using the shared() method.
      */
     global with sharing abstract class Callback {
@@ -55,12 +57,13 @@ global with sharing class ArrayV1 {
 
         /**
          * @description
+         * <p>
          * This class must be extended to code the logic to be performed on each array element.
-         * <br><br>
+         * <p>
          * The method will be called for each element. The currentValue will be null, except when the callback
          * is being called from the reduce() method. In this case, its value will be the accumulated result of
          * all the previous callbacks.
-         * <br><br>
+         * <p>
          * See the iterator methods for details of the return values expected from the callback.
          *
          * @param element The current array element.
@@ -74,8 +77,9 @@ global with sharing class ArrayV1 {
 
     /**
      * @description
+     * <p>
      * Iterator methods.
-     * <br><br>
+     * <p>
      * The over() method must be called first to use these methods.
      */
     global interface Methods {
@@ -100,10 +104,11 @@ global with sharing class ArrayV1 {
 
         /**
          * @description
+         * <p>
          * Calls the callback for each element in the array being iterated over.
-         * <br><br>
+         * <p>
          * The currentValue argument to the callback function will be null.
-         * <br><br>
+         * <p>
          * The return value from the callback function is ignored.
          *
          * @param callback The callback class to be invoked for each array element.
@@ -112,8 +117,9 @@ global with sharing class ArrayV1 {
 
         /**
          * @description
+         * <p>
          * Calls the callback for each element in the array being iterated over.
-         * <br><br>
+         * <p>
          * In the first call to the callback, the currentValue will be the first element of the array and the
          * element argument will be the second element of the array. In subsequent calls, the currentValue will be
          * the value returned by the last callback.
@@ -126,8 +132,9 @@ global with sharing class ArrayV1 {
 
         /**
          * @description
+         * <p>
          * Calls the callback for each element in the array iterated over in reverse order.
-         * <br><br>
+         * <p>
          * In the first call to the callback, the currentValue will be the last element of the array and the
          * element argument will be the second to last element of the array. In subsequent calls, the currentValue will be
          * the value returned by the last callback.
@@ -140,8 +147,9 @@ global with sharing class ArrayV1 {
 
         /**
          * @description
+         * <p>
          * Builds an object based on the processing of each element of the array.
-         * <br><br>
+         * <p>
          * The currentValue argument of the callback function will be the value of the initialValue argument for
          * the iteration. In subsequent calls, the currentValue will be the last value returned by the callback's
           * function() method.
@@ -155,8 +163,9 @@ global with sharing class ArrayV1 {
 
         /**
          * @description
+         * <p>
          * Builds an object based on the processing of each element of the array iterated over in reverse order.
-         * <br><br>
+         * <p>
          * The currentValue argument of the callback function will be the value of the initialValue argument for
          * the iteration. In subsequent calls, the currentValue will be the last value returned by the callback's
           * function() method.
@@ -170,8 +179,9 @@ global with sharing class ArrayV1 {
 
         /**
          * @description
+         * <p>
          * Builds a list of results matching the filter condition.
-         * <br><br>
+         * <p>
          * The callback function must return true if the array element is to be added to the return list or false if not.
          *
          * @param callback The callback class to be invoked for each array element.
@@ -182,12 +192,13 @@ global with sharing class ArrayV1 {
 
         /**
          * @description
+         * <p>
          * Builds a list of objects with a transformation applied.
-         * <br><br>
+         * <p>
          * This is the equivalent of the Javascript map() function.
-         * <br><br>
+         * <p>
          * The callback function must apply the transformation and return the transformed object.
-         * <br><br>
+         * <p>
          * The list returned will be of type ANY and as a result may not be cast to the type the list contains.
          *
          * @param callback The callback class to be invoked for each array element.
@@ -198,12 +209,13 @@ global with sharing class ArrayV1 {
 
         /**
          * @description
+         * <p>
          * Builds a list of objects with a transformation applied.
-         * <br><br>
+         * <p>
          * This is the equivalent of the Javascript map() function.
-         * <br><br>
+         * <p>
          * The callback function must apply the transformation and return the transformed object.
-         * <br><br>
+         * <p>
          * The return list must be of the type of the transformed elements. This allows the returned list to
          * be cast to the type of the element.
          *
@@ -226,8 +238,9 @@ global with sharing class ArrayV1 {
 
         /**
          * @description
+         * <p>
          * Returns the element at the given index.
-         * <br><br>
+         * <p>
          * If index is negative, the element relative to the end of the array is returned. Use -1 for the last element.
          *
          * @param index The positional index of the element to return.
@@ -248,8 +261,9 @@ global with sharing class ArrayV1 {
 
         /**
          * @description
+         * <p>
          * Returns true if the array contains a value that is matched by the callback function.
-         * <br><br>
+         * <p>
          * The callback function must return true if the array element is a match.
          *
          * @param callback The callback class to be invoked for each array element.
@@ -260,8 +274,9 @@ global with sharing class ArrayV1 {
 
         /**
          * @description
+         * <p>
          * Returns true if all the elements of the array have a value that is matched by the callback function.
-         * <br><br>
+         * <p>
          * The callback function must return true if the array element is a match.
          *
          * @param callback The callback class to be invoked for each array element.
@@ -323,10 +338,11 @@ global with sharing class ArrayV1 {
 
     /**
      * @description
+     * <p>
      * Creates the iterator for an array of objects.
-     * <br><br>
+     * <p>
      * The method to iterate the array with may then be called.
-     * <br><br>
+     * <p>
      * If data is to be shared between callbacks, call the shared() method before the iterator method.
      *
      * @param objects The array of objects to be iterated.
@@ -339,12 +355,13 @@ global with sharing class ArrayV1 {
 
     /**
      * @description
+     * <p>
      * Creates the iterator from an Object.
-     * <br><br>
+     * <p>
      * If the Object is Iterable a List is built from it, otherwise a List is used with a single element, the object.
-     * <br><br>
+     * <p>
      * The method to iterate the array with may then be called.
-     * <br><br>
+     * <p>
      * If data is to be shared between callbacks, call the shared() method before the iterator method.
      *
      * @param source The source object.
