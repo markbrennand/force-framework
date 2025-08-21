@@ -359,7 +359,9 @@ public with sharing virtual class DependencyAPI implements API {
                     ((QueryV1.API) new QueryAPI.Factory().newInstance())
                             .type(Binding__c.SObjectType)
                             .security(AccessLevel.USER_MODE)
-                            .returning(new Set<SObjectField> { Binding__c.Type__c, Binding__c.Action__c, Binding__c.Implementation__c })
+                            .returning(Binding__c.Type__c)
+                            .returning(Binding__c.Action__c)
+                            .returning(Binding__c.Implementation__c)
                             .execute(OptionalV1.empty())
                             .orElse(new List<Binding__c>())
                 );
@@ -434,7 +436,8 @@ public with sharing virtual class DependencyAPI implements API {
         // implementation.
         ((QueryV1.API) new QueryAPI.Factory().newInstance()).type(Binding__c.SObjectType)
                 .security(AccessLevel.USER_MODE)
-                .returning(new Set<SObjectField> { Binding__c.Type__c, Binding__c.Action__c })
+                .returning(Binding__c.Type__c)
+                .returning(Binding__c.Action__c)
                 .execute(OptionalV1.empty())
                 .then(new DuplicateCheck());
     }

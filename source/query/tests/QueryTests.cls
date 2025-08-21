@@ -59,6 +59,13 @@ public with sharing class QueryTests {
             }
 
             try {
+                extended.returning(Contact.AccountId);
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
+
+            try {
                 extended.returning(new Set<SObjectField>());
                 Assert.fail();
             } catch (QueryException qe) {
@@ -74,6 +81,13 @@ public with sharing class QueryTests {
 
             try {
                 extended.returning((QueryV1.API) null);
+                Assert.fail();
+            } catch (QueryException qe) {
+                Assert.areEqual('Access denied', qe.getMessage());
+            }
+
+            try {
+                extended.returning((QueryV1.AggregatedField) null);
                 Assert.fail();
             } catch (QueryException qe) {
                 Assert.areEqual('Access denied', qe.getMessage());
@@ -152,6 +166,34 @@ public with sharing class QueryTests {
     }
 
     @IsTest
+    private static void testOrder() {
+        TestHelper.setNOW();
+        System.runAs(TestHelper.getUser(TESTING)) {
+            QueryV1.Order order = QueryV1.ascending(Contact.AccountId);
+            Assert.areEqual('AccountId', order.getField());
+            Assert.isTrue(order.isAscending());
+            Assert.isFalse(order.isNullsFirst().isPresent());
+
+            order = QueryV1.descending(Contact.Name);
+            Assert.areEqual('Name', order.getField());
+            Assert.isFalse(order.isAscending());
+            Assert.isFalse(order.isNullsFirst().isPresent());
+
+            order = QueryV1.ascending(Contact.Name).nullsFirst();
+            Assert.areEqual('Name', order.getField());
+            Assert.isTrue(order.isAscending());
+            Assert.isTrue(order.isNullsFirst().isPresent());
+            Assert.isTrue((Boolean) order.isNullsFirst().get());
+
+            order = QueryV1.descending(Contact.Name).nullsLast();
+            Assert.areEqual('Name', order.getField());
+            Assert.isFalse(order.isAscending());
+            Assert.isTrue(order.isNullsFirst().isPresent());
+            Assert.isFalse((Boolean) order.isNullsFirst().get());
+        }
+    }
+
+    @IsTest
     private static void testMatching() {
         TestHelper.setNOW();
         createData();
@@ -192,8 +234,8 @@ public with sharing class QueryTests {
         System.runAs(TestHelper.getUser(TESTING)) {
             List<AggregateResult> aggregates = (List<AggregateResult>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
+                    .returning(QueryV1.aggregatedField(Contact.LastName, 'LastName'))
                     .returning(new Set<QueryV1.AggregatedField>{
-                            QueryV1.aggregatedField(Contact.LastName, 'LastName'),
                             QueryV1.aggregatedField('COUNT', Contact.Id, 'Contacts')
                     })
                     .group(new Set<SObjectField>{ Contact.LastName })
@@ -211,9 +253,9 @@ public with sharing class QueryTests {
 
             aggregates = (List<AggregateResult>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
+                    .returning(QueryV1.aggregatedField(Contact.LastName, 'LastName'))
+                    .returning(QueryV1.aggregatedField(Contact.FirstName, 'FirstName'))
                     .returning(new Set<QueryV1.AggregatedField>{
-                            QueryV1.aggregatedField(Contact.LastName, 'LastName'),
-                            QueryV1.aggregatedField(Contact.FirstName, 'FirstName'),
                             QueryV1.aggregatedField('COUNT', Contact.Id, 'Contacts')
                     })
                     .group(new Set<SObjectField>{ Contact.LastName })
@@ -248,10 +290,8 @@ public with sharing class QueryTests {
 
             aggregates = (List<AggregateResult>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
-                    .returning(new Set<QueryV1.AggregatedField>{
-                            QueryV1.aggregatedField(Contact.AccountId, Account.Name, 'AccountName'),
-                            QueryV1.aggregatedField('COUNT', Contact.Id, 'Contacts')
-                    })
+                    .returning(QueryV1.aggregatedField(Contact.AccountId, Account.Name, 'AccountName'))
+                    .returning(QueryV1.aggregatedField('COUNT', Contact.Id, 'Contacts'))
                     .group(Contact.AccountId, new Set<SObjectField>{ Account.Name })
                     .ordered(QueryV1.ascending(Contact.AccountId, Account.Name))
                     .execute(OptionalV1.empty())
@@ -304,7 +344,7 @@ public with sharing class QueryTests {
                     })
                     .group(new Set<SObjectField> { Contact.FirstName })
                     .ordered(QueryV1.ascending(QueryV1.aggregatedField('SUM', Contact.AccountId, Account.AnnualRevenue, 'Revenue')))
-                    .ordered(QueryV1.descending(QueryV1.aggregatedField(Contact.FirstName, 'ContactFirstName'), false))
+                    .ordered(QueryV1.descending(QueryV1.aggregatedField(Contact.FirstName, 'ContactFirstName')).nullsLast())
                     .execute(OptionalV1.empty())
                     .get();
 
@@ -395,7 +435,7 @@ public with sharing class QueryTests {
         System.runAs(TestHelper.getUser(TESTING)) {
             List<Account> accounts = (List<Account>) QueryV1.of(Account.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
-                    .returning(new Set<SObjectField> { Account.Name })
+                    .returning(Account.Name)
                     .returning(
                             QueryV1.of(Contact.SObjectType)
                                     .returning(new Set<SObjectField> { Contact.FirstName, Contact.LastName })
@@ -410,8 +450,8 @@ public with sharing class QueryTests {
                                     .returning(Partner.AccountFromId, new Set<SObjectField> { Account.Name })
                                     .returning(Partner.AccountToId, new Set<SObjectField> { Account.Name })
                                     .ordered(new Set<QueryV1.Order> {
-                                            QueryV1.ascending(Partner.AccountFromId, Account.Name, true),
-                                            QueryV1.descending(Partner.AccountToId, Account.Name, false)
+                                            QueryV1.ascending(Partner.AccountFromId, Account.Name).nullsFirst(),
+                                            QueryV1.descending(Partner.AccountToId, Account.Name).nullsLast()
                                     })
                     )
                     .ordered(QueryV1.ascending(Account.Name))
@@ -542,8 +582,9 @@ public with sharing class QueryTests {
         System.runAs(TestHelper.getUser(TESTING)) {
             List<Contact> contacts = (List<Contact>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
+                    .returning(Contact.FirstName)
                     .returning(new Set<SObjectField>{
-                            Contact.FirstName, Contact.LastName
+                            Contact.LastName
                     })
                     .ordered(new Set<QueryV1.Order>{
                             QueryV1.ascending(Contact.LastName),
@@ -568,9 +609,8 @@ public with sharing class QueryTests {
 
             contacts = (List<Contact>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
-                    .returning(new Set<SObjectField>{
-                            Contact.FirstName, Contact.LastName
-                    })
+                    .returning(Contact.FirstName)
+                    .returning(Contact.LastName)
                     .ordered(new Set<QueryV1.Order>{
                             QueryV1.ascending(Contact.LastName),
                             QueryV1.ascending(Contact.FirstName)
@@ -943,8 +983,8 @@ public with sharing class QueryTests {
             List<Contact> contacts = (List<Contact>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
                     .returningAll()
-                    .ordered(QueryV1.ascending(Contact.LastName, true))
-                    .ordered(QueryV1.ascending(Contact.FirstName, true))
+                    .ordered(QueryV1.ascending(Contact.LastName).nullsFirst())
+                    .ordered(QueryV1.ascending(Contact.FirstName).nullsFirst())
                     .execute(OptionalV1.empty())
                     .get();
 
@@ -968,8 +1008,8 @@ public with sharing class QueryTests {
                     .security(AccessLevel.SYSTEM_MODE)
                     .returningAll()
                     .ordered(new Set<QueryV1.Order> {
-                            QueryV1.ascending(Contact.LastName, true),
-                            QueryV1.ascending(Contact.FirstName, true)
+                            QueryV1.ascending(Contact.LastName).nullsFirst(),
+                            QueryV1.ascending(Contact.FirstName).nullsFirst()
                     })
                     .execute(OptionalV1.empty())
                     .get();
@@ -993,8 +1033,8 @@ public with sharing class QueryTests {
             contacts = (List<Contact>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
                     .returningAll()
-                    .ordered(QueryV1.descending(Contact.LastName, true))
-                    .ordered(QueryV1.descending(Contact.FirstName, true))
+                    .ordered(QueryV1.descending(Contact.LastName).nullsFirst())
+                    .ordered(QueryV1.descending(Contact.FirstName).nullsFirst())
                     .execute(OptionalV1.empty())
                     .get();
 
@@ -1018,8 +1058,8 @@ public with sharing class QueryTests {
                     .security(AccessLevel.SYSTEM_MODE)
                     .returningAll()
                     .ordered(new Set<QueryV1.Order> {
-                            QueryV1.descending(Contact.LastName, true),
-                            QueryV1.descending(Contact.FirstName, true)
+                            QueryV1.descending(Contact.LastName).nullsFirst(),
+                            QueryV1.descending(Contact.FirstName).nullsFirst()
                     })
                     .execute(OptionalV1.empty())
                     .get();
@@ -1044,10 +1084,10 @@ public with sharing class QueryTests {
                     .security(AccessLevel.SYSTEM_MODE)
                     .returningAll()
                     .returning(Contact.AccountId, new Set<SObjectField> { Account.AccountNumber })
-                    .ordered(QueryV1.ascending(Contact.AccountId, Account.AccountNumber, true))
+                    .ordered(QueryV1.ascending(Contact.AccountId, Account.AccountNumber).nullsFirst())
                     .ordered(new Set<QueryV1.Order> {
-                            QueryV1.ascending(Contact.LastName, true),
-                            QueryV1.ascending(Contact.FirstName, true)
+                            QueryV1.ascending(Contact.LastName).nullsFirst(),
+                            QueryV1.ascending(Contact.FirstName).nullsFirst()
                     })
                     .execute(OptionalV1.empty())
                     .get();
@@ -1079,10 +1119,10 @@ public with sharing class QueryTests {
                     .security(AccessLevel.SYSTEM_MODE)
                     .returningAll()
                     .returning(Contact.AccountId, new Set<SObjectField> { Account.AccountNumber })
-                    .ordered(QueryV1.descending(Contact.AccountId, Account.AccountNumber, true))
+                    .ordered(QueryV1.descending(Contact.AccountId, Account.AccountNumber).nullsFirst())
                     .ordered(new Set<QueryV1.Order> {
-                            QueryV1.ascending(Contact.LastName, true),
-                            QueryV1.ascending(Contact.FirstName, true)
+                            QueryV1.ascending(Contact.LastName).nullsFirst(),
+                            QueryV1.ascending(Contact.FirstName).nullsFirst()
                     })
                     .execute(OptionalV1.empty())
                     .get();
@@ -1117,11 +1157,11 @@ public with sharing class QueryTests {
                             QueryV1.of(Contact.SObjectType)
                                     .returning(new Set<SObjectField> { Contact.LastName, Contact.FirstName })
                                     .ordered(new Set<QueryV1.Order> {
-                                            QueryV1.ascending(Contact.LastName, true),
-                                            QueryV1.ascending(Contact.FirstName, true)
+                                            QueryV1.ascending(Contact.LastName).nullsFirst(),
+                                            QueryV1.ascending(Contact.FirstName).nullsFirst()
                                     })
                     )
-                    .ordered(QueryV1.ascending(Account.AccountNumber, true))
+                    .ordered(QueryV1.ascending(Account.AccountNumber).nullsFirst())
                     .execute(OptionalV1.empty())
                     .get();
 
@@ -1156,11 +1196,11 @@ public with sharing class QueryTests {
                             QueryV1.of(Contact.SObjectType)
                                     .returning(new Set<SObjectField> { Contact.LastName, Contact.FirstName })
                                     .ordered(new Set<QueryV1.Order> {
-                                            QueryV1.descending(Contact.LastName, true),
-                                            QueryV1.descending(Contact.FirstName, true)
+                                            QueryV1.descending(Contact.LastName).nullsFirst(),
+                                            QueryV1.descending(Contact.FirstName).nullsFirst()
                                     })
                     )
-                    .ordered(QueryV1.descending(Account.AccountNumber, true))
+                    .ordered(QueryV1.descending(Account.AccountNumber).nullsFirst())
                     .execute(OptionalV1.empty())
                     .get();
 
@@ -1198,8 +1238,8 @@ public with sharing class QueryTests {
             List<Contact> contacts = (List<Contact>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
                     .returningAll()
-                    .ordered(QueryV1.ascending(Contact.LastName, false))
-                    .ordered(QueryV1.ascending(Contact.FirstName, false))
+                    .ordered(QueryV1.ascending(Contact.LastName).nullsLast())
+                    .ordered(QueryV1.ascending(Contact.FirstName).nullsLast())
                     .execute(OptionalV1.empty())
                     .get();
 
@@ -1223,8 +1263,8 @@ public with sharing class QueryTests {
                     .security(AccessLevel.SYSTEM_MODE)
                     .returningAll()
                     .ordered(new Set<QueryV1.Order> {
-                            QueryV1.ascending(Contact.LastName, false),
-                            QueryV1.ascending(Contact.FirstName, false)
+                            QueryV1.ascending(Contact.LastName).nullsLast(),
+                            QueryV1.ascending(Contact.FirstName).nullsLast()
                     })
                     .execute(OptionalV1.empty())
                     .get();
@@ -1248,8 +1288,8 @@ public with sharing class QueryTests {
             contacts = (List<Contact>) QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
                     .returningAll()
-                    .ordered(QueryV1.descending(Contact.LastName, false))
-                    .ordered(QueryV1.descending(Contact.FirstName, false))
+                    .ordered(QueryV1.descending(Contact.LastName).nullsLast())
+                    .ordered(QueryV1.descending(Contact.FirstName).nullsLast())
                     .execute(OptionalV1.empty())
                     .get();
 
@@ -1273,8 +1313,8 @@ public with sharing class QueryTests {
                     .security(AccessLevel.SYSTEM_MODE)
                     .returningAll()
                     .ordered(new Set<QueryV1.Order> {
-                            QueryV1.descending(Contact.LastName, false),
-                            QueryV1.descending(Contact.FirstName, false)
+                            QueryV1.descending(Contact.LastName).nullsLast(),
+                            QueryV1.descending(Contact.FirstName).nullsLast()
                     })
                     .execute(OptionalV1.empty())
                     .get();
@@ -1299,10 +1339,10 @@ public with sharing class QueryTests {
                     .security(AccessLevel.SYSTEM_MODE)
                     .returningAll()
                     .returning(Contact.AccountId, new Set<SObjectField> { Account.AccountNumber })
-                    .ordered(QueryV1.ascending(Contact.AccountId, Account.AccountNumber, false))
+                    .ordered(QueryV1.ascending(Contact.AccountId, Account.AccountNumber).nullsLast())
                     .ordered(new Set<QueryV1.Order> {
-                            QueryV1.ascending(Contact.LastName, false),
-                            QueryV1.ascending(Contact.FirstName, false)
+                            QueryV1.ascending(Contact.LastName).nullsLast(),
+                            QueryV1.ascending(Contact.FirstName).nullsLast()
                     })
                     .execute(OptionalV1.empty())
                     .get();
@@ -1334,10 +1374,10 @@ public with sharing class QueryTests {
                     .security(AccessLevel.SYSTEM_MODE)
                     .returningAll()
                     .returning(Contact.AccountId, new Set<SObjectField> { Account.AccountNumber })
-                    .ordered(QueryV1.descending(Contact.AccountId, Account.AccountNumber, false))
+                    .ordered(QueryV1.descending(Contact.AccountId, Account.AccountNumber).nullsLast())
                     .ordered(new Set<QueryV1.Order> {
-                            QueryV1.ascending(Contact.LastName, false),
-                            QueryV1.ascending(Contact.FirstName, false)
+                            QueryV1.ascending(Contact.LastName).nullsLast(),
+                            QueryV1.ascending(Contact.FirstName).nullsLast()
                     })
                     .execute(OptionalV1.empty())
                     .get();
@@ -1372,11 +1412,11 @@ public with sharing class QueryTests {
                             QueryV1.of(Contact.SObjectType)
                                     .returning(new Set<SObjectField> { Contact.LastName, Contact.FirstName })
                                     .ordered(new Set<QueryV1.Order> {
-                                            QueryV1.ascending(Contact.LastName, false),
-                                            QueryV1.ascending(Contact.FirstName, false)
+                                            QueryV1.ascending(Contact.LastName).nullsLast(),
+                                            QueryV1.ascending(Contact.FirstName).nullsLast()
                                     })
                     )
-                    .ordered(QueryV1.ascending(Account.AccountNumber, false))
+                    .ordered(QueryV1.ascending(Account.AccountNumber).nullsLast())
                     .execute(OptionalV1.empty())
                     .get();
 
@@ -1411,11 +1451,11 @@ public with sharing class QueryTests {
                             QueryV1.of(Contact.SObjectType)
                                     .returning(new Set<SObjectField> { Contact.LastName, Contact.FirstName })
                                     .ordered(new Set<QueryV1.Order> {
-                                            QueryV1.descending(Contact.LastName, false),
-                                            QueryV1.descending(Contact.FirstName, false)
+                                            QueryV1.descending(Contact.LastName).nullsLast(),
+                                            QueryV1.descending(Contact.FirstName).nullsLast()
                                     })
                     )
-                    .ordered(QueryV1.descending(Account.AccountNumber, false))
+                    .ordered(QueryV1.descending(Account.AccountNumber).nullsLast())
                     .execute(OptionalV1.empty())
                     .get();
 

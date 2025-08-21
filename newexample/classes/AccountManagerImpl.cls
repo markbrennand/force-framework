@@ -28,11 +28,9 @@ global with sharing class AccountManagerImpl implements AccountManager {
 
         forcefw.QueryV1.of(Contact.SObjectType)
                 .security(AccessLevel.USER_MODE)
+                .returning(forcefw.QueryV1.aggregatedField(Contact.AccountId, 'AccountId'))
+                .returning(forcefw.QueryV1.aggregatedField('COUNT', Contact.Id, 'Total'))
                 .matching('AccountId IN :accountIds')
-                .returning(new Set<forcefw.QueryV1.AggregatedField> {
-                        forcefw.QueryV1.aggregatedField(Contact.AccountId, 'AccountId'),
-                        forcefw.QueryV1.aggregatedField('COUNT', Contact.Id, 'Total')
-                })
                 .group(new Set<SObjectField> { Contact.AccountId })
                 .execute(forcefw.OptionalV1.of(new Map<String, Object> { 'accountIds' => accountIds }))
                 .then(new UpdateAccounts())
@@ -73,8 +71,8 @@ global with sharing class AccountManagerImpl implements AccountManager {
             forcefw.OptionalV1.of(
                     forcefw.ArrayV1.over((List<Account>) forcefw.QueryV1.of(Account.SObjectType)
                             .security(AccessLevel.USER_MODE)
+                            .returning(Account.Id)
                             .matching('Id IN :accountIds')
-                            .returning(new Set<SObjectField> { Account.Id })
                             .execute(forcefw.OptionalV1.of(new Map<String, Object> { 'accountIds' => counts.keySet() }))
                             .get()
                     )
@@ -96,8 +94,9 @@ global with sharing class AccountManagerImpl implements AccountManager {
 
             return forcefw.QueryV1.of(Contact.SObjectType)
                     .security(AccessLevel.USER_MODE)
+                    .returning(Contact.Id)
+                    .returning(Contact.AccountId)
                     .matching('AccountId IN :accountIds')
-                    .returning(new set<SObjectField> { Contact.Id, Contact.AccountId })
                     .execute(forcefw.OptionalV1.of(new Map<String, Object> { 'accountIds' => counts.keySet() }))
                     .then(new SetPeerCountInContact(counts));
         }

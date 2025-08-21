@@ -87,6 +87,17 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
             return returning(new Set<SObjectField>(type.getDescribe(SObjectDescribeOptions.DEFERRED).fields.getMap().values()));
         }
 
+        public QueryV1.API returning(final SObjectField field) {
+            throwExceptionIfCountQuery();
+            throwExceptionIfAggregatedQuery();
+
+            final Set<String> value = getValue(returning);
+            ArrayV1.over(new List<SObjectField> { field }).reduce(new BuildReturning(), value);
+
+            returning = OptionalV1.of(value);
+            return this;
+        }
+
         public QueryV1.API returning(final Set<SObjectField> fields) {
             throwExceptionIfCountQuery();
             throwExceptionIfAggregatedQuery();
@@ -117,6 +128,17 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
             ArrayV1.over(getChildRelationshipsNames(query.type())).sharing(query).reduce(new AddRelationship(), value);
 
             returning = OptionalV1.of(value);
+            return this;
+        }
+
+        public QueryV1.API returning(final QueryV1.AggregatedField field) {
+            throwExceptionIfCountQuery();
+            throwExceptionIfRegularQuery();
+
+            final Set<String> value = getValue(aggregates);
+            ArrayV1.over(new List<QueryV1.AggregatedField> { field }).reduce(new CommonHelper.ToString(), value);
+
+            aggregates = OptionalV1.of(value);
             return this;
         }
 
@@ -360,13 +382,13 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
         return new AggregatedFieldImpl(joinField, field, function, alias);
     }
 
-    public static QueryV1.Order order(OptionalV1 joinField, final SObjectField field, final Boolean isAscending, OptionalV1 nullsFirst) {
-        return new OrderImpl(field, isAscending ? SortOrder.ASCENDING : SortOrder.DESCENDING, joinField, nullsFirst);
+    public static QueryV1.Order order(OptionalV1 joinField, final SObjectField field, final Boolean isAscending) {
+        return new OrderImpl(field, isAscending ? SortOrder.ASCENDING : SortOrder.DESCENDING, joinField);
     }
 
-    public static QueryV1.Order order(final QueryV1.AggregatedField aggregate, final Boolean isAscending, OptionalV1 nullsFirst) {
-        return new OrderImpl(aggregate, isAscending ? SortOrder.ASCENDING : SortOrder.DESCENDING, nullsFirst);
-    }
+    public static QueryV1.Order order(final QueryV1.AggregatedField aggregate, final Boolean isAscending) {
+        return new OrderImpl(aggregate, isAscending ? SortOrder.ASCENDING : SortOrder.DESCENDING);
+   }
 
     private with sharing class AggregatedFieldImpl implements QueryV1.AggregatedField {
         private final String field;
@@ -414,9 +436,9 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
     private with sharing class OrderImpl implements QueryV1.Order {
         private final String field;
         private final SortOrder order;
-        private final OptionalV1 nullsFirst;
+        private OptionalV1 nullsFirst = OptionalV1.empty();
 
-        public OrderImpl(final SObjectField field, final SortOrder order, final OptionalV1 joinField, final OptionalV1 nullsFirst) {
+        public OrderImpl(final SObjectField field, final SortOrder order, final OptionalV1 joinField) {
             if (joinField.isPresent()) {
                 if (! (joinField.get() instanceof SObjectField)) {
                     throw new QueryException('Join field must be an SObjectField');
@@ -429,13 +451,33 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
                 this.field = field.getDescribe().name;
             }
             this.order = order;
-            this.nullsFirst = nullsFirst;
         }
 
-        public OrderImpl(final QueryV1.AggregatedField aggregatedField, final SortOrder order, final OptionalV1 nullsFirst) {
+        public OrderImpl(final QueryV1.AggregatedField aggregatedField, final SortOrder order) {
             this.field = ((AggregatedFieldImpl) aggregatedField).toOrderString();
             this.order = order;
-            this.nullsFirst = nullsFirst;
+        }
+
+        public String getField() {
+            return field;
+        }
+
+        public Boolean isAscending() {
+            return order == SortOrder.ASCENDING;
+        }
+
+        public OptionalV1 isNullsFirst() {
+            return nullsFirst;
+        }
+
+        public QueryV1.Order nullsFirst() {
+            nullsFirst = OptionalV1.of(true);
+            return (QueryV1.Order) this;
+        }
+
+        public QueryV1.Order nullsLast() {
+            nullsFirst = OptionalV1.of(false);
+            return (QueryV1.Order) this;
         }
 
         public override String toString() {
@@ -560,6 +602,19 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
      * <p>
      * Method is solely for mocking use.
      *
+     * @param field ignored.
+     *
+     * @return ignored.
+     */
+    public QueryV1.API returning(final SObjectField field) {
+        throw new QueryException('Access denied');
+    }
+
+    /**
+     * @description
+     * <p>
+     * Method is solely for mocking use.
+     *
      * @param fields ignored.
      *
      * @return ignored.
@@ -578,6 +633,19 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
      * @return ignored.
      */
     public QueryV1.API returning(final QueryV1.API query) {
+        throw new QueryException('Access denied');
+    }
+
+    /**
+     * @description
+     * <p>
+     * Method is solely for mocking use.
+     *
+     * @param field ignored.
+     *
+     * @return ignored.
+     */
+    public QueryV1.API returning(final QueryV1.AggregatedField field) {
         throw new QueryException('Access denied');
     }
 

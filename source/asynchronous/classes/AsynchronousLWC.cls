@@ -130,19 +130,17 @@ public with sharing virtual class AsynchronousLWC implements API {
         ) {
             final QueryV1.API query = QueryV1.of(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.USER_MODE)
-                    .matching(buildQuery(filters))
-                    .returning(new Set<SObjectField> {
-                            AsynchronousJob__c.ApexJobId__c,
-                            AsynchronousJob__c.Name,
-                            AsynchronousJob__c.Reference__c,
-                            AsynchronousJob__c.Status__c,
-                            AsynchronousJob__c.RetryNumber__c,
-                            AsynchronousJob__c.MaximumRetries__c,
-                            AsynchronousJob__c.Runnable__c,
-                            AsynchronousJob__c.ScheduledRunTime__c,
-                            AsynchronousJob__c.LastRunTime__c
-                    })
+                    .returning(AsynchronousJob__c.ApexJobId__c)
+                    .returning(AsynchronousJob__c.Name)
+                    .returning(AsynchronousJob__c.Reference__c)
+                    .returning(AsynchronousJob__c.Status__c)
+                    .returning(AsynchronousJob__c.RetryNumber__c)
+                    .returning(AsynchronousJob__c.MaximumRetries__c)
+                    .returning(AsynchronousJob__c.Runnable__c)
+                    .returning(AsynchronousJob__c.ScheduledRunTime__c)
+                    .returning(AsynchronousJob__c.LastRunTime__c)
                     .returning(AsynchronousJob__c.OwnerId, new Set<SObjectField> { User.Name })
+                    .matching(buildQuery(filters))
                     .max(max)
                     .offset(offset);
 
@@ -176,8 +174,8 @@ public with sharing virtual class AsynchronousLWC implements API {
         public void deleteJobs(final List<Id> jobIds) {
             QueryV1.of(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.USER_MODE)
+                    .returning(AsynchronousJob__c.Id)
                     .matching('Id IN :jobIds')
-                    .returning(new Set<SObjectField> { AsynchronousJob__c.Id })
                     .execute(OptionalV1.of(new Map<String, Object> { 'jobIds' => jobIds }))
                     .then(new QueryHelper.SObjectDeleter(AccessLevel.USER_MODE));
         }
@@ -192,8 +190,8 @@ public with sharing virtual class AsynchronousLWC implements API {
         public void runJobs(final List<Id> jobIds) {
             QueryV1.of(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.USER_MODE)
+                    .returning(AsynchronousJob__c.Id)
                     .matching('Id IN :jobIds AND Runnable__c != :schedulerClassName')
-                    .returning(new Set<SObjectField> { AsynchronousJob__c.Id })
                     .execute(OptionalV1.of(new Map<String, Object> {
                             'jobIds' => jobIds,
                             'schedulerClassName' => AsynchronousScheduler.RunNextAvailable.class.getName()
@@ -216,12 +214,8 @@ public with sharing virtual class AsynchronousLWC implements API {
 
             returnMap.putAll((Map<String, Integer>) QueryV1.of(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.USER_MODE)
-                    .returning(
-                            new Set<QueryV1.AggregatedField> {
-                                    QueryV1.aggregatedField(AsynchronousJob__c.Status__c, STATUS_ALIAS),
-                                    QueryV1.aggregatedField('COUNT', AsynchronousJob__c.Id, COUNT_ALIAS)
-                            }
-                    )
+                    .returning(QueryV1.aggregatedField(AsynchronousJob__c.Status__c, STATUS_ALIAS))
+                    .returning(QueryV1.aggregatedField('COUNT', AsynchronousJob__c.Id, COUNT_ALIAS))
                     .group(new Set<SObjectField> { AsynchronousJob__c.Status__c })
                     .execute(OptionalV1.empty())
                     .then(new TotalsTransformer())
@@ -390,6 +384,10 @@ public with sharing virtual class AsynchronousLWC implements API {
                 returnObject.put(stripped, fields.get(field));
             }
 
+            final String apexJobId = (String) returnObject.get('ApexJobId__c');
+            if ((apexJobId ?? '').length() > 15) {
+                returnObject.put('ApexJobId__c', apexJobId.substring(0, 15));
+            }
             returnObject.put('Owner', match.Owner.Name);
 
             if (match.Status__c == AsynchronousV1.Status.RUNNING.name()) {

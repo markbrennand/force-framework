@@ -22,9 +22,60 @@ global with sharing class QueryV1 {
     /**
      * @description
      * <p>
-     * Implementation dependent representation of a SOQL order clause.
+     * Representation of an SOQL order clause.
      */
-    global interface Order {}
+    global interface Order {
+
+        /**
+         * @description
+         * <p>
+         * Returns the field that the results will be ordered by.
+         *
+         * @return The field to be ordered by.
+         */
+        String getField();
+
+        /**
+         * @description
+         * <p>
+         * Returns true if the results are to be ordered in ascending value, false if descending.
+         *
+         * @return True is the results are returned in ascending order, false if descending.
+         */
+        Boolean isAscending();
+
+        /**
+         * @description
+         * <p>
+         * Returns an OptionalV1 representing whether null values for the associated field are to be included in the
+         * results at the start or end.
+         * <p>
+         * If the return value is not set in the OptionalV1, then the default null ordering is being used.
+         * <p>
+         * Otherwise, a value of true indicates null values will be returned first and false indicates last.
+         *
+         * @return An OptionalV1 representing the ordering of null values.
+         */
+        OptionalV1 isNullsFirst();
+
+        /**
+         * @description
+         * <p>
+         * Sets the result ordering to null values first.
+         *
+         * @return The current instance so it can be chained.
+         */
+        Order nullsFirst();
+
+        /**
+         * @description
+         * <p>
+         * Sets the result ordering to null values last.
+         *
+         * @return The current instance so it can be chained.
+         */
+        Order nullsLast();
+    }
 
     /**
      * @description
@@ -94,15 +145,156 @@ global with sharing class QueryV1 {
          */
         API returningAll();
 
+        /**
+         * @description
+         * <p>
+         * Adds the given field to the fields to be returned by the query.
+         * <p>
+         * The fields to be returned are accumulated from all the calls to the returning methods.
+         *
+         * @param field The field to return.
+         *
+         * @return The current API instance so it can be chained.
+         */
+        API returning(final SObjectField field);
+
+        /**
+         * @description
+         * <p>
+         * Adds the given fields to the fields to be returned by the query.
+         * <p>
+         * The fields to be returned are accumulated from all the calls to the returning methods.
+         *
+         * @param fields The fields to return.
+         *
+         * @return The current API instance so it can be chained.
+         */
         API returning(final Set<SObjectField> fields);
+
+        /**
+         * @description
+         * <p>
+         * Adds the given fields from a related object to the fields to be returned by the query.
+         * <p>
+         * The fields to be returned are accumulated from all the calls to the returning methods.
+         *
+         * @param joinField The Id field in the object being queried that links to the related object.
+         * @param fields The fields to return.
+         *
+         * @return The current API instance so it can be chained.
+         */
         API returning(final SObjectField joinField, final Set<SObjectField> fields);
+
+        /**
+         * @description
+         * <p>
+         * Adds the given sub query to the fields.
+         * <p>
+         * The SObjectType of the sub query is used to determine the child relationship(s) from the object being
+         * queried to the object associated with the sub query. A query field is added to the query for each
+         * child relationship.
+         * <p>
+         * The fields to be returned are accumulated from all the calls to the returning methods.
+         *
+         * @param query The sub query.
+         *
+         * @return The current API instance so it can be chained.
+         */
         API returning(final API query);
+
+        /**
+         * @description
+         * <p>
+         * Adds the given aggregated field to the fields to be returned by the query.
+         * <p>
+         * The fields to be returned are accumulated from all the calls to the returning methods.
+         *
+         * @param field The aggregated field to return.
+         *
+         * @return The current API instance so it can be chained.
+         */
+        API returning(final AggregatedField field);
+
+        /**
+         * @description
+         * <p>
+         * Adds the given aggregated fields to the fields to be returned by the query.
+         * <p>
+         * The fields to be returned are accumulated from all the calls to the returning methods.
+         *
+         * @param fields The aggregated fields to return.
+         *
+         * @return The current API instance so it can be chained.
+         */
         API returning(final Set<AggregatedField> fields);
+
+        /**
+         * @description
+         * <p>
+         * Sets the WHERE clause for the query.
+         * <p>
+         * The condition may include bind variables. The Map passed to the execute method must include a definition
+         * for each bind variable in the condition.
+         *
+         * @param condition The query WHERE clause.
+         *
+         * @return The current API instance so it can be chained.
+         */
         API matching(final String condition);
+
+        /**
+         * @description
+         * <p>
+         * Adds a result ordering to the query.
+         * <p>
+         * The result ordering is determined by the accumulation of all the ordered calls.
+         *
+         * @param order The result order to add to the query.
+         *
+         * @return The current API instance so it can be chained.
+         */
         API ordered(final Order order);
+
+        /**
+         * @description
+         * <p>
+         * Adds result orderings to the query.
+         * <p>
+         * The result ordering is determined by the accumulation of all the ordered calls.
+         *
+         * @param order The result orders to add to the query.
+         *
+         * @return The current API instance so it can be chained.
+         */
         API ordered(final Set<Order> order);
+
+        /**
+         * @description
+         * <p>
+         * For an aggregated query, sets the fields to group the results by.
+         * <p>
+         * The grouping is determined by the accumulation of all the group calls.
+         *
+         * @param fields The fields to group the results by.
+         *
+         * @return The current API instance so it can be chained.
+         */
         API group(final Set<SObjectField> fields);
+
+        /**
+         * @description
+         * <p>
+         * For an aggregated query, sets the fields in a related object to group the results by.
+         * <p>
+         * The grouping is determined by the accumulation of all the group calls.
+         *
+         * @param joinField The Id field in the object being queried that links to the related object.
+         * @param fields The fields to group the results by.
+         *
+         * @return The current API instance so it can be chained.
+         */
         API group(final SObjectField joinField, final Set<SObjectField> fields);
+
         API has(final String condition);
         API max(final Integer max);
         API offset(final Integer offset);
@@ -118,51 +310,27 @@ global with sharing class QueryV1 {
     }
 
     global static Order ascending(final SObjectField field) {
-        return QueryAPI.order(OptionalV1.empty(), field, true, OptionalV1.empty());
-    }
-
-    global static Order ascending(final SObjectField field, final Boolean nullsFirst) {
-        return QueryAPI.order(OptionalV1.empty(), field, true, OptionalV1.of(nullsFirst));
+        return QueryAPI.order(OptionalV1.empty(), field, true);
     }
 
     global static Order ascending(final SObjectField joinField, final SObjectField field) {
-        return QueryAPI.order(OptionalV1.of(joinField), field, true, OptionalV1.empty());
-    }
-
-    global static Order ascending(final SObjectField joinField, final SObjectField field, final Boolean nullsFirst) {
-        return QueryAPI.order(OptionalV1.of(joinField), field, true, OptionalV1.of(nullsFirst));
+        return QueryAPI.order(OptionalV1.of(joinField), field, true);
     }
 
     global static Order ascending(final AggregatedField field) {
-        return QueryAPI.order(field, true, OptionalV1.empty());
-    }
-
-    global static Order ascending(final AggregatedField field, final Boolean nullsFirst) {
-        return QueryAPI.order(field, true, OptionalV1.of(nullsFirst));
-    }
-
-    global static Order descending(final AggregatedField field) {
-        return QueryAPI.order(field, false, OptionalV1.empty());
-    }
-
-    global static Order descending(final AggregatedField field, final Boolean nullsFirst) {
-        return QueryAPI.order(field, false, OptionalV1.of(nullsFirst));
+        return QueryAPI.order(field, true);
     }
 
     global static Order descending(final SObjectField field) {
-        return QueryAPI.order(OptionalV1.empty(), field, false, OptionalV1.empty());
-    }
-
-    global static Order descending(final SObjectField field, final Boolean nullsFirst) {
-        return QueryAPI.order(OptionalV1.empty(), field, false, OptionalV1.of(nullsFirst));
+        return QueryAPI.order(OptionalV1.empty(), field, false);
     }
 
     global static Order descending(final SObjectField joinField, final SObjectField field) {
-        return QueryAPI.order(OptionalV1.of(joinField), field, false, OptionalV1.empty());
+        return QueryAPI.order(OptionalV1.of(joinField), field, false);
     }
 
-    global static Order descending(final SObjectField joinField, final SObjectField field, final Boolean nullsFirst) {
-        return QueryAPI.order(OptionalV1.of(joinField), field, false, OptionalV1.of(nullsFirst));
+    global static Order descending(final AggregatedField field) {
+        return QueryAPI.order(field, false);
     }
 
     /**
