@@ -1,8 +1,8 @@
 /**
  * @description
- * <p>
+ * <p/>
  * Unit tests for DependencyHelper class.
- * <p>
+ * <p/>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand

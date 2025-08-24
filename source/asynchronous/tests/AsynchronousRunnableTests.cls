@@ -1,8 +1,8 @@
 /**
  * @description
- * <p>
+ * <p/>
  * Unit tests for AsynchronousRunnable class.
- * <p>
+ * <p/>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -25,8 +25,8 @@ public with sharing class AsynchronousRunnableTests {
             Assert.areEqual(1, runnable.getMaximumActive());
             Assert.isTrue(runnable.onSuccess((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock()));
             Assert.isTrue(runnable.onCancellation((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock()));
-            Assert.isTrue(runnable.onFailure((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock(), new DMLException('Test')));
-            Assert.areEqual(AsynchronousV1.Status.QUEUED, runnable.onError((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock(), new DMLException('Test')));
+            Assert.isTrue(runnable.onFailure((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock(), new DmlException('Test')));
+            Assert.areEqual(AsynchronousV1.Status.QUEUED, runnable.onError((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock(), new DmlException('Test')));
         }
     }
 

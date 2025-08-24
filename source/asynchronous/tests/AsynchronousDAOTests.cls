@@ -1,8 +1,8 @@
 /**
  * @description
- * <p>
+ * <p/>
  * Unit tests for AsynchronousDAO class.
- * <p>
+ * <p/>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -497,7 +497,7 @@ public with sharing class AsynchronousDAOTests {
 
             insert job;
 
-            Exception exc = new DMLException('Test');
+            Exception exc = new DmlException('Test');
 
             AsynchronousJobException__c error = new AsynchronousJobException__c(
                     AsynchronousJob__c = job.Id,
@@ -524,7 +524,7 @@ public with sharing class AsynchronousDAOTests {
     }
 
     private with sharing class AsynchronousStateModifier implements MockerV1.Modifier {
-        private AsynchronousHelper.API api = (AsynchronousHelper.API) new AsynchronousHelper.Factory().newInstance();
+        private final AsynchronousHelper.API api = (AsynchronousHelper.API) new AsynchronousHelper.Factory().newInstance();
 
         public Object process(List<Object> arguments) {
             return api.encodeState((AsynchronousJob__c) arguments[0], (Map<String, String>) arguments[1]);

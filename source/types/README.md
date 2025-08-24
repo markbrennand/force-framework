@@ -11,7 +11,7 @@ it will call the _newInstance_ method of the _Factory_ implementation to create 
 See the reference [Apex docs](../../docs/SfApexDocs/typesv1.html) for the API. It is suggested that you keep a page open with
 the Apex docs  loaded for your reference whilst reading this page.
 
-If you wish to try the _Types_ example code , see [Geting Started](../../GETTINGSTARTED.md).
+If you wish to try the _Types_ example code , see [Getting Started](../../GETTINGSTARTED.md).
 
 ### Use Case - Reduce Need For Global Classes
 If you're using the Force Framework package, the code for that package is in the _forcefw_ namespace. Taking

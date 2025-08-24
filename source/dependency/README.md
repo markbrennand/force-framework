@@ -23,7 +23,7 @@ interface.
 See the reference [Apex docs](../../docs/SfApexDocs/dependencyv1.html) for the API. It is suggested that you keep a page open with the
 Apex docs loaded for your reference whilst reading this page.
 
-If you wish to try the _Dependency Injection_ example code, see [Geting Started](../../GETTINGSTARTED.md).
+If you wish to try the _Dependency Injection_ example code, see [Getting Started](../../GETTINGSTARTED.md).
 
 ## Bindings
 A binding is the mapping from a property or abstract entity to its concrete implementation. The bindings are stored in

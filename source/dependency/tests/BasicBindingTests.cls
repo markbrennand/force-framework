@@ -1,8 +1,8 @@
 /**
  * @description
- * <p>
+ * <p/>
  * Unit tests for basic binding.
- * <p>
+ * <p/>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -120,7 +120,7 @@ public with sharing class BasicBindingTests {
             };
         }
 
-        BindingTestHelper.singletoInstance =
+        BindingTestHelper.singletonInstance =
         BindingTestHelper.prototypeInstance = 0;
 
         // The first inject call adds the 2 custom bindings, which will instantiate the implementation. Hence use
@@ -168,7 +168,7 @@ public with sharing class BasicBindingTests {
                 DependencyV1.bind(BindingTestHelper.AbstractTest.class, BindingTestHelper.PrototypeTest.class);
             }
 
-            BindingTestHelper.singletoInstance =
+            BindingTestHelper.singletonInstance =
                     BindingTestHelper.prototypeInstance = 0;
         }
     }

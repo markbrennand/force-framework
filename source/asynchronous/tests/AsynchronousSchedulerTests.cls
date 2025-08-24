@@ -1,8 +1,8 @@
 /**
  * @description
- * <p>
+ * <p/>
  * Unit tests for AsynchronousScheduler class.
- * <p>
+ * <p/>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -44,9 +44,9 @@ public with sharing class AsynchronousSchedulerTests {
 
 
             AsynchronousScheduler scheduler = new AsynchronousScheduler();
-            AsynchronousScheduler.configuration = new Map<String, Integer>{
+            AsynchronousScheduler.configuration = ImmutableV1.of(new Map<String, Integer>{
                     AsynchronousScheduler.NO_JOBS_TO_RUN_DELAY_PROPERTY => 5000
-            };
+            });
 
             Long started = System.currentTimeMillis();
             scheduler.run(asyncJob, 'ApexJobId');
@@ -125,7 +125,7 @@ public with sharing class AsynchronousSchedulerTests {
                     new AsynchronousJob__c(
                             Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = SingleConcurrencyTestRunnable.class.getName(),
-                            ScheduledRunTime__c = DateTime.now().addSeconds(-10))
+                            ScheduledRunTime__c = CommonHelper.now().addSeconds(-10))
             };
 
             mockForRun(asyncObjects, 2, new Set<Id>{
@@ -139,11 +139,11 @@ public with sharing class AsynchronousSchedulerTests {
                     new AsynchronousJob__c(
                             Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = SingleConcurrencyTestRunnable.class.getName(),
-                            ScheduledRunTime__c = DateTime.now().addSeconds(-10)),
+                            ScheduledRunTime__c = CommonHelper.now().addSeconds(-10)),
                     new AsynchronousJob__c(
                             Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = SingleConcurrencyTestRunnable.class.getName(),
-                            ScheduledRunTime__c = DateTime.now().addSeconds(-5))
+                            ScheduledRunTime__c = CommonHelper.now().addSeconds(-5))
             };
 
             mockForRun(asyncObjects, 2, new Set<Id>{
@@ -163,7 +163,7 @@ public with sharing class AsynchronousSchedulerTests {
                     new AsynchronousJob__c(
                             Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
-                            ScheduledRunTime__c = DateTime.now().addSeconds(-10))
+                            ScheduledRunTime__c = CommonHelper.now().addSeconds(-10))
             };
 
             mockForRun(asyncObjects, 2, new Set<Id>{
@@ -177,11 +177,11 @@ public with sharing class AsynchronousSchedulerTests {
                     new AsynchronousJob__c(
                             Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
-                            ScheduledRunTime__c = DateTime.now().addSeconds(-10)),
+                            ScheduledRunTime__c = CommonHelper.now().addSeconds(-10)),
                     new AsynchronousJob__c(
                             Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
-                            ScheduledRunTime__c = DateTime.now().addSeconds(-5))
+                            ScheduledRunTime__c = CommonHelper.now().addSeconds(-5))
             };
 
             mockForRun(asyncObjects, 2, new Set<Id>{
@@ -195,15 +195,15 @@ public with sharing class AsynchronousSchedulerTests {
                     new AsynchronousJob__c(
                             Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
-                            ScheduledRunTime__c = DateTime.now().addSeconds(-10)),
+                            ScheduledRunTime__c = CommonHelper.now().addSeconds(-10)),
                     new AsynchronousJob__c(
                             Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
-                            ScheduledRunTime__c = DateTime.now().addSeconds(-5)),
+                            ScheduledRunTime__c = CommonHelper.now().addSeconds(-5)),
                     new AsynchronousJob__c(
                             Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
-                            ScheduledRunTime__c = DateTime.now().addSeconds(-1))
+                            ScheduledRunTime__c = CommonHelper.now().addSeconds(-1))
             };
 
             mockForRun(asyncObjects, 2, new Set<Id>{
@@ -223,15 +223,15 @@ public with sharing class AsynchronousSchedulerTests {
                     new AsynchronousJob__c(
                             Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = SingleConcurrencyTestRunnable.class.getName(),
-                            ScheduledRunTime__c = DateTime.now().addSeconds(-10)),
+                            ScheduledRunTime__c = CommonHelper.now().addSeconds(-10)),
                     new AsynchronousJob__c(
                             Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
-                            ScheduledRunTime__c = DateTime.now().addSeconds(-5)),
+                            ScheduledRunTime__c = CommonHelper.now().addSeconds(-5)),
                     new AsynchronousJob__c(
                             Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
                             Runnable__c = DoubleConcurrencyTestRunnable.class.getName(),
-                            ScheduledRunTime__c = DateTime.now().addSeconds(-4))
+                            ScheduledRunTime__c = CommonHelper.now().addSeconds(-4))
             };
 
             mockForRun(asyncObjects, 1, new Set<Id>{
@@ -303,7 +303,7 @@ public with sharing class AsynchronousSchedulerTests {
         System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousScheduler scheduler = new AsynchronousScheduler();
             Assert.isFalse(scheduler.onSuccess((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock()));
-            Assert.isTrue(scheduler.onFailure((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock(), new DMLException('Test')));
+            Assert.isTrue(scheduler.onFailure((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock(), new DmlException('Test')));
             Assert.isFalse(scheduler.onCancellation((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock()));
         }
     }
@@ -378,10 +378,10 @@ public with sharing class AsynchronousSchedulerTests {
 
         AsynchronousDAO.API = (AsynchronousDAO) mocked.mock();
 
-        AsynchronousScheduler.configuration = new Map<String, Integer> {
+        AsynchronousScheduler.configuration = ImmutableV1.of(new Map<String, Integer> {
                 AsynchronousScheduler.MAXIMUM_JOBS_TO_START_PROPERTY => maxJobsToStart,
                 AsynchronousScheduler.NO_JOBS_TO_RUN_DELAY_PROPERTY => 1000
-        };
+        });
     }
 
     public with sharing class SingleConcurrencyTestRunnable extends AsynchronousV1.Runnable {

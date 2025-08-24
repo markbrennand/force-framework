@@ -1,8 +1,8 @@
 /**
  * @description
- * <p>
+ * <p/>
  * Unit tests for MockerV1 class.
- * <p>
+ * <p/>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -24,12 +24,12 @@ public with sharing class MockerTests {
                 MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                         .whenNoArguments()
                         .forMethod('mock')
-                        .throws(new DMLException('Test'))
+                        .throws(new DmlException('Test'))
                         .mock();
 
                 mocked.mock();
                 Assert.fail();
-            } catch (DMLException de) {
+            } catch (DmlException de) {
                 Assert.areEqual('Test', de.getMessage());
             }
         }
@@ -319,21 +319,21 @@ public with sharing class MockerTests {
 
     @SuppressWarnings('PMD.ApexDoc')
     private with sharing class TestModifier implements MockerV1.Modifier {
-        public Object process(List<Object> arguments) {
+        public Object process(final List<Object> arguments) {
             return 456;
         }
     }
 
     @SuppressWarnings('PMD.ApexDoc')
     private with sharing class TestComparator implements Comparator<Object> {
-        public Integer compare(Object param1, Object param2) {
+        public Integer compare(final Object param1, final Object param2) {
             return ((Account) param1).Name == ((Account) param2).Name ? 0 : -1;
         }
     }
 
     @SuppressWarnings('PMD.ApexDoc')
     private with sharing class TestFactory implements MockerV1.Factory {
-        public Object stub(StubProvider provider) {
+        public Object stub(final StubProvider provider) {
             return Test.createStub(MockerV1.class, provider);
         }
     }

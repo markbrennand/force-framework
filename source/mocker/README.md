@@ -12,17 +12,17 @@ with the Apex docs loaded for your reference whilst reading this page.
 If a failure occurs in the _MockerV1_ code, an _AssertionException_ is thrown. See
 [Apex docs](../../docs/assertion/SfApexDocs/assertion.html).
 
-If you wish to try the _Mocker_ example code, see [Geting Started](../../GETTINGSTARTED.md).
+If you wish to try the _Mocker_ example code, see [Getting Started](../../GETTINGSTARTED.md).
 
 For an example of a complete suite of unit tests written using _MockerV1_ that test their features in isolation, see
-[Asynhcronous Unit Tests](https://github.com/markbrennand/force-frameworks/tree/gh-pages/source/asynchronous/tests)
+[Asynchronous Unit Tests](https://github.com/markbrennand/force-frameworks/tree/gh-pages/source/asynchronous/tests)
 
 ### Mocker Creation
 To mock a class or interface, first call the _MockerV1.of_ method.
 
 The argument to the method can be either the _Type_ to be mocked, or a _MockerV1.Factory_ instance.
 
-To create the mocked instance of the clsss or interface, call the _mock_ method on the _MockerV1_ returned
+To create the mocked instance of the class or interface, call the _mock_ method on the _MockerV1_ returned
 by the _of_ call.
 
 If _of_ is called with the _Type_ argument then a mocked instance of that _Type_ will be created.

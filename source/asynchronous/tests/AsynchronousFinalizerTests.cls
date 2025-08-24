@@ -1,8 +1,8 @@
 /**
  * @description
- * <p>
+ * <p/>
  * Unit tests for AsynchronousFinalizer class.
- * <p>
+ * <p/>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -244,7 +244,7 @@ public with sharing class AsynchronousFinalizerTests {
 
         if (jobToBeDeleted) {
             mocked
-                    // The Runnable's onFailure method will have asked for the job to be deleted.
+                    // The Runnable onFailure method will have asked for the job to be deleted.
                     .whenArgument(new List<AsynchronousJob__c>{ asyncObject })
                         .forMethod('removeObjects').called(1);
         } else {
@@ -290,7 +290,7 @@ public with sharing class AsynchronousFinalizerTests {
 
         } else if (jobToBeDeleted) {
             mocked
-                    // The Runnable's onFailure method will have asked for the job to be deleted.
+                    // The Runnable onFailure method will have asked for the job to be deleted.
                     .whenArgument(new List<AsynchronousJob__c> {
                             new AsynchronousJob__c(Id = asyncObject.Id)
                     })

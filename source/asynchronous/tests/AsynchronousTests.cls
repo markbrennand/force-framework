@@ -1,8 +1,8 @@
 /**
  * @description
- * <p>
+ * <p/>
  * Unit tests for AsynchronousAPI class.
- * <p>
+ * <p/>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -683,7 +683,7 @@ public with sharing class AsynchronousTests {
 
             insert job;
 
-            Exception exc = new DMLException('Test');
+            Exception exc = new DmlException('Test');
 
             AsynchronousJobException__c error = new AsynchronousJobException__c(
                     AsynchronousJob__c = job.Id,
@@ -764,7 +764,7 @@ public with sharing class AsynchronousTests {
                         ScheduledRunTime__c = CommonHelper.now().addDays(-2)
                 );
                 Assert.fail();
-            } catch (DMLException de) {
+            } catch (DmlException de) {
                 Assert.isTrue(
                         TestHelper.exceptionContains('Class System.UserInfo does not implement AsynchronousV1.RunnableJob', de),
                         de.getMessage()

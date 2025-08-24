@@ -1,8 +1,8 @@
 /**
  * @description
- * <p>
+ * <p/>
  * Unit tests for ComparisonHelper class.
- * <p>
+ * <p/>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -104,7 +104,7 @@ public with sharing class ComparisonHelperTests {
     private static void testAdditionalComparator() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            Exception exc1 = new DMLException('TEST');
+            Exception exc1 = new DmlException('TEST');
 
             Assert.isFalse(ComparisonHelper.compare(exc1, new DependencyV1.APIException('TEST')));
 

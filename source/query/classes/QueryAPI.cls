@@ -1,30 +1,33 @@
 /**
  * @description
+ * <p/>
  * Class providing the default implementation of the Query API.
- * <p>
+ * <p/>
  * All application access is restricted to the API instance variable API. This ensures the application can only
  * ever call the methods of the API interface.
- * <p>
+ * <p/>
  * The outer class implements the API only to allow it to be mocked. Any calls to the API method implementations
  * in the outer class will throw an Exception.
- * <p>
+ * <p/>
  * See <a href=../README.md target="_blank">README</a> for full details of the Query API.
- * <p>
+ * <p/>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */
-public with sharing virtual class QueryAPI implements QueryV1.API {
+@SuppressWarnings('PMD.ApexDoc')
+public with sharing virtual class QueryAPI extends MockableQueryAPI {
 
     /**
      * @description
-     * <p>
+     * <p/>
      * Active API instance.
-     * <p>
-     * The instance is injected from the Registry.
-     * <p>
+     * <p/>
+     * The instance is injected from the Registry. As the instance maintains state between calls, a new instance
+     * must be injected each time it is requested.
+     * <p/>
      * The instance is test visible so it can be mocked.
-     * <p>
+     * <p/>
      * Any implementation must be of type DependencyV1.Prototype as state must be maintained.
      */
     @TestVisible
@@ -44,14 +47,26 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
-     * <p>
+     * <p/>
      * Allow extension but not construction.
-     * <p>
+     * <p/>
      * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
      */
     @SuppressWarnings('PMD.EmptyStatementBlock')
     protected QueryAPI() {}
 
+    /**
+     * @description
+     * <p/>
+     * Class inaccessible outside the QueryAPI class providing implementation of the Query API.
+     * <p/>
+     * The Factory class is used to create new instances of this class.
+     * <p/>
+     * As the class maintains state between calls, it must be a prototype class to ensure a new instance is created
+     * each time it is injected.
+     * <p/>
+     * See QueryV1.API for method signatures.
+     */
     private with sharing class Implementation implements QueryV1.API, DependencyV1.Prototype {
         private SObjectType type;
         private AccessLevel security = AccessLevel.USER_MODE;
@@ -63,6 +78,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
         private OptionalV1 ordering = OptionalV1.empty();
         private OptionalV1 max = OptionalV1.empty();
         private OptionalV1 offset = OptionalV1.empty();
+        private OptionalV1 bindings = OptionalV1.empty();
         private Boolean isCount = false;
 
         public SObjectType type() {
@@ -70,7 +86,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
             return type;
         }
 
-        public QueryV1.API type(SObjectType type) {
+        public QueryV1.API type(final SObjectType type) {
             Assert.isNull(this.type, 'Query type cannot be changed');
             this.type = type;
             return this;
@@ -92,7 +108,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
             throwExceptionIfAggregatedQuery();
 
             final Set<String> value = getValue(returning);
-            ArrayV1.over(new List<SObjectField> { field }).reduce(new BuildReturning(), value);
+            ArrayV1.over(new List<SObjectField> { field }).reduce(new FieldToString(), value);
 
             returning = OptionalV1.of(value);
             return this;
@@ -103,7 +119,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
             throwExceptionIfAggregatedQuery();
 
             final Set<String> value = getValue(returning);
-            ArrayV1.over(fields).reduce(new BuildReturning(), value);
+            ArrayV1.over(fields).reduce(new FieldToString(), value);
 
             returning = OptionalV1.of(value);
             return this;
@@ -120,7 +136,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
             return this;
         }
 
-        public QueryV1.API returning(QueryV1.API query) {
+        public QueryV1.API returning(final QueryV1.API query) {
             throwExceptionIfCountQuery();
             throwExceptionIfAggregatedQuery();
 
@@ -142,7 +158,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
             return this;
         }
 
-        public QueryV1.API returning(Set<QueryV1.AggregatedField> fields) {
+        public QueryV1.API returning(final Set<QueryV1.AggregatedField> fields) {
             throwExceptionIfCountQuery();
             throwExceptionIfRegularQuery();
 
@@ -164,14 +180,13 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
             return this;
         }
 
-        public QueryV1.API ordered(final QueryV1.Order order) {
-            throwExceptionIfCountQuery();
-
-            final Set<String> value = getValue(ordering);
-            ArrayV1.over(order).reduce(new CommonHelper.ToString(), value);
-
-            ordering = OptionalV1.of(value);
+        public QueryV1.API bindings(final Map<String, Object> values) {
+            bindings = OptionalV1.of(values);
             return this;
+        }
+
+        public QueryV1.API ordered(final QueryV1.Order order) {
+            return ordered(new Set<QueryV1.Order> { order });
         }
 
         public QueryV1.API ordered(final Set<QueryV1.Order> order) {
@@ -184,7 +199,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
             return this;
         }
 
-        public QueryV1.API group(Set<SObjectField> fields) {
+        public QueryV1.API group(final Set<SObjectField> fields) {
             throwExceptionIfCountQuery();
             throwExceptionIfRegularQuery();
 
@@ -206,7 +221,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
             return this;
         }
 
-        public QueryV1.API has(String condition) {
+        public QueryV1.API has(final String condition) {
             throwExceptionIfRegularQuery();
 
             has = OptionalV1.of(condition);
@@ -223,24 +238,24 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
             return this;
         }
 
-        public OptionalV1 execute(OptionalV1 bindVars) {
+        public OptionalV1 execute() {
             final String query = buildOuterQuery();
 
             if (isCount) {
-                if (bindVars.isPresent()) {
-                    return OptionalV1.of(Database.countQueryWithBinds(query, (Map<String, Object>) bindVars.get(), security));
+                if (bindings.isPresent()) {
+                    return OptionalV1.of(Database.countQueryWithBinds(query, (Map<String, Object>) bindings.get(), security));
                 } else {
                     return OptionalV1.of(Database.countQuery(query, security));
                 }
             } else {
                 final List<SObject> matches;
-                if (bindVars.isPresent()) {
-                    matches = Database.queryWithBinds(query, (Map<String, Object>) bindVars.get(), security);
+                if (bindings.isPresent()) {
+                    matches = Database.queryWithBinds(query, (Map<String, Object>) bindings.get(), security);
                 } else {
                     matches = Database.query(query, security);
                 }
 
-                return matches.isEmpty() ? OptionalV1.empty() : OptionalV1.of(matches);
+                return matches.isEmpty() ? OptionalV1.empty() : OptionalV1.of(ImmutableV1.of(matches));
             }
         }
 
@@ -332,16 +347,16 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
             return relationships;
         }
 
-        private Set<String> getValue(OptionalV1 value) {
+        private Set<String> getValue(final OptionalV1 value) {
             return value.isPresent() ? (Set<String>) value.get() : new Set<String>();
         }
     }
 
     /**
      * @description
-     * <p>
+     * <p/>
      * Creates the default API implementation.
-     * <p>
+     * <p/>
      * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
@@ -353,21 +368,11 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
 
     /**
      * @description
-     * <p>
+     * <p/>
      * Class providing check on Binding made to AsynchronousAPI.API.
      */
     public with sharing class BindingCheck implements DependencyV1.BindingCheck {
 
-        /**
-         * @description
-         * <p>
-         * Checks that a valid binding has been made to QueryAPI.API.
-         *
-         * @param forType The type being bound to, QueryAPI.API.
-         * @param withImpl The implementation being bound to QueryAPI.API.
-         *
-         * @return The result of the validation.
-         */
         public DependencyV1.ValidationResult validate(final Type forType, final Type withImpl) {
             return DependencyHelper.buildValidationResult(
                     TypesV1.newInstance(withImpl) instanceof QueryV1.API,
@@ -382,7 +387,7 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
         return new AggregatedFieldImpl(joinField, field, function, alias);
     }
 
-    public static QueryV1.Order order(OptionalV1 joinField, final SObjectField field, final Boolean isAscending) {
+    public static QueryV1.Order order(final OptionalV1 joinField, final SObjectField field, final Boolean isAscending) {
         return new OrderImpl(field, isAscending ? SortOrder.ASCENDING : SortOrder.DESCENDING, joinField);
     }
 
@@ -491,13 +496,6 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
         }
     }
 
-    private with sharing class BuildReturning extends ArrayV1.Callback {
-        public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
-            ((Set<String>) currentValue.get()).add(((SObjectField) element).getDescribe().name);
-            return currentValue;
-        }
-    }
-
     private with sharing class GetRelationshipName extends ArrayV1.Callback {
         public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final ChildRelationship relationship = (ChildRelationship) element;
@@ -522,262 +520,6 @@ public with sharing virtual class QueryAPI implements QueryV1.API {
             ((Set<String>) currentValue.get()).add(((Implementation) shared().get()).buildInnerQuery((String) element));
             return currentValue;
         }
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @param type ignored.
-     *
-     * @return ignored.
-     */
-    public QueryV1.API type(final SObjectType type) {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @return ignored.
-     */
-    public SObjectType type() {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @param security ignored.
-     *
-     * @return ignored.
-     */
-    public QueryV1.API security(final AccessLevel security) {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @return ignored.
-     */
-    public QueryV1.API count() {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @return ignored.
-     */
-    public QueryV1.API returningAll() {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @param joinField ignored.
-     * @param fields ignored.
-     *
-     * @return ignored.
-     */
-    public QueryV1.API returning(final SObjectField joinField, final Set<SObjectField> fields) {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @param field ignored.
-     *
-     * @return ignored.
-     */
-    public QueryV1.API returning(final SObjectField field) {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @param fields ignored.
-     *
-     * @return ignored.
-     */
-    public QueryV1.API returning(final Set<SObjectField> fields) {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @param query ignored.
-     *
-     * @return ignored.
-     */
-    public QueryV1.API returning(final QueryV1.API query) {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @param field ignored.
-     *
-     * @return ignored.
-     */
-    public QueryV1.API returning(final QueryV1.AggregatedField field) {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @param fields ignored.
-     *
-     * @return ignored.
-     */
-    public QueryV1.API returning(final Set<QueryV1.AggregatedField> fields) {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @param condition ignored.
-     *
-     * @return ignored.
-     */
-    public QueryV1.API matching(final String condition) {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @param order ignored.
-     *
-     * @return ignored.
-     */
-    public QueryV1.API ordered(final QueryV1.Order order) {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @param order ignored.
-     *
-     * @return ignored.
-     */
-    public QueryV1.API ordered(final Set<QueryV1.Order> order) {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @param fields ignored.
-     *
-     * @return ignored.
-     */
-    public QueryV1.API group(final Set<SObjectField> fields) {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @param joinField ignored.
-     * @param fields ignored.
-     *
-     * @return ignored.
-     */
-    public QueryV1.API group(final SObjectField joinField, final Set<SObjectField> fields) {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @param condition ignored.
-     *
-     * @return ignored.
-     */
-    public QueryV1.API has(final String condition) {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @param bindVars ignored.
-     *
-     * @return ignored.
-     */
-    public OptionalV1 execute(final OptionalV1 bindVars) {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @param max ignored.
-     *
-     * @return ignored.
-     */
-    public QueryV1.API max(final Integer max) {
-        throw new QueryException('Access denied');
-    }
-
-    /**
-     * @description
-     * <p>
-     * Method is solely for mocking use.
-     *
-     * @param offset ignored.
-     *
-     * @return ignored.
-     */
-    public QueryV1.API offset(final Integer offset) {
-        throw new QueryException('Access denied');
     }
 
     // Set the default implementation of API. This can be overridden using a Dependency Injection Binding.

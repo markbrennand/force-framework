@@ -1,8 +1,8 @@
 /**
  * @description
- * <p>
+ * <p/>
  * Helper methods for Asynchronous unit tests.
- * <p>
+ * <p/>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -17,6 +17,6 @@ public with sharing class AsynchronousTestHelper {
         }
 
         @SuppressWarnings('PMD.EmptyStatementBlock')
-        public override void run(AsynchronousV1.Job asyncJob, String apexJobId) {}
+        public override void run(final AsynchronousV1.Job asyncJob, final String apexJobId) {}
     }
 }

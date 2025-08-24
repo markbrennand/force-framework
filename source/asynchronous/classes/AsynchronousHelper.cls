@@ -1,20 +1,20 @@
 /**
  * @description
- * <p>
+ * <p/>
  * Class containing helper methods for the Asynchronous framework.
- * <p>
+ * <p/>
  * The methods herein are intended for the sole use of the framework.
- * <p>
+ * <p/>
  * The implementation of the API is hidden in the private Implementation class. The class is hidden so an application
  * cannot access the class to mis-use it.
- * <p>
+ * <p/>
  * All application access is restricted to the API instance variable API. This ensures the application can only
  * ever call the methods of the API interface.
- * <p>
+ * <p/>
  * The outer class implements the API only to allow it to be mocked. Any calls to the API method implementations
  * in the outer class will throw an Exception.
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
- * <p>
+ * <p/>
  *
  * @author Mark Brennand
  */
@@ -22,16 +22,16 @@ public with sharing virtual class AsynchronousHelper implements API {
 
     /**
      * @description
-     * <p>
+     * <p/>
      * Interface defining the API provided by this class.
      */
     public interface API {
 
         /**
          * @description
-         * <p>
+         * <p/>
          * Records the detail of an Exception.
-         * <p>
+         * <p/>
          * Due to a stubbing issue with Exception, the actual Exception must be wrapped in APIException.
          *
          * @param asyncObject The Asynchronous object to record the Exception against.
@@ -41,9 +41,9 @@ public with sharing virtual class AsynchronousHelper implements API {
 
         /**
          * @description
-         * <p>
+         * <p/>
          * Records a new internal Exception encountered in the framework.
-         * <p>
+         * <p/>
          * Due to a stubbing issue with Exception, the actual Exception must be wrapped in APIException.
          *
          * @param asyncObject The Asynchronous object to record the Exception against.
@@ -53,7 +53,7 @@ public with sharing virtual class AsynchronousHelper implements API {
 
         /**
          * @description
-         * <p>
+         * <p/>
          * Given the state retrieved from backing store, turns it into the internal representation.
          *
          * @param asyncStateObjects The state objects.
@@ -64,7 +64,7 @@ public with sharing virtual class AsynchronousHelper implements API {
 
         /**
          * @description
-         * <p>
+         * <p/>
          * Given the internal state, turns it into a series of state objects representing it.
          *
          * @param asyncObject The Asynchronous object the state will be stored against.
@@ -76,7 +76,7 @@ public with sharing virtual class AsynchronousHelper implements API {
 
         /**
          * @description
-         * <p>
+         * <p/>
          * Queues the given job for processing.
          *
          * @param asyncObject The job to be queued for processing.
@@ -86,9 +86,9 @@ public with sharing virtual class AsynchronousHelper implements API {
 
     /**
      * @description
-     * <p>
+     * <p/>
      * Maximum amount of data that can be stored in a chunk.
-     * <p>
+     * <p/>
      * The variable is not declared as final so it can be overridden by a unit test.
      */
     @TestVisible
@@ -96,7 +96,7 @@ public with sharing virtual class AsynchronousHelper implements API {
 
     /**
      * @description
-     * <p>
+     * <p/>
      * Active API instance.
      */
     @TestVisible
@@ -114,7 +114,7 @@ public with sharing virtual class AsynchronousHelper implements API {
 
     /**
      * @description
-     * <p>
+     * <p/>
      * Allow extension but not construction.
      *
      * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
@@ -124,16 +124,16 @@ public with sharing virtual class AsynchronousHelper implements API {
 
     /**
      * @description
-     * <p>
+     * <p/>
      * Class providing the implementation of the API.
      */
     private with sharing class Implementation implements API {
 
         /**
          * @description
-         * <p>
+         * <p/>
          * Records the detail of an Exception in an Asynchronous Exception object.
-         * <p>
+         * <p/>
          * A new record is created and persisted for each Exception recorded.
          *
          * @param asyncObject The Asynchronous object to record the Exception against.
@@ -158,11 +158,11 @@ public with sharing virtual class AsynchronousHelper implements API {
 
         /**
          * @description
-         * <p>
+         * <p/>
          * Records a new internal error encountered in the framework.
-         * <p>
+         * <p/>
          * Exceptions thrown from the Runnable for an Apex job are not recorded using this method.
-         * <p>
+         * <p/>
          * A new Asynchronous Exception is created to record the Exception and the Status of the Asynchronous job
          * is changed to indicate it failed. No further processing will be performed on the job.
          *
@@ -177,7 +177,7 @@ public with sharing virtual class AsynchronousHelper implements API {
 
         /**
          * @description
-         * <p>
+         * <p/>
          * Given the state objects retrieved from backing store, turns them into their internal representation.
          *
          * @param asyncStateObjects The state objects.
@@ -200,7 +200,7 @@ public with sharing virtual class AsynchronousHelper implements API {
 
         /**
          * @description
-         * <p>
+         * <p/>
          * Given the internal state, turns it into a series of state objects representing it.
          *
          * @param asyncObject The Asynchronous object the state will be stored against.
@@ -224,7 +224,7 @@ public with sharing virtual class AsynchronousHelper implements API {
                 chunks.add(new AsynchronousJobState__c(
                         AsynchronousJob__c = asyncObject.Id,
                         ChunkNumber__c = ++chunkNumber,
-                        Content__c = stateJSON.substring(0, maxChunkSize)
+                        Content__c = stateJson.substring(0, maxChunkSize)
                 ));
 
                 stateJson = stateJson.substring(maxChunkSize);
@@ -235,7 +235,7 @@ public with sharing virtual class AsynchronousHelper implements API {
                 chunks.add(new AsynchronousJobState__c(
                         AsynchronousJob__c = asyncObject.Id,
                         ChunkNumber__c = ++chunkNumber,
-                        Content__c = stateJSON
+                        Content__c = stateJson
                 ));
             }
 
@@ -244,9 +244,9 @@ public with sharing virtual class AsynchronousHelper implements API {
 
         /**
          * @description
-         * <p>
+         * <p/>
          * Schedules an Apex job for the given Asynchronous object.
-         * <p>
+         * <p/>
          * If an Exception occurs during the queueing, a future job is started to run the job.
          *
          * @param asyncObject The job to be queued.
@@ -275,7 +275,7 @@ public with sharing virtual class AsynchronousHelper implements API {
 
     /**
      * @description
-     * <p>
+     * <p/>
      * Method is solely for mocking use.
      *
      * @param asyncObject ignored.
@@ -287,7 +287,7 @@ public with sharing virtual class AsynchronousHelper implements API {
 
     /**
      * @description
-     * <p>
+     * <p/>
      * Method is solely for mocking use.
      *
      * @param asyncStateObjects ignored.
@@ -300,7 +300,7 @@ public with sharing virtual class AsynchronousHelper implements API {
 
     /**
      * @description
-     * <p>
+     * <p/>
      * Method is solely for mocking use.
      *
      * @param asyncObject ignored.
@@ -317,7 +317,7 @@ public with sharing virtual class AsynchronousHelper implements API {
 
     /**
      * @description
-     * <p>
+     * <p/>
      * Method is solely for mocking use.
      *
      * @param asyncObject ignored.
@@ -328,9 +328,9 @@ public with sharing virtual class AsynchronousHelper implements API {
 
     /**
      * @description
-     * <p>
+     * <p/>
      * Called if an Apex job could not be started in the request it was queued in.
-     * <p>
+     * <p/>
      * The most likely reason the job could not be started is exceeding the Apex job chaining limit.
      *
      * @param asyncObjectId The id of the AsynchronousJob__c to be started.
@@ -349,7 +349,7 @@ public with sharing virtual class AsynchronousHelper implements API {
 
     /**
      * @description
-     * <p>
+     * <p/>
      * Creates an Apex job for the given Asynchronous object.
      *
      * @param asyncObject The job to be started.
@@ -375,9 +375,9 @@ public with sharing virtual class AsynchronousHelper implements API {
 
     /**
      * @description
-     * <p>
+     * <p/>
      * Creates the default API implementation.
-     * <p>
+     * <p/>
      * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
@@ -385,7 +385,7 @@ public with sharing virtual class AsynchronousHelper implements API {
 
         /**
          * @description
-         * <p>
+         * <p/>
          * Returns a new instance of the API implementation.
          *
          * @return The API implementation.
@@ -397,14 +397,14 @@ public with sharing virtual class AsynchronousHelper implements API {
 
     /**
      * @description
-     * <p>
+     * <p/>
      * Class providing check on Binding made to AsynchronousDAO.API.
      */
     public with sharing class BindingCheck implements DependencyV1.BindingCheck {
 
         /**
          * @description
-         * <p>
+         * <p/>
          * Checks that a valid binding has been made to AsynchronousDAO.API.
          *
          * @param forType The type being bound to, AsynchronousDAO.API.

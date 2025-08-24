@@ -1,8 +1,8 @@
 /**
  * @description
- * <p>
+ * <p/>
  * Unit tests for ArrayV1 class.
- * <p>
+ * <p/>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -472,7 +472,7 @@ public with sharing class ArrayTests {
     }
 
     private static void testTransform(Object toTest) {
-        List<Object> results = (List<Object>) ArrayV1.over(toTest).transform(new Transformer());
+        List<Object> results = ArrayV1.over(toTest).transform(new Transformer());
         Assert.areEqual(2, results.size());
         Assert.areEqual('TEST1', results[0]);
         Assert.areEqual('TEST2', results[1]);
@@ -746,13 +746,13 @@ public with sharing class ArrayTests {
         Assert.areEqual(1, stack.length());
         stack.push(2);
         Assert.areEqual(2, stack.length());
-        Assert.areEqual(2, (Integer) stack.pop().get());
+        Assert.areEqual(2, stack.pop().get());
         Assert.areEqual(1, stack.length());
         stack.push(3);
         Assert.areEqual(2, stack.length());
-        Assert.areEqual(3, (Integer) stack.pop().get());
+        Assert.areEqual(3, stack.pop().get());
         Assert.areEqual(1, stack.length());
-        Assert.areEqual(1, (Integer) stack.pop().get());
+        Assert.areEqual(1, stack.pop().get());
         Assert.areEqual(0, stack.length());
         Assert.isFalse(stack.pop().isPresent());
     }
@@ -787,13 +787,13 @@ public with sharing class ArrayTests {
         Assert.areEqual(1, fifo.length());
         fifo.push(2);
         Assert.areEqual(2, fifo.length());
-        Assert.areEqual(1, (Integer) fifo.shift().get());
+        Assert.areEqual(1, fifo.shift().get());
         Assert.areEqual(1, fifo.length());
         fifo.push(3);
         Assert.areEqual(2, fifo.length());
-        Assert.areEqual(2, (Integer) fifo.shift().get());
+        Assert.areEqual(2, fifo.shift().get());
         Assert.areEqual(1, fifo.length());
-        Assert.areEqual(3, (Integer) fifo.shift().get());
+        Assert.areEqual(3, fifo.shift().get());
         Assert.areEqual(0, fifo.length());
         Assert.isFalse(fifo.shift().isPresent());
     }
@@ -935,7 +935,7 @@ public with sharing class ArrayTests {
     }
 
     private with sharing class TestIterable implements Iterable<Object> {
-        private List<Object> objects;
+        private final List<Object> objects;
 
         public TestIterable(List<Object> objects) {
             this.objects = objects;

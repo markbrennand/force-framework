@@ -1,8 +1,8 @@
 /**
  * @description
- * <p>
+ * <p/>
  * Unit tests for action binding.
- * <p>
+ * <p/>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -31,7 +31,7 @@ public with sharing class ActionBindingTests {
 
             try {
                 insert new Binding__c(Type__c = (Map<Decimal, Integer>.class).getName(), Action__c = 'Test', Implementation__c = BindingTestHelper.MapFactory.class.getName());
-            } catch(DMLException de) {
+            } catch(DmlException de) {
                 Assert.isTrue(
                         TestHelper.exceptionContains('Class Map<Decimal,Integer> is not registered for bind checking', de),
                         'Unexpected exception: ' + de
@@ -54,7 +54,7 @@ public with sharing class ActionBindingTests {
             DependencyV1.bind(Integer.class, 'Test', BindingTestHelper.IntegerFactory.class);
             DependencyV1.bind(Map<String, Integer>.class, 'Test', BindingTestHelper.MapFactory.class);
             insert new Binding__c(Type__c = BindingTestHelper.TestInterface.class.getName(), Action__c = 'Test', Implementation__c = BindingTestHelper.SingletonTest.class.getName());
-            insert new Binding__c(Type__c = BindingTestHelper.AbstractTest.class.getName(), Action__c = 'Testg', Implementation__c = BindingTestHelper.SingletonTest.class.getName());
+            insert new Binding__c(Type__c = BindingTestHelper.AbstractTest.class.getName(), Action__c = 'Test', Implementation__c = BindingTestHelper.SingletonTest.class.getName());
             insert new Binding__c(Type__c = Integer.class.getName(), Action__c = 'Test', Implementation__c = BindingTestHelper.IntegerFactory.class.getName());
             insert new Binding__c(Type__c = (Map<String, Integer>.class).getName(), Action__c = 'Test', Implementation__c = BindingTestHelper.MapFactory.class.getName());
 
@@ -207,7 +207,7 @@ public with sharing class ActionBindingTests {
             DependencyV1.bind(BindingTestHelper.AbstractTest.class, 'Test', BindingTestHelper.PrototypeTest.class);
         }
 
-        BindingTestHelper.singletoInstance =
+        BindingTestHelper.singletonInstance =
                 BindingTestHelper.prototypeInstance = 0;
     }
 

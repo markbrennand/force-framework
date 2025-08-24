@@ -1,8 +1,8 @@
 /**
  * @description
- * <p>
+ * <p/>
  * Unit tests for TriggerAPI class.
- * <p>
+ * <p/>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -367,7 +367,7 @@ public with sharing class TriggerTests {
             invoke('Subscriber1', event);
 
             if (event.isAfter()) {
-                List<AsynchronousJob__c> records = (List<AsynchronousJob__c>) event.getRecords();
+                List<AsynchronousJob__c> records = event.getRecords();
                 Map<Id, AsynchronousJob__c> recordsMap = new Map<Id, AsynchronousJob__c>(records);
 
                 for (AsynchronousJob__c record : records) {
@@ -376,7 +376,7 @@ public with sharing class TriggerTests {
                     }
 
                     if (((AsynchronousJob__c) event.getOldValue(record).get()).RetryInterval__c != record.RetryInterval__c - INCREMENT) {
-                        throw new DMLException('Retry interval was not incremented');
+                        throw new DmlException('Retry interval was not incremented');
                     }
                 }
 
@@ -384,7 +384,7 @@ public with sharing class TriggerTests {
                 if (oldRecords.isPresent()) {
                     for (SObject record : ((Map<Id, SObject>) oldRecords.get()).values()) {
                         if (!recordsMap.containsKey(record.Id)) {
-                            throw new DMLException('Old records contains an additional record');
+                            throw new DmlException('Old records contains an additional record');
                         }
                     }
                 }

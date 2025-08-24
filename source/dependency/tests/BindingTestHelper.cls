@@ -1,8 +1,8 @@
 /**
  * @description
- * <p>
+ * <p/>
  * Common test data and methods for Binding related unit tests.
- * <p>
+ * <p/>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -11,14 +11,14 @@
 public with sharing class BindingTestHelper {
 
     @TestVisible
-    private static Integer singletoInstance = 0;
+    private static Integer singletonInstance = 0;
 
     @TestVisible
     private static Integer prototypeInstance = 0;
 
     @TestVisible
     @SuppressWarnings('PMD.ExcessiveParameterList')
-    private static void testBindingFailure(Type forType, OptionalV1 action, Type withImpl, String expectedError) {
+    private static void testBindingFailure(final Type forType, final OptionalV1 action, final Type withImpl, final String expectedError) {
         try {
             if (action.isPresent()) {
                 DependencyV1.bind(forType, (String) action.get(), withImpl);
@@ -43,8 +43,8 @@ public with sharing class BindingTestHelper {
     }
 
     @TestVisible
-    private static void handleException(Exception exc, String expectedError) {
-        if (! (exc instanceof DMLException || exc instanceof DependencyV1.APIException)) {
+    private static void handleException(final Exception exc, final String expectedError) {
+        if (! (exc instanceof DmlException || exc instanceof DependencyV1.APIException)) {
             throw exc;
         }
 
@@ -61,10 +61,10 @@ public with sharing class BindingTestHelper {
 
     @SuppressWarnings('PMD.ApexDoc')
     public with sharing class SingletonTest extends AbstractTest {
-        private String value;
+        private final String value;
 
         public SingletonTest() {
-            value = 'INSTANCE' + (++singletoInstance);
+            value = 'INSTANCE' + (++singletonInstance);
         }
         public String getValue() {
             return value;
@@ -73,7 +73,7 @@ public with sharing class BindingTestHelper {
 
     @SuppressWarnings('PMD.ApexDoc')
     public with sharing class PrototypeTest extends AbstractTest implements DependencyV1.Prototype {
-        private String value;
+        private final String value;
 
         public PrototypeTest() {
             value = 'INSTANCE' + (++prototypeInstance);
@@ -85,10 +85,10 @@ public with sharing class BindingTestHelper {
 
     @SuppressWarnings('PMD.ApexDoc')
     public with sharing class SingletonCustomTest extends AbstractTest  {
-        private String value;
+        private final String value;
 
         public SingletonCustomTest() {
-            value = 'CUSTOM' + (++singletoInstance);
+            value = 'CUSTOM' + (++singletonInstance);
         }
         public String getValue() {
             return value;
@@ -97,7 +97,7 @@ public with sharing class BindingTestHelper {
 
     @SuppressWarnings('PMD.ApexDoc')
     public with sharing class PrototypeCustomTest extends AbstractTest implements DependencyV1.Prototype {
-        private String value;
+        private final String value;
 
         public PrototypeCustomTest() {
             value = 'CUSTOM' + (++prototypeInstance);
@@ -109,9 +109,9 @@ public with sharing class BindingTestHelper {
 
     @SuppressWarnings('PMD.ApexDoc')
     public with sharing class AbstractTestBindingCheck implements DependencyV1.BindingCheck {
-        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
+        public DependencyV1.ValidationResult validate(final Type forType, final Type withImpl) {
             Object instance = TypesV1.newInstance(withImpl);
-            singletoInstance =
+            singletonInstance =
             prototypeInstance = 0;
 
             if (instance instanceof AbstractTest) {
@@ -126,9 +126,9 @@ public with sharing class BindingTestHelper {
 
     @SuppressWarnings('PMD.ApexDoc')
     public with sharing class TestInterfaceBindingCheck implements DependencyV1.BindingCheck {
-        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
+        public DependencyV1.ValidationResult validate(final Type forType, final Type withImpl) {
             Object instance = TypesV1.newInstance(withImpl);
-            singletoInstance =
+            singletonInstance =
             prototypeInstance = 0;
 
             if (instance instanceof TestInterface) {

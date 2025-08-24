@@ -1,8 +1,8 @@
 /**
  * @description
- * <p>
+ * <p/>
  * Unit tests for the AsynchronousHelper class.
- * <p>
+ * <p/>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -140,7 +140,7 @@ public with sharing class AsynchronousHelperTests {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
             final AsynchronousJob__c asyncObject = new AsynchronousJob__c(Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType));
-            final Exception exc = new DMLException('Test');
+            final Exception exc = new DmlException('Test');
 
             AsynchronousHelper.API = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
                     .whenArguments(asyncObject, new AsynchronousV1.APIException('Wrapper', exc))
