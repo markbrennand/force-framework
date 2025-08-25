@@ -32,7 +32,7 @@ public with sharing class AsynchronousFinalizerTests {
                     ScheduledRunTime__c = CommonHelper.now()
             );
 
-            AsynchronousDAO.API = (AsynchronousDAO) mockForSuccess(asyncObject, false).mock();
+            AsynchronousDAO.impl = (AsynchronousDAO) mockForSuccess(asyncObject, false).mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
             MockerV1.validate();
         }
@@ -53,7 +53,7 @@ public with sharing class AsynchronousFinalizerTests {
                     ScheduledRunTime__c = CommonHelper.now()
             );
 
-            AsynchronousDAO.API = (AsynchronousDAO) mockForSuccess(asyncObject, true).mock();
+            AsynchronousDAO.impl = (AsynchronousDAO) mockForSuccess(asyncObject, true).mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
             MockerV1.validate();
         }
@@ -74,7 +74,7 @@ public with sharing class AsynchronousFinalizerTests {
                     ScheduledRunTime__c = CommonHelper.now()
             );
 
-            AsynchronousDAO.API = (AsynchronousDAO) mockForException(asyncObject, false, 'onSuccess failed').mock();
+            AsynchronousDAO.impl = (AsynchronousDAO) mockForException(asyncObject, false, 'onSuccess failed').mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
             MockerV1.validate();
         }
@@ -97,7 +97,7 @@ public with sharing class AsynchronousFinalizerTests {
 
             Exception exc = new AsynchronousV1.APIException('Test');
 
-            AsynchronousDAO.API = (AsynchronousDAO) mockForFailure(asyncObject, AsynchronousV1.Status.FAILED, exc, false).mock();
+            AsynchronousDAO.impl = (AsynchronousDAO) mockForFailure(asyncObject, AsynchronousV1.Status.FAILED, exc, false).mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
             MockerV1.validate();
         }
@@ -120,7 +120,7 @@ public with sharing class AsynchronousFinalizerTests {
 
             Exception exc = new AsynchronousV1.APIException('Test');
 
-            AsynchronousDAO.API = (AsynchronousDAO) mockForFailure(asyncObject, AsynchronousV1.Status.FAILED, exc, true).mock();
+            AsynchronousDAO.impl = (AsynchronousDAO) mockForFailure(asyncObject, AsynchronousV1.Status.FAILED, exc, true).mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
             MockerV1.validate();
         }
@@ -143,7 +143,7 @@ public with sharing class AsynchronousFinalizerTests {
 
             Exception exc = new AsynchronousV1.APIException('Test');
 
-            AsynchronousDAO.API = (AsynchronousDAO) mockForException(asyncObject, true, 'onFailure failed').mock();
+            AsynchronousDAO.impl = (AsynchronousDAO) mockForException(asyncObject, true, 'onFailure failed').mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
             MockerV1.validate();
         }
@@ -166,7 +166,7 @@ public with sharing class AsynchronousFinalizerTests {
 
             Exception exc = new AsynchronousV1.APIException('Test');
 
-            AsynchronousDAO.API = (AsynchronousDAO) mockForFailure(asyncObject, AsynchronousV1.Status.QUEUED, exc, false).mock();
+            AsynchronousDAO.impl = (AsynchronousDAO) mockForFailure(asyncObject, AsynchronousV1.Status.QUEUED, exc, false).mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
             MockerV1.validate();
         }
@@ -204,7 +204,7 @@ public with sharing class AsynchronousFinalizerTests {
                     })
                         .forMethod('persistObjects').called(1);
 
-            AsynchronousDAO.API = (AsynchronousDAO) mocked.mock();
+            AsynchronousDAO.impl = (AsynchronousDAO) mocked.mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(null));
             MockerV1.validate();
         }
@@ -227,7 +227,7 @@ public with sharing class AsynchronousFinalizerTests {
 
             Exception exc = new AsynchronousV1.APIException('Test');
 
-            AsynchronousDAO.API = (AsynchronousDAO) mockForFailure(asyncObject, AsynchronousV1.Status.CANCELLED, exc, false).mock();
+            AsynchronousDAO.impl = (AsynchronousDAO) mockForFailure(asyncObject, AsynchronousV1.Status.CANCELLED, exc, false).mock();
             AsynchronousFinalizer.createFinalizer(asyncObject.Id).execute(new Context(exc));
             MockerV1.validate();
         }

@@ -425,7 +425,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
         final Map<String, String> state =
                 asyncObject.AsynchronousJobState__r.isEmpty()
                         ? new Map<String, String>()
-                        : AsynchronousHelper.API.decodeState(asyncObject.AsynchronousJobState__r);
+                        : AsynchronousHelper.impl.decodeState(asyncObject.AsynchronousJobState__r);
 
         final AsynchronousV1.Job asyncJob = new AsynchronousJob()
                 .withAsyncObjectId(asyncObject.Id)

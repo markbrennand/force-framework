@@ -73,7 +73,7 @@ global with sharing class TriggerV1 {
          *
          * @return The operation being performed by the trigger.
          */
-        Operation getOperation();
+        TriggerV1.Operation getOperation();
 
         /**
          * @description
@@ -151,7 +151,7 @@ global with sharing class TriggerV1 {
          *
          * @param event The trigger event.
          */
-        void onEvent(final Event event);
+        void onEvent(final TriggerV1.Event event);
     }
 
     /**
@@ -165,7 +165,7 @@ global with sharing class TriggerV1 {
      * of object associated with the Apex Trigger.
      */
     global static void publish() {
-        TriggerAPI.API.publish();
+        TriggerAPI.impl.publish();
     }
 
     /**
@@ -176,7 +176,7 @@ global with sharing class TriggerV1 {
      * @param type The object type whose subscribers are to be disabled.
      */
     global static void disable(final SObjectType type) {
-        TriggerAPI.API.disable(type);
+        TriggerAPI.impl.disable(type);
     }
     /**
      * @description
@@ -186,7 +186,7 @@ global with sharing class TriggerV1 {
      * @param type The object type whose subscribers are to be enabled.
      */
     global static void enable(final SObjectType type) {
-        TriggerAPI.API.enable(type);
+        TriggerAPI.impl.enable(type);
     }
 
     /**
@@ -199,7 +199,7 @@ global with sharing class TriggerV1 {
      * @return True if the subscribers are enabled.
      */
     global static Boolean isEnabled(final SObjectType type) {
-        return TriggerAPI.API.isEnabled(type);
+        return TriggerAPI.impl.isEnabled(type);
     }
 
     /**
@@ -212,7 +212,7 @@ global with sharing class TriggerV1 {
      * @param type The Subscriber class to disable.
      */
     global static void disable(final Type type) {
-        TriggerAPI.API.disable(type);
+        TriggerAPI.impl.disable(type);
     }
 
     /**
@@ -225,7 +225,7 @@ global with sharing class TriggerV1 {
      * @param type The Subscriber class to enable.
      */
     global static void enable(final Type type) {
-        TriggerAPI.API.enable(type);
+        TriggerAPI.impl.enable(type);
     }
 
     /**
@@ -238,7 +238,7 @@ global with sharing class TriggerV1 {
      * @return True if the Subscriber class is enabled.
      */
     global static Boolean isEnabled(final Type type) {
-        return TriggerAPI.API.isEnabled(type);
+        return TriggerAPI.impl.isEnabled(type);
     }
 
     /**

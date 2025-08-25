@@ -31,11 +31,10 @@ public with sharing virtual class QueryAPI extends MockableQueryAPI {
      * Any implementation must be of type DependencyV1.Prototype as state must be maintained.
      */
     @TestVisible
-    @SuppressWarnings('PMD.PropertyNamingConventions')
-    public static QueryV1.API API {
+    public static QueryV1.API impl {
         public get {
-            if (Test.isRunningTest() && API != null) { // API has been mocked.
-                return API;
+            if (Test.isRunningTest() && impl != null) { // API has been mocked.
+                return impl;
             } else {
                 return (QueryV1.API) DependencyV1.inject(QueryV1.API.class);
             }

@@ -78,7 +78,7 @@ public with sharing class BindingMockingTests {
     private static void testMocking() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            DependencyAPI.API = createMock();
+            DependencyAPI.impl = createMock();
 
             Assert.isTrue(DependencyV1.isBound(BindingTestHelper.TestInterface.class));
             Assert.isFalse(DependencyV1.isBound(BindingTestHelper.AbstractTest.class));

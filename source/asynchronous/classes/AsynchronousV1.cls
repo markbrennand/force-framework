@@ -68,7 +68,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return The jobs's status.
          */
-        Status getStatus();
+        AsynchronousV1.Status getStatus();
 
         /**
          * @description
@@ -86,7 +86,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return The Runnable implementation.
          */
-        RunnableJob getRunnable();
+        AsynchronousV1.RunnableJob getRunnable();
 
         /**
          * @description
@@ -232,7 +232,7 @@ global with sharing virtual class AsynchronousV1 {
          * @param asyncJob The job being run.
          * @param apexJobId The Id of the Apex job for the RunnableJob.
          */
-        void run(final Job asyncJob, final String apexJobId);
+        void run(final AsynchronousV1.Job asyncJob, final String apexJobId);
 
         /**
          * @description
@@ -245,7 +245,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return Whether to delete a record of the job or not.
          */
-        Boolean onSuccess(final Job asyncJob);
+        Boolean onSuccess(final AsynchronousV1.Job asyncJob);
 
         /**
          * @description
@@ -259,7 +259,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return Whether to delete a record of the job or not.
          */
-        Boolean onFailure(final Job asyncJob, final Exception exc);
+        Boolean onFailure(final AsynchronousV1.Job asyncJob, final Exception exc);
 
         /**
          * @description
@@ -272,7 +272,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return Whether to delete a record of the job or not.
          */
-        Boolean onCancellation(final Job asyncJob);
+        Boolean onCancellation(final AsynchronousV1.Job asyncJob);
 
         /**
          * @description
@@ -291,7 +291,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return The new Status of the job.
          */
-        Status onError(final Job asyncJob, final Exception exc);
+        Status onError(final AsynchronousV1.Job asyncJob, final Exception exc);
     }
 
     /**
@@ -343,7 +343,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return True if the Asynchronous__c object is to be kept, false if not.
          */
-        global virtual Boolean onSuccess(final Job asyncJob) {
+        global virtual Boolean onSuccess(final AsynchronousV1.Job asyncJob) {
             return true;
         }
 
@@ -359,7 +359,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return True if the Asynchronous__c object is to be kept, false if not.
          */
-        global virtual Boolean onFailure(final Job asyncJob, final Exception exc) {
+        global virtual Boolean onFailure(final AsynchronousV1.Job asyncJob, final Exception exc) {
             return true;
         }
 
@@ -372,7 +372,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return True if the Asynchronous__c object is to be kept, false if not.
          */
-        global virtual Boolean onCancellation(final Job asyncJob) {
+        global virtual Boolean onCancellation(final AsynchronousV1.Job asyncJob) {
             return true;
         }
 
@@ -391,7 +391,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return The new status for the job.
          */
-        global virtual Status onError(final Job asyncJob, final Exception exc) {
+        global virtual Status onError(final AsynchronousV1.Job asyncJob, final Exception exc) {
             return Status.QUEUED;
         }
     }
@@ -457,8 +457,8 @@ global with sharing virtual class AsynchronousV1 {
      *
      * @return The jobs queued for processing.
      */
-    global static List<Job> queueJobs(final List<Job> asyncJobs) {
-        return AsynchronousAPI.API.queueJobs(asyncJobs);
+    global static List<AsynchronousV1.Job> queueJobs(final List<AsynchronousV1.Job> asyncJobs) {
+        return AsynchronousAPI.impl.queueJobs(asyncJobs);
     }
 
     /**
@@ -491,7 +491,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return The builder instance, so it may be chained.
          */
-        global Builder withReference(final String reference) {
+        global AsynchronousV1.Builder withReference(final String reference) {
             this.reference = reference;
             return this;
         }
@@ -505,7 +505,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return The builder instance, so it may be chained.
          */
-        global Builder withMaximumRetries(final Integer maximumRetries) {
+        global AsynchronousV1.Builder withMaximumRetries(final Integer maximumRetries) {
             this.maximumRetries = maximumRetries;
             return this;
         }
@@ -519,7 +519,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return The builder instance, so it may be chained.
          */
-        global Builder withRetryInterval(final Integer retryInterval) {
+        global AsynchronousV1.Builder withRetryInterval(final Integer retryInterval) {
             this.retryInterval = retryInterval;
             return this;
         }
@@ -533,7 +533,7 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return The builder instance, so it may be chained.
          */
-        global Builder withState(final Map<String, String> state) {
+        global AsynchronousV1.Builder withState(final Map<String, String> state) {
             this.state = state;
             return this;
         }
@@ -545,8 +545,8 @@ global with sharing virtual class AsynchronousV1 {
          *
          * @return The constructed Job instance.
          */
-        global Job build() {
-            return AsynchronousAPI.API.createJob(type, reference, maximumRetries, retryInterval, state);
+        global AsynchronousV1.Job build() {
+            return AsynchronousAPI.impl.createJob(type, reference, maximumRetries, retryInterval, state);
         }
     }
 
@@ -569,7 +569,7 @@ global with sharing virtual class AsynchronousV1 {
             final Integer offset,
             final Integer max
     ) {
-        return AsynchronousLWC.API.getJobs(filters, ordering, offset, max);
+        return AsynchronousLWC.impl.getJobs(filters, ordering, offset, max);
     }
 
     /**
@@ -581,7 +581,7 @@ global with sharing virtual class AsynchronousV1 {
      */
     @AuraEnabled(Cacheable=false)
     public static void deleteJobs(final List<Id> jobIds) {
-        AsynchronousLWC.API.deleteJobs(jobIds);
+        AsynchronousLWC.impl.deleteJobs(jobIds);
     }
 
     /**
@@ -593,7 +593,7 @@ global with sharing virtual class AsynchronousV1 {
      */
     @AuraEnabled(Cacheable=false)
     public static void runJobs(final List<Id> jobIds) {
-        AsynchronousLWC.API.runJobs(jobIds);
+        AsynchronousLWC.impl.runJobs(jobIds);
     }
 
     /**
@@ -605,6 +605,6 @@ global with sharing virtual class AsynchronousV1 {
      */
     @AuraEnabled(Cacheable=false)
     public static Map<String, Integer> getTotals() {
-        return AsynchronousLWC.API.getTotals();
+        return AsynchronousLWC.impl.getTotals();
     }
 }

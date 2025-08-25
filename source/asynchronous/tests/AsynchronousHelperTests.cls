@@ -86,8 +86,8 @@ public with sharing class AsynchronousHelperTests {
 
             Exception exc = new AsynchronousV1.APIException('Test');
 
-            AsynchronousDAO.API = mockForRecordException(asyncObject, exc);
-            AsynchronousHelper.API.recordException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
+            AsynchronousDAO.impl = mockForRecordException(asyncObject, exc);
+            AsynchronousHelper.impl.recordException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
             MockerV1.validate();
         }
     }
@@ -104,8 +104,8 @@ public with sharing class AsynchronousHelperTests {
 
             Exception exc = new AsynchronousV1.APIException('Test');
 
-            AsynchronousDAO.API = mockForInternalFailure(asyncObject, exc);
-            AsynchronousHelper.API.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
+            AsynchronousDAO.impl = mockForInternalFailure(asyncObject, exc);
+            AsynchronousHelper.impl.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
             MockerV1.validate();
         }
     }
@@ -129,8 +129,8 @@ public with sharing class AsynchronousHelperTests {
                     AsynchronousHelper.maxChunkSize, 1, 2, 4, 8, 16, 32, 62, 128, 256
             }) {
                 AsynchronousHelper.maxChunkSize = size;
-                List<AsynchronousJobState__c> chunks = AsynchronousHelper.API.encodeState(asynchronousObject, state);
-                Assert.areEqual(state, AsynchronousHelper.API.decodeState(chunks), 'Unexpected state for size ' + size);
+                List<AsynchronousJobState__c> chunks = AsynchronousHelper.impl.encodeState(asynchronousObject, state);
+                Assert.areEqual(state, AsynchronousHelper.impl.decodeState(chunks), 'Unexpected state for size ' + size);
             }
         }
     }
@@ -142,7 +142,7 @@ public with sharing class AsynchronousHelperTests {
             final AsynchronousJob__c asyncObject = new AsynchronousJob__c(Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType));
             final Exception exc = new DmlException('Test');
 
-            AsynchronousHelper.API = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
+            AsynchronousHelper.impl = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
                     .whenArguments(asyncObject, new AsynchronousV1.APIException('Wrapper', exc))
                         .withComparators(new List<Comparator<Object>>{
                                 new TestHelper.ExceptionComparator()
@@ -153,11 +153,11 @@ public with sharing class AsynchronousHelperTests {
                         .forMethod('queueJob').called(1).throws(exc)
                     .mock();
 
-            AsynchronousHelper.API.recordException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
-            AsynchronousHelper.API.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
+            AsynchronousHelper.impl.recordException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
+            AsynchronousHelper.impl.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
 
             try {
-                AsynchronousHelper.API.queueJob(asyncObject);
+                AsynchronousHelper.impl.queueJob(asyncObject);
                 Assert.fail('Queue job should fail');
             } catch (DmlException de) {
                 Assert.areEqual(de, exc, 'Unexpected exception thrown');

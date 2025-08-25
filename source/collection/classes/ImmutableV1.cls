@@ -5,8 +5,8 @@
  * <p/>
  * Use these classes to create and manage immutable Lists, Sets and Maps.
  * <p/>
- * The ReadOnlyList and ReadOnlySet implement the Collection interface. This interface gives access to all the
- * functionality of the ArrayV1 API.
+ * The ReadOnlyList and ReadOnlySet implement the Collection interface. The interface gives access to all the
+ * functionality of the ArrayV1.Methods interface.
  * <p/>
  * See <a href=./../source/collection/README.md target="_blank">README</a> for full details of the Collection API.
  * <p/>
@@ -20,7 +20,8 @@ global with sharing class ImmutableV1 {
     /**
      * @description
      * <p/>
-     * Interface for List and Set that supports conversion to a List and the functionality of the ArrayV1 functionality.
+     * Interface for List and Set that supports conversion to a List and the functionality of the ArrayV1.Methods
+     * interface.
      * <p/>
      * A ReadOnlyMap or ReadyOnlySet may have reduce(), filter(), transform() etc. called on it.
      */
@@ -212,7 +213,7 @@ global with sharing class ImmutableV1 {
         Boolean containsAll(final Set<Object> objs);
     }
 
-    private with sharing class ImmutableMap implements ReadOnlyMap {
+    private with sharing class ImmutableMap implements ImmutableV1.ReadOnlyMap {
         private final Map<Object, Object> wrapped;
 
         public ImmutableMap(final Map<Object, Object> source) {
@@ -248,7 +249,7 @@ global with sharing class ImmutableV1 {
         }
     }
 
-    private with sharing abstract class Methods implements Collection {
+    private with sharing abstract class CollectionImpl implements ImmutableV1.Collection {
         private final ArrayV1.Methods methods {
             private get {
                 if (methods == null) {
@@ -358,7 +359,7 @@ global with sharing class ImmutableV1 {
         }
     }
 
-    private with sharing class ImmutableList extends Methods implements ReadOnlyList {
+    private with sharing class ImmutableList extends ImmutableV1.CollectionImpl implements ImmutableV1.ReadOnlyList {
         private final List<Object> wrapped;
 
         public ImmutableList(final List<Object> source) {
@@ -394,7 +395,7 @@ global with sharing class ImmutableV1 {
         }
     }
 
-    private with sharing class ImmutableSet extends Methods implements ReadOnlySet {
+    private with sharing class ImmutableSet extends ImmutableV1.CollectionImpl implements ReadOnlySet {
         private final Set<Object> wrapped;
 
         public ImmutableSet(final Set<Object> source) {
@@ -442,8 +443,16 @@ global with sharing class ImmutableV1 {
         return new ImmutableMap(cloned);
     }
 
-    public static ReadOnlyList of(final List<Object> source) {
-        return new ImmutableList(source.clone());
+    public static ReadOnlyList of(final Iterable<Object> source) {
+        if (source instanceof List<Object>) {
+            return new ImmutableList(((List<Object>) source).clone());
+        } else {
+            final List<Object> elements = new List<Object>();
+            for (Object value : (Iterable<Object>) source) {
+                elements.add(value);
+            }
+            return new ImmutableList(elements);
+        }
     }
 
     public static ReadOnlySet of(final Set<Object> source) {

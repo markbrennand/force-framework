@@ -113,9 +113,9 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
             final String jobId = jobsToStart.iterator().next();
 
             try {
-                final AsynchronousJob__c asyncObject = AsynchronousDAO.API.getObject(jobId);
+                final AsynchronousJob__c asyncObject = AsynchronousDAO.impl.getObject(jobId);
                 asyncObject.ApexJobId__c = apexJobId;
-                AsynchronousHelper.API.queueJob(asyncObject);
+                AsynchronousHelper.impl.queueJob(asyncObject);
 
             } catch(AssertionV1.AssertionException ae) {
                 // An assertion exception indicates a problem with the job, so just ignore it.
@@ -235,7 +235,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
         final AsynchronousV1.Job asyncJob;
 
         if (!jobsLeftToStart.isEmpty()) {
-            asyncJob = AsynchronousAPI.API.createJob(
+            asyncJob = AsynchronousAPI.impl.createJob(
                     RunNextAvailable.class,
                     null,
                     0,
@@ -245,11 +245,11 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
 
         } else {
             final Set<String> newJobsToStart = getJobIdsToStart((Integer) configuration.get(MAXIMUM_JOBS_TO_START_PROPERTY));
-            if (newJobsToStart.isEmpty() && (AsynchronousDAO.API.countSchedulableObjects() == 0)) {
+            if (newJobsToStart.isEmpty() && (AsynchronousDAO.impl.countSchedulableObjects() == 0)) {
                 return;
             }
 
-            asyncJob = AsynchronousAPI.API.createJob(
+            asyncJob = AsynchronousAPI.impl.createJob(
                     RunNextAvailable.class,
                     null,
                     0,
@@ -259,13 +259,13 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
         }
 
         // More than one running Scheduler would cause the synchronisation to fail.
-        if (AsynchronousDAO.API.countActiveObjects(new AsynchronousJob__c(Runnable__c = RunNextAvailable.class.getName())) < 1) {
+        if (AsynchronousDAO.impl.countActiveObjects(new AsynchronousJob__c(Runnable__c = RunNextAvailable.class.getName())) < 1) {
             AsynchronousJob__c asyncObject = AsynchronousJob.toSObject(asyncJob);
-            AsynchronousDAO.API.persistObjects(
+            AsynchronousDAO.impl.persistObjects(
                     new List<AsynchronousJob__c> { asyncObject},
                     new List<Map<String, String>> { asyncJob.getState() }
             );
-            AsynchronousHelper.API.queueJob(asyncObject);
+            AsynchronousHelper.impl.queueJob(asyncObject);
         }
     }
 
@@ -285,7 +285,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
         final Map<String, Integer> activeCountCache = new Map<String, Integer>();
         final Map<String, Integer> activeCache = new Map<String, Integer>();
 
-        for (AsynchronousJob__c asyncObject : AsynchronousDAO.API.getScheduledObjects(maxToStart)) {
+        for (AsynchronousJob__c asyncObject : AsynchronousDAO.impl.getScheduledObjects(maxToStart)) {
             final String runnable = asyncObject.Runnable__c;
             final Integer maxActive;
             final Integer active;
@@ -305,7 +305,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
                 active = activeCache.get(runnable);
 
             } else {
-                active = AsynchronousDAO.API.countActiveObjects(asyncObject);
+                active = AsynchronousDAO.impl.countActiveObjects(asyncObject);
                 activeCache.put(runnable, active);
             }
 

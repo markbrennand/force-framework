@@ -65,7 +65,7 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        Order nullsFirst();
+        QueryV1.Order nullsFirst();
 
         /**
          * @description
@@ -74,7 +74,7 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        Order nullsLast();
+        QueryV1.Order nullsLast();
     }
 
     /**
@@ -106,7 +106,7 @@ global with sharing class QueryV1 {
          * @return The current instance for method chaining.
          *
          */
-        API type(final SObjectType type);
+        QueryV1.API type(final SObjectType type);
 
         /**
          * @description
@@ -119,7 +119,7 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        API security(final AccessLevel security);
+        QueryV1.API security(final AccessLevel security);
 
         /**
          * @description
@@ -130,7 +130,7 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        API count();
+        QueryV1.API count();
 
         /**
          * @description
@@ -143,7 +143,7 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        API returningAll();
+        QueryV1.API returningAll();
 
         /**
          * @description
@@ -156,7 +156,7 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        API returning(final SObjectField field);
+        QueryV1.API returning(final SObjectField field);
 
         /**
          * @description
@@ -169,7 +169,7 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        API returning(final Set<SObjectField> fields);
+        QueryV1.API returning(final Set<SObjectField> fields);
 
         /**
          * @description
@@ -183,7 +183,7 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        API returning(final SObjectField joinField, final Set<SObjectField> fields);
+        QueryV1.API returning(final SObjectField joinField, final Set<SObjectField> fields);
 
         /**
          * @description
@@ -200,7 +200,7 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        API returning(final API query);
+        QueryV1.API returning(final QueryV1.API query);
 
         /**
          * @description
@@ -213,7 +213,7 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        API returning(final AggregatedField field);
+        QueryV1.API returning(final QueryV1.AggregatedField field);
 
         /**
          * @description
@@ -226,7 +226,7 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        API returning(final Set<AggregatedField> fields);
+        QueryV1.API returning(final Set<QueryV1.AggregatedField> fields);
 
         /**
          * @description
@@ -240,7 +240,7 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        API matching(final String condition);
+        QueryV1.API matching(final String condition);
 
         /**
          * @description
@@ -253,7 +253,7 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        API ordered(final Order order);
+        QueryV1.API ordered(final QueryV1.Order order);
 
         /**
          * @description
@@ -266,7 +266,7 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        API ordered(final Set<Order> order);
+        QueryV1.API ordered(final Set<QueryV1.Order> order);
 
         /**
          * @description
@@ -279,7 +279,7 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        API group(final Set<SObjectField> fields);
+        QueryV1.API group(final Set<SObjectField> fields);
 
         /**
          * @description
@@ -293,7 +293,7 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        API group(final SObjectField joinField, final Set<SObjectField> fields);
+        QueryV1.API group(final SObjectField joinField, final Set<SObjectField> fields);
 
         /**
          * @description
@@ -304,7 +304,7 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        API has(final String condition);
+        QueryV1.API has(final String condition);
 
         /**
          * @description
@@ -315,7 +315,7 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        API max(final Integer max);
+        QueryV1.API max(final Integer max);
 
         /**
          * @description
@@ -326,40 +326,63 @@ global with sharing class QueryV1 {
          *
          * @return The current instance for method chaining.
          */
-        API offset(final Integer offset);
-        API bindings(final Map<String, Object> values);
+        QueryV1.API offset(final Integer offset);
+
+        /**
+         * @description
+         * <p/>
+         * Sets the bind variables to be used in the query set by the matching() method.
+         *
+         * @param values The bind variables.
+         *
+         * @return The current instance for method chaining.
+         */
+        QueryV1.API bindings(final Map<String, Object> values);
+
+        /**
+         * @description
+         * <p/>
+         * Executes the query.
+         * <p/>
+         * The Optional returned will have no value if there are no matching objects. If there are matches, the
+         * Optional value will be an ImmutableV1.ReadOnlyList containing the matching objects.
+         *
+         * @param offset The offset to the first record.
+         *
+         * @return The current instance for method chaining.
+         */
         OptionalV1 execute();
     }
 
-    global static API of(final SObjectType type) {
-        return QueryAPI.API.type(type);
+    global static QueryV1.API of(final SObjectType type) {
+        return QueryAPI.impl.type(type);
     }
 
-    global static API count(final SObjectType type) {
-        return QueryAPI.API.type(type).count();
+    global static QueryV1.API count(final SObjectType type) {
+        return QueryAPI.impl.type(type).count();
     }
 
-    global static Order ascending(final SObjectField field) {
+    global static QueryV1.Order ascending(final SObjectField field) {
         return QueryAPI.order(OptionalV1.empty(), field, true);
     }
 
-    global static Order ascending(final SObjectField joinField, final SObjectField field) {
+    global static QueryV1.Order ascending(final SObjectField joinField, final SObjectField field) {
         return QueryAPI.order(OptionalV1.of(joinField), field, true);
     }
 
-    global static Order ascending(final AggregatedField field) {
+    global static QueryV1.Order ascending(final AggregatedField field) {
         return QueryAPI.order(field, true);
     }
 
-    global static Order descending(final SObjectField field) {
+    global static QueryV1.Order descending(final SObjectField field) {
         return QueryAPI.order(OptionalV1.empty(), field, false);
     }
 
-    global static Order descending(final SObjectField joinField, final SObjectField field) {
+    global static QueryV1.Order descending(final SObjectField joinField, final SObjectField field) {
         return QueryAPI.order(OptionalV1.of(joinField), field, false);
     }
 
-    global static Order descending(final AggregatedField field) {
+    global static QueryV1.Order descending(final AggregatedField field) {
         return QueryAPI.order(field, false);
     }
 
@@ -373,7 +396,7 @@ global with sharing class QueryV1 {
      *
      * @return An aggregate field which can be used in the query.
      */
-    global static AggregatedField aggregatedField(final SObjectField field, final String alias) {
+    global static QueryV1.AggregatedField aggregatedField(final SObjectField field, final String alias) {
         return QueryAPI.aggregatedField(OptionalV1.empty(), OptionalV1.empty(), field, alias);
     }
 
@@ -388,7 +411,7 @@ global with sharing class QueryV1 {
      *
      * @return An aggregate field which can be used in the query.
      */
-    global static AggregatedField aggregatedField(final SObjectField joinField, final SObjectField field, final String alias) {
+    global static QueryV1.AggregatedField aggregatedField(final SObjectField joinField, final SObjectField field, final String alias) {
         return QueryAPI.aggregatedField(OptionalV1.empty(), OptionalV1.of(joinField), field, alias);
     }
 
@@ -403,7 +426,7 @@ global with sharing class QueryV1 {
      *
      * @return An aggregate field which can be used in the query.
      */
-    global static AggregatedField aggregatedField(final String function, final SObjectField field, final String alias) {
+    global static QueryV1.AggregatedField aggregatedField(final String function, final SObjectField field, final String alias) {
         return QueryAPI.aggregatedField(OptionalV1.of(function), OptionalV1.empty(), field, alias);
     }
 
@@ -419,7 +442,7 @@ global with sharing class QueryV1 {
      *
      * @return An aggregate field which can be used in the query.
      */
-    global static AggregatedField aggregatedField(final String function, final SObjectField joinField, final SObjectField field, final String alias) {
+    global static QueryV1.AggregatedField aggregatedField(final String function, final SObjectField joinField, final SObjectField field, final String alias) {
         return QueryAPI.aggregatedField(OptionalV1.of(function), OptionalV1.of(joinField), field, alias);
     }
 }

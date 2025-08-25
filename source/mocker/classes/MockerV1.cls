@@ -36,7 +36,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
      * <p/>
      * The stub handler called for all mocked objects.
      */
-    private final static Matcher MATCHER = new Matcher();
+    private final static MockerV1.Matcher MATCHER = new MockerV1.Matcher();
 
     /**
      * @description
@@ -304,7 +304,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
      *
      * @return A Mocker which may be used to define a mocking scenario.
      */
-    global static MockerV1 of(final Factory factory) {
+    global static MockerV1 of(final MockerV1.Factory factory) {
         AssertionV1.isNotNull(factory, 'argument: Mocker.of.factory');
 
         final MockerV1 mocked = new MockerV1(factory.stub(MATCHER));
@@ -464,7 +464,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
      * Method definition associated with an Argument.
      */
     global with sharing class Method extends MockerV1.Chainable {
-        private final Arguments arguments;
+        private final MockerV1.Arguments arguments;
         private final String methodName;
         private OptionalV1 expectedCount = OptionalV1.empty();
         private Integer actualCount = 0;
@@ -479,7 +479,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          * @param arguments The parent Arguments.
          * @param methodName The name of the mocked method.
          */
-        private Method(final Arguments arguments, final String methodName) {
+        private Method(final MockerV1.Arguments arguments, final String methodName) {
             AssertionV1.isNotNull(arguments, 'argument: Mocker.Method.arguments');
             AssertionV1.isNotNull(methodName, 'argument: Mocker.Method.methodName');
 
@@ -629,7 +629,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
      */
     global with sharing class Arguments extends MockerV1.Chainable {
         private final List<Object> expectedArguments;
-        private final List<Method> methods = new List<Method>();
+        private final List<MockerV1.Method> methods = new List<MockerV1.Method>();
         private List<Comparator<Object>> comparators = new List<Comparator<Object>>();
 
         /**

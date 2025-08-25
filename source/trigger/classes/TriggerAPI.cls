@@ -24,11 +24,10 @@ public with sharing virtual class TriggerAPI implements API {
      * The instance is test visible so it can be mocked.
      */
     @TestVisible
-    @SuppressWarnings('PMD.PropertyNamingConventions')
-    public static API API {
+    public static API impl {
         public get {
-            if (Test.isRunningTest() && API != null) { // API has been mocked.
-                return API;
+            if (Test.isRunningTest() && impl != null) { // API has been mocked.
+                return impl;
             } else {
                 return (API) DependencyV1.inject(API.class);
             }

@@ -33,11 +33,10 @@ public with sharing virtual class AsynchronousAPI implements API {
      * The instance is test visible so it can be mocked.
      */
     @TestVisible
-    @SuppressWarnings('PMD.PropertyNamingConventions')
-    public static API API {
+    public static API impl {
         public get {
-            if (Test.isRunningTest() && API != null) { // API has been mocked.
-                return API;
+            if (Test.isRunningTest() && impl != null) { // API has been mocked.
+                return impl;
             } else {
                 return (API) DependencyV1.inject(API.class);
             }
@@ -185,7 +184,7 @@ public with sharing virtual class AsynchronousAPI implements API {
                 states.add(job.getState());
             }
 
-            AsynchronousDAO.API.persistObjects(asyncObjects, states);
+            AsynchronousDAO.impl.persistObjects(asyncObjects, states);
 
             return (List<AsynchronousV1.Job>) ArrayV1.over(asyncObjects)
                     .sharing(states)
@@ -251,7 +250,7 @@ public with sharing virtual class AsynchronousAPI implements API {
             System.attachFinalizer(AsynchronousFinalizer.createFinalizer(asynchronousJob.Id));
             run(asyncJob, context.getJobId());
 
-            AsynchronousDAO.API.persistObjects(
+            AsynchronousDAO.impl.persistObjects(
                     new List<AsynchronousJob__c>{
                             asynchronousJob
                     },

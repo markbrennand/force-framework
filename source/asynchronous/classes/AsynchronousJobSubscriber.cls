@@ -50,7 +50,7 @@ public with sharing class AsynchronousJobSubscriber {
         }
 
         private void handleAfter(final TriggerV1.Event event) {
-            AsynchronousDAO.API.removeObjects(
+            AsynchronousDAO.impl.removeObjects(
                     (List<AsynchronousJob__c>)
                             ArrayV1.over(event.getRecords()).sharing(event).reduce(
                                     new DeletionsBuilder(),

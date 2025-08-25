@@ -265,7 +265,7 @@ public with sharing class TriggerTests {
     private static void testMocking() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TriggerAPI.API = (TriggerAPI.API) MockerV1.of(TriggerAPI.class)
+            TriggerAPI.impl = (TriggerAPI.API) MockerV1.of(TriggerAPI.class)
                     .whenNoArguments()
                     .forMethod('publish')
                     .called(2)

@@ -82,7 +82,7 @@ export default class AsynchronousJobActions extends LightningElement {
         );
     }
 
-    _canRowBeRun(row) {
+    static _canRowBeRun(row) {
         return row.Status__c === 'SUCCEEDED'
             || row.Status__c === 'FAILED'
             || row.Status__c === 'CANCELLED'

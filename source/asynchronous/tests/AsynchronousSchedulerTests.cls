@@ -71,14 +71,14 @@ public with sharing class AsynchronousSchedulerTests {
                     })
             };
 
-            AsynchronousDAO.API = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
+            AsynchronousDAO.impl = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
                     .whenArgument(asyncJobId1)
                         .forMethod('getObject')
                             .called(1)
                             .returns(asyncObject)
                     .mock();
 
-            AsynchronousHelper.API = (AsynchronousHelper.API) MockerV1.of(AsynchronousHelper.class)
+            AsynchronousHelper.impl = (AsynchronousHelper.API) MockerV1.of(AsynchronousHelper.class)
                     .whenArgument(asyncObject)
                         .forMethod('queueJob')
                             .called(1)
@@ -262,7 +262,7 @@ public with sharing class AsynchronousSchedulerTests {
                     MockerV1.fakeId(AsynchronousJob__c.SObjectType)
             };
 
-            AsynchronousAPI.API = (AsynchronousAPI) MockerV1.of(AsynchronousAPI.class)
+            AsynchronousAPI.impl = (AsynchronousAPI) MockerV1.of(AsynchronousAPI.class)
                     .whenArguments(
                             AsynchronousScheduler.RunNextAvailable.class,
                             null,
@@ -276,7 +276,7 @@ public with sharing class AsynchronousSchedulerTests {
                             .called(1)
                     .mock();
 
-            AsynchronousDAO.API = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
+            AsynchronousDAO.impl = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
                     .whenArgument(new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName()))
                         .forMethod('countActiveObjects')
                             .called(1)
@@ -309,7 +309,7 @@ public with sharing class AsynchronousSchedulerTests {
     }
 
     private static void mockForRun(List<AsynchronousJob__c> asyncObjects, Integer maxJobsToStart, Set<Id> jobsThatShouldBeStarted) {
-        AsynchronousHelper.API = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
+        AsynchronousHelper.impl = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
                 .whenArgument(new AsynchronousJob__c(
                         Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
                         Status__c = AsynchronousV1.Status.PENDING.name()
@@ -376,7 +376,7 @@ public with sharing class AsynchronousSchedulerTests {
                             .returns(0);
         }
 
-        AsynchronousDAO.API = (AsynchronousDAO) mocked.mock();
+        AsynchronousDAO.impl = (AsynchronousDAO) mocked.mock();
 
         AsynchronousScheduler.configuration = ImmutableV1.of(new Map<String, Integer> {
                 AsynchronousScheduler.MAXIMUM_JOBS_TO_START_PROPERTY => maxJobsToStart,

@@ -78,7 +78,7 @@ global with sharing class DependencyV1 {
          *
          * @return The result of the validation.
          */
-        ValidationResult validate(final Type forType, final Type withImpl);
+        DependencyV1.ValidationResult validate(final Type forType, final Type withImpl);
     }
 
     /**
@@ -93,7 +93,7 @@ global with sharing class DependencyV1 {
      * @return The implementation of the given type.
      */
     global static Object inject(final Type forType) {
-        return DependencyAPI.API.inject(forType);
+        return DependencyAPI.impl.inject(forType);
     }
 
     /**
@@ -109,7 +109,7 @@ global with sharing class DependencyV1 {
      * @return The implementation of the given type.
      */
     global static Object inject(final Type forType, final String action) {
-        return DependencyAPI.API.inject(forType, action);
+        return DependencyAPI.impl.inject(forType, action);
     }
 
     /**
@@ -122,7 +122,7 @@ global with sharing class DependencyV1 {
      * @return True if binding exists, false if not.
      */
     global static Boolean isBound(final Type forType) {
-        return DependencyAPI.API.isBound(forType);
+        return DependencyAPI.impl.isBound(forType);
     }
 
     /**
@@ -136,7 +136,7 @@ global with sharing class DependencyV1 {
      * @return True if binding exists, false if not.
      */
     global static Boolean isBound(final Type forType, final String action) {
-        return DependencyAPI.API.isBound(forType, action);
+        return DependencyAPI.impl.isBound(forType, action);
     }
 
     /**
@@ -148,7 +148,7 @@ global with sharing class DependencyV1 {
      * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
      */
     global static void bind(final Type forType, final Type withImpl) {
-        DependencyAPI.API.bind(forType, withImpl);
+        DependencyAPI.impl.bind(forType, withImpl);
     }
 
     /**
@@ -161,7 +161,7 @@ global with sharing class DependencyV1 {
      * @param withImpl The implementation for the type and action. Must be a concrete class with a no-op constructor.
      */
     global static void bind(final Type forType, final String action, final Type withImpl) {
-        DependencyAPI.API.bind(forType, action, withImpl);
+        DependencyAPI.impl.bind(forType, action, withImpl);
     }
 
     /**
@@ -170,7 +170,7 @@ global with sharing class DependencyV1 {
      * Forces the custom bindings to be reloaded.
      */
     global static void reload() {
-        DependencyAPI.API.reload();
+        DependencyAPI.impl.reload();
     }
 
     /**
@@ -180,7 +180,7 @@ global with sharing class DependencyV1 {
      *
      * @return A validation result representing success.
      */
-    global static ValidationResult valid() {
+    global static DependencyV1.ValidationResult valid() {
         return DependencyAPI.newValidationResult(true, null);
     }
 
@@ -193,7 +193,7 @@ global with sharing class DependencyV1 {
      *
      * @return A validation result representing failure.
      */
-    global static ValidationResult invalid(final String errorMessage) {
+    global static DependencyV1.ValidationResult invalid(final String errorMessage) {
         return DependencyAPI.newValidationResult(false, errorMessage);
     }
 }

@@ -53,16 +53,15 @@ public with sharing virtual class DependencyAPI implements API {
      * The instance is test visible so it can be mocked.
      */
     @TestVisible
-    @SuppressWarnings('PMD.PropertyNamingConventions')
-    public static API API {
+    public static API impl {
         public get {
-            if (Test.isRunningTest() && API != null) { // API has been mocked.
-                return API;
+            if (Test.isRunningTest() && impl != null) { // API has been mocked.
+                return impl;
             } else {
-                if (API == null) {
-                    API = new Implementation();
+                if (impl == null) {
+                    impl = new Implementation();
                 }
-                return API;
+                return impl;
             }
         }
         private set;
@@ -591,6 +590,8 @@ public with sharing virtual class DependencyAPI implements API {
      */
     private with sharing class AddBindingCheck extends ArrayV1.Callback {
         final Boolean isTest = Test.isRunningTest();
+
+        public AddBindingCheck() {}
 
         public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final BindingCheck__mdt check = (BindingCheck__mdt) element;

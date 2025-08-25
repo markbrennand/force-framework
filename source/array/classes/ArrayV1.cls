@@ -100,7 +100,7 @@ global with sharing class ArrayV1 {
          *
          * @return The Methods implementation, allowing the call to be chained with over().
          */
-        Methods sharing(final Object shared);
+        ArrayV1.Methods sharing(final Object shared);
 
         /**
          * @description
@@ -113,7 +113,7 @@ global with sharing class ArrayV1 {
          *
          * @param callback The callback class to be invoked for each array element.
          */
-        void forEach(final Callback callback);
+        void forEach(final ArrayV1.Callback callback);
 
         /**
          * @description
@@ -128,7 +128,7 @@ global with sharing class ArrayV1 {
          *
          * @return The return value from the last element of the array iterated over.
          */
-        Object reduce(final Callback callback);
+        Object reduce(final ArrayV1.Callback callback);
 
         /**
          * @description
@@ -143,7 +143,7 @@ global with sharing class ArrayV1 {
          *
          * @return The return value from the last element of the array iterated over.
          */
-        Object reduceRight(final Callback callback);
+        Object reduceRight(final ArrayV1.Callback callback);
 
         /**
          * @description
@@ -159,7 +159,7 @@ global with sharing class ArrayV1 {
          *
          * @return The return value from the last element of the array iterated over.
          */
-        Object reduce(final Callback callback, final Object initialValue);
+        Object reduce(final ArrayV1.Callback callback, final Object initialValue);
 
         /**
          * @description
@@ -175,7 +175,7 @@ global with sharing class ArrayV1 {
          *
          * @return The return value from the last element of the array iterated over.
          */
-        Object reduceRight(final Callback callback, final Object initialValue);
+        Object reduceRight(final ArrayV1.Callback callback, final Object initialValue);
 
         /**
          * @description
@@ -188,7 +188,7 @@ global with sharing class ArrayV1 {
          *
          * @return List of filtered results.
          */
-        List<Object> filter(final Callback callback);
+        List<Object> filter(final ArrayV1.Callback callback);
 
         /**
          * @description
@@ -205,7 +205,7 @@ global with sharing class ArrayV1 {
          *
          * @return The list of transformed objects.
          */
-        List<Object> transform(final Callback callback);
+        List<Object> transform(final ArrayV1.Callback callback);
 
         /**
          * @description
@@ -224,7 +224,7 @@ global with sharing class ArrayV1 {
          *
          * @return The list of transformed objects.
          */
-        List<Object> transform(final Callback callback, final List<Object> returnList);
+        List<Object> transform(final ArrayV1.Callback callback, final List<Object> returnList);
 
         /**
          * @description
@@ -270,7 +270,7 @@ global with sharing class ArrayV1 {
          *
          * @return True if a matching value is found.
          */
-        Boolean some(final Callback callback);
+        Boolean some(final ArrayV1.Callback callback);
 
         /**
          * @description
@@ -283,7 +283,7 @@ global with sharing class ArrayV1 {
          *
          * @return True if all the elements match.
          */
-        Boolean every(final Callback callback);
+        Boolean every(final ArrayV1.Callback callback);
 
         /**
          * @description
@@ -349,7 +349,7 @@ global with sharing class ArrayV1 {
      *
      * @return The methods that may be called on the array.
      */
-    global static Methods over(final List<Object> objects) {
+    global static ArrayV1.Methods over(final List<Object> objects) {
         return ArrayAPI.newInstance(objects);
     }
 
@@ -368,7 +368,7 @@ global with sharing class ArrayV1 {
      *
      * @return The methods that may be called on the array.
      */
-    global static Methods over(final Object source) {
+    global static ArrayV1.Methods over(final Object source) {
         final List<Object> toIterate;
         if (source instanceof List<Object>) {
             toIterate = (List<Object>) source;

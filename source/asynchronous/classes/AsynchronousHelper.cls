@@ -100,11 +100,10 @@ public with sharing virtual class AsynchronousHelper implements API {
      * Active API instance.
      */
     @TestVisible
-    @SuppressWarnings('PMD.PropertyNamingConventions')
-    public static API API {
+    public static API impl {
         public get {
-            if (Test.isRunningTest() && API != null) { // API has been mocked.
-                return API;
+            if (Test.isRunningTest() && impl != null) { // API has been mocked.
+                return impl;
             } else {
                 return (API) DependencyV1.inject(API.class);
             }
@@ -153,7 +152,7 @@ public with sharing virtual class AsynchronousHelper implements API {
                     ExceptionStackTrace__c = exc.getCause().getStackTraceString()
             );
 
-            AsynchronousDAO.API.persistException(asyncError);
+            AsynchronousDAO.impl.persistException(asyncError);
         }
 
         /**
@@ -172,7 +171,7 @@ public with sharing virtual class AsynchronousHelper implements API {
         public void recordInternalException(final AsynchronousJob__c asyncObject, final AsynchronousV1.APIException exc) {
             recordException(asyncObject, exc);
             asyncObject.Status__c = AsynchronousV1.Status.FAILED.name();
-            AsynchronousDAO.API.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+            AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject });
         }
 
         /**
@@ -338,12 +337,12 @@ public with sharing virtual class AsynchronousHelper implements API {
     @Future
     private static void startAsynchronousJob(final String asyncObjectId) {
         AssertionV1.isNotNull(asyncObjectId, 'argument: AsynchronousHelper.startAsynchronousJob.asyncObjectId');
-        final AsynchronousJob__c asyncObject = AsynchronousDAO.API.getObject(asyncObjectId);
+        final AsynchronousJob__c asyncObject = AsynchronousDAO.impl.getObject(asyncObjectId);
 
         try {
             enqueueApexJob(asyncObject);
         } catch(Exception exc) {
-            AsynchronousHelper.API.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
+            AsynchronousHelper.impl.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
         }
     }
 
@@ -363,13 +362,13 @@ public with sharing virtual class AsynchronousHelper implements API {
         asyncObject.Status__c = AsynchronousV1.Status.RUNNING.name();
         asyncObject.LastRunTime__c = CommonHelper.now();
 
-        AsynchronousDAO.API.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+        AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject });
 
         asyncObject.ApexJobId__c = System.enqueueJob(
-                runnable.forJob(AsynchronousJob.fromSObject(AsynchronousDAO.API.getObject(asyncObject.Id)))
+                runnable.forJob(AsynchronousJob.fromSObject(AsynchronousDAO.impl.getObject(asyncObject.Id)))
         );
 
-        AsynchronousDAO.API.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+        AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject });
     }
 
 

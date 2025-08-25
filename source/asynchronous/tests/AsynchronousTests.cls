@@ -107,7 +107,7 @@ public with sharing class AsynchronousTests {
             Assert.areEqual(state, job.getState());
             Assert.areEqual(AsynchronousV1.Status.PENDING, job.getStatus());
 
-            AsynchronousDAO.API = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
+            AsynchronousDAO.impl = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
                     .whenArguments(
                             new List<AsynchronousJob__c>{
                                     new AsynchronousJob__c(Status__c = AsynchronousV1.Status.PENDING.name())
@@ -133,9 +133,9 @@ public with sharing class AsynchronousTests {
     private static void testMocking() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            AsynchronousAPI.API = createMock();
+            AsynchronousAPI.impl = createMock();
 
-            AsynchronousV1.Job job = AsynchronousAPI.API.createJob(
+            AsynchronousV1.Job job = AsynchronousAPI.impl.createJob(
                     AsynchronousTests.class,
                     null,
                     1,
@@ -146,7 +146,7 @@ public with sharing class AsynchronousTests {
             Assert.areEqual(AsynchronousV1.Status.CANCELLED, job.getStatus());
             Assert.areEqual('MOCKED', job.getReference());
 
-            AsynchronousAPI.API.queueJobs(new List<AsynchronousV1.Job>{ job });
+            AsynchronousAPI.impl.queueJobs(new List<AsynchronousV1.Job>{ job });
             MockerV1.validate();
         }
     }
@@ -319,7 +319,7 @@ public with sharing class AsynchronousTests {
                     job1, job2, job3, job4, job5
             };
 
-            List<Map<String, Object>> jobs = AsynchronousLWC.API.getJobs(
+            List<Map<String, Object>> jobs = AsynchronousLWC.impl.getJobs(
                     null,
                     'ScheduledRunTime__c ASC',
                     0,
@@ -339,7 +339,7 @@ public with sharing class AsynchronousTests {
             Assert.areEqual(1, jobs.size());
             Assert.areEqual(job2.Id, jobs[0].get('Id'));
 
-            jobs = AsynchronousLWC.API.getJobs(
+            jobs = AsynchronousLWC.impl.getJobs(
                     new Map<String, Object>{
                             'Status__c' => new List<String>{
                                     'QUEUED', 'SUCCEEDED'
@@ -369,7 +369,7 @@ public with sharing class AsynchronousTests {
             Assert.areEqual(1, jobs.size());
             Assert.areEqual(job3.Id, jobs[0].get('Id'));
 
-            jobs = AsynchronousLWC.API.getJobs(
+            jobs = AsynchronousLWC.impl.getJobs(
                     new Map<String, Object>{
                             'Status__c' => new List<String>{
                                     'QUEUED', 'RUNNING'
@@ -443,7 +443,7 @@ public with sharing class AsynchronousTests {
 
             insert new List<AsynchronousJob__c> { job1, job2 };
 
-            AsynchronousLWC.API.runJobs(new List<Id> { job1.Id, job2.Id });
+            AsynchronousLWC.impl.runJobs(new List<Id> { job1.Id, job2.Id });
             Assert.areEqual(
                     2,
                     [
@@ -534,7 +534,7 @@ public with sharing class AsynchronousTests {
 
             insert new List<AsynchronousJob__c> { job1, job2, job3, job4, job5 };
 
-            AsynchronousLWC.API.deleteJobs(new List<Id> { job1.Id, job2.Id });
+            AsynchronousLWC.impl.deleteJobs(new List<Id> { job1.Id, job2.Id });
             Assert.areEqual(3, [SELECT COUNT() FROM AsynchronousJob__c]);
             Assert.areEqual(0, [SELECT COUNT() FROM AsynchronousJob__c WHERE Id = :job1.Id OR Id = :job2.Id ]);
 
@@ -620,7 +620,7 @@ public with sharing class AsynchronousTests {
 
             insert new List<AsynchronousJob__c> { job1, job2, job3, job4, job5, job6 };
 
-            Map<String, Integer> counts = AsynchronousLWC.API.getTotals();
+            Map<String, Integer> counts = AsynchronousLWC.impl.getTotals();
             Assert.areEqual(6, counts.size());
             Assert.areEqual(0, counts.get('PENDING'));
             Assert.areEqual(2, counts.get('QUEUED'));
@@ -643,7 +643,7 @@ public with sharing class AsynchronousTests {
             job6.Status__c = AsynchronousV1.Status.CANCELLED.name();
             upsert new List<AsynchronousJob__c> { job4, job5, job6 };
 
-            counts = AsynchronousLWC.API.getTotals();
+            counts = AsynchronousLWC.impl.getTotals();
             Assert.areEqual(6, counts.size());
             Assert.areEqual(0, counts.get('PENDING'));
             Assert.areEqual(1, counts.get('QUEUED'));
@@ -695,7 +695,7 @@ public with sharing class AsynchronousTests {
                     ExceptionStackTrace__c = exc.getStackTraceString()
             );
 
-            AsynchronousDAO.API.persistException(error);
+            AsynchronousDAO.impl.persistException(error);
 
             AsynchronousJobException__c persisted = [
                     SELECT Id, AsynchronousJob__c, RetryNumber__c, StatusOnError__c, ApexJobId__c, ExceptionType__c,
@@ -714,7 +714,7 @@ public with sharing class AsynchronousTests {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
             try {
-                AsynchronousHelper helper = (AsynchronousHelper) AsynchronousHelper.API;
+                AsynchronousHelper helper = (AsynchronousHelper) AsynchronousHelper.impl;
                 Assert.fail();
 
             } catch (TypeException te) {
@@ -725,7 +725,7 @@ public with sharing class AsynchronousTests {
             }
 
             try {
-                AsynchronousAPI async = (AsynchronousAPI) AsynchronousAPI.API;
+                AsynchronousAPI async = (AsynchronousAPI) AsynchronousAPI.impl;
                 Assert.fail();
 
             } catch (TypeException te) {
@@ -736,7 +736,7 @@ public with sharing class AsynchronousTests {
             }
 
             try {
-                AsynchronousDAO dao = (AsynchronousDAO) AsynchronousDAO.API;
+                AsynchronousDAO dao = (AsynchronousDAO) AsynchronousDAO.impl;
                 Assert.fail();
 
             } catch (TypeException te) {

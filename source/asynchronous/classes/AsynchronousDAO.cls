@@ -125,11 +125,10 @@ public with sharing virtual class AsynchronousDAO implements API {
      * The instance is injected from the Registry.
      */
     @TestVisible
-    @SuppressWarnings('PMD.PropertyNamingConventions')
-    public static API API {
+    public static API impl {
         public get {
-            if (Test.isRunningTest() && API != null) { // API has been mocked.
-                return API;
+            if (Test.isRunningTest() && impl != null) { // API has been mocked.
+                return impl;
             } else {
                 return (API) DependencyV1.inject(API.class);
             }
@@ -324,7 +323,7 @@ public with sharing virtual class AsynchronousDAO implements API {
             for (Integer i = 0; i < asyncObjects.size(); i++) {
                 final AsynchronousJob__c asynchronousObject = asyncObjects[i];
                 allIds.add(asynchronousObject.Id);
-                newStates.addAll(AsynchronousHelper.API.encodeState(asynchronousObject, states[i]));
+                newStates.addAll(AsynchronousHelper.impl.encodeState(asynchronousObject, states[i]));
             }
 
             QueryV1.of(AsynchronousJobState__c.SObjectType)

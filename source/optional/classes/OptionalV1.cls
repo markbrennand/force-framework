@@ -157,8 +157,8 @@ global with sharing class OptionalV1 {
             return (ImmutableV1.Collection) content;
         } else if (content instanceof List<Object>) {
             return ImmutableV1.of((List<Object>) content);
-        } else if (content instanceof Set<Object>) {
-            return ImmutableV1.of((Set<Object>) content);
+        } else if (content instanceof Iterable<Object>) {
+            return ImmutableV1.of((Iterable<Object>) content);
         } else {
             return ImmutableV1.of(new List<Object> { content });
        }
@@ -188,7 +188,7 @@ global with sharing class OptionalV1 {
      *
      * @return The value returned by the transformer.
      */
-    global OptionalV1 then(final Function function) {
+    global OptionalV1 then(final OptionalV1.Function function) {
         return function.apply(this);
     }
 }
