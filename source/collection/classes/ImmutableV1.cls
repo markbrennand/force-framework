@@ -448,7 +448,7 @@ global with sharing class ImmutableV1 {
             return new ImmutableList(((List<Object>) source).clone());
         } else {
             final List<Object> elements = new List<Object>();
-            for (Object value : (Iterable<Object>) source) {
+            for (Object value : source) {
                 elements.add(value);
             }
             return new ImmutableList(elements);

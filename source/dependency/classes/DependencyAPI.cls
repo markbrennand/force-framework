@@ -591,8 +591,25 @@ public with sharing virtual class DependencyAPI implements API {
     private with sharing class AddBindingCheck extends ArrayV1.Callback {
         final Boolean isTest = Test.isRunningTest();
 
+        /**
+         * @description
+         * <p/>
+         * Constructor.
+         */
+        @SuppressWarnings('PMD.EmptyStatementBlock')
         public AddBindingCheck() {}
 
+        /**
+         * @description
+         * <p/>
+         * Adds a binding check to the Map of bindings keyed by the interface or class name to be injected.
+         *
+         * @param element The binding metadata records.
+         * @param currentValue The Map of bindings.
+         * @param index The positional index of the binding metadata record in its List of objects.
+         *
+         * @return The Map of bindings.
+         */
         public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final BindingCheck__mdt check = (BindingCheck__mdt) element;
             final Map<Type, List<DependencyV1.BindingCheck>> checks = (Map<Type, List<DependencyV1.BindingCheck>>) currentValue.get();
@@ -600,6 +617,7 @@ public with sharing virtual class DependencyAPI implements API {
             if (check.IsUnitTest__c == isTest) {
                 AssertionV1.isNotNull(check.Type__c, 'Binding Check Metadata record ' + check.Label + ' has no Type defined');
                 AssertionV1.isNotNull(check.BindingCheck__c, 'Binding Check Metadata record ' + check.Label + ' has no BindingCheck class');
+
                 final Type forType = TypesV1.load(check.Type__c);
                 final Object checker = TypesV1.newInstance(TypesV1.load(check.BindingCheck__c));
 
