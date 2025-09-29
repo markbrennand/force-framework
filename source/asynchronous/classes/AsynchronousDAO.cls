@@ -1,18 +1,18 @@
 
 /**
  * @description
- * <p/>
+ * <p>
  * Class defining the API for all DML and SOQL operations required by the default Asynchronous API implementation.
- * <p/>
+ * <p>
  * The implementation of the API is hidden in the private Implementation class. The class is hidden so an application
  * cannot access the class to mis-use it.
- * <p/>
+ * <p>
  * All application access is restricted to the API instance variable API. This ensures the application can only
  * ever call the methods of the API interface.
- * <p/>
+ * <p>
  * The outer class implements the API only to allow it to be mocked. Any calls to the API method implementations
  * in the outer class will throw an Exception.
- * <p/>
+ * <p>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -21,14 +21,14 @@ public with sharing virtual class AsynchronousDAO implements API {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Interface defining the SOQL and DML operations.
      */
     public interface API {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Given the Id of an object, the object is retrieved.
          *
          * @param asyncObjectId The Id of the object to retrieve.
@@ -39,9 +39,9 @@ public with sharing virtual class AsynchronousDAO implements API {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Builds a List of the objects that are scheduled to run.
-         * <p/>
+         * <p>
          * The List returned must be ordered chronologically, with the first entry being the job that has been
          * waiting the longest to run.
          *
@@ -53,9 +53,9 @@ public with sharing virtual class AsynchronousDAO implements API {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Determines the number os objects that remain to be run.
-         * <p/>
+         * <p>
          * The remaining objects must includes all those that are in QUEUED or RUNNING state. The RUNNING must
          * be included as their job may fail and they will be scheduled to re-run if they have re-tries left.
          *
@@ -65,9 +65,9 @@ public with sharing virtual class AsynchronousDAO implements API {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Determines the number of active instances of the given object.
-         * <p/>
+         * <p>
          * The Runnable in for the object determines the number of active instances.
          *
          * @param asyncObject The object to have its concurrency determined.
@@ -78,7 +78,7 @@ public with sharing virtual class AsynchronousDAO implements API {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Inserts or updates the given objects.
          *
          * @param asyncObjects The objects to persist.
@@ -87,9 +87,9 @@ public with sharing virtual class AsynchronousDAO implements API {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Inserts or updates the given objects and states.
-         * <p/>
+         * <p>
          * The objects must be persisted first and then each state linked to its associated object before
          * persisting.
          *
@@ -100,7 +100,7 @@ public with sharing virtual class AsynchronousDAO implements API {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Deletes the given objects.
          *
          * @param asyncObjects The objects to remove.
@@ -109,7 +109,7 @@ public with sharing virtual class AsynchronousDAO implements API {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Inserts the given exception object.
          *
          * @param asyncErrorObject The exception object to persist.
@@ -119,7 +119,7 @@ public with sharing virtual class AsynchronousDAO implements API {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Active API instance.
      *
      * The instance is injected from the Registry.
@@ -138,9 +138,9 @@ public with sharing virtual class AsynchronousDAO implements API {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Allow extension but not construction.
-     * <p/>
+     * <p>
      * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
      */
     @SuppressWarnings('PMD.EmptyStatementBlock')
@@ -148,14 +148,14 @@ public with sharing virtual class AsynchronousDAO implements API {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Class providing the implementation of the API.
      */
     private with sharing class Implementation implements API {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Given the Id of the AsynchronousJob__c object, the object is retrieved.
          *
          * @param asyncObjectId The Id of the object to retrieve.
@@ -192,9 +192,9 @@ public with sharing virtual class AsynchronousDAO implements API {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Builds a List of the AsynchronousJob__c objects that are scheduled to run.
-         * <p/>
+         * <p>
          * The AsynchronousJob__c objects are ordered by ScheduledRunTime__c. This ensures that the list returned
          * is in chronological order, with the first entry being the job that has been waiting the longest to run.
          *
@@ -222,9 +222,9 @@ public with sharing virtual class AsynchronousDAO implements API {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Determines the number os AsynchronousJob__c objects that remain to be run.
-         * <p/>
+         * <p>
          * The AsynchronousJob__c objects are queried by QUEUED and RUNNING status.
          *
          * @return The number of objects that are scheduled or are running.
@@ -249,9 +249,9 @@ public with sharing virtual class AsynchronousDAO implements API {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Determines the number of active instances of the given AsynchronousJob__c object.
-         * <p/>
+         * <p>
          * A count of the RUNNING jobs are queried which have a Runnable__c that matches that of the given object.
          *
          * @param asyncObject The object to have its concurrency determined.
@@ -275,7 +275,7 @@ public with sharing virtual class AsynchronousDAO implements API {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Inserts or updates the given AsynchronousJob__c objects.
          *
          * @param asyncObjects The objects to persist.
@@ -297,9 +297,9 @@ public with sharing virtual class AsynchronousDAO implements API {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Inserts or updates the given AsynchronousJob__c objects and states.
-         * <p/>
+         * <p>
          * The AsynchronousJob__c objects are persisted first so each has an Id. The List of states is iterated
          * and AsynchronousJobState__c objects are created for the state, and linked to their associated
          * AsynchronousJob__c object. All extant AsynchronousJobState__c objects are deleted before all the new
@@ -345,7 +345,7 @@ public with sharing virtual class AsynchronousDAO implements API {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Deletes the given AsynchronousJob__c objects.
          *
          * @param asyncObjects The objects to remove.
@@ -357,7 +357,7 @@ public with sharing virtual class AsynchronousDAO implements API {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Inserts the given AsynchronousJobException__c object.
          *
          * @param asyncErrorObject The exception object to persist.
@@ -370,7 +370,7 @@ public with sharing virtual class AsynchronousDAO implements API {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Method is solely for mocking use.
      *
      * @param asyncObjectId ignored.
@@ -383,7 +383,7 @@ public with sharing virtual class AsynchronousDAO implements API {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Method is solely for mocking use.
      *
      * @param maxJobsToReturn ignored.
@@ -396,7 +396,7 @@ public with sharing virtual class AsynchronousDAO implements API {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Method is solely for mocking use.
      *
      * @return ignored.
@@ -407,7 +407,7 @@ public with sharing virtual class AsynchronousDAO implements API {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Method is solely for mocking use.
      *
      * @param asyncJob ignored.
@@ -420,7 +420,7 @@ public with sharing virtual class AsynchronousDAO implements API {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Method is solely for mocking use.
      *
      * @param asyncObjects ignored.
@@ -442,7 +442,7 @@ public with sharing virtual class AsynchronousDAO implements API {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Method is solely for mocking use.
      *
      * @param asyncObjects ignored.
@@ -453,7 +453,7 @@ public with sharing virtual class AsynchronousDAO implements API {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Method is solely for mocking use.
      *
      * @param asyncError ignored.
@@ -464,9 +464,9 @@ public with sharing virtual class AsynchronousDAO implements API {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Creates the default API implementation.
-     * <p/>
+     * <p>
      * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
@@ -474,7 +474,7 @@ public with sharing virtual class AsynchronousDAO implements API {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Returns an instance of the API implementation.
          *
          * @return The API implementation,
@@ -486,14 +486,14 @@ public with sharing virtual class AsynchronousDAO implements API {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Class providing check on Binding made to AsynchronousDAO.API.
      */
     public with sharing class BindingCheck implements DependencyV1.BindingCheck {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Checks that a valid binding has been made to AsynchronousDAO.API.
          *
          * @param forType The type being bound to, AsynchronousDAO.API.

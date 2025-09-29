@@ -1,8 +1,8 @@
 /**
  * @description
- * <p/>
+ * <p>
  * Helper class providing utility methods for Query API.
- * <p/>
+ * <p>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -11,7 +11,7 @@ public with sharing class QueryHelper {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Builds the fully qualified names of the fields to be returned in a query from a related object.
      *
      * @param joinField The Id field that links to the related object.
@@ -33,7 +33,7 @@ public with sharing class QueryHelper {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Function called from an Optional to delete objects.
      */
     public with sharing class SObjectDeleter implements OptionalV1.Function {
@@ -41,7 +41,7 @@ public with sharing class QueryHelper {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Constructs an instance of the class to delete objects in the given mode
          *
          * @param mode The access mode to delete the objects in.
@@ -52,7 +52,7 @@ public with sharing class QueryHelper {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Deletes the objects given by the Optional value.
          *
          * @param value The Optional containing the objects to delete.

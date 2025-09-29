@@ -1,23 +1,23 @@
 /**
  * @description
- * <p/>
+ * <p>
  * Finalizer called on completion of an Apex job.
- * <p/>
+ * <p>
  * Success or failure of the job is determined from the context.
- * <p/>
+ * <p>
  * If successful, the Asynchronous job's Runnable onSuccess method will be called.
- * <p/>
+ * <p>
  * If the job has failed, the job's Runnable onError method will be called. The return value will indicate
  * whether processing of the job is to be continued.
- * <p/>
+ * <p>
  * If processing is to be continued and the number of re-tries has been reached for the job, the job's Runnable
  * onFailure method will be called.
- * <p/>
+ * <p>
  * If the number of re-tries hasn't been reached, the job's Status is set to QUEUED and the re-try number is
  * incremented.
- * <p/>
+ * <p>
  * If there are scheduled jobs left to process, a new Asynchronous scheduler is queued.
- * <p/>
+ * <p>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -26,16 +26,16 @@ public with sharing class AsynchronousFinalizer {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Set of job Ids that remain to be started.
      */
     public final static String JOBS_TO_START = 'JobsToStart';
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Factory method to create a new Finalizer.
-     * <p/>
+     * <p>
      * The implementation is hidden to prevent re-use outside the framework.
      *
      * @param asyncObjectId The id of the Asynchronous object.
@@ -48,21 +48,21 @@ public with sharing class AsynchronousFinalizer {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Finalizer for the Asynchronous framework.
      */
     private with sharing class ApexFinalizer implements Finalizer {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * The Id of the AsynchronousJob__c object the Apex Job has been created to run.
          */
         private final Id asyncObjectId;
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Constructs a new Finalizer for the given AsynchronousJob__c object Id.
          *
          * @param asyncObjectId The Asynchronous_c object Id.
@@ -73,18 +73,18 @@ public with sharing class AsynchronousFinalizer {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Called when the Apex job has completed.
-         * <p/>
+         * <p>
          * The context is used to determine the status of the job.
-         * <p/>
+         * <p>
          * If the job succeeded, the Runnable onSuccess method is called. The return value
          * from the call indicates whether to keep the AsynchronousJob__c object or delete it.
-         * <p/>
+         * <p>
          * If the job failed and there are more re-tries available, the Runnable onError method
          * is called. The return value from the method indicates the new Status to assign to the
          * job.
-         * <p/>
+         * <p>
          * If the job failed and the re-tries have been exhausted, the Runnable onFailure method
          * is called. The return value from the call indicates whether to keep the AsynchronousJob__c
          * object or delete it.
@@ -120,7 +120,7 @@ public with sharing class AsynchronousFinalizer {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Method handling the successful processing of a job.
          *
          * @param asyncObject The AsynchronousJob__c object for the job.
@@ -138,9 +138,9 @@ public with sharing class AsynchronousFinalizer {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Method handling the failed processing of a job.
-         * <p/>
+         * <p>
          * If re-tries are available, and the Status returned by the Runnable onError method
          * is QUEUED, then the job is scheduled to run again in the number of milliseconds given
          * by the job's Retry Interval.

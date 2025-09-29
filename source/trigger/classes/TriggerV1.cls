@@ -1,15 +1,15 @@
 /**
  * @description
- * <p/>
+ * <p>
  * Class defining the Trigger API available for public use.
- * <p/>
+ * <p>
  * The Subscriber interface defines the contract that implementations must provide to process events generated
  * by the Trigger API.
- * <p/>
+ * <p>
  * Each Subscriber implementation must register itself with a Trigger metadata record.
- * <p/>
+ * <p>
  * See <a href=../../source/trigger/README.md target="_blank">README</a> for full details of the Trigger API.
- * <p/>
+ * <p>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -19,21 +19,21 @@ global with sharing class TriggerV1 {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * The type of trigger operation that has fired.
      */
     global enum Operation { INSERTING, UPDATING, DELETING }
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Exception thrown when a trigger operation fails.
      */
     global with sharing class APIException extends ForceFwException {}
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Prevent construction.
      */
     @SuppressWarnings('PMD.EmptyStatementBlock')
@@ -41,16 +41,16 @@ global with sharing class TriggerV1 {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Event created by the trigger to represent the operation being performed.
-     * <p/>
+     * <p>
      * The event is sent to all the Subscribers bound to the object.
      */
     global interface Event {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Indicates whether the trigger is performing a before action.
          *
          * @return True if the trigger is performing a before action.
@@ -59,7 +59,7 @@ global with sharing class TriggerV1 {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Indicates whether the trigger is performing an after action.
          *
          * @return True if the trigger is performing an after action.
@@ -68,7 +68,7 @@ global with sharing class TriggerV1 {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Yields the trigger operation being performed.
          *
          * @return The operation being performed by the trigger.
@@ -77,9 +77,9 @@ global with sharing class TriggerV1 {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Yields the records passed to the trigger for processing.
-         * <p/>
+         * <p>
          * Any records passed to an after trigger will have been cloned. This allows DML to be performed on them.
          *
          * @return The records the trigger is processing.
@@ -88,7 +88,7 @@ global with sharing class TriggerV1 {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Checks whether given record has an old value assigned.
          *
          * @param record The record whose old value is required.
@@ -99,7 +99,7 @@ global with sharing class TriggerV1 {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Gets the old value of a record.
          *
          * @param record The record whose old value is required.
@@ -110,7 +110,7 @@ global with sharing class TriggerV1 {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Gets all the old values registered.
          *
          * @return All the old values.
@@ -119,12 +119,12 @@ global with sharing class TriggerV1 {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Yields the maximum recursive depth for the trigger.
-         * <p/>
+         * <p>
          * The recursive depth is the number of times the trigger has been called as a result of DML performed on
          * the object associated with the trigger in trigger logic.
-         * <p/>
+         * <p>
          * If the recursive depth returned is 0, no checks on the recursive depth are performed.
          *
          * @return The maximum recursive depth for the trigger.
@@ -134,18 +134,18 @@ global with sharing class TriggerV1 {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Classes implementing this interface may register themselves for use of the Trigger API.
      */
     global interface Subscriber {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Method called by the Trigger API when a trigger fires.
-         * <p/>
+         * <p>
          * The event argument encapsulates all the information for the trigger operation that has fired.
-         * <p/>
+         * <p>
          * All the Subscriber implementations bound to the object whose trigger hss fired will have their
          * onEvent method called.
          *
@@ -156,11 +156,11 @@ global with sharing class TriggerV1 {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Entry point for Trigger API.
-     * <p/>
+     * <p>
      * This method must be called from the Apex Trigger.
-     * <p/>
+     * <p>
      * An event representing the Trigger action is created and published to all the subscribers bound to the type
      * of object associated with the Apex Trigger.
      */
@@ -170,7 +170,7 @@ global with sharing class TriggerV1 {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Disables the subscribers for the given object type.
      *
      * @param type The object type whose subscribers are to be disabled.
@@ -180,7 +180,7 @@ global with sharing class TriggerV1 {
     }
     /**
      * @description
-     * <p/>
+     * <p>
      * Enables the subscribers for the given object type.
      *
      * @param type The object type whose subscribers are to be enabled.
@@ -191,7 +191,7 @@ global with sharing class TriggerV1 {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Determines whether subscribers are enabled for the given object type.
      *
      * @param type The object type whose subscription status is to be checked.
@@ -204,9 +204,9 @@ global with sharing class TriggerV1 {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Disables the given Subscriber class.
-     * <p/>
+     * <p>
      * No further events will be published to the associated subscriber.
      *
      * @param type The Subscriber class to disable.
@@ -217,9 +217,9 @@ global with sharing class TriggerV1 {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Enables the given Subscriber class.
-     * <p/>
+     * <p>
      * Events will be published to the associated subscriber.
      *
      * @param type The Subscriber class to enable.
@@ -230,7 +230,7 @@ global with sharing class TriggerV1 {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Determines whether the given Subscriber class is enabled.
      *
      * @param type The Subscriber class to be checked.
@@ -243,14 +243,14 @@ global with sharing class TriggerV1 {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Class providing check on Binding made to TriggerV1.Subscriber.
      */
     public with sharing class BindingCheck implements DependencyV1.BindingCheck {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Checks that a valid binding has been made to TriggerV1.Subscriber.
          *
          * @param forType The type being bound to, TriggerV1.Subscriber.

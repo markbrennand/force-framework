@@ -1,8 +1,8 @@
 /**
  * @description
- * <p/>
+ * <p>
  * Common test data and methods for all unit tests.
- * <p/>
+ * <p>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand

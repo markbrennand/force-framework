@@ -1,8 +1,8 @@
 /**
  * @description
- * <p/>
+ * <p>
  * Helper class providing common utility methods.
- * <p/>
+ * <p>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -11,7 +11,7 @@ public with sharing class CommonHelper {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Mockable time.
      */
     @TestVisible
@@ -29,7 +29,7 @@ public with sharing class CommonHelper {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Returns the namespace prefix for objects in the source code for the framework.
      *
      * @return The namespace of the objects, including the __.
@@ -40,7 +40,7 @@ public with sharing class CommonHelper {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Returns the namespace prefix for Apex in the source code for the framework.
      *
      * @return The namespace of the Apex, including the .
@@ -51,9 +51,9 @@ public with sharing class CommonHelper {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Returns the current date and time.
-     * <p/>
+     * <p>
      * The value can be mocked in a unit test by setting the when variable.
      *
      * @return The current date time.
@@ -64,14 +64,14 @@ public with sharing class CommonHelper {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Converts a collection element to its String equivalent.
      */
     public with sharing class ToString extends ArrayV1.Callback {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Callback function to convert an element of a List to its String value and add it to a return List.
          *
          * @param element The element to convert to a String.
@@ -100,7 +100,7 @@ public with sharing class CommonHelper {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Constructor.
          *
          * @param result The List to add the elements to.
@@ -111,7 +111,7 @@ public with sharing class CommonHelper {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Given an Optional containing a Collection, the elements in the Collection are added to the List.
          *
          * @param value An Optional containing the Collection of elements.

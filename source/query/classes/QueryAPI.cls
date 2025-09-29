@@ -1,16 +1,16 @@
 /**
  * @description
- * <p/>
+ * <p>
  * Class providing the default implementation of the Query API.
- * <p/>
+ * <p>
  * All application access is restricted to the API instance variable API. This ensures the application can only
  * ever call the methods of the API interface.
- * <p/>
+ * <p>
  * The outer class implements the API only to allow it to be mocked. Any calls to the API method implementations
  * in the outer class will throw an Exception.
- * <p/>
+ * <p>
  * See <a href=../README.md target="_blank">README</a> for full details of the Query API.
- * <p/>
+ * <p>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -20,14 +20,14 @@ public with sharing virtual class QueryAPI extends MockableQueryAPI {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Active API instance.
-     * <p/>
+     * <p>
      * The instance is injected from the Registry. As the instance maintains state between calls, a new instance
      * must be injected each time it is requested.
-     * <p/>
+     * <p>
      * The instance is test visible so it can be mocked.
-     * <p/>
+     * <p>
      * Any implementation must be of type DependencyV1.Prototype as state must be maintained.
      */
     @TestVisible
@@ -46,9 +46,9 @@ public with sharing virtual class QueryAPI extends MockableQueryAPI {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Allow extension but not construction.
-     * <p/>
+     * <p>
      * This is also required to support the Apex mocking classes. A private constructor cannot be mocked.
      */
     @SuppressWarnings('PMD.EmptyStatementBlock')
@@ -56,14 +56,14 @@ public with sharing virtual class QueryAPI extends MockableQueryAPI {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Class inaccessible outside the QueryAPI class providing implementation of the Query API.
-     * <p/>
+     * <p>
      * The Factory class is used to create new instances of this class.
-     * <p/>
+     * <p>
      * As the class maintains state between calls, it must be a prototype class to ensure a new instance is created
      * each time it is injected.
-     * <p/>
+     * <p>
      * See QueryV1.API for method signatures.
      */
     private with sharing class Implementation implements QueryV1.API, DependencyV1.Prototype {
@@ -353,9 +353,9 @@ public with sharing virtual class QueryAPI extends MockableQueryAPI {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Creates the default API implementation.
-     * <p/>
+     * <p>
      * The constructor for the implementation is protected. This prevents the Dependency framework constructing it.
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
@@ -367,7 +367,7 @@ public with sharing virtual class QueryAPI extends MockableQueryAPI {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Class providing check on Binding made to AsynchronousAPI.API.
      */
     public with sharing class BindingCheck implements DependencyV1.BindingCheck {

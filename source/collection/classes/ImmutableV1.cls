@@ -1,15 +1,15 @@
 /**
  * @description
- * <p/>
+ * <p>
  * Class providing the Collections API implementation.
- * <p/>
+ * <p>
  * Use these classes to create and manage immutable Lists, Sets and Maps.
- * <p/>
+ * <p>
  * The ReadOnlyList and ReadOnlySet implement the Collection interface. The interface gives access to all the
  * functionality of the ArrayV1.Methods interface.
- * <p/>
+ * <p>
  * See <a href=./../source/collection/README.md target="_blank">README</a> for full details of the Collection API.
- * <p/>
+ * <p>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -19,19 +19,19 @@ global with sharing class ImmutableV1 {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Interface for List and Set that supports conversion to a List and the functionality of the ArrayV1.Methods
      * interface.
-     * <p/>
+     * <p>
      * A ReadOnlyMap or ReadyOnlySet may have reduce(), filter(), transform() etc. called on it.
      */
     global interface Collection extends ArrayV1.Methods {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Converts the contents of a collection to a List.
-         * <p/>
+         * <p>
          * The collection's elements will be added to the List passed as argument. This method allows a List
          * of a specific type to be populated from a collection.
          *
@@ -43,9 +43,9 @@ global with sharing class ImmutableV1 {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Converts the contents of a collection to a List.
-         * <p/>
+         * <p>
          * The returned List will be of type Object. This will prevent it being cast to a List of any other type, even
          * if the List contains that type.
          *
@@ -55,7 +55,7 @@ global with sharing class ImmutableV1 {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Checks if the collection is empty.
          *
          * @return  True if the collection is empty, otherwise false.
@@ -64,7 +64,7 @@ global with sharing class ImmutableV1 {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Returns the number of elements in the collection.
          *
          * @return The number of elements in the collection.
@@ -73,7 +73,7 @@ global with sharing class ImmutableV1 {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Determines whether collection contains the given object.
          *
          * @param element The object to be checked.
@@ -85,11 +85,11 @@ global with sharing class ImmutableV1 {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * An immutable Map.
-     * <p/>
+     * <p>
      * It has all the accessor functionality of a Map but has had the update capability removed.
-     * <p/>
+     * <p>
      * It provides one item of functionality not present in a Map, iteration over the implementation, the Objects
      * returned by the Iterator will be the Map's keys.
      */
@@ -97,7 +97,7 @@ global with sharing class ImmutableV1 {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Retrieves the value associated with the specified key.
          *
          * @param key The key whose associated value is to be returned.
@@ -108,7 +108,7 @@ global with sharing class ImmutableV1 {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Checks if the map contains the specified key.
          *
          * @param key The key to check
@@ -119,7 +119,7 @@ global with sharing class ImmutableV1 {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Returns a List of the values stored in the Map.
          *
          * @return The values.
@@ -128,7 +128,7 @@ global with sharing class ImmutableV1 {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Returns the keys to the Map's elements.
          *
          * @return The keys.
@@ -137,7 +137,7 @@ global with sharing class ImmutableV1 {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Returns the number of keys in the Map.
          *
          * @return The number of keys in the Map.
@@ -147,18 +147,18 @@ global with sharing class ImmutableV1 {
 
     /**
      * @description
-     * <p/>
+     * <p>
      * An immutable List.
-     * <p/>
+     * <p>
      * It has all the accessor functionality of a List but has had the update capability removed.
-     * <p/>
+     * <p>
      * The Collection methods may be used to use the functionality from ArrayV1.
      */
     global interface ReadOnlyList extends ImmutableV1.Collection {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Retrieves the element at the given index in the List.
          *
          * @param index The positional index.
@@ -169,7 +169,7 @@ global with sharing class ImmutableV1 {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Finds the positional index in the List of the given object.
          *
          * @param element The object to find.
@@ -181,18 +181,18 @@ global with sharing class ImmutableV1 {
 
     /**
     * @description
-    * <p/>
+    * <p>
     * An immutable Set
-    * <p/>
+    * <p>
     * It has all the accessor functionality of a Set but has had the update capability removed.
-    * <p/>
+    * <p>
     * The Collection methods may be used to use the functionality from ArrayV1.
     */
     global interface ReadOnlySet extends ImmutableV1.Collection {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Determines whether the Set contains all the objects in the List argument.
          *
          * @param objs The objects to be matched.
@@ -203,7 +203,7 @@ global with sharing class ImmutableV1 {
 
         /**
          * @description
-         * <p/>
+         * <p>
          * Determines whether the Set contains all the objects in the Set argument.
          *
          * @param objs The objects to be matched.

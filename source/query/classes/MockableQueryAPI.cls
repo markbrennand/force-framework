@@ -1,10 +1,10 @@
 /**
  * @description
- * <p/>
+ * <p>
  * Class providing a mockable implementation of the Query API.
- * <p/>
+ * <p>
  * See <a href=../README.md target="_blank">README</a> for full details of the Query API.
- * <p/>
+ * <p>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand

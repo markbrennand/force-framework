@@ -1,12 +1,12 @@
 /**
  * @description
- * <p/>
+ * <p>
  * Class providing check on Binding made to an Apex language type.
- * <p/>
+ * <p>
  * In addition to the primitive types, some Map types are validated too.
- * <p/>
+ * <p>
  * See <a href=../README.md target="_blank">README</a> for full details of DependencyV1.BindingCheck API.
- * <p/>
+ * <p>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
@@ -15,7 +15,7 @@ public with sharing class ApexTypeBindingCheck implements DependencyV1.BindingCh
 
     /**
      * @description
-     * <p/>
+     * <p>
      * Checks that a valid binding has been made to a primitive type.
      *
      * @param forType The type being bound to.
