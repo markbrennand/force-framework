@@ -345,7 +345,7 @@ global with sharing class QueryV1 {
          * Executes the query.
          * <p>
          * The Optional returned will have no value if there are no matching objects. If there are matches, the
-         * Optional value will be an ImmutableV1.ReadOnlyList containing the matching objects.
+         * Optional value will be an ImmutableV1.Collection containing the matching objects.
          *
          * @param offset The offset to the first record.
          *

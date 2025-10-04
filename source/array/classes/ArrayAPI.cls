@@ -162,7 +162,7 @@ public with sharing class ArrayAPI {
         public List<Object> filter(final ArrayV1.Callback callback) {
             Assert.isNotNull(callback, 'Callback for method must be defined');
             callback.sharing(shared);
-            final List<Object> filtered = newListOfSameType(objects);
+            final List<Object> filtered = CommonHelper.newListOfSameType(objects);
             for (Integer i = 0; i < length; i++) {
                 if (isTrue(callback.function(objects[i], null, i))) {
                     filtered.add(objects[i]);
@@ -226,7 +226,7 @@ public with sharing class ArrayAPI {
          * @return The new array.
          */
         public List<Object> concat(final List<Object> elements) {
-            final List<Object> cloned = newListOfSameType(objects);
+            final List<Object> cloned = CommonHelper.newListOfSameType(objects);
             cloned.addAll(objects);
             cloned.addAll(elements);
             return cloned;
@@ -244,7 +244,7 @@ public with sharing class ArrayAPI {
          * @return The new array.
          */
         public OptionalV1 at(final Integer index) {
-            if ((index > 0 && index >= length) || (index < 0 && (length + index) < 0)) {
+            if ((index >= 0 && index >= length) || (index < 0 && (length + index) < 0)) {
                 return OptionalV1.empty();
             }
             return (index >= 0) ? OptionalV1.of(objects[index]) : OptionalV1.of(objects[length + index]);
@@ -315,7 +315,7 @@ public with sharing class ArrayAPI {
          * @return The new array with the reversed elements.
          */
         public List<Object> reverse() {
-            final List<Object> cloned = newListOfSameType(objects);
+            final List<Object> cloned = CommonHelper.newListOfSameType(objects);
             for (Integer i = length; i > 0; i--) {
                 cloned.add(objects[i-1]);
             }
@@ -408,12 +408,6 @@ public with sharing class ArrayAPI {
          */
         public Iterator<Object> iterator() {
             return objects.iterator();
-        }
-
-        private List<Object> newListOfSameType(final List<Object> listToClone) {
-            final List<Object> cloned = listToClone.clone();
-            cloned.clear();
-            return cloned;
         }
 
         private OptionalV1 reduce(

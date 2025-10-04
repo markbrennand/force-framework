@@ -1354,7 +1354,11 @@ public with sharing class ArrayTests {
     private static void testOptionalListPushAndPop() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            testPushAndPop(OptionalV1.of(new List<Integer>()));
+            try {
+                testPushAndPop(OptionalV1.of(new List<Integer>()));
+            } catch(ImmutableV1.APIException ae) {
+                Assert.areEqual('Mutation of collection not allowed', ae.getMessage());
+            }
         }
     }
 
@@ -1362,7 +1366,11 @@ public with sharing class ArrayTests {
     private static void testOptionalSetPushAndPop() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            testPushAndPop(OptionalV1.of(new Set<Integer>()));
+            try {
+                testPushAndPop(OptionalV1.of(new Set<Integer>()));
+            } catch(ImmutableV1.APIException ae) {
+                Assert.areEqual('Mutation of collection not allowed', ae.getMessage());
+            }
         }
     }
 
@@ -1370,7 +1378,11 @@ public with sharing class ArrayTests {
     private static void testOptionalCollectionPushAndPop() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            testPushAndPop(OptionalV1.of(ImmutableV1.of(new Set<Integer>())));
+            try {
+                testPushAndPop(OptionalV1.of(ImmutableV1.of(new Set<Integer>())));
+            } catch(ImmutableV1.APIException ae) {
+                Assert.areEqual('Mutation of collection not allowed', ae.getMessage());
+            }
         }
     }
 
@@ -1419,7 +1431,11 @@ public with sharing class ArrayTests {
     private static void testOptionalListPushAndShift() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            testPushAndShift(OptionalV1.of(new List<Integer>()));
+            try {
+                testPushAndShift(OptionalV1.of(new List<Integer>()));
+            } catch(ImmutableV1.APIException ae) {
+                Assert.areEqual('Mutation of collection not allowed', ae.getMessage());
+            }
         }
     }
 
@@ -1427,7 +1443,11 @@ public with sharing class ArrayTests {
     private static void testOptionalSetPushAndShift() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            testPushAndShift(OptionalV1.of(new Set<Integer>()));
+            try {
+                testPushAndShift(OptionalV1.of(new Set<Integer>()));
+            } catch(ImmutableV1.APIException ae) {
+                Assert.areEqual('Mutation of collection not allowed', ae.getMessage());
+            }
         }
     }
 
@@ -1435,7 +1455,11 @@ public with sharing class ArrayTests {
     private static void testOptionalCollectionPushAndShift() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            testPushAndShift(OptionalV1.of(ImmutableV1.of(new Set<Integer>())));
+            try {
+                testPushAndShift(OptionalV1.of(ImmutableV1.of(new Set<Integer>())));
+            } catch(ImmutableV1.APIException ae) {
+                Assert.areEqual('Mutation of collection not allowed', ae.getMessage());
+            }
         }
     }
 

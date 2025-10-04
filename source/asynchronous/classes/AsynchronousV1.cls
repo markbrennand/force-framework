@@ -306,7 +306,7 @@ global with sharing virtual class AsynchronousV1 {
      * Classes extending this class must have a no-op constructor which calls the constructor for this class with
      * the Type of the extending class.
      */
-    global with sharing abstract class Runnable extends AsynchronousAPI.ApexJobRunnable {
+    global with sharing abstract class Runnable extends AsynchronousImpl.ApexJobRunnable {
 
         /**
          * @description

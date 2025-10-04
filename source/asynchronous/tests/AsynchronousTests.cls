@@ -155,7 +155,7 @@ public with sharing class AsynchronousTests {
     private static void testBindingCheck() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            DependencyV1.bind(AsynchronousAPI.API.class, AsynchronousAPI.Factory.class);
+            DependencyV1.bind(AsynchronousAPI.API.class, AsynchronousImpl.Factory.class);
             try {
                 DependencyV1.bind(AsynchronousAPI.API.class, AsynchronousScheduler.RunNextAvailable.class);
                 Assert.fail();
@@ -166,7 +166,7 @@ public with sharing class AsynchronousTests {
                 );
             }
 
-            DependencyV1.bind(AsynchronousLWC.API.class, AsynchronousLWC.Factory.class);
+            DependencyV1.bind(AsynchronousLWC.API.class, AsynchronousLWCImpl.Factory.class);
             try {
                 DependencyV1.bind(AsynchronousLWC.API.class, AsynchronousScheduler.RunNextAvailable.class);
                 Assert.fail();
@@ -719,7 +719,7 @@ public with sharing class AsynchronousTests {
 
             } catch (TypeException te) {
                 Assert.isTrue(
-                        TestHelper.exceptionContains('Invalid conversion from runtime type AsynchronousHelper.Implementation to AsynchronousHelper', te),
+                        TestHelper.exceptionContains('Invalid conversion from runtime type AsynchronousHelperImpl.API to AsynchronousHelper', te),
                         'Unexpected exception: ' + te
                 );
             }
@@ -730,7 +730,7 @@ public with sharing class AsynchronousTests {
 
             } catch (TypeException te) {
                 Assert.isTrue(
-                        TestHelper.exceptionContains('Invalid conversion from runtime type AsynchronousAPI.Implementation to AsynchronousAPI', te),
+                        TestHelper.exceptionContains('Invalid conversion from runtime type AsynchronousImpl.API to AsynchronousAPI', te),
                         'Unexpected exception: ' + te
                 );
             }
@@ -741,7 +741,7 @@ public with sharing class AsynchronousTests {
 
             } catch (TypeException te) {
                 Assert.isTrue(
-                        TestHelper.exceptionContains('Invalid conversion from runtime type AsynchronousDAO.Implementation to AsynchronousDAO', te),
+                        TestHelper.exceptionContains('Invalid conversion from runtime type AsynchronousDAOImpl.API to AsynchronousDAO', te),
                         'Unexpected exception: ' + te
                 );
             }

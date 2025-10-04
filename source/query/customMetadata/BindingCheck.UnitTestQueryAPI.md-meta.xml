@@ -4,7 +4,7 @@
     <protected>false</protected>
     <values>
         <field>BindingCheck__c</field>
-        <value xsi:type="xsd:string">QueryAPI.BindingCheck</value>
+        <value xsi:type="xsd:string">QueryBinding</value>
     </values>
     <values>
         <field>IsUnitTest__c</field>

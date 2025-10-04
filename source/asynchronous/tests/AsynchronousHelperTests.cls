@@ -22,10 +22,10 @@ public with sharing class AsynchronousHelperTests {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
             try {
-                DependencyV1.bind(AsynchronousHelper.API.class, AsynchronousAPI.Factory.class);
+                DependencyV1.bind(AsynchronousHelper.API.class, AsynchronousImpl.Factory.class);
             } catch(DependencyV1.APIException ae) {
                 Assert.isTrue(
-                        TestHelper.exceptionContains( 'Class AsynchronousAPI.Factory does not implement AsynchronousHelper.API', ae),
+                        TestHelper.exceptionContains( 'Class AsynchronousImpl.Factory does not implement AsynchronousHelper.API', ae),
                         'Unexpected exception: ' + ae
                 );
             }
@@ -126,9 +126,9 @@ public with sharing class AsynchronousHelperTests {
             AsynchronousJob__c asynchronousObject = new AsynchronousJob__c(Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType));
 
             for (Integer size : new List<Integer>{
-                    AsynchronousHelper.maxChunkSize, 1, 2, 4, 8, 16, 32, 62, 128, 256
+                    AsynchronousHelperImpl.maxChunkSize, 1, 2, 4, 8, 16, 32, 62, 128, 256
             }) {
-                AsynchronousHelper.maxChunkSize = size;
+                AsynchronousHelperImpl.maxChunkSize = size;
                 List<AsynchronousJobState__c> chunks = AsynchronousHelper.impl.encodeState(asynchronousObject, state);
                 Assert.areEqual(state, AsynchronousHelper.impl.decodeState(chunks), 'Unexpected state for size ' + size);
             }

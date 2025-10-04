@@ -65,6 +65,21 @@ public with sharing class CommonHelper {
     /**
      * @description
      * <p>
+     * Creates a new List of the same type as the source List.
+     *
+     * @param source The List giving the type to be created.
+     *
+     * @return A new List of the same type as the source.
+     */
+    public static List<Object> newListOfSameType(final List<Object> source) {
+        final List<Object> cloned = source.clone();
+        cloned.clear();
+        return cloned;
+    }
+
+    /**
+     * @description
+     * <p>
      * Converts a collection element to its String equivalent.
      */
     public with sharing class ToString extends ArrayV1.Callback {

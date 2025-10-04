@@ -36,8 +36,8 @@ public with sharing class DependencyHelperTests {
                     t1
             );
 
-            Assert.isTrue(r1.isValid);
-            Assert.isNull(r1.errorMessage);
+            Assert.isTrue(r1.isValid());
+            Assert.isNull(r1.getErrorMessage());
 
             DependencyAPI.ValidationResultImpl r2 = (DependencyAPI.ValidationResultImpl) DependencyHelper.buildValidationResult(
                     o2 instanceof Integer,
@@ -46,8 +46,8 @@ public with sharing class DependencyHelperTests {
                     t2
             );
 
-            Assert.isFalse(r2.isValid);
-            Assert.areEqual('Class Double does not extend Integer', r2.errorMessage);
+            Assert.isFalse(r2.isValid());
+            Assert.areEqual('Class Double does not extend Integer', r2.getErrorMessage());
 
             DependencyAPI.ValidationResultImpl r3 = (DependencyAPI.ValidationResultImpl) DependencyHelper.buildValidationResult(
                     o2 instanceof DependencyV1.Prototype,
@@ -56,8 +56,8 @@ public with sharing class DependencyHelperTests {
                     t2
             );
 
-            Assert.isFalse(r3.isValid);
-            Assert.isTrue(TestHelper.textContains('Class Double does not implement DependencyV1.Prototype', r3.errorMessage));
+            Assert.isFalse(r3.isValid());
+            Assert.isTrue(TestHelper.textContains('Class Double does not implement DependencyV1.Prototype', r3.getErrorMessage()));
         }
     }
 }

@@ -266,7 +266,7 @@ public with sharing class AsynchronousDAOTests {
     private static void testBindingCheck() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            DependencyV1.bind(AsynchronousDAO.API.class, AsynchronousDAO.Factory.class);
+            DependencyV1.bind(AsynchronousDAO.API.class, AsynchronousDAOImpl.Factory.class);
             try {
                 DependencyV1.bind(AsynchronousDAO.API.class, AsynchronousScheduler.RunNextAvailable.class);
                 Assert.fail('Binding check should fail');
@@ -524,7 +524,7 @@ public with sharing class AsynchronousDAOTests {
     }
 
     private with sharing class AsynchronousStateModifier implements MockerV1.Modifier {
-        private final AsynchronousHelper.API api = (AsynchronousHelper.API) new AsynchronousHelper.Factory().newInstance();
+        private final AsynchronousHelper.API api = (AsynchronousHelper.API) new AsynchronousHelperImpl.Factory().newInstance();
 
         public Object process(List<Object> arguments) {
             return api.encodeState((AsynchronousJob__c) arguments[0], (Map<String, String>) arguments[1]);

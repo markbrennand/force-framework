@@ -49,8 +49,8 @@ public with sharing class DependencySubscriber {
          * @param event The event representing the trigger invocation.
          */
         private void handle(final TriggerV1.Event event) {
-            DependencyAPI.checkForDuplicates();
-            DependencyAPI.validate(event.getRecords());
+            DependencyHelper.checkForDuplicates();
+            DependencyAPI.validate((List<Binding__c>) event.getRecords().toList());
             DependencyV1.reload();
         }
     }

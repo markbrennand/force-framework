@@ -47,7 +47,25 @@ global with sharing class DependencyV1 {
      * <p>
      * Result of a binding validation check.
      */
-    global interface ValidationResult {}
+    global interface ValidationResult {
+        /**
+         * @description
+         * <p>
+         * Is the result of the validation success.
+         *
+         * @return True if success, false if not.
+         */
+        Boolean isValid();
+
+        /**
+         * @description
+         * <p>
+         * Returns the error message for a failed validation.
+         *
+         * @return The error message.
+         */
+        String getErrorMessage();
+    }
 
     /**
      * @description

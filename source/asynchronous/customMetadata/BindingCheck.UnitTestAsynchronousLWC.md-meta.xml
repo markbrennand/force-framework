@@ -4,7 +4,7 @@
     <protected>false</protected>
     <values>
         <field>BindingCheck__c</field>
-        <value xsi:type="xsd:string">AsynchronousLWC.BindingCheck</value>
+        <value xsi:type="xsd:string">AsynchronousLWCBinding</value>
     </values>
     <values>
         <field>IsUnitTest__c</field>

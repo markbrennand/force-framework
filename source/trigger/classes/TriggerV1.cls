@@ -84,7 +84,7 @@ global with sharing class TriggerV1 {
          *
          * @return The records the trigger is processing.
          */
-        List<SObject> getRecords();
+        ImmutableV1.Collection getRecords();
 
         /**
          * @description

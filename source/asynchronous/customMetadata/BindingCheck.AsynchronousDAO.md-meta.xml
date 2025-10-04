@@ -4,7 +4,7 @@
     <protected>false</protected>
     <values>
         <field>BindingCheck__c</field>
-        <value xsi:type="xsd:string">AsynchronousDAO.BindingCheck</value>
+        <value xsi:type="xsd:string">AsynchronousDAOBinding</value>
     </values>
     <values>
         <field>IsUnitTest__c</field>

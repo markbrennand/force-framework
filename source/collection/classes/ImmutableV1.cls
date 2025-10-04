@@ -5,8 +5,7 @@
  * <p>
  * Use these classes to create and manage immutable Lists, Sets and Maps.
  * <p>
- * The ReadOnlyList and ReadOnlySet implement the Collection interface. The interface gives access to all the
- * functionality of the ArrayV1.Methods interface.
+ * List and Set functionality is combined and provided by the Collection interface.
  * <p>
  * See <a href=./../source/collection/README.md target="_blank">README</a> for full details of the Collection API.
  * <p>
@@ -16,6 +15,12 @@
  */
 @SuppressWarnings('PMD.AvoidGlobalModifier')
 global with sharing class ImmutableV1 {
+
+    /**
+     * @description
+     * Exception thrown when an operation in the Immutable API fails.
+     */
+    global with sharing class APIException extends ForceFwException {}
 
     /**
      * @description
@@ -81,6 +86,50 @@ global with sharing class ImmutableV1 {
          * @return True if the collection contains the object, false if not.
          */
         Boolean contains(final Object element);
+
+        /**
+         * @description
+         * <p>
+         * Determines whether the Set contains all the objects in the List argument.
+         *
+         * @param objs The objects to be matched.
+         *
+         * @return True if the Set contains all the objects, false if not.
+         */
+        Boolean containsAll(final List<Object> objs);
+
+        /**
+         * @description
+         * <p>
+         * Determines whether the Set contains all the objects in the Set argument.
+         *
+         * @param objs The objects to be matched.
+         *
+         * @return True if the Set contains all the objects, false if not.
+         */
+        Boolean containsAll(final Set<Object> objs);
+
+        /**
+         * @description
+         * <p>
+         * Retrieves the element at the given index in the List.
+         *
+         * @param index The positional index.
+         *
+         * @return The element.
+         */
+        Object get(final Integer index);
+
+        /**
+         * @description
+         * <p>
+         * Finds the positional index in the List of the given object.
+         *
+         * @param element The object to find.
+         *
+         * @return The positional index, or -1 if not found.
+         */
+        Integer indexOf(final Object element);
     }
 
     /**
@@ -145,74 +194,6 @@ global with sharing class ImmutableV1 {
         Integer size();
     }
 
-    /**
-     * @description
-     * <p>
-     * An immutable List.
-     * <p>
-     * It has all the accessor functionality of a List but has had the update capability removed.
-     * <p>
-     * The Collection methods may be used to use the functionality from ArrayV1.
-     */
-    global interface ReadOnlyList extends ImmutableV1.Collection {
-
-        /**
-         * @description
-         * <p>
-         * Retrieves the element at the given index in the List.
-         *
-         * @param index The positional index.
-         *
-         * @return The element.
-         */
-        Object get(final Integer index);
-
-        /**
-         * @description
-         * <p>
-         * Finds the positional index in the List of the given object.
-         *
-         * @param element The object to find.
-         *
-         * @return The positional index, or -1 if not found.
-         */
-        Integer indexOf(final Object element);
-    }
-
-    /**
-    * @description
-    * <p>
-    * An immutable Set
-    * <p>
-    * It has all the accessor functionality of a Set but has had the update capability removed.
-    * <p>
-    * The Collection methods may be used to use the functionality from ArrayV1.
-    */
-    global interface ReadOnlySet extends ImmutableV1.Collection {
-
-        /**
-         * @description
-         * <p>
-         * Determines whether the Set contains all the objects in the List argument.
-         *
-         * @param objs The objects to be matched.
-         *
-         * @return True if the Set contains all the objects, false if not.
-         */
-        Boolean containsAll(final List<Object> objs);
-
-        /**
-         * @description
-         * <p>
-         * Determines whether the Set contains all the objects in the Set argument.
-         *
-         * @param objs The objects to be matched.
-         *
-         * @return True if the Set contains all the objects, false if not.
-         */
-        Boolean containsAll(final Set<Object> objs);
-    }
-
     private with sharing class ImmutableMap implements ImmutableV1.ReadOnlyMap {
         private final Map<Object, Object> wrapped;
 
@@ -249,18 +230,78 @@ global with sharing class ImmutableV1 {
         }
     }
 
-    private with sharing abstract class CollectionImpl implements ImmutableV1.Collection {
+    private with sharing class CollectionImpl implements Collection {
         private final ArrayV1.Methods methods {
             private get {
                 if (methods == null) {
-                    methods = ArrayV1.over(getCollection());
+                    methods = ArrayV1.over(wrapped);
                 }
                 return methods;
             }
             private set;
         }
 
-        public abstract Iterable<Object> getCollection();
+        private final List<Object> wrapped;
+
+        public CollectionImpl(final List<Object> source) {
+            this.wrapped = source;
+        }
+
+        public Integer size() {
+            return wrapped.size();
+        }
+
+        public Boolean isEmpty() {
+            return wrapped.isEmpty();
+        }
+
+        public Object get(final Integer index) {
+            return wrapped.get(index);
+        }
+
+        public Integer indexOf(final Object element) {
+            return wrapped.indexOf(element);
+        }
+
+        public Boolean contains(final Object element) {
+            return wrapped.contains(element);
+        }
+
+        public Boolean containsAll(List<Object> objs) {
+            for (Object obj : objs) {
+                if (!contains(obj)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public Boolean containsAll(Set<Object> objs) {
+            for (Object obj : objs) {
+                if (!contains(obj)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public Iterator<Object> iterator() {
+            return wrapped.iterator();
+        }
+
+        public List<Object> toList() {
+            return toList(CommonHelper.newListOfSameType(wrapped));
+        }
+
+        public List<Object> toList(final List<Object> result) {
+            for (Object obj : wrapped) {
+                result.add(obj);
+            }
+
+            return result;
+        }
 
         public Integer length() {
             return methods.length();
@@ -327,15 +368,15 @@ global with sharing class ImmutableV1 {
         }
 
         public void push(final Object obj) {
-            methods.push(obj);
+            throw new APIException('Mutation of collection not allowed');
         }
 
         public OptionalV1 pop() {
-            return methods.pop();
+            throw new APIException('Mutation of collection not allowed');
         }
 
         public OptionalV1 shift() {
-            return methods.shift();
+            throw new APIException('Mutation of collection not allowed');
         }
 
         public List<Object> sort() {
@@ -345,97 +386,54 @@ global with sharing class ImmutableV1 {
         public List<Object> sort(final Comparator<Object> comparator) {
             return methods.sort(comparator);
         }
-
-        public List<Object> toList(final List<Object> result) {
-            for (Object obj : getCollection()) {
-                result.add(obj);
-            }
-
-            return result;
-        }
-
-        public List<Object> toList() {
-            return toList(new List<Object>());
-        }
     }
 
-    private with sharing class ImmutableList extends ImmutableV1.CollectionImpl implements ImmutableV1.ReadOnlyList {
-        private final List<Object> wrapped;
-
-        public ImmutableList(final List<Object> source) {
-            this.wrapped = source;
-        }
-
-        public override Iterable<Object> getCollection() {
-            return wrapped;
-        }
-
-        public Integer size() {
-            return wrapped.size();
-        }
-
-        public Boolean isEmpty() {
-            return wrapped.isEmpty();
-        }
-
-        public Object get(final Integer index) {
-            return wrapped.get(index);
-        }
-
-        public Integer indexOf(final Object element) {
-            return wrapped.indexOf(element);
-        }
-
-        public Boolean contains(final Object element) {
-            return wrapped.contains(element);
-        }
-
-        public Iterator<Object> iterator() {
-            return wrapped.iterator();
-        }
-    }
-
-    private with sharing class ImmutableSet extends ImmutableV1.CollectionImpl implements ReadOnlySet {
-        private final Set<Object> wrapped;
-
-        public ImmutableSet(final Set<Object> source) {
-            this.wrapped = source;
-        }
-
-        public override Iterable<Object> getCollection() {
-            return wrapped;
-        }
-
-        public Integer size() {
-            return wrapped.size();
-        }
-
-        public Boolean isEmpty() {
-            return wrapped.isEmpty();
-        }
-
-        public Boolean contains(final Object element) {
-            return wrapped.contains(element);
-        }
-
-        public Boolean containsAll(final List<Object> objs) {
-            return wrapped.containsAll(objs);
-        }
-
-        public Boolean containsAll(final Set<Object> objs) {
-            return wrapped.containsAll(objs);
-        }
-
-        public Iterator<Object> iterator() {
-            return wrapped.iterator();
-        }
-    }
-
-    public static ReadOnlyMap of(final Map<Object, Object> source) {
+    /**
+     * @description
+     * <p>
+     * Creates an immutable Map from the given source Map.
+     * <p>
+     * The key to the Map is of an unknown type.
+     *
+     * @param source The source Map.
+     *
+     * @return The immutable Map.
+     */
+    global static ReadOnlyMap of(final Map<Object, Object> source) {
         return new ImmutableMap(source.clone());
     }
 
-    public static ReadOnlyMap of(final Map<String, Object> source) {
+    /**
+     * @description
+     * <p>
+     * Creates an immutable Map from the given source Map.
+     * <p>
+     * The key to the Map is an SObject Id.
+     *
+     * @param source The source Map.
+     *
+     * @return The immutable Map.
+     */
+    global static ReadOnlyMap of(final Map<Id, Object> source) {
+        Map<Object, Object> cloned = new Map<Object, Object>();
+        for (Id key : source.keySet()) {
+            cloned.put(key, source.get(key));
+        }
+        return new ImmutableMap(cloned);
+    }
+
+    /**
+     * @description
+     * <p>
+     * Creates an immutable Map from the given source Map.
+     * <p>
+     * The key to the Map is a String.
+     *
+     * @param source The source Map.
+     *
+     * @return The immutable Map.
+     */
+    global static ReadOnlyMap of(final Map<String, Object> source) {
         Map<Object, Object> cloned = new Map<Object, Object>();
         for (String key : source.keySet()) {
             cloned.put(key, source.get(key));
@@ -443,19 +441,24 @@ global with sharing class ImmutableV1 {
         return new ImmutableMap(cloned);
     }
 
-    public static ReadOnlyList of(final Iterable<Object> source) {
+    /**
+     * @description
+     * <p>
+     * Creates an immutable List from the given Iterable.
+     *
+     * @param source The Iterable.
+     *
+     * @return The immutable List.
+     */
+    global static Collection of(final Iterable<Object> source) {
         if (source instanceof List<Object>) {
-            return new ImmutableList(((List<Object>) source).clone());
+            return new CollectionImpl(((List<Object>) source).clone());
         } else {
             final List<Object> elements = new List<Object>();
             for (Object value : source) {
                 elements.add(value);
             }
-            return new ImmutableList(elements);
+            return new CollectionImpl(elements);
         }
-    }
-
-    public static ReadOnlySet of(final Set<Object> source) {
-        return new ImmutableSet(source.clone());
     }
 }

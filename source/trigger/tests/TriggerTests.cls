@@ -315,32 +315,32 @@ public with sharing class TriggerTests {
             Trigger__mdt triggerDefinition = new Trigger__mdt();
             triggerDefinition.BeforeInsert__c = true;
             triggerDefinition.AfterInsert__c  = false;
-            Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, true));
-            Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, false));
+            Assert.isTrue(TriggerHelper.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, true));
+            Assert.isFalse(TriggerHelper.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, false));
             triggerDefinition.BeforeInsert__c = false;
             triggerDefinition.AfterInsert__c = true;
-            Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, true));
-            Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, false));
+            Assert.isFalse(TriggerHelper.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, true));
+            Assert.isTrue(TriggerHelper.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.INSERTING, false));
 
             triggerDefinition = new Trigger__mdt();
             triggerDefinition.BeforeUpdate__c = true;
             triggerDefinition.AfterUpdate__c  = false;
-            Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, true));
-            Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, false));
+            Assert.isTrue(TriggerHelper.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, true));
+            Assert.isFalse(TriggerHelper.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, false));
             triggerDefinition.BeforeUpdate__c = false;
             triggerDefinition.AfterUpdate__c = true;
-            Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, true));
-            Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, false));
+            Assert.isFalse(TriggerHelper.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, true));
+            Assert.isTrue(TriggerHelper.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.UPDATING, false));
 
             triggerDefinition = new Trigger__mdt();
             triggerDefinition.BeforeDelete__c = true;
             triggerDefinition.AfterDelete__c  = false;
-            Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, true));
-            Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, false));
+            Assert.isTrue(TriggerHelper.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, true));
+            Assert.isFalse(TriggerHelper.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, false));
             triggerDefinition.BeforeDelete__c = false;
             triggerDefinition.AfterDelete__c = true;
-            Assert.isFalse(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, true));
-            Assert.isTrue(TriggerAPI.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, false));
+            Assert.isFalse(TriggerHelper.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, true));
+            Assert.isTrue(TriggerHelper.isSubscriberBoundToAction(triggerDefinition, TriggerV1.Operation.DELETING, false));
         }
     }
 
@@ -348,7 +348,7 @@ public with sharing class TriggerTests {
     private static void testBindingCheck() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            DependencyV1.bind(TriggerAPI.API.class, TriggerAPI.Factory.class);
+            DependencyV1.bind(TriggerAPI.API.class, TriggerImpl.Factory.class);
             try {
                 DependencyV1.bind(TriggerAPI.API.class, AsynchronousScheduler.RunNextAvailable.class);
                 Assert.fail();
@@ -367,23 +367,25 @@ public with sharing class TriggerTests {
             invoke('Subscriber1', event);
 
             if (event.isAfter()) {
-                List<AsynchronousJob__c> records = event.getRecords();
-                Map<Id, AsynchronousJob__c> recordsMap = new Map<Id, AsynchronousJob__c>(records);
+                ImmutableV1.Collection records = event.getRecords();
+                Map<Id, AsynchronousJob__c> recordsMap =
+                        new Map<Id, AsynchronousJob__c>((List<AsynchronousJob__c>) records.toList());
 
-                for (AsynchronousJob__c record : records) {
-                    if (!event.hasOldValue(record)) {
+                for (Object record : records) {
+                    final AsynchronousJob__c asyncJob = (AsynchronousJob__c) record;
+                    if (!event.hasOldValue(asyncJob)) {
                         continue;
                     }
 
-                    if (((AsynchronousJob__c) event.getOldValue(record).get()).RetryInterval__c != record.RetryInterval__c - INCREMENT) {
+                    if (((AsynchronousJob__c) event.getOldValue(asyncJob).get()).RetryInterval__c != asyncJob.RetryInterval__c - INCREMENT) {
                         throw new DmlException('Retry interval was not incremented');
                     }
                 }
 
                 OptionalV1 oldRecords = event.getOldValues();
                 if (oldRecords.isPresent()) {
-                    for (SObject record : ((Map<Id, SObject>) oldRecords.get()).values()) {
-                        if (!recordsMap.containsKey(record.Id)) {
+                    for (Object objectId : (ImmutableV1.ReadOnlyMap) oldRecords.get()) {
+                        if (!recordsMap.containsKey((Id) objectId)) {
                             throw new DmlException('Old records contains an additional record');
                         }
                     }
@@ -454,8 +456,8 @@ public with sharing class TriggerTests {
             }
         }
 
-        for (SObject record : event.getRecords()) {
-            listToUpdate.add(record.Id);
+        for (Object record : event.getRecords()) {
+            listToUpdate.add(((SObject) record).Id);
         }
 
         final String key = subscriber

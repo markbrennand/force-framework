@@ -10,7 +10,7 @@
  * @author Mark Brennand
  */
 @SuppressWarnings('PMD.ApexDoc')
-public with sharing virtual class MockableQueryAPI implements QueryV1.API {
+public with sharing virtual class QueryAPIMockable implements QueryV1.API {
 
     public QueryV1.API type(final SObjectType type) {
         throw new QueryException('Access denied');

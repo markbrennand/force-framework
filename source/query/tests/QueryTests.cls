@@ -211,9 +211,7 @@ public with sharing class QueryTests {
                     .ordered(QueryV1.ascending(Contact.FirstName))
                     .matching('LastName = \'1\' AND FirstName IN(\'AC\', \'CC\')')
                     .execute()
-                    .collection().toList(new List<Contact>());
-                    // .then(new CommonHelper.ToList(new List<Contact>()))
-                    // .get();
+                    .collection().toList();
 
             Assert.areEqual(2, contacts.size());
             Assert.areEqual('1', contacts[0].LastName);
@@ -228,7 +226,8 @@ public with sharing class QueryTests {
                     .bindings(new Map<String, Object> { 'lastName' => '1', 'firstNames' => new Set<String> { 'AC', 'CC' }})
                     .matching('LastName = :lastName AND FirstName IN :firstNames')
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(2, contacts.size());
             Assert.areEqual('1', contacts[0].LastName);
@@ -252,7 +251,8 @@ public with sharing class QueryTests {
                     .group(new Set<SObjectField>{ Contact.LastName })
                     .ordered(QueryV1.ascending(Contact.LastName))
                     .execute()
-                    .collection().toList(new List<AggregateResult>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(3, aggregates.size());
             Assert.areEqual('1', aggregates[0].get('LastName'));
@@ -274,7 +274,8 @@ public with sharing class QueryTests {
                     .ordered(QueryV1.ascending(Contact.LastName))
                     .ordered(QueryV1.ascending(Contact.FirstName))
                     .execute()
-                    .collection().toList(new List<AggregateResult>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, aggregates.size());
             Assert.areEqual('1', aggregates[0].get('LastName'));
@@ -306,7 +307,8 @@ public with sharing class QueryTests {
                     .group(Contact.AccountId, new Set<SObjectField>{ Account.Name })
                     .ordered(QueryV1.ascending(Contact.AccountId, Account.Name))
                     .execute()
-                    .collection().toList(new List<AggregateResult>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(4, aggregates.size());
             Assert.areEqual('A', aggregates[0].get('AccountName'));
@@ -331,7 +333,8 @@ public with sharing class QueryTests {
                     .group(new Set<SObjectField> { Contact.FirstName })
                     .ordered(QueryV1.ascending(Contact.AccountId, Account.Name))
                     .execute()
-                    .collection().toList(new List<AggregateResult>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(4, aggregates.size());
             Assert.areEqual('A', aggregates[0].get('AccountName'));
@@ -357,7 +360,8 @@ public with sharing class QueryTests {
                     .ordered(QueryV1.ascending(QueryV1.aggregatedField('SUM', Contact.AccountId, Account.AnnualRevenue, 'Revenue')))
                     .ordered(QueryV1.descending(QueryV1.aggregatedField(Contact.FirstName, 'ContactFirstName')).nullsLast())
                     .execute()
-                    .collection().toList(new List<AggregateResult>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(4, aggregates.size());
             Assert.areEqual(1500, aggregates[0].get('Revenue'));
@@ -411,7 +415,8 @@ public with sharing class QueryTests {
                     .has('COUNT(Id) >= 1')
                     .ordered(QueryV1.ascending(Contact.LastName))
                     .execute()
-                    .collection().toList(new List<AggregateResult>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(3, aggregates.size());
             Assert.areEqual('1', aggregates[0].get('LastName'));
@@ -431,7 +436,8 @@ public with sharing class QueryTests {
                     .has('COUNT(Id) > 3')
                     .ordered(QueryV1.ascending(Contact.LastName))
                     .execute()
-                    .collection().toList(new List<AggregateResult>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(1, aggregates.size());
             Assert.areEqual('1', aggregates[0].get('LastName'));
@@ -467,7 +473,8 @@ public with sharing class QueryTests {
                     )
                     .ordered(QueryV1.ascending(Account.Name))
                     .execute()
-                    .collection().toList(new List<Account>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(4, accounts.size());
             Assert.areEqual('A', accounts[0].Name);
@@ -503,7 +510,8 @@ public with sharing class QueryTests {
                     )
                     .ordered(QueryV1.ascending(Account.Name))
                     .execute()
-                    .collection().toList(new List<Account>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(4, accounts.size());
             Assert.areEqual('A', accounts[0].Name);
@@ -562,7 +570,8 @@ public with sharing class QueryTests {
                     })
                     .max(2)
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(2, contacts.size());
             Assert.areEqual('1', contacts[0].LastName);
@@ -582,7 +591,8 @@ public with sharing class QueryTests {
                     })
                     .max(1)
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(1, contacts.size());
             Assert.areEqual('1', contacts[0].LastName);
@@ -607,7 +617,8 @@ public with sharing class QueryTests {
                     })
                     .offset(1)
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(6, contacts.size());
             Assert.areEqual('1', contacts[0].LastName);
@@ -633,7 +644,8 @@ public with sharing class QueryTests {
                     })
                     .offset(5)
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(2, contacts.size());
             Assert.areEqual('2', contacts[0].LastName);
@@ -657,7 +669,8 @@ public with sharing class QueryTests {
                             QueryV1.ascending(Contact.FirstName)
                     })
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.areEqual('1', contacts[0].LastName);
@@ -750,7 +763,8 @@ public with sharing class QueryTests {
                     .ordered(QueryV1.ascending(Contact.LastName))
                     .ordered(QueryV1.ascending(Contact.FirstName))
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.areEqual('1', contacts[0].LastName);
@@ -776,7 +790,8 @@ public with sharing class QueryTests {
                             QueryV1.ascending(Contact.FirstName)
                     })
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.areEqual('1', contacts[0].LastName);
@@ -800,7 +815,8 @@ public with sharing class QueryTests {
                     .ordered(QueryV1.descending(Contact.LastName))
                     .ordered(QueryV1.descending(Contact.FirstName))
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.areEqual('3', contacts[0].LastName);
@@ -826,7 +842,8 @@ public with sharing class QueryTests {
                             QueryV1.descending(Contact.FirstName)
                     })
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.areEqual('3', contacts[0].LastName);
@@ -854,7 +871,8 @@ public with sharing class QueryTests {
                             QueryV1.ascending(Contact.FirstName)
                     })
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.isNull(contacts[0].Account.AccountNumber);
@@ -889,7 +907,8 @@ public with sharing class QueryTests {
                             QueryV1.ascending(Contact.FirstName)
                     })
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.isNull(contacts[0].Account.AccountNumber);
@@ -927,7 +946,8 @@ public with sharing class QueryTests {
                     )
                     .ordered(QueryV1.ascending(Account.AccountNumber))
                     .execute()
-                    .collection().toList(new List<Account>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(4, accounts.size());
             Assert.isNull(accounts[0].AccountNumber);
@@ -966,7 +986,8 @@ public with sharing class QueryTests {
                     )
                     .ordered(QueryV1.descending(Account.AccountNumber))
                     .execute()
-                    .collection().toList(new List<Account>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(4, accounts.size());
             Assert.isNull(accounts[0].AccountNumber);
@@ -1005,7 +1026,8 @@ public with sharing class QueryTests {
                     .ordered(QueryV1.ascending(Contact.LastName).nullsFirst())
                     .ordered(QueryV1.ascending(Contact.FirstName).nullsFirst())
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.areEqual('1', contacts[0].LastName);
@@ -1031,7 +1053,8 @@ public with sharing class QueryTests {
                             QueryV1.ascending(Contact.FirstName).nullsFirst()
                     })
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.areEqual('1', contacts[0].LastName);
@@ -1055,7 +1078,8 @@ public with sharing class QueryTests {
                     .ordered(QueryV1.descending(Contact.LastName).nullsFirst())
                     .ordered(QueryV1.descending(Contact.FirstName).nullsFirst())
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.areEqual('3', contacts[0].LastName);
@@ -1081,7 +1105,8 @@ public with sharing class QueryTests {
                             QueryV1.descending(Contact.FirstName).nullsFirst()
                     })
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.areEqual('3', contacts[0].LastName);
@@ -1109,7 +1134,8 @@ public with sharing class QueryTests {
                             QueryV1.ascending(Contact.FirstName).nullsFirst()
                     })
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.isNull(contacts[0].Account.AccountNumber);
@@ -1144,7 +1170,8 @@ public with sharing class QueryTests {
                             QueryV1.ascending(Contact.FirstName).nullsFirst()
                     })
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.isNull(contacts[0].Account.AccountNumber);
@@ -1182,7 +1209,8 @@ public with sharing class QueryTests {
                     )
                     .ordered(QueryV1.ascending(Account.AccountNumber).nullsFirst())
                     .execute()
-                    .collection().toList(new List<Account>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(4, accounts.size());
             Assert.isNull(accounts[0].AccountNumber);
@@ -1221,7 +1249,8 @@ public with sharing class QueryTests {
                     )
                     .ordered(QueryV1.descending(Account.AccountNumber).nullsFirst())
                     .execute()
-                    .collection().toList(new List<Account>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(4, accounts.size());
             Assert.isNull(accounts[0].AccountNumber);
@@ -1260,7 +1289,8 @@ public with sharing class QueryTests {
                     .ordered(QueryV1.ascending(Contact.LastName).nullsLast())
                     .ordered(QueryV1.ascending(Contact.FirstName).nullsLast())
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.areEqual('1', contacts[0].LastName);
@@ -1286,7 +1316,8 @@ public with sharing class QueryTests {
                             QueryV1.ascending(Contact.FirstName).nullsLast()
                     })
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.areEqual('1', contacts[0].LastName);
@@ -1310,7 +1341,8 @@ public with sharing class QueryTests {
                     .ordered(QueryV1.descending(Contact.LastName).nullsLast())
                     .ordered(QueryV1.descending(Contact.FirstName).nullsLast())
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.areEqual('3', contacts[0].LastName);
@@ -1336,7 +1368,8 @@ public with sharing class QueryTests {
                             QueryV1.descending(Contact.FirstName).nullsLast()
                     })
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.areEqual('3', contacts[0].LastName);
@@ -1364,7 +1397,8 @@ public with sharing class QueryTests {
                             QueryV1.ascending(Contact.FirstName).nullsLast()
                     })
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.areEqual('A1', contacts[0].Account.AccountNumber);
@@ -1399,7 +1433,8 @@ public with sharing class QueryTests {
                             QueryV1.ascending(Contact.FirstName).nullsLast()
                     })
                     .execute()
-                    .collection().toList(new List<Contact>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(7, contacts.size());
             Assert.areEqual('C1', contacts[0].Account.AccountNumber);
@@ -1437,7 +1472,8 @@ public with sharing class QueryTests {
                     )
                     .ordered(QueryV1.ascending(Account.AccountNumber).nullsLast())
                     .execute()
-                    .collection().toList(new List<Account>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(4, accounts.size());
             Assert.areEqual('A1', accounts[0].AccountNumber);
@@ -1476,7 +1512,8 @@ public with sharing class QueryTests {
                     )
                     .ordered(QueryV1.descending(Account.AccountNumber).nullsLast())
                     .execute()
-                    .collection().toList(new List<Account>());
+                    .collection()
+                    .toList();
 
             Assert.areEqual(4, accounts.size());
             Assert.areEqual('C1', accounts[0].AccountNumber);
