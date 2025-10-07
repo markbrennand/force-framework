@@ -75,6 +75,13 @@ public with sharing class TriggerImpl {
         /**
          * @description
          * <p>
+         * Cache of the Filter implementation for each object type.
+         */
+        private final Map<String, ArrayV1.Callback> filters = new Map<String, ArrayV1.Callback>();
+
+        /**
+         * @description
+         * <p>
          * Determines whether subscriber for an object type is enabled or not.
          */
         private final Map<SObjectType, Boolean> disabledObjectTypes = new Map<SObjectType, Boolean>();
@@ -264,7 +271,7 @@ public with sharing class TriggerImpl {
 
             return TriggerEvent.newEvent(
                     records,
-                    Trigger.isInsert ? OptionalV1.empty() : OptionalV1.of(Trigger.oldMap),
+                    Trigger.isInsert ? OptionalV1.empty() : OptionalV1.of(ImmutableV1.of(Trigger.oldMap)),
                     isBefore,
                     operation,
                     events.containsKey(objectKey) ? events.get(objectKey).length() + 1 : 1
@@ -314,6 +321,14 @@ public with sharing class TriggerImpl {
                 return OptionalV1.empty();
             }
 
+            final OptionalV1 eventToPublish = getEventToPublish(
+                    getPublishingInformation().event,
+                    triggerDefinition);
+
+            if (!eventToPublish.isPresent()) {
+                return OptionalV1.empty();
+            }
+
             // Add any namespace to the class before checking.
             final Type subscriberType = TypesV1.load(triggerDefinition.SubscriberClass__c);
             if (getPublishingInformation().parent.disabledSubscribers.containsKey(subscriberType.getName())) {
@@ -324,11 +339,8 @@ public with sharing class TriggerImpl {
                 when THROW_EXCEPTION {
                     throw new TriggerV1.APIException('Maximum recursive calls exceeded for ' + getPublishingInformation().objectKey + ' event');
                 }
-                when IGNORE_EVENT {
-                    return OptionalV1.empty();
-                }
                 when PROCESS_EVENT {
-                    processEvent(triggerDefinition, getPublishingInformation().event);
+                    processEvent(triggerDefinition, (TriggerV1.Event) eventToPublish.get());
                 }
             }
 
@@ -374,18 +386,7 @@ public with sharing class TriggerImpl {
                 return;
             }
 
-            final String subscriberClass = triggerDefinition.SubscriberClass__c;
-            final TriggerV1.Subscriber subscriber;
-
-            if (getPublishingInformation().parent.subscribers.containsKey(subscriberClass)) {
-                subscriber = getPublishingInformation().parent.subscribers.get(subscriberClass);
-            } else {
-                subscriber = (TriggerV1.Subscriber)
-                        TypesV1.newInstance(TypesV1.load(triggerDefinition.SubscriberClass__c));
-
-                getPublishingInformation().parent.subscribers.put(subscriberClass, subscriber);
-            }
-
+            final TriggerV1.Subscriber subscriber = getSubscriber(triggerDefinition);
             subscriber.onEvent(event);
         }
 
@@ -398,6 +399,58 @@ public with sharing class TriggerImpl {
          */
         private PublishingInformation getPublishingInformation() {
             return (PublishingInformation) shared().get();
+        }
+
+        private TriggerV1.Subscriber getSubscriber(final Trigger__mdt triggerDefinition) {
+            final String subscriberClass = triggerDefinition.SubscriberClass__c;
+            if (getPublishingInformation().parent.subscribers.containsKey(subscriberClass)) {
+                return  getPublishingInformation().parent.subscribers.get(subscriberClass);
+            } else {
+                TriggerV1.Subscriber subscriber = (TriggerV1.Subscriber)
+                        TypesV1.newInstance(TypesV1.load(triggerDefinition.SubscriberClass__c));
+
+                getPublishingInformation().parent.subscribers.put(subscriberClass, subscriber);
+                return subscriber;
+            }
+        }
+
+        private OptionalV1 getEventToPublish(TriggerV1.Event event, Trigger__mdt triggerDefinition) {
+            OptionalV1 filter = getFilter(triggerDefinition);
+            if (filter.isPresent()) {
+                final List<SObject> matches = (List<SObject>) event.getRecords()
+                        .sharing(event.getOldValues())
+                        .filter((ArrayV1.Callback) filter.get());
+
+                if (matches.isEmpty()) {
+                    return OptionalV1.empty();
+                } else {
+                    return OptionalV1.of(TriggerEvent.newEvent(
+                            matches,
+                            event.getOldValues(),
+                            event.isBefore(),
+                            event.getOperation(),
+                            event.getRecursiveDepth()
+                    ));
+                }
+            } else {
+                return OptionalV1.of(event);
+            }
+        }
+
+        private OptionalV1 getFilter(final Trigger__mdt triggerDefinition) {
+            final String filterClass = triggerDefinition.FilterClass__c;
+            if (String.isEmpty(filterClass)) {
+                return OptionalV1.empty();
+            }
+
+            final Map<String, ArrayV1.Callback> filters = (Map<String, ArrayV1.Callback>) getPublishingInformation().parent.filters;
+            if (filters.containsKey(filterClass)) {
+                return OptionalV1.of(filters.get(filterClass));
+            } else {
+                ArrayV1.Callback filter = (ArrayV1.Callback) TypesV1.newInstance(TypesV1.load(filterClass));
+                filters.put(filterClass, filter);
+                return OptionalV1.of(filter);
+            }
         }
     }
 

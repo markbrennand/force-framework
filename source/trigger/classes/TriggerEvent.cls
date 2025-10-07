@@ -18,7 +18,7 @@ public with sharing class TriggerEvent {
      * Implementation of the Event interface.
      */
     private with sharing class Event implements TriggerV1.Event {
-        private final List<SObject> records;
+        private final ImmutableV1.Collection records;
         private final OptionalV1 oldRecords;
         private final Boolean isBefore;
         private final TriggerV1.Operation operation;
@@ -42,7 +42,7 @@ public with sharing class TriggerEvent {
                 final TriggerV1.Operation operation,
                 final Integer recursiveDepth
         ) {
-            this.records =  records;
+            this.records =  ImmutableV1.of(records);
             this.oldRecords = oldRecords;
             this.isBefore = isBefore;
             this.operation  = operation;
@@ -90,7 +90,7 @@ public with sharing class TriggerEvent {
          * @return An immutable list of the objects the DML operation is being performed on.
          */
         public ImmutableV1.Collection getRecords() {
-            return ImmutableV1.of(records);
+            return records;
         }
 
         /**
@@ -105,7 +105,7 @@ public with sharing class TriggerEvent {
          * @return True if the object has a previous value.
          */
         public Boolean hasOldValue(final SObject record) {
-            return oldRecords.isPresent() && ((Map<Id, SObject>) oldRecords.get()).containsKey(record.Id);
+            return oldRecords.isPresent() && ((ImmutableV1.ReadOnlyMap) oldRecords.get()).containsKey(record.Id);
         }
 
         /**
@@ -119,7 +119,7 @@ public with sharing class TriggerEvent {
          */
         public OptionalV1 getOldValue(final SObject record) {
             return oldRecords.isPresent()
-                    ? OptionalV1.ofNullable(((Map<Id, SObject>) oldRecords.get()).get(record.Id))
+                    ? OptionalV1.ofNullable(((ImmutableV1.ReadOnlyMap) oldRecords.get()).get(record.Id))
                     : OptionalV1.empty();
         }
 
@@ -131,9 +131,7 @@ public with sharing class TriggerEvent {
          * @return An immutable map of the old record values, or an optional representing undefined.
          */
         public OptionalV1 getOldValues() {
-            return oldRecords.isPresent()
-                    ? OptionalV1.ofNullable(ImmutableV1.of((Map<Id, Object>) oldRecords.get()))
-                    : OptionalV1.empty();
+            return oldRecords;
         }
 
         /**

@@ -148,15 +148,15 @@ public with sharing class AsynchronousDAOImpl {
         public void persistObjects(final List<AsynchronousJob__c> asyncObjects) {
             AssertionV1.isNotNull(asyncObjects, 'argument: AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
 
-            final Boolean subscribersEnabled = TriggerV1.isEnabled(AsynchronousJobSubscriber.Factory.class);
-            TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
+            final Boolean subscriberEnabled = TriggerV1.isEnabled(AsynchronousJob__c.SObjectType);
+            TriggerV1.disable(AsynchronousJob__c.SObjectType);
 
-            Database.upsert(asyncObjects, AccessLevel.USER_MODE);
-
-            if (subscribersEnabled) {
-                TriggerV1.enable(AsynchronousJobSubscriber.Factory.class);
-            } else {
-                TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
+            try {
+                Database.upsert(asyncObjects, AccessLevel.USER_MODE);
+            } finally {
+                if (subscriberEnabled) {
+                    TriggerV1.enable(AsynchronousJob__c.SObjectType);
+                }
             }
         }
 
@@ -178,33 +178,33 @@ public with sharing class AsynchronousDAOImpl {
             AssertionV1.isNotNull(states, 'argument: AsynchronousDAO.apiPersistAsynchronous.states');
             AssertionV1.areEqual(asyncObjects.size(), states.size(), 'The number of Asynchronous objects does not match the number of states');
 
-            final Boolean subscribersEnabled = TriggerV1.isEnabled(AsynchronousJobSubscriber.Factory.class);
-            TriggerV1.enable(AsynchronousJobSubscriber.Factory.class);
+            final Boolean subscriberEnabled = TriggerV1.isEnabled(AsynchronousJob__c.SObjectType);
+            TriggerV1.enable(AsynchronousJob__c.SObjectType);
 
-            Database.upsert(asyncObjects, AccessLevel.USER_MODE);
+            try {
+                Database.upsert(asyncObjects, AccessLevel.USER_MODE);
 
-            final Set<Id> allIds = new Set<Id>();
-            final List<AsynchronousJobState__c> newStates = new List<AsynchronousJobState__c>();
-            for (Integer i = 0; i < asyncObjects.size(); i++) {
-                final AsynchronousJob__c asynchronousObject = asyncObjects[i];
-                allIds.add(asynchronousObject.Id);
-                newStates.addAll(AsynchronousHelper.impl.encodeState(asynchronousObject, states[i]));
-            }
+                final Set<Id> allIds = new Set<Id>();
+                final List<AsynchronousJobState__c> newStates = new List<AsynchronousJobState__c>();
+                for (Integer i = 0; i < asyncObjects.size(); i++) {
+                    final AsynchronousJob__c asynchronousObject = asyncObjects[i];
+                    allIds.add(asynchronousObject.Id);
+                    newStates.addAll(AsynchronousHelper.impl.encodeState(asynchronousObject, states[i]));
+                }
 
-            QueryV1.of(AsynchronousJobState__c.SObjectType)
-                    .security(AccessLevel.USER_MODE)
-                    .matching('AsynchronousJob__c IN :allIds')
-                    .bindings(new Map<String, Object> { 'allIds' => allIds })
-                    .execute()
-                    .then(new CommonHelper.ToList(new List<SObject>()))
-                    .then(new SObjectHelper.Deleter(AccessLevel.USER_MODE));
+                QueryV1.of(AsynchronousJobState__c.SObjectType)
+                        .security(AccessLevel.USER_MODE)
+                        .matching('AsynchronousJob__c IN :allIds')
+                        .bindings(new Map<String, Object> { 'allIds' => allIds })
+                        .execute()
+                        .then(new CommonHelper.ToList(new List<SObject>()))
+                        .then(new SObjectHelper.Deleter(AccessLevel.USER_MODE));
 
-            Database.upsert(newStates, AccessLevel.USER_MODE);
-
-            if (subscribersEnabled) {
-                TriggerV1.enable(AsynchronousJobSubscriber.Factory.class);
-            } else {
-                TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
+                Database.upsert(newStates, AccessLevel.USER_MODE);
+            } finally {
+                if (!subscriberEnabled) {
+                    TriggerV1.disable(AsynchronousJob__c.SObjectType);
+                }
             }
         }
 

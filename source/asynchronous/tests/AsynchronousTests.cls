@@ -183,7 +183,9 @@ public with sharing class AsynchronousTests {
     private static void testCancellation() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.StartSchedulerFactory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.PreProcessorFactory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.CancellationsFactory.class);
             TriggerV1.disable(TriggerTests.Subscriber1.class);
             TriggerV1.disable(TriggerTests.Subscriber2.class);
 
@@ -225,7 +227,7 @@ public with sharing class AsynchronousTests {
 
             insert new List<AsynchronousJob__c> { job1, job2, job3 };
 
-            TriggerV1.enable(AsynchronousJobSubscriber.Factory.class);
+            TriggerV1.enable(AsynchronousJobSubscriber.CancellationsFactory.class);
             job1.Status__c = AsynchronousV1.Status.CANCELLED.name();
             job2.Status__c = AsynchronousV1.Status.CANCELLED.name();
             job3.RetryNumber__c = 1;
@@ -253,7 +255,11 @@ public with sharing class AsynchronousTests {
     private static void testGetJobs() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.StartSchedulerFactory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.PreProcessorFactory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.CancellationsFactory.class);
+            TriggerV1.disable(TriggerTests.Subscriber1.class);
+            TriggerV1.disable(TriggerTests.Subscriber2.class);
 
             AsynchronousJob__c job1 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
@@ -408,8 +414,6 @@ public with sharing class AsynchronousTests {
             Assert.areEqual(new Set<String>{
                     'Id', 'LastRunTime__c', 'MaximumRetries__c', 'Name', 'Owner', 'OwnerId', 'Reference__c', 'RetryNumber__c', 'RetriesRemaining__c', 'RunTime__c', 'Runnable__c', 'ScheduledRunTime__c', 'Status__c'
             }, jobs[0].keySet());
-
-            TriggerV1.enable(AsynchronousJobSubscriber.Factory.class);
         }
     }
 
@@ -417,7 +421,11 @@ public with sharing class AsynchronousTests {
     private static void testRunJobs() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.StartSchedulerFactory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.PreProcessorFactory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.CancellationsFactory.class);
+            TriggerV1.disable(TriggerTests.Subscriber1.class);
+            TriggerV1.disable(TriggerTests.Subscriber2.class);
 
             AsynchronousJob__c job1 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
@@ -466,8 +474,6 @@ public with sharing class AsynchronousTests {
                             WHERE Status__c = :AsynchronousV1.Status.PENDING.name()
                     ]
             );
-
-            TriggerV1.enable(AsynchronousJobSubscriber.Factory.class);
         }
     }
 
@@ -475,7 +481,11 @@ public with sharing class AsynchronousTests {
     private static void testDeleteJobs() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.StartSchedulerFactory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.PreProcessorFactory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.CancellationsFactory.class);
+            TriggerV1.disable(TriggerTests.Subscriber1.class);
+            TriggerV1.disable(TriggerTests.Subscriber2.class);
 
             AsynchronousJob__c job1 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
@@ -541,8 +551,6 @@ public with sharing class AsynchronousTests {
             AsynchronousV1.deleteJobs(new List<Id> { job3.Id, job4.Id });
             Assert.areEqual(1, [SELECT COUNT() FROM AsynchronousJob__c]);
             Assert.areEqual(0, [SELECT COUNT() FROM AsynchronousJob__c WHERE Id = :job3.Id OR Id = :job4.Id ]);
-
-            TriggerV1.enable(AsynchronousJobSubscriber.Factory.class);
         }
     }
 
@@ -550,7 +558,11 @@ public with sharing class AsynchronousTests {
     private static void testGetJobTotals() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.StartSchedulerFactory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.PreProcessorFactory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.CancellationsFactory.class);
+            TriggerV1.disable(TriggerTests.Subscriber1.class);
+            TriggerV1.disable(TriggerTests.Subscriber2.class);
 
             AsynchronousJob__c job1 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
@@ -660,8 +672,6 @@ public with sharing class AsynchronousTests {
             Assert.areEqual(1, counts.get('SUCCEEDED'));
             Assert.areEqual(2, counts.get('CANCELLED'));
             Assert.areEqual(0, counts.get('FAILED'));
-
-            TriggerV1.enable(AsynchronousJobSubscriber.Factory.class);
         }
     }
 

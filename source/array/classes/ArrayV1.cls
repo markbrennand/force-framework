@@ -42,7 +42,11 @@ global with sharing class ArrayV1 {
          * @param shared The data to be shared.
          */
         global void sharing(final Object shared) {
-            this.shared = OptionalV1.ofNullable(shared);
+            if (shared instanceof OptionalV1) {
+                this.shared = (OptionalV1) shared;
+            } else {
+                this.shared = OptionalV1.ofNullable(shared);
+            }
         }
 
         /**
@@ -350,7 +354,7 @@ global with sharing class ArrayV1 {
      * @return The methods that may be called on the array.
      */
     global static ArrayV1.Methods over(final List<Object> objects) {
-        return ArrayAPI.newInstance(objects);
+        return ArrayImpl.newInstance(objects);
     }
 
     /**

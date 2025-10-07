@@ -1,7 +1,7 @@
 {
   "packageDirectories": [
     {
-      "versionName": "Release 1.0",
+      "versionName": "Release 1.1",
       "versionNumber": "1.1.0.NEXT",
       "path": "source",
       "default": true,
@@ -86,6 +86,12 @@
     "force-fw@1.1.0-1": "04tgL0000005O4vQAE",
     "force-fw@1.1.0-2": "04tgL0000005P93QAE",
     "force-fw@1.1.0-3": "04tgL0000005WqTQAU",
-    "force-fw@1.1.0-5": "04tgL0000007bcLQAQ"
+    "force-fw@1.1.0-5": "04tgL0000007bcLQAQ",
+    "force-fw@1.1.0-6": "04tgL0000007bhBQAQ",
+    "force-fw@1.1.0-7": "04tgL0000007dUTQAY",
+    "force-fw@1.1.0-8": "04tgL0000007dW5QAI",
+    "force-fw@1.1.0-9": "04tgL0000007fKzQAI",
+    "force-fw@1.1.0-10": "04tgL0000007fcjQAA",
+    "force-fw@1.1.0-11": "04tgL0000007ffxQAA"
   }
 }

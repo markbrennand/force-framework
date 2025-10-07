@@ -155,7 +155,6 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
                                 (SELECT Id FROM Badges WHERE ImageUrl != 'ab'),
                                 (SELECT Id FROM CombinedAttachments WHERE ContentUrl != 'ab'),
                                 (SELECT Id FROM CommSubscriptionConsents WHERE ConsentCapturedSource != 'ab'),
-                                (SELECT Id FROM ContactCleanInfoReviewers WHERE City != 'ab'),
                                 (SELECT Id FROM ContactRequests WHERE Name != 'ab')
                         FROM User
                         ORDER BY Country DESC, EmployeeNumber DESC, DigestFrequency DESC, DefaultGroupNotificationFrequency DESC

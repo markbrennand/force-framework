@@ -9,7 +9,7 @@
  *
  * @author Mark Brennand
  */
-public with sharing class ArrayAPI {
+public with sharing class ArrayImpl {
 
     /**
      * @description

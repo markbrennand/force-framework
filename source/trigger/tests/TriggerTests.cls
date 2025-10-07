@@ -87,7 +87,9 @@ public with sharing class TriggerTests {
     private static void testOperations() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.StartSchedulerFactory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.PreProcessorFactory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.CancellationsFactory.class);
 
             AsynchronousJob__c job1 = new AsynchronousJob__c(
                     Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
@@ -143,7 +145,9 @@ public with sharing class TriggerTests {
     private static void testSubscriberNotCalledIfRecursiveDepthExceeded() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.StartSchedulerFactory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.PreProcessorFactory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.CancellationsFactory.class);
             TriggerV1.disable(Subscriber2.class);
 
             MAX_RECURSIVE_DEPTH.put('Subscriber1', 12);
@@ -200,6 +204,37 @@ public with sharing class TriggerTests {
     }
 
     @IsTest
+    private static void testFilter() {
+        TestHelper.setNOW();
+        System.runAs(TestHelper.getUser(TESTING)) {
+            insert new AsynchronousJob__c(
+                    Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
+                    MaximumRetries__c = 0,
+                    RetryNumber__c = 0,
+                    RetryInterval__c = 0,
+                    ScheduledRunTime__c = CommonHelper.now(),
+                    Status__c = AsynchronousV1.Status.SUCCEEDED.name()
+            );
+
+            Assert.isTrue(INSERTED_IDS.containsKey('Subscriber1'));
+            Assert.isTrue(INSERTED_IDS.containsKey('Subscriber2'));
+
+            INSERTED_IDS.clear();
+            insert new AsynchronousJob__c(
+                    Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
+                    MaximumRetries__c = 0,
+                    RetryNumber__c = 0,
+                    RetryInterval__c = 0,
+                    ScheduledRunTime__c = CommonHelper.now(),
+                    Status__c = AsynchronousV1.Status.FAILED.name()
+            );
+
+            Assert.isTrue(INSERTED_IDS.containsKey('Subscriber1'));
+            Assert.isFalse(INSERTED_IDS.containsKey('Subscriber2'));
+        }
+    }
+
+    @IsTest
     private static void testSubscriberEnablement() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -241,7 +276,9 @@ public with sharing class TriggerTests {
     private static void testExceptionThrownIfRecursiveDepthExceeded() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            TriggerV1.disable(AsynchronousJobSubscriber.Factory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.StartSchedulerFactory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.PreProcessorFactory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.CancellationsFactory.class);
             TriggerV1.disable(Subscriber1.class);
 
             MAX_RECURSIVE_DEPTH.put('Subscriber2', 12);
@@ -470,6 +507,12 @@ public with sharing class TriggerTests {
             INVOCATIONS.put(key, INVOCATIONS.get(key) + 1);
         } else {
             INVOCATIONS.put(key, 1);
+        }
+    }
+
+    public with sharing class Filter extends ArrayV1.Callback {
+        public override OptionalV1 function(Object element, OptionalV1 currentValue, Integer index) {
+            return OptionalV1.of(((AsynchronousJob__c) element).Status__c == AsynchronousV1.Status.SUCCEEDED.name());
         }
     }
 

@@ -119,4 +119,4 @@ See [Query](source/query/README.md)
 ## Collection
 TBD.
 
-See [Collection](source/collection/README.md)
+See [Collection](source/immutable/README.md)

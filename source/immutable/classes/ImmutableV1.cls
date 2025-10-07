@@ -42,7 +42,7 @@ global with sharing class ImmutableV1 {
          *
          * @param result The List to be populated.
          *
-         * @return The populated list.
+         * @return The populated List.
          */
         List<Object> toList(final List<Object> result);
 
@@ -54,7 +54,7 @@ global with sharing class ImmutableV1 {
          * The returned List will be of type Object. This will prevent it being cast to a List of any other type, even
          * if the List contains that type.
          *
-         * @return The collection's contents as a list.
+         * @return The collection's contents as a List.
          */
         List<Object> toList();
 
@@ -194,200 +194,6 @@ global with sharing class ImmutableV1 {
         Integer size();
     }
 
-    private with sharing class ImmutableMap implements ImmutableV1.ReadOnlyMap {
-        private final Map<Object, Object> wrapped;
-
-        public ImmutableMap(final Map<Object, Object> source) {
-            this.wrapped = source;
-        }
-
-        public Object get(final Object key) {
-            return wrapped.get(key);
-        }
-
-        public Boolean containsKey(final Object key) {
-            return wrapped.containsKey(key);
-        }
-
-        public List<Object> values() {
-            return wrapped.values();
-        }
-
-        public Set<Object> keySet() {
-            return wrapped.keySet();
-        }
-
-        public Boolean isEmpty() {
-            return wrapped.isEmpty();
-        }
-
-        public Integer size() {
-            return wrapped.size();
-        }
-
-        public Iterator<Object> iterator() {
-            return keySet().iterator();
-        }
-    }
-
-    private with sharing class CollectionImpl implements Collection {
-        private final ArrayV1.Methods methods {
-            private get {
-                if (methods == null) {
-                    methods = ArrayV1.over(wrapped);
-                }
-                return methods;
-            }
-            private set;
-        }
-
-        private final List<Object> wrapped;
-
-        public CollectionImpl(final List<Object> source) {
-            this.wrapped = source;
-        }
-
-        public Integer size() {
-            return wrapped.size();
-        }
-
-        public Boolean isEmpty() {
-            return wrapped.isEmpty();
-        }
-
-        public Object get(final Integer index) {
-            return wrapped.get(index);
-        }
-
-        public Integer indexOf(final Object element) {
-            return wrapped.indexOf(element);
-        }
-
-        public Boolean contains(final Object element) {
-            return wrapped.contains(element);
-        }
-
-        public Boolean containsAll(List<Object> objs) {
-            for (Object obj : objs) {
-                if (!contains(obj)) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public Boolean containsAll(Set<Object> objs) {
-            for (Object obj : objs) {
-                if (!contains(obj)) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public Iterator<Object> iterator() {
-            return wrapped.iterator();
-        }
-
-        public List<Object> toList() {
-            return toList(CommonHelper.newListOfSameType(wrapped));
-        }
-
-        public List<Object> toList(final List<Object> result) {
-            for (Object obj : wrapped) {
-                result.add(obj);
-            }
-
-            return result;
-        }
-
-        public Integer length() {
-            return methods.length();
-        }
-
-        public ArrayV1.Methods sharing(final Object shared) {
-            return methods.sharing(shared);
-        }
-
-        public void forEach(final ArrayV1.Callback callback) {
-            methods.forEach(callback);
-        }
-
-        public Object reduce(final ArrayV1.Callback callback) {
-            return methods.reduce(callback);
-        }
-
-        public Object reduceRight(final ArrayV1.Callback callback) {
-            return methods.reduceRight(callback);
-        }
-
-        public Object reduce(final ArrayV1.Callback callback, final Object initialValue) {
-            return methods.reduce(callback, initialValue);
-        }
-
-        public Object reduceRight(final ArrayV1.Callback callback, final Object initialValue) {
-            return methods.reduceRight(callback, initialValue);
-        }
-
-        public List<Object> filter(final ArrayV1.Callback callback) {
-            return methods.filter(callback);
-        }
-
-        public List<Object> transform(final ArrayV1.Callback callback) {
-            return methods.transform(callback);
-        }
-
-        public List<Object> transform(final ArrayV1.Callback callback, final List<Object> returnList) {
-            return methods.transform(callback, returnList);
-        }
-
-        public List<Object> concat(final List<Object> elements) {
-            return methods.concat(elements);
-        }
-
-        public OptionalV1 at(final Integer index) {
-            return methods.at(index);
-        }
-
-        public String join(final String separator) {
-            return methods.join(separator);
-        }
-
-        public Boolean some(final ArrayV1.Callback callback) {
-            return methods.some(callback);
-        }
-
-        public Boolean every(final ArrayV1.Callback callback) {
-            return methods.every(callback);
-        }
-
-        public List<Object> reverse() {
-            return methods.reverse();
-        }
-
-        public void push(final Object obj) {
-            throw new APIException('Mutation of collection not allowed');
-        }
-
-        public OptionalV1 pop() {
-            throw new APIException('Mutation of collection not allowed');
-        }
-
-        public OptionalV1 shift() {
-            throw new APIException('Mutation of collection not allowed');
-        }
-
-        public List<Object> sort() {
-            return methods.sort();
-        }
-
-        public List<Object> sort(final Comparator<Object> comparator) {
-            return methods.sort(comparator);
-        }
-    }
-
     /**
      * @description
      * <p>
@@ -400,7 +206,7 @@ global with sharing class ImmutableV1 {
      * @return The immutable Map.
      */
     global static ReadOnlyMap of(final Map<Object, Object> source) {
-        return new ImmutableMap(source.clone());
+        return ImmutableImpl.newMap(source.clone());
     }
 
     /**
@@ -419,7 +225,7 @@ global with sharing class ImmutableV1 {
         for (Id key : source.keySet()) {
             cloned.put(key, source.get(key));
         }
-        return new ImmutableMap(cloned);
+        return ImmutableImpl.newMap(cloned);
     }
 
     /**
@@ -438,7 +244,7 @@ global with sharing class ImmutableV1 {
         for (String key : source.keySet()) {
             cloned.put(key, source.get(key));
         }
-        return new ImmutableMap(cloned);
+        return ImmutableImpl.newMap(cloned);
     }
 
     /**
@@ -452,13 +258,13 @@ global with sharing class ImmutableV1 {
      */
     global static Collection of(final Iterable<Object> source) {
         if (source instanceof List<Object>) {
-            return new CollectionImpl(((List<Object>) source).clone());
+            return ImmutableImpl.newCollection(((List<Object>) source).clone());
         } else {
             final List<Object> elements = new List<Object>();
             for (Object value : source) {
                 elements.add(value);
             }
-            return new CollectionImpl(elements);
+            return ImmutableImpl.newCollection(elements);
         }
     }
 }
