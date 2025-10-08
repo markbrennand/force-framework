@@ -7,6 +7,7 @@
  * 
  * @author Mark Brennand
  */
+@SuppressWarnings('PMD.ApexDoc')
 public with sharing virtual class DependencyAPIMockable implements DependencyAPI.API {
 
     public Object inject(final Type forType) {

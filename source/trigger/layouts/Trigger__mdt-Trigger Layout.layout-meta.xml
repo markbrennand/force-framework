@@ -57,7 +57,8 @@
                 <field>ThrowExceptionWhenRecursionExceeded__c</field>
             </layoutItems>
             <layoutItems>
-                <emptySpace>true</emptySpace>
+                <behavior>Edit</behavior>
+                <field>FilterClass__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>

@@ -414,7 +414,7 @@ public with sharing class TriggerImpl {
             }
         }
 
-        private OptionalV1 getEventToPublish(TriggerV1.Event event, Trigger__mdt triggerDefinition) {
+        private OptionalV1 getEventToPublish(final TriggerV1.Event event, final Trigger__mdt triggerDefinition) {
             OptionalV1 filter = getFilter(triggerDefinition);
             if (filter.isPresent()) {
                 final List<SObject> matches = (List<SObject>) event.getRecords()

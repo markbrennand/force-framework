@@ -8,7 +8,7 @@
     </values>
     <values>
         <field>AfterInsert__c</field>
-        <value xsi:type="xsd:boolean">true</value>
+        <value xsi:type="xsd:boolean">false</value>
     </values>
     <values>
         <field>AfterUpdate__c</field>

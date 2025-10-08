@@ -7,6 +7,7 @@
  * 
  * @author Mark Brennand
  */
+@SuppressWarnings('PMD.ApexDoc')
 public with sharing virtual class AsynchronousDAOMockable implements AsynchronousDAO.API {
 
     public AsynchronousJob__c getObject(final Id asyncObjectId) {

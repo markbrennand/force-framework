@@ -7,6 +7,7 @@
  * 
  * @author Mark Brennand
  */
+@SuppressWarnings('PMD.ApexDoc')
 public with sharing virtual class AsynchronousHelperMockable implements AsynchronousHelper.API {
 
     public void recordException(final AsynchronousJob__c asyncObject, final AsynchronousV1.APIException exc) {

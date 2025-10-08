@@ -87,27 +87,17 @@ global with sharing class ImmutableV1 {
          */
         Boolean contains(final Object element);
 
-        /**
-         * @description
-         * <p>
-         * Determines whether the Set contains all the objects in the List argument.
-         *
-         * @param objs The objects to be matched.
-         *
-         * @return True if the Set contains all the objects, false if not.
-         */
-        Boolean containsAll(final List<Object> objs);
 
         /**
          * @description
          * <p>
-         * Determines whether the Set contains all the objects in the Set argument.
+         * Determines whether the collection contains all the objects in the Iterable argument.
          *
          * @param objs The objects to be matched.
          *
-         * @return True if the Set contains all the objects, false if not.
+         * @return True if the collection contains all the objects, false if not.
          */
-        Boolean containsAll(final Set<Object> objs);
+        Boolean containsAll(final Iterable<Object> objs);
 
         /**
          * @description

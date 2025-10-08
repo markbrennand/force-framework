@@ -78,7 +78,25 @@ public with sharing class AsynchronousJobSubscriber {
         }
     }
 
+    /**
+     * @description
+     * <p>
+     * Filter returning only AsynchronousJob__c objects that have changed status to Cancelled and whose associated
+     * Runnable requires that the object is deleted on cancellation.
+     */
     public with sharing class CancellationsFilter extends ArrayV1.Callback {
+
+        /**
+         * @description
+         * <p>
+         * Does AsynchronousJob__c object meet tghe criteria for deletion.
+         *
+         * @param element The AsynchronousJob__c object.
+         * @param currentValue The value accumulated over the array iteration.
+         * @param index The positional index of the array element.
+         *
+         * @return Optional of true if job is to be deleted.
+         */
         public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final OptionalV1 oldValues = (OptionalV1) shared();
             final AsynchronousJob__c asyncObject = (AsynchronousJob__c) element;
@@ -119,7 +137,7 @@ public with sharing class AsynchronousJobSubscriber {
          *
          * @param event The trigger API event.
          */
-        public void onEvent(TriggerV1.Event event) {
+        public void onEvent(final TriggerV1.Event event) {
             ArrayV1.over(event.getRecords()).forEach(new PreProcessor());
         }
     }
@@ -140,7 +158,7 @@ public with sharing class AsynchronousJobSubscriber {
          *
          * @param event The trigger API event.
          */
-        public void onEvent(TriggerV1.Event event) {
+        public void onEvent(final TriggerV1.Event event) {
             final List<AsynchronousJob__c> toDelete = new List<AsynchronousJob__c>();
             for (Object record : event.getRecords()) {
                 toDelete.add(new AsynchronousJob__c(Id = ((AsynchronousJob__c) record).Id));
@@ -172,7 +190,26 @@ public with sharing class AsynchronousJobSubscriber {
         }
     }
 
+    /**
+     * @description
+     * <p>
+     * Pre processes AsynchroousJob__c objects prior to persistence.
+     */
     private with sharing class PreProcessor extends ArrayV1.Callback {
+
+        /**
+         * @description
+         * <p>
+         * Checks if class set in AsynchronousJob__c object implements Runnable.
+         * <p>
+         * Marks the job as ready to run.
+         *
+         * @param element The AsynchronousJob__c object.
+         * @param currentValue The accumulator.
+         * @param index The positional index of the AsynchronousJob__c object in the List being processed.
+         *
+         * @return An optional with the new value or an empty optional if no value update is required.
+         */
         public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final AsynchronousJob__c asyncObject = (AsynchronousJob__c) element;
 

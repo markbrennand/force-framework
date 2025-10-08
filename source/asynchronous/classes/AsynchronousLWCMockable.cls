@@ -7,6 +7,7 @@
  * 
  * @author Mark Brennand
  */
+@SuppressWarnings('PMD.ApexDoc')
 public with sharing virtual class AsynchronousLWCMockable implements AsynchronousLWC.API {
 
     public List<Map<String, Object>> getJobs(final Map<String, Object> filters, final String ordering, final Integer offset, final Integer max) {

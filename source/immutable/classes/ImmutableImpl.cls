@@ -24,31 +24,37 @@ public with sharing class ImmutableImpl {
 
         private final List<Object> wrapped;
 
-        public CollectionImpl(final List<Object> source) {
+        public  CollectionImpl(final List<Object> source) {
             this.wrapped = source;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public Integer size() {
             return wrapped.size();
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public Boolean isEmpty() {
             return wrapped.isEmpty();
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public Object get(final Integer index) {
             return wrapped.get(index);
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public Integer indexOf(final Object element) {
             return wrapped.indexOf(element);
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public Boolean contains(final Object element) {
             return wrapped.contains(element);
         }
 
-        public Boolean containsAll(List<Object> objs) {
+        @SuppressWarnings('PMD.ApexDoc')
+        public Boolean containsAll(final Iterable<Object> objs) {
             for (Object obj : objs) {
                 if (!contains(obj)) {
                     return false;
@@ -58,24 +64,17 @@ public with sharing class ImmutableImpl {
             return true;
         }
 
-        public Boolean containsAll(Set<Object> objs) {
-            for (Object obj : objs) {
-                if (!contains(obj)) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
+        @SuppressWarnings('PMD.ApexDoc')
         public Iterator<Object> iterator() {
             return wrapped.iterator();
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public List<Object> toList() {
             return toList(CommonHelper.newListOfSameType(wrapped));
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public List<Object> toList(final List<Object> result) {
             for (Object obj : wrapped) {
                 result.add(obj);
@@ -84,74 +83,92 @@ public with sharing class ImmutableImpl {
             return result;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public Integer length() {
             return methods.length();
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public ArrayV1.Methods sharing(final Object shared) {
             return methods.sharing(shared);
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public void forEach(final ArrayV1.Callback callback) {
             methods.forEach(callback);
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public Object reduce(final ArrayV1.Callback callback) {
             return methods.reduce(callback);
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public Object reduceRight(final ArrayV1.Callback callback) {
             return methods.reduceRight(callback);
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public Object reduce(final ArrayV1.Callback callback, final Object initialValue) {
             return methods.reduce(callback, initialValue);
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public Object reduceRight(final ArrayV1.Callback callback, final Object initialValue) {
             return methods.reduceRight(callback, initialValue);
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public List<Object> filter(final ArrayV1.Callback callback) {
             return methods.filter(callback);
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public List<Object> transform(final ArrayV1.Callback callback) {
             return methods.transform(callback);
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public List<Object> transform(final ArrayV1.Callback callback, final List<Object> returnList) {
             return methods.transform(callback, returnList);
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public List<Object> concat(final List<Object> elements) {
             return methods.concat(elements);
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public OptionalV1 at(final Integer index) {
             return methods.at(index);
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public String join(final String separator) {
             return methods.join(separator);
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public Boolean some(final ArrayV1.Callback callback) {
             return methods.some(callback);
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public Boolean every(final ArrayV1.Callback callback) {
             return methods.every(callback);
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public List<Object> reverse() {
             return methods.reverse();
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public void push(final Object obj) {
             throw new ImmutableV1.APIException('Mutation of collection not allowed');
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public OptionalV1 pop() {
             throw new ImmutableV1.APIException('Mutation of collection not allowed');
         }
@@ -160,10 +177,12 @@ public with sharing class ImmutableImpl {
             throw new ImmutableV1.APIException('Mutation of collection not allowed');
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public List<Object> sort() {
             return methods.sort();
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public List<Object> sort(final Comparator<Object> comparator) {
             return methods.sort(comparator);
         }
@@ -176,30 +195,37 @@ public with sharing class ImmutableImpl {
             this.wrapped = source;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public Object get(final Object key) {
             return wrapped.get(key);
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public Boolean containsKey(final Object key) {
             return wrapped.containsKey(key);
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public List<Object> values() {
             return wrapped.values();
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public Set<Object> keySet() {
             return wrapped.keySet();
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public Boolean isEmpty() {
             return wrapped.isEmpty();
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public Integer size() {
             return wrapped.size();
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public Iterator<Object> iterator() {
             return keySet().iterator();
         }

@@ -7,6 +7,7 @@
  * 
  * @author Mark Brennand
  */
+@SuppressWarnings('PMD.ApexDoc')
 public with sharing virtual class AsynchronousAPIMockable implements AsynchronousAPI.API {
 
     public AsynchronousV1.Job createJob(

@@ -69,7 +69,7 @@ public with sharing class ImmutableTests {
         }
     }
 
-    private static void testCollection(final ImmutableV1.Collection collection, ImmutableV1.Collection emptyCollection) {
+    private static void testCollection(final ImmutableV1.Collection collection, final ImmutableV1.Collection emptyCollection) {
         Assert.isFalse(collection.isEmpty());
         Assert.areEqual(3, collection.size());
         Assert.isTrue(collection.contains('A'));
