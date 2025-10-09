@@ -227,10 +227,26 @@ public with sharing virtual class DependencyAPI extends DependencyAPIMockable {
             this.errorMessage = errorMessage;
         }
 
+        /**
+         * @description
+         * <p>
+         * Yields validity of validation result.
+         *
+         * @return True if the result indicates successful validation, false if not.
+         */
         public Boolean isValid() {
             return isValid;
         }
 
+        /**
+         * @description
+         * <p>
+         * Yields the error message related to a failed validation.
+         * <p>
+         * The error message will only be set if isValid() returns false.
+         *
+         * @return The error message.
+         */
         public String getErrorMessage() {
             return errorMessage;
         }

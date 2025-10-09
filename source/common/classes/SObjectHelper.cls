@@ -49,15 +49,35 @@ public with sharing class SObjectHelper {
         }
     }
 
+    /**
+     * @description
+     * <p>
+     * Performs the given transformation on an object before updating in the database.
+     */
     public with sharing class Transformer implements OptionalV1.Function {
         private final ArrayV1.Callback callback;
         private final AccessLevel mode;
 
+        /**
+         * @description
+         * Creates an instance of the class for the give transformer.
+         * @param callback The transformer.
+         * @param mode Mode to perform tghe database update in.
+         */
         public Transformer(final ArrayV1.Callback callback, final AccessLevel mode) {
             this.callback = callback;
             this.mode = mode;
         }
 
+        /**
+         * @description
+         * <p>
+         * Transforms the data in the Optional and updates in database.
+         *
+         * @param value The Optional to be transformed.
+         *
+         * @return Unused.
+         */
         @SuppressWarnings('PMD.ApexCRUDViolation')
         public OptionalV1 apply(final OptionalV1 value) {
             if (value.isPresent()) {

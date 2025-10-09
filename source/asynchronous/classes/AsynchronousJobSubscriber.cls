@@ -65,7 +65,7 @@ public with sharing class AsynchronousJobSubscriber {
      * Factory to create the start scheduler subscriber class.
      */
     public class StartSchedulerFactory implements TypesV1.Factory {
-        private final StartSchedulerSubnscriber subscriber = new StartSchedulerSubnscriber();
+        private final StartSchedulerSubscriber subscriber = new StartSchedulerSubscriber();
 
         /**
          * @description
@@ -89,7 +89,7 @@ public with sharing class AsynchronousJobSubscriber {
         /**
          * @description
          * <p>
-         * Does AsynchronousJob__c object meet tghe criteria for deletion.
+         * Does AsynchronousJob__c object meet the criteria for deletion.
          *
          * @param element The AsynchronousJob__c object.
          * @param currentValue The value accumulated over the array iteration.
@@ -112,9 +112,25 @@ public with sharing class AsynchronousJobSubscriber {
         }
     }
 
+    /**
+     * @description
+     * <p>
+     * Filter to determine whether AsynchronousJob__c object is for running the Scheduler.
+     */
     public with sharing class StartSchedulerFilter extends ArrayV1.Callback {
         private final String schedulerClassName = AsynchronousScheduler.RunNextAvailable.class.getName();
 
+        /**
+         * @description
+         * <p>
+         * Is AsynchronousJob__c object runnable the Scheduler.
+         *
+         * @param element The AsynchronousJob__c object.
+         * @param currentValue The value accumulated over the array iteration.
+         * @param index The positional index of the array element.
+         *
+         * @return Optional of true if job is to be deleted.
+         */
         public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final AsynchronousJob__c asyncObject = (AsynchronousJob__c) element;
             return OptionalV1.of(asyncObject.Runnable__c != schedulerClassName);
@@ -176,7 +192,7 @@ public with sharing class AsynchronousJobSubscriber {
      * <p>
      * The class is private to prevent re-use outside this class.
      */
-    private with sharing class StartSchedulerSubnscriber implements TriggerV1.Subscriber {
+    private with sharing class StartSchedulerSubscriber implements TriggerV1.Subscriber {
 
         /**
          * @description
