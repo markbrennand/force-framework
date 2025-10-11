@@ -404,14 +404,7 @@ public with sharing class DependencyImpl {
      * Factory to create the default API implementation.
      */
     public class Factory implements TypesV1.Factory {
-
-        /**
-         * @description
-         * <p>
-         * Constructs the default API implementation.
-         *
-         * @return The default API implementation.
-         */
+        @SuppressWarnings('PMD.ApexDoc')
         public Object newInstance() {
             return new API();
         }

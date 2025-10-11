@@ -66,13 +66,7 @@ public with sharing class DependencySubscriber {
     public with sharing class Factory implements TypesV1.Factory {
         private final Implementation subscriber = new Implementation();
 
-        /**
-         * @description
-         * <p>
-         * Returns the API implementation.
-         *
-         * @return The API implementation.
-         */
+        @SuppressWarnings('PMD.ApexDoc')
         public Object newInstance() {
             return subscriber;
         }

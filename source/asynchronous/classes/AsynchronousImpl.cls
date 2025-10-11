@@ -237,14 +237,7 @@ public with sharing class AsynchronousImpl {
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
     public with sharing class Factory implements TypesV1.Factory {
-
-        /**
-         * @description
-         * <p>
-         * Returns the implementation of the API.
-         *
-         * @return The API implementation.
-         */
+        @SuppressWarnings('PMD.ApexDoc')
         public Object newInstance() {
             return new API();
         }

@@ -333,13 +333,7 @@ public with sharing class AsynchronousLWCImpl {
      */
     public with sharing class Factory implements TypesV1.Factory {
 
-        /**
-         * @description
-         * <p>
-         * Constructs a new instance of the API implementation.
-         *
-         * @return The API implementation.
-         */
+        @SuppressWarnings('PMD.ApexDoc')
         public Object newInstance() {
             return new API();
         }

@@ -29,12 +29,7 @@ public with sharing class AsynchronousJobSubscriber {
     public class PreProcessorFactory implements TypesV1.Factory {
         private final PreProcessorSubscriber subscriber = new PreProcessorSubscriber();
 
-        /**
-         * @description
-         * Constructs a new instance of the trigger subscriber.
-         *
-         * @return The trigger subscriber.
-         */
+        @SuppressWarnings('PMD.ApexDoc')
         public Object newInstance() {
             return subscriber;
         }
@@ -48,12 +43,7 @@ public with sharing class AsynchronousJobSubscriber {
     public class CancellationsFactory implements TypesV1.Factory {
         private final CancellationsSubscriber subscriber = new CancellationsSubscriber();
 
-        /**
-         * @description
-         * Constructs a new instance of the trigger subscriber.
-         *
-         * @return The trigger subscriber.
-         */
+        @SuppressWarnings('PMD.ApexDoc')
         public Object newInstance() {
             return subscriber;
         }
@@ -67,12 +57,7 @@ public with sharing class AsynchronousJobSubscriber {
     public class StartSchedulerFactory implements TypesV1.Factory {
         private final StartSchedulerSubscriber subscriber = new StartSchedulerSubscriber();
 
-        /**
-         * @description
-         * Constructs a new instance of the start scheduler subscriber.
-         *
-         * @return The trigger subscriber.
-         */
+        @SuppressWarnings('PMD.ApexDoc')
         public Object newInstance() {
             return subscriber;
         }

@@ -37,28 +37,33 @@ public with sharing class QueryImpl {
         private OptionalV1 bindings = OptionalV1.empty();
         private Boolean isCount = false;
 
+        @SuppressWarnings('PMD.ApexDoc')
         public SObjectType type() {
             Assert.isNotNull(type, 'Query type has not been set');
             return type;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API type(final SObjectType type) {
             Assert.isNull(this.type, 'Query type cannot be changed');
             this.type = type;
             return this;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API security(final AccessLevel security) {
             this.security = security;
             return this;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API returningAll() {
             throwExceptionIfCountQuery();
             throwExceptionIfAggregatedQuery();
             return returning(new Set<SObjectField>(type.getDescribe(SObjectDescribeOptions.DEFERRED).fields.getMap().values()));
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API returning(final SObjectField field) {
             throwExceptionIfCountQuery();
             throwExceptionIfAggregatedQuery();
@@ -70,6 +75,7 @@ public with sharing class QueryImpl {
             return this;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API returning(final Set<SObjectField> fields) {
             throwExceptionIfCountQuery();
             throwExceptionIfAggregatedQuery();
@@ -81,6 +87,7 @@ public with sharing class QueryImpl {
             return this;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API returning(final SObjectField joinField, final Set<SObjectField> fields) {
             throwExceptionIfCountQuery();
             throwExceptionIfAggregatedQuery();
@@ -92,6 +99,7 @@ public with sharing class QueryImpl {
             return this;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API returning(final QueryV1.API query) {
             throwExceptionIfCountQuery();
             throwExceptionIfAggregatedQuery();
@@ -103,6 +111,7 @@ public with sharing class QueryImpl {
             return this;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API returning(final QueryV1.AggregatedField field) {
             throwExceptionIfCountQuery();
             throwExceptionIfRegularQuery();
@@ -114,6 +123,7 @@ public with sharing class QueryImpl {
             return this;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API returning(final Set<QueryV1.AggregatedField> fields) {
             throwExceptionIfCountQuery();
             throwExceptionIfRegularQuery();
@@ -125,26 +135,31 @@ public with sharing class QueryImpl {
             return this;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API count() {
             throwExceptionIfAggregatedQuery();
             isCount = true;
             return this;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API matching(final String condition) {
             matching = OptionalV1.ofNullable(condition);
             return this;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API bindings(final Map<String, Object> values) {
             bindings = OptionalV1.of(values);
             return this;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API ordered(final QueryV1.Order order) {
             return ordered(new Set<QueryV1.Order> { order });
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API ordered(final Set<QueryV1.Order> order) {
             throwExceptionIfCountQuery();
 
@@ -155,6 +170,7 @@ public with sharing class QueryImpl {
             return this;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API group(final Set<SObjectField> fields) {
             throwExceptionIfCountQuery();
             throwExceptionIfRegularQuery();
@@ -166,6 +182,7 @@ public with sharing class QueryImpl {
             return this;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API group(final SObjectField joinField, final Set<SObjectField> fields) {
             throwExceptionIfCountQuery();
             throwExceptionIfRegularQuery();
@@ -177,6 +194,7 @@ public with sharing class QueryImpl {
             return this;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API has(final String condition) {
             throwExceptionIfRegularQuery();
 
@@ -184,16 +202,19 @@ public with sharing class QueryImpl {
             return this;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API max(final Integer max) {
             this.max = OptionalV1.of(' LIMIT ' + max);
             return this;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public QueryV1.API offset(final Integer offset) {
             this.offset = OptionalV1.of(' OFFSET ' + offset);
             return this;
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public OptionalV1 execute() {
             final String query = buildOuterQuery();
 
@@ -324,6 +345,7 @@ public with sharing class QueryImpl {
      * We use the factory to defer the construction by injection to this class, which is able to construct it.
      */
     public with sharing class Factory implements TypesV1.Factory {
+        @SuppressWarnings('PMD.ApexDoc')
         public Object newInstance() {
             return new API();
         }

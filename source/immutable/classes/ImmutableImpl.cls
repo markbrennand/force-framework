@@ -11,7 +11,17 @@
  */
 public with sharing class ImmutableImpl {
 
+    /**
+     * @description
+     * <p>
+     * Implementation of the Collection API.
+     * <p>
+     * Class is hidden to prevent re-use.
+     */
     private with sharing class CollectionImpl implements ImmutableV1.Collection {
+
+        private final List<Object> wrapped;
+
         private final ArrayV1.Methods methods {
             private get {
                 if (methods == null) {
@@ -22,9 +32,14 @@ public with sharing class ImmutableImpl {
             private set;
         }
 
-        private final List<Object> wrapped;
-
-        public  CollectionImpl(final List<Object> source) {
+        /**
+         * @description
+         * <p>
+         * Constructs an instance of the class providing an immutable Collection for the given List.
+         *
+         * @param source The List to be made immutable.
+         */
+        public CollectionImpl(final List<Object> source) {
             this.wrapped = source;
         }
 
@@ -173,6 +188,7 @@ public with sharing class ImmutableImpl {
             throw new ImmutableV1.APIException('Mutation of collection not allowed');
         }
 
+        @SuppressWarnings('PMD.ApexDoc')
         public OptionalV1 shift() {
             throw new ImmutableV1.APIException('Mutation of collection not allowed');
         }
@@ -188,9 +204,21 @@ public with sharing class ImmutableImpl {
         }
     }
 
+    /**
+     * @description
+     * <p>
+     * Implementation of immutable Map.
+     */
     private with sharing class ImmutableMap implements ImmutableV1.ReadOnlyMap {
         private final Map<Object, Object> wrapped;
 
+        /**
+         * @description
+         * <p>
+         * Constructs an immutable Map for the given source Map.
+         *
+         * @param source The Map to be return an immutable Map for.
+         */
         public ImmutableMap(final Map<Object, Object> source) {
             this.wrapped = source;
         }
@@ -231,10 +259,28 @@ public with sharing class ImmutableImpl {
         }
     }
 
+    /**
+     * @description
+     * <p>
+     * Builds an immutable Collection for the given List.
+     *
+     * @param source The List to be made immutable.
+     *
+     * @return The immutable Collection.
+     */
     public static ImmutableV1.Collection newCollection(final List<Object> source) {
         return new CollectionImpl(source);
     }
 
+    /**
+     * @description
+     * <p>
+     * Builds an immutable Map for the given Map.
+     *
+     * @param source The Map to be made immutable.
+     *
+     * @return The immutable Map.
+     */
     public static ImmutableV1.ReadOnlyMap newMap(final Map<Object, Object> source) {
         return new ImmutableMap(source);
     }

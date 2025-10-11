@@ -347,41 +347,113 @@ global with sharing class QueryV1 {
          * The Optional returned will have no value if there are no matching objects. If there are matches, the
          * Optional value will be an ImmutableV1.Collection containing the matching objects.
          *
-         * @param offset The offset to the first record.
-         *
-         * @return The current instance for method chaining.
+         * @return The results.
          */
         OptionalV1 execute();
     }
 
+    /**
+     * @description
+     * <p>
+     * Creates an instance of the Query API to query the given object.
+     *
+     * @param type The object to be queried.
+     *
+     * @return The Query API instance.
+     */
     global static QueryV1.API of(final SObjectType type) {
         return QueryAPI.impl.type(type);
     }
 
+    /**
+     * @description
+     * <p>
+     * Creates an instance of the Query API to perform a count of the given object.
+     *
+     * @param type The object to be counted.
+     *
+     * @return The Query API instance.
+     */
     global static QueryV1.API count(final SObjectType type) {
         return QueryAPI.impl.type(type).count();
     }
 
+    /**
+     * @description
+     * <p>
+     * Creates an ordering to add to the query for the given field in ascending value.
+     *
+     * @param field The field to be ordered.
+     *
+     * @return The ordering tgo add to the query.
+     */
     global static QueryV1.Order ascending(final SObjectField field) {
         return QueryAPI.order(OptionalV1.empty(), field, true);
     }
 
+    /**
+     * @description
+     * <p>
+     * Creates an ordering to add to the query for the given field in ascending order from a related object.
+     *
+     * @param joinField The Id field of the related related object containing the field to order.
+     * @param field The field to be ordered.
+     *
+     * @return The ordering tgo add to the query.
+     */
     global static QueryV1.Order ascending(final SObjectField joinField, final SObjectField field) {
         return QueryAPI.order(OptionalV1.of(joinField), field, true);
     }
 
+    /**
+     * @description
+     * <p>
+     * Creates an ordering to add to the query for the given aggregated field in ascending value.
+     *
+     * @param field The aggregated field to be ordered.
+     *
+     * @return The ordering tgo add to the query.
+     */
     global static QueryV1.Order ascending(final AggregatedField field) {
         return QueryAPI.order(field, true);
     }
 
+    /**
+     * @description
+     * <p>
+     * Creates an ordering to add to the query for the given field in descending value.
+     *
+     * @param field The field to be ordered.
+     *
+     * @return The ordering tgo add to the query.
+     */
     global static QueryV1.Order descending(final SObjectField field) {
         return QueryAPI.order(OptionalV1.empty(), field, false);
     }
 
+    /**
+     * @description
+     * <p>
+     * Creates an ordering to add to the query for the given field in descending order from a related object.
+     *
+     * @param joinField The Id field of the related related object containing the field to order.
+     * @param field The field to be ordered.
+     *
+     * @return The ordering tgo add to the query.
+     */
     global static QueryV1.Order descending(final SObjectField joinField, final SObjectField field) {
         return QueryAPI.order(OptionalV1.of(joinField), field, false);
     }
 
+    /**
+     * @description
+     * <p>
+     * Creates an ordering to add to the query for the given aggregated field in descending value.
+     *
+     * @param field The aggregated field to be ordered.
+     *
+     * @return The ordering tgo add to the query.
+     */
     global static QueryV1.Order descending(final AggregatedField field) {
         return QueryAPI.order(field, false);
     }

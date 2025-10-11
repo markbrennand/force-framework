@@ -31,6 +31,11 @@ public with sharing class QueryHelper {
         );
     }
 
+    /**
+     * @description
+     * <p>
+     * Callback class to get names of child relationships that match a specific SObject type.
+     */
     public with sharing class GetRelationshipName extends ArrayV1.Callback {
         public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final ChildRelationship relationship = (ChildRelationship) element;
@@ -43,6 +48,11 @@ public with sharing class QueryHelper {
         }
     }
 
+    /**
+     * @description
+     * <p>
+     * Converts fields to names.
+     */
     public with sharing class FieldToString extends ArrayV1.Callback {
         public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             ((Set<String>) currentValue.get()).add(((SObjectField) element).getDescribe().name);
@@ -51,10 +61,6 @@ public with sharing class QueryHelper {
     }
 
     private with sharing class FieldJoiner extends ArrayV1.Callback {
-
-        @SuppressWarnings('PMD.EmptyStatementBlock')
-        public FieldJoiner() {}
-
         public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final String relationshipName = (String) shared().get();
             final Set<String> fields = (Set<String>) currentValue.get();
