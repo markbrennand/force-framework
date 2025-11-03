@@ -49,15 +49,21 @@ public with sharing class TriggerHelper {
         public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final Map<String, List<Trigger__mdt>> triggerDefinitions = (Map<String, List<Trigger__mdt>>) currentValue.get();
             final Trigger__mdt triggerDefinition  = (Trigger__mdt) element;
-            final String objectKey = triggerDefinition.ObjectKey__c;
+            final String objectName = getObjectName(triggerDefinition.ObjectName__c);
 
-            if (triggerDefinitions.containsKey(objectKey)) {
-                triggerDefinitions.get(objectKey).add(triggerDefinition);
+            if (triggerDefinitions.containsKey(objectName)) {
+                triggerDefinitions.get(objectName).add(triggerDefinition);
             } else {
-                triggerDefinitions.put(objectKey, new List<Trigger__mdt> { triggerDefinition });
+                triggerDefinitions.put(objectName, new List<Trigger__mdt> { triggerDefinition });
             }
 
             return OptionalV1.of(triggerDefinitions);
         }
+
+        private String getObjectName(final String name) {
+            return String.isEmpty(CommonHelper.getSObjectNamespace())
+                    ? name.replace(CommonHelper.NAMESPACE + '__', '') : name;
+        }
+
     }
 }

@@ -25,7 +25,7 @@ public with sharing class TriggerImpl {
      */
     private with sharing class PublishingInformation {
         private final API parent { private get; private set; }
-        private final String objectKey { private get; private set; }
+        private final String objectName { private get; private set; }
         private final TriggerV1.Event event { private get; private set; }
 
         /**
@@ -34,17 +34,17 @@ public with sharing class TriggerImpl {
          * Details of an event to be published.
          *
          * @param parent The API implementation publishing the event.
-         * @param objectKey The key for the object the event is being published for.
+         * @param objectName The key for the object the event is being published for.
          * @param event The event to publish.
          */
         public PublishingInformation(
                 final API parent,
-                final String objectKey,
+                final String objectName,
                 final TriggerV1.Event event
 
         ) {
             this.parent = parent;
-            this.objectKey = objectKey;
+            this.objectName = objectName;
             this.event = event;
         }
     }
@@ -213,42 +213,29 @@ public with sharing class TriggerImpl {
          * @param objectType The type of object the trigger has fired for.
          */
         private void publishEvent(final SObjectType objectType) {
-            final String objectKey = getObjectKey(objectType.getDescribe(SObjectDescribeOptions.DEFERRED).name);
+            final String objectName = objectType.getDescribe(SObjectDescribeOptions.DEFERRED).name;
 
-            if (triggerDefinitions.containsKey(objectKey)) {
-                final TriggerV1.Event event = createEvent(objectKey);
+            if (triggerDefinitions.containsKey(objectName)) {
+                final TriggerV1.Event event = createEvent(objectName);
 
-                if (events.containsKey(objectKey)) {
-                    events.get(objectKey).push(event);
+                if (events.containsKey(objectName)) {
+                    events.get(objectName).push(event);
                 } else {
-                    events.put(objectKey, ArrayV1.over(event));
+                    events.put(objectName, ArrayV1.over(event));
                 }
 
                 try {
-                    ArrayV1.over(triggerDefinitions.get(objectKey))
-                            .sharing(new PublishingInformation(this, objectKey, event))
+                    ArrayV1.over(triggerDefinitions.get(objectName))
+                            .sharing(new PublishingInformation(this, objectName, event))
                             .forEach(new EventPublisher());
 
                 } finally {
-                    events.get(objectKey).pop();
+                    events.get(objectName).pop();
                 }
 
             } else {
-                throw new TriggerV1.APIException('No Trigger metadata record found for ' + objectKey);
+                throw new TriggerV1.APIException('No Trigger metadata record found for ' + objectName);
             }
-        }
-
-        /**
-         * @description
-         * <p>
-         * Builds the canonical key to match the Trigger_mdt.ObjectKey__c field.
-         *
-         * @param name The object type.
-         *
-         * @return The canonical key.
-         */
-        private String getObjectKey(final String name) {
-            return name.replace('__c', '').replaceFirst('^.*__', '');
         }
 
         /**
@@ -256,11 +243,11 @@ public with sharing class TriggerImpl {
          * <p>
          * Builds an Event representing the Trigger invocation.
          *
-         * @param objectKey The canonical key of the object the Trigger has fired for.
+         * @param objectName The name of the object the Trigger has fired for.
          *
          * @return The Event representing the Trigger invocation.
          */
-        private TriggerV1.Event createEvent(final String objectKey) {
+        private TriggerV1.Event createEvent(final String objectName) {
             final Boolean isBefore = Trigger.isBefore;
 
             final TriggerV1.Operation operation =
@@ -274,7 +261,7 @@ public with sharing class TriggerImpl {
                     Trigger.isInsert ? OptionalV1.empty() : OptionalV1.of(ImmutableV1.of(Trigger.oldMap)),
                     isBefore,
                     operation,
-                    events.containsKey(objectKey) ? events.get(objectKey).length() + 1 : 1
+                    events.containsKey(objectName) ? events.get(objectName).length() + 1 : 1
             );
         }
 
@@ -335,9 +322,9 @@ public with sharing class TriggerImpl {
                 return OptionalV1.empty();
             }
 
-            switch on checkRecursiveDepth(getPublishingInformation().objectKey, triggerDefinition) {
+            switch on checkRecursiveDepth(getPublishingInformation().objectName, triggerDefinition) {
                 when THROW_EXCEPTION {
-                    throw new TriggerV1.APIException('Maximum recursive calls exceeded for ' + getPublishingInformation().objectKey + ' event');
+                    throw new TriggerV1.APIException('Maximum recursive calls exceeded for ' + getPublishingInformation().objectName + ' event');
                 }
                 when PROCESS_EVENT {
                     processEvent(triggerDefinition, (TriggerV1.Event) eventToPublish.get());
@@ -353,15 +340,15 @@ public with sharing class TriggerImpl {
          * For the given canonical key and Trigger custom metadata records, the current recursive depth is checked
          * against the maximum value set in the custom metadata record.
          *
-         * @param objectKey The canonical key for the object the trigger has fired for.
+         * @param objectName The canonical key for the object the trigger has fired for.
          * @param triggerDefinition The Trigger custom metadata record being processed.
          *
          * @return Result of the processing.
          */
-        private RecursiveDepthAction checkRecursiveDepth(final String objectKey, final Trigger__mdt triggerDefinition) {
+        private RecursiveDepthAction checkRecursiveDepth(final String objectName, final Trigger__mdt triggerDefinition) {
             final Integer maximumRecursiveCalls = (Integer) triggerDefinition.MaximumRecursiveDepth__c;
             if ((maximumRecursiveCalls > 0) &&
-                    (getPublishingInformation().parent.events.get(getPublishingInformation().objectKey).length() >
+                    (getPublishingInformation().parent.events.get(getPublishingInformation().objectName).length() >
                             maximumRecursiveCalls)
             ) {
                 return triggerDefinition.ThrowExceptionWhenRecursionExceeded__c

@@ -16,7 +16,7 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
-                <field>ObjectKey__c</field>
+                <field>ObjectName__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>

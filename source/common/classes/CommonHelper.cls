@@ -10,6 +10,11 @@
 public with sharing class CommonHelper {
 
     /**
+     * @description The name of the namespace when packaged.
+     */
+    public static final String NAMESPACE = 'forcefw';
+
+    /**
      * @description
      * <p>
      * Mockable time.

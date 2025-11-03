@@ -35,8 +35,8 @@
         <value xsi:type="xsd:double">1.0</value>
     </values>
     <values>
-        <field>ObjectKey__c</field>
-        <value xsi:type="xsd:string">Binding</value>
+        <field>ObjectName__c</field>
+        <value xsi:type="xsd:string">forcefw__Binding__c</value>
     </values>
     <values>
         <field>SubscriberClass__c</field>

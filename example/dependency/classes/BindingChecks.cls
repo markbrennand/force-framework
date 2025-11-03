@@ -16,25 +16,22 @@ public with sharing class BindingChecks {
         public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
             if (forType == QueryClasses.QueryInterface.class) {
                 if (TypesV1.newInstance(withImpl) instanceof QueryClasses.QueryInterface) {
-                    return new DependencyV1.ValidationResult(true, null);
+                    return DependencyV1.valid();
                 } else {
-                    return new DependencyV1.ValidationResult(
-                            false,
+                    return DependencyV1.invalid(
                             'Class "' + withImpl.getName() + '" does not implement "' + forType.getName() + '"'
                     );
                 }
             } else if (forType == QueryClasses.AbstractQuery.class) {
                 if (TypesV1.newInstance(withImpl) instanceof QueryClasses.AbstractQuery) {
-                    return new DependencyV1.ValidationResult(true, null);
+                    return DependencyV1.valid();
                 } else {
-                    return new DependencyV1.ValidationResult(
-                            false,
+                    return DependencyV1.invalid(
                             'Class "' + withImpl.getName() + '" does not extend "' + forType.getName() + '"'
                     );
                 }
             } else {
-                return new DependencyV1.ValidationResult(
-                        false,
+                return DependencyV1.invalid(
                         'Type "' + forType.getName() + '" is not supported for validation'
                 );
             }
@@ -54,19 +51,17 @@ public with sharing class BindingChecks {
             switch on forType.getName() {
                 when 'Map<String,Integer>' {
                     if (impl instanceof Map<String, Integer>) {
-                        return new DependencyV1.ValidationResult(true, null);
+                        return DependencyV1.valid();
                     }
                 }
                 when else {
-                    return new DependencyV1.ValidationResult(
-                            false,
+                    return DependencyV1.invalid(
                             'Type "' + withImpl + '" can not be validated'
                     );
                 }
             }
 
-            return new DependencyV1.ValidationResult(
-                    false,
+            return DependencyV1.invalid(
                     'Implementation "' + withImpl.getName() + '" is not an instance of "' + forType.getName() + '"'
             );
         }
@@ -81,10 +76,9 @@ public with sharing class BindingChecks {
     public with sharing class AccountManagerBindingCheck implements DependencyV1.BindingCheck {
         public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
             if (TypesV1.newInstance(withImpl) instanceof AccountClasses.AccountManager) {
-                return new DependencyV1.ValidationResult(true, null);
+                return DependencyV1.valid();
             } else {
-                return new DependencyV1.ValidationResult(
-                        false,
+                return DependencyV1.invalid(
                         'Implementation "' + withImpl.getName() + '" is not an instance of "' + forType.getName() + '"'
                 );
             }
