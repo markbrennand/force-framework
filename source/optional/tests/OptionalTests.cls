@@ -91,6 +91,31 @@ public with sharing class OptionalTests {
         }
     }
 
+    @IsTest
+    private static void testCollection() {
+        OptionalV1 value = OptionalV1.of(new List<String> { 'A', 'B', 'C' });
+        Assert.areEqual('A:B:C', value.collection().join(':'));
+
+        value = OptionalV1.of(new Set<String> { 'D', 'E', 'F' });
+        Assert.areEqual('D:E:F', value.collection().join(':'));
+
+        value = OptionalV1.of(ImmutableV1.of(new List<String> { 'G', 'H', 'I' }));
+        Assert.areEqual('G:H:I', value.collection().join(':'));
+
+        value = OptionalV1.of('J');
+        Assert.areEqual('J', value.collection().join(':'));
+
+        value = OptionalV1.empty();
+        Assert.areEqual('K:L:M', value.collection(ImmutableV1.of(new List<String> { 'K', 'L', 'M' })).join(':'));
+        Assert.areEqual('N:O:P', value.collection(new Set<String> { 'N', 'O', 'P' }).join(':'));
+        Assert.areEqual('Q:R:S', value.collection(ImmutableV1.of(new List<String> { 'Q', 'R', 'S' })).join(':'));
+        Assert.areEqual('T', value.collection('T').join(':'));
+        try {
+            value.collection();
+            Assert.fail();
+        } catch (OptionalV1.NoSuchElementException nsee) {}
+    }
+
     private with sharing class TestFunction implements OptionalV1.Function {
         public OptionalV1 apply(final OptionalV1 value) {
             if (!value.isPresent()) {

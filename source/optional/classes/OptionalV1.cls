@@ -151,17 +151,22 @@ global with sharing class OptionalV1 {
      * @return A Collection representing the value.
      */
     global ImmutableV1.Collection collection() {
-        final Object content = get();
+        return collect(get());
+    }
 
-        if (content instanceof ImmutableV1.Collection) {
-            return (ImmutableV1.Collection) content;
-        } else if (content instanceof List<Object>) {
-            return ImmutableV1.of((List<Object>) content);
-        } else if (content instanceof Iterable<Object>) {
-            return ImmutableV1.of((Iterable<Object>) content);
-        } else {
-            return ImmutableV1.of(new List<Object> { content });
-       }
+    /**
+     * @description
+     * <p>
+     * Returns the value assigned to the Optional as a Collection allowing the functionality of ArrayV1 to be used.
+     * <p>
+     * If the Optional is un-assigned, the collection represented by the argument is used.
+     *
+     * @param other Fallback collection to use if Optional has no value.
+     *
+     * @return A Collection representing the value.
+     */
+    global ImmutableV1.Collection collection(final Object other) {
+        return collect(orElse(other));
     }
 
     /**
@@ -190,5 +195,17 @@ global with sharing class OptionalV1 {
      */
     global OptionalV1 then(final OptionalV1.Function function) {
         return function.apply(this);
+    }
+
+    private ImmutableV1.Collection collect(final Object value) {
+        if (value instanceof ImmutableV1.Collection) {
+            return (ImmutableV1.Collection) value;
+        } else if (value instanceof List<Object>) {
+            return ImmutableV1.of((List<Object>) value);
+        } else if (value instanceof Iterable<Object>) {
+            return ImmutableV1.of((Iterable<Object>) value);
+        } else {
+            return ImmutableV1.of(new List<Object> { value });
+        }
     }
 }
