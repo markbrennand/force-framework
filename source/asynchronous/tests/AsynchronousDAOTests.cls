@@ -38,7 +38,7 @@ public with sharing class AsynchronousDAOTests {
             }
 
             try {
-                extended.countSchedulableObjects();
+                extended.countSchedulableObjects(1);
                 Assert.fail();
             } catch(AsynchronousV1.APIException ae) {
                 Assert.areEqual('Access denied', ae.getMessage());
@@ -357,23 +357,26 @@ public with sharing class AsynchronousDAOTests {
 
             insert new List<AsynchronousJob__c> { job1, job2, job3, job4, job5, job6 };
 
-            Assert.areEqual(2, AsynchronousDAO.impl.countSchedulableObjects());
+            Assert.areEqual(0, AsynchronousDAO.impl.countSchedulableObjects(0));
+            Assert.areEqual(1, AsynchronousDAO.impl.countSchedulableObjects(1));
+            Assert.areEqual(2, AsynchronousDAO.impl.countSchedulableObjects(2));
+            Assert.areEqual(2, AsynchronousDAO.impl.countSchedulableObjects(3));
 
             job1.Status__c = AsynchronousV1.Status.QUEUED.name();
             upsert job1;
-            Assert.areEqual(3, AsynchronousDAO.impl.countSchedulableObjects());
+            Assert.areEqual(3, AsynchronousDAO.impl.countSchedulableObjects(3));
 
             job4.Status__c = AsynchronousV1.Status.SUCCEEDED.name();
             upsert job4;
-            Assert.areEqual(2, AsynchronousDAO.impl.countSchedulableObjects());
+            Assert.areEqual(2, AsynchronousDAO.impl.countSchedulableObjects(2));
 
             job3.Status__c = AsynchronousV1.Status.FAILED.name();
             upsert job3;
-            Assert.areEqual(2, AsynchronousDAO.impl.countSchedulableObjects());
+            Assert.areEqual(2, AsynchronousDAO.impl.countSchedulableObjects(2));
 
             job3.Status__c = AsynchronousV1.Status.CANCELLED.name();
             upsert job3;
-            Assert.areEqual(2, AsynchronousDAO.impl.countSchedulableObjects());
+            Assert.areEqual(2, AsynchronousDAO.impl.countSchedulableObjects(2));
 
             TriggerV1.enable(AsynchronousJobSubscriber.Factory.class);
         }

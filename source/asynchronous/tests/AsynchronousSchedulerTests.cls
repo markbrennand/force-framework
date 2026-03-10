@@ -340,7 +340,7 @@ public with sharing class AsynchronousSchedulerTests {
         }
 
         MockerV1.Method mocked = MockerV1.of(AsynchronousDAO.class)
-                .whenNoArguments()
+                .whenArgument(1)
                     .forMethod('countSchedulableObjects')
                         .called(jobsThatShouldBeStarted.isEmpty() ? 1 : 0)
                         .returns(1)

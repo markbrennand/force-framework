@@ -18,7 +18,7 @@ public with sharing virtual class AsynchronousDAOMockable implements Asynchronou
         throw new AsynchronousV1.APIException('Access denied');
     }
 
-    public Integer countSchedulableObjects() {
+    public Integer countSchedulableObjects(final Integer maximumToReturn) {
         throw new AsynchronousV1.APIException('Access denied');
     }
 

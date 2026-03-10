@@ -41,6 +41,7 @@ public with sharing class AsynchronousLWCImpl {
         ) {
             final QueryV1.API query = QueryV1.of(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.USER_MODE)
+                    .returning(AsynchronousJob__c.Id)
                     .returning(AsynchronousJob__c.ApexJobId__c)
                     .returning(AsynchronousJob__c.Name)
                     .returning(AsynchronousJob__c.Reference__c)

@@ -78,9 +78,11 @@ public with sharing virtual class AsynchronousDAO extends AsynchronousDAOMockabl
          * The remaining objects must includes all those that are in QUEUED or RUNNING state. The RUNNING must
          * be included as their job may fail and they will be scheduled to re-run if they have re-tries left.
          *
-         * @return The number of objects that are scheduled or are running.
+         * @param maximumToCount The maximum number of jobs to include in the count.
+         *
+         * @return The number of objects that are scheduled or are running bounded by the maximum number argument.
          */
-        Integer countSchedulableObjects();
+        Integer countSchedulableObjects(final Integer maximumToCount);
 
         /**
          * @description

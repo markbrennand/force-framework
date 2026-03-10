@@ -25,7 +25,16 @@ export default class AsynchronousJobList extends LightningElement {
     _timerId;
 
     columns = [
-        { label: 'Name', fieldName: 'Name' },
+        {
+          label: 'Name',
+          fieldName: 'jobUrl',
+          type: 'url',
+          typeAttributes: {
+            label: { fieldName: 'Name' },
+            target: '_blank',
+            tooltip: 'View'
+          }
+        },
         { label: 'Apex Job', fieldName: 'ApexJobId__c' },
         { label: 'Owner', fieldName: 'Owner' },
         { label: 'Reference', fieldName: 'Reference__c' },
@@ -92,12 +101,18 @@ export default class AsynchronousJobList extends LightningElement {
             };
 
             try {
-                return await getJobs({
+                const records = await getJobs({
                     filters: filters,
                     ordering: this.sortedBy + ' ' + this.sortedDirection,
                     offset: 0,
                     max: MAX_TO_FETCH
                 });
+
+                return records.map(record => ({
+                    ...record,
+                    jobUrl: '/' + record.Id
+                }));
+
             } catch(error) {
                 this.dispatchEvent(
                     new ShowToastEvent(

@@ -243,14 +243,15 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
             );
 
         } else {
-            final Set<String> newJobsToStart = getJobIdsToStart((Integer) configuration.get(MAXIMUM_JOBS_TO_START_PROPERTY));
-            if (newJobsToStart.isEmpty() && (AsynchronousDAO.impl.countSchedulableObjects() == 0)) {
+            final Integer maximumJobs = (Integer) configuration.get(MAXIMUM_JOBS_TO_START_PROPERTY);
+            final Set<String> newJobsToStart = getJobIdsToStart(maximumJobs);
+            if (newJobsToStart.isEmpty() && (AsynchronousDAO.impl.countSchedulableObjects(maximumJobs) == 0)) {
                 return;
             }
 
             asyncJob = AsynchronousAPI.impl.createJob(
                     RunNextAvailable.class,
-                    null,
+                    'Scheduler',
                     0,
                     0,
                     new Map<String, String> { AsynchronousFinalizer.JOBS_TO_START => JSON.serialize(newJobsToStart) }

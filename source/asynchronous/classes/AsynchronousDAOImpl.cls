@@ -92,9 +92,11 @@ public with sharing class AsynchronousDAOImpl {
          * <p>
          * The AsynchronousJob__c objects are queried by QUEUED and RUNNING status.
          *
+         * @param maximumToCount The maximum number of jobs to include in the count.
+         *
          * @return The number of objects that are scheduled or are running.
          */
-        public Integer countSchedulableObjects() {
+        public Integer countSchedulableObjects(final Integer maximumToCount) {
             final Set<String> schedulableStatuses = new Set<String> {
                     AsynchronousV1.Status.QUEUED.name(),
                     AsynchronousV1.Status.RUNNING.name()
@@ -108,6 +110,7 @@ public with sharing class AsynchronousDAOImpl {
                             'schedulableStatuses' => schedulableStatuses,
                             'schedulerClass' => AsynchronousScheduler.RunNextAvailable.class.getName()
                     })
+                    .max(maximumToCount)
                     .execute()
                     .orElse(0);
         }
@@ -247,5 +250,4 @@ public with sharing class AsynchronousDAOImpl {
             return new API();
         }
     }
-
 }

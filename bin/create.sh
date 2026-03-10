@@ -3,7 +3,7 @@
 [[ x"${2}" = x"" ]] && {
     readonly alias="${1}"
 } || {
-    readonly devhub="${2}"
+    readonly devhub="${1}"
     readonly alias="${2}"
 }
 

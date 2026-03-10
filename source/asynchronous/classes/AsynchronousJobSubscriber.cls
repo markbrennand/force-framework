@@ -108,13 +108,13 @@ public with sharing class AsynchronousJobSubscriber {
         /**
          * @description
          * <p>
-         * Is AsynchronousJob__c object runnable the Scheduler.
+         * Is AsynchronousJob__c object runnable and not the Scheduler.
          *
          * @param element The AsynchronousJob__c object.
          * @param currentValue The value accumulated over the array iteration.
          * @param index The positional index of the array element.
          *
-         * @return Optional of true if job is to be deleted.
+         * @return Optional of true if job is to be started.
          */
         public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final AsynchronousJob__c asyncObject = (AsynchronousJob__c) element;

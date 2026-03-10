@@ -185,6 +185,28 @@ global with sharing class DependencyV1 {
     /**
      * @description
      * <p>
+     * Return a validation result based on whether the isOfType parameter indicates that the implementation is of the
+     * required type.
+     *
+     * @param isOfType True if the implementation is of the required type.
+     * @param isForTypeAnInterface True if the required type is an interface.
+     * @param forType The type the implementation is expected to be of.
+     * @param withImpl The type of the implementation.
+     *
+     * @return The validation result.
+     */
+    global static ValidationResult validationResult(
+            final Boolean isOfType,
+            final Boolean isForTypeAnInterface,
+            final Type forType,
+            final Type withImpl
+    ) {
+        return DependencyHelper.buildValidationResult(isOfType, isForTypeAnInterface, forType, withImpl);
+    }
+
+    /**
+     * @description
+     * <p>
      * Forces the custom bindings to be reloaded.
      */
     global static void reload() {
