@@ -47,9 +47,9 @@ public with sharing class AsynchronousHelperImpl {
                     RetryNumber__c = asyncObject.RetryNumber__c,
                     StatusOnError__c = asyncObject.Status__c,
                     ApexJobId__c = asyncObject.ApexJobId__c,
-                    ExceptionType__c = exc.getCause().getTypeName(),
-                    ExceptionMessage__c = exc.getCause().getMessage(),
-                    ExceptionStackTrace__c = exc.getCause().getStackTraceString()
+                    ExceptionType__c = truncate(exc.getCause().getTypeName(), AsynchronousJobException__c.ExceptionType__c),
+                    ExceptionMessage__c = truncate(exc.getCause().getMessage(), AsynchronousJobException__c.ExceptionMessage__c),
+                    ExceptionStackTrace__c = truncate(exc.getCause().getStackTraceString(), AsynchronousJobException__c.ExceptionStackTrace__c)
             );
 
             AsynchronousDAO.impl.persistException(asyncError);
@@ -158,6 +158,29 @@ public with sharing class AsynchronousHelperImpl {
             } catch(Exception exc) {
                 startAsynchronousJob(asyncObject.Id);
             }
+        }
+
+        /**
+         * @description
+         * <p>
+         * Safely truncates a String to fit within the maximum length of a given SObject field.
+         * <p>
+         * Uses field describe to determine the allowed length and returns the input unchanged
+         * if it already fits; otherwise returns a substring limited to the field length.
+         *
+         * @param value The String value to potentially truncate.
+         * @param field The SObjectField whose length constraint will be applied.
+         *
+         * @return The original value if within limit; otherwise a substring of value whose length
+         *         is less than or equal to the field's maximum length.
+         */
+        private String truncate(final String value, final SObjectField field) {
+            if (value == null) {
+                return null;
+            }
+
+            final Integer maxLength = field.getDescribe().getLength();
+            return value.length() <= maxLength ? value : value.substring(0, maxLength);
         }
     }
 

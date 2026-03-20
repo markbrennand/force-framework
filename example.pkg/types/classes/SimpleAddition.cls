@@ -42,9 +42,9 @@ global with sharing class SimpleAddition {
     global with sharing class BindingCheck implements forcefw.DependencyV1.BindingCheck {
         public forcefw.DependencyV1.ValidationResult validate(final Type forType, final Type withImpl) {
             if (forcefw.TypesV1.newInstance(withImpl) instanceof API) {
-                return new forcefw.DependencyV1.ValidationResult(true, null);
+                return forcefw.DependencyV1.valid();
             } else {
-                return new forcefw.DependencyV1.ValidationResult(false, 'Type ' + withImpl.getName() + ' does not implement SimpleAddition.API');
+                return forcefw.DependencyV1.invalid('Type ' + withImpl.getName() + ' does not implement SimpleAddition.API');
             }
         }
     }

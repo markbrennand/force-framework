@@ -1,13 +1,13 @@
 /**
  * @description
  * <p>
- * Helper class providing common utility methods.
+ * Copy of Common Helper class providing common utility methods.
  * <p>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
  * @author Mark Brennand
  */
-public with sharing class CommonHelper {
+public with sharing class CommonHelperCopy {
 
     /**
      * @description The name of the namespace when packaged.
@@ -40,7 +40,7 @@ public with sharing class CommonHelper {
      * @return The namespace of the objects, including the __.
      */
     public static String getSObjectNamespace() {
-        return Binding__c.SObjectType.getDescribe(SObjectDescribeOptions.DEFERRED).name.replace('Binding__c', '');
+        return forcefw__Binding__c.SObjectType.getDescribe(SObjectDescribeOptions.DEFERRED).name.replace('Binding__c', '');
     }
 
     /**
@@ -87,7 +87,7 @@ public with sharing class CommonHelper {
      * <p>
      * Converts a collection element to its String equivalent.
      */
-    public with sharing class ToString extends ArrayV1.Callback {
+    public with sharing class ToString extends forcefw.ArrayV1.Callback {
 
         /**
          * @description
@@ -100,7 +100,7 @@ public with sharing class CommonHelper {
          *
          * @return The List of Strings.
          */
-        public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
+        public override forcefw.OptionalV1 function(final Object element, final forcefw.OptionalV1 currentValue, final Integer index) {
             final Object collection = currentValue.get();
             if (collection instanceof List<String>) {
                 ((List<String>) collection).add(element.toString());
@@ -115,7 +115,7 @@ public with sharing class CommonHelper {
      * @description
      * Adds elements of an Iterable of unknown type to a List of a specific type.
      */
-    public with sharing class ToList implements OptionalV1.Function {
+    public with sharing class ToList implements forcefw.OptionalV1.Function {
         private final List<Object> result;
 
         /**
@@ -138,12 +138,12 @@ public with sharing class CommonHelper {
          *
          * @return An Optional containing a List built from the Collection's elements.
          */
-        public OptionalV1 apply(final OptionalV1 value) {
+        public forcefw.OptionalV1 apply(final forcefw.OptionalV1 value) {
             if (!value.isPresent()) {
                 return value;
             }
 
-            return OptionalV1.of(((ImmutableV1.Collection) value.get()).toList(result));
+            return forcefw.OptionalV1.of(((forcefw.ImmutableV1.Collection) value.get()).toList(result));
         }
     }
 }

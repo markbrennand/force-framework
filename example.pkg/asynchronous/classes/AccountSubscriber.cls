@@ -10,12 +10,8 @@ public with sharing class AccountSubscriber {
 
         public void onEvent(forcefw.TriggerV1.Event event) {
             if (event.isAfter()) {
-                AccountContactTotals.startCalculationJob(event.getRecords(), new Set<Id>());
+                // UNCOMMENT TO RUN ASYNCHRONOUSLY AccountContactTotals.startCalculationJob(event.getRecords(), new Set<Id>());
             }
-        }
-
-        public Set<forcefw.TriggerV1.Operation> forOperations() {
-            return new Set<forcefw.TriggerV1.Operation> { forcefw.TriggerV1.Operation.INSERTING, forcefw.TriggerV1.Operation.UPDATING };
         }
     }
 

@@ -104,25 +104,27 @@ global with sharing class AccountContactTotals extends forcefw.AsynchronousV1.Ru
      * @param contacts The modified Contacts.
      * @param event The event representing the trigger invocation.
      */
-    public static void startCalculationJob(final List<Contact> contacts, final forcefw.TriggerV1.Event event) {
+    public static void startCalculationJob(final forcefw.ImmutableV1.Collection contacts, final forcefw.TriggerV1.Event event) {
         final List<Account> accounts = new List<Account>();
         final Set<Id> orphanedContactIds = new Set<Id>();
 
-        if (contacts == null) {
-            for (Contact deletedContact : (List<Contact>) event.getOldValues()) {
+        if (event.getOperation() == forcefw.TriggerV1.Operation.DELETING) {
+            for (Object next : contacts) {
+                final Contact deletedContact = (Contact) next;
                 if (deletedContact.AccountId != null) {
                     accounts.add(new Account(Id = deletedContact.AccountId));
                 }
             }
 
         } else {
-            for (Contact contact : contacts) {
+            for (Object next : contacts) {
+                final Contact contact = (Contact) next;
                 if (contact.AccountId == null) {
                     orphanedContactIds.add(contact.Id);
                 }
 
                 if (event.hasOldValue(contact)) {
-                    final Contact oldValue = (Contact) event.getOldValue(contact);
+                    final Contact oldValue = (Contact) event.getOldValue(contact).get();
                     if (contact.AccountId != oldValue.AccountId) {
                         if (contact.AccountId != null) {
                             accounts.add(new Account(Id = contact.AccountId));

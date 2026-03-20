@@ -265,7 +265,7 @@ public with sharing class AsynchronousSchedulerTests {
             AsynchronousAPI.impl = (AsynchronousAPI) MockerV1.of(AsynchronousAPI.class)
                     .whenArguments(
                             AsynchronousScheduler.RunNextAvailable.class,
-                            null,
+                            'Scheduler(1)',
                             0,
                             0,
                             new Map<String, String>{

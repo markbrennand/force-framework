@@ -48,9 +48,9 @@ global with sharing class SimpleAddition {
     global with sharing class BindingCheck implements DependencyV1.BindingCheck {
         public DependencyV1.ValidationResult validate(final Type forType, final Type withImpl) {
             if (TypesV1.newInstance(withImpl) instanceof API) {
-                return new DependencyV1.ValidationResult(true, null);
+                return DependencyV1.valid();
             } else {
-                return new DependencyV1.ValidationResult(false, 'Type ' + withImpl.getName() + ' does not implement SimpleAddition.API');
+                return DependencyV1.invalid('Type ' + withImpl.getName() + ' does not implement SimpleAddition.API');
             }
         }
     }

@@ -46,6 +46,13 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
     /**
      * @description
      * <p>
+     * Reference to assign to async. jab running Scheduler.
+     */
+    private final Static String SCHEDULER_JOB_REFERENCE = 'Scheduler({0})';
+
+    /**
+     * @description
+     * <p>
      * The number of jobs to be run that the Scheduler should select in the queue method.
      */
     @TestVisible
@@ -236,7 +243,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
         if (!jobsLeftToStart.isEmpty()) {
             asyncJob = AsynchronousAPI.impl.createJob(
                     RunNextAvailable.class,
-                    null,
+                    String.format(SCHEDULER_JOB_REFERENCE, new List<Object> { jobsLeftToStart.size() }),
                     0,
                     0,
                     new Map<String, String> { AsynchronousFinalizer.JOBS_TO_START => JSON.serialize(jobsLeftToStart) }
@@ -251,7 +258,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
 
             asyncJob = AsynchronousAPI.impl.createJob(
                     RunNextAvailable.class,
-                    'Scheduler',
+                    String.format(SCHEDULER_JOB_REFERENCE, new List<Object> { newJobsToStart.size() }),
                     0,
                     0,
                     new Map<String, String> { AsynchronousFinalizer.JOBS_TO_START => JSON.serialize(newJobsToStart) }

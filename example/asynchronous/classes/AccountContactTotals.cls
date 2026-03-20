@@ -91,7 +91,6 @@ global with sharing class AccountContactTotals extends AsynchronousV1.Runnable {
      * global.
      */
     global with sharing class Executor implements TypesV1.Factory {
-
         public Object newInstance() {
             return new AccountContactTotals();
         }
@@ -104,25 +103,27 @@ global with sharing class AccountContactTotals extends AsynchronousV1.Runnable {
      * @param contacts The modified Contacts.
      * @param event The event created by the trigger.
      */
-    public static void startCalculationJob(final List<Contact> contacts, final TriggerV1.Event event) {
+    public static void startCalculationJob(final ImmutableV1.Collection contacts, final TriggerV1.Event event) {
         final List<Account> accounts = new List<Account>();
         final Set<Id> orphanedContactIds = new Set<Id>();
 
         if (event.getOperation() == TriggerV1.Operation.DELETING) {
-            for (Contact deletedContact : contacts) {
+            for (Object next : contacts) {
+                final Contact deletedContact = (Contact) next;
                 if (deletedContact.AccountId != null) {
                     accounts.add(new Account(Id = deletedContact.AccountId));
                 }
             }
 
         } else {
-            for (Contact contact : contacts) {
+            for (Object next : contacts) {
+                final Contact contact = (Contact) next;
                 if (contact.AccountId == null) {
                     orphanedContactIds.add(contact.Id);
                 }
 
                 if (event.hasOldValue(contact)) {
-                    final Contact oldValue = (Contact) event.getOldValue(contact);
+                    final Contact oldValue = (Contact) event.getOldValue(contact).get();
                     if (contact.AccountId != oldValue.AccountId) {
                         if (contact.AccountId != null) {
                             accounts.add(new Account(Id = contact.AccountId));

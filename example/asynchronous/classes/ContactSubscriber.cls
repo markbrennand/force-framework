@@ -16,12 +16,8 @@ public with sharing class ContactSubscriber {
 
         public void onEvent(TriggerV1.Event event) {
             if (event.isAfter()) {
-                AccountContactTotals.startCalculationJob(event.getRecords(), event);
+                // UNCOMMENT TO RUN ASYNCHRONOUSLY AccountContactTotals.startCalculationJob(event.getRecords(), event);
             }
-        }
-
-        public Set<TriggerV1.Operation> forOperations() {
-            return TriggerV1.ALL_OPERATIONS;
         }
     }
 

@@ -11,7 +11,7 @@
         <value xsi:type="xsd:double">1.0</value>
     </values>
     <values>
-        <field>forcefw__ObjectKey__c</field>
+        <field>forcefw__ObjectName__c</field>
         <value xsi:type="xsd:string">Contact</value>
     </values>
     <values>

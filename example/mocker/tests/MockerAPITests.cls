@@ -5,6 +5,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 global with sharing class MockerAPITests {
 
     /**
@@ -20,10 +21,10 @@ global with sharing class MockerAPITests {
                 .whenNoArguments()
                     .forMethod('getCurrentTime')
                         .called(1)
-                        .returns(Datetime.now())
+                        .returns(CommonHelper.now())
                 .mock();
 
-        Assert.isTrue(Datetime.now() >= mockedAPI.getCurrentTime());
+        Assert.isTrue(CommonHelper.now() == mockedAPI.getCurrentTime());
 
         // Check that the mocked method has been called the correct number of times.
         MockerV1.validate();
@@ -70,13 +71,13 @@ global with sharing class MockerAPITests {
                 .whenNoArguments()
                     .forMethod('getCurrentTime')
                         .called(1)
-                        .returns(Datetime.now())
+                        .returns(CommonHelper.now())
                     .forMethod('getOrganizationId')
                         .called(1)
                         .returns(MockerV1.fakeId(Organization.SObjectType))
                 .mock();
 
-        Assert.isTrue(Datetime.now() >= mockedAPI.getCurrentTime());
+        Assert.isTrue(CommonHelper.now() == mockedAPI.getCurrentTime());
         Assert.isTrue(mockedAPI.getOrganizationId().endsWith('01'));
 
         // Check that the mocked method has been called the correct number of times.
@@ -99,7 +100,7 @@ global with sharing class MockerAPITests {
                 .mock();
 
         // Pass a date which cannot match that of the argument set for the mocked method.
-        mockedAPI.setCurrentTime(Datetime.now().addDays(1));
+        mockedAPI.setCurrentTime(CommonHelper.now().addDays(1));
 
         // We can pass null in as the argument.
         mockedAPI.setCurrentTime(null);
@@ -114,13 +115,13 @@ global with sharing class MockerAPITests {
                 .mock();
 
         // Pass a date which cannot match that of the argument set for the mocked method.
-        mockedAPI.setCurrentTime(Datetime.now().addDays(1));
+        mockedAPI.setCurrentTime(CommonHelper.now().addDays(1));
 
         // Passing a null date should not match the parameter type.
         try {
             mockedAPI.setCurrentTime(null);
             Assert.fail();
-        } catch(Assertion.AssertionException ae) {}
+        } catch(AssertionV1.AssertionException ae) {}
 
         MockerV1.validate();
     }
@@ -232,7 +233,7 @@ global with sharing class MockerAPITests {
                 .whenNoArguments()
                     .forMethod('getCurrentTime')
                         .called(5)
-                        .returns(Datetime.now())
+                        .returns(CommonHelper.now())
                 .mock();
 
         ExampleService service = new ExampleService(mockedAPI);

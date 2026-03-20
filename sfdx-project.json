@@ -1,8 +1,8 @@
 {
   "packageDirectories": [
     {
-      "versionName": "Release 1.1",
-      "versionNumber": "1.1.0.NEXT",
+      "versionName": "Release 1.2",
+      "versionNumber": "1.2.1.NEXT",
       "path": "source",
       "default": true,
       "package": "force-fw",
@@ -19,6 +19,10 @@
     "force-fw@1.1.0-16": "04tgL0000008TsrQAE",
     "force-fw@1.1.0-17": "04tgL0000009jp7QAA",
     "force-fw@1.1.0-18": "04tgL000000CKhJQAW",
-    "force-fw@1.1.0-19": "04tgL000000CN8vQAG"
+    "force-fw@1.1.0-19": "04tgL000000CN8vQAG",
+    "force-fw@1.2.0-1": "04tgL000000CNfBQAW",
+    "force-fw@1.2.1-1": "04tgL000000CZDJQA4",
+    "force-fw@1.2.1-2": "04tgL000000CfnNQAS",
+    "force-fw@1.2.1-3": "04tgL000000CjW1QAK"
   }
 }

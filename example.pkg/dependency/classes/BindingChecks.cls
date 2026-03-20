@@ -15,28 +15,22 @@ global with sharing class BindingChecks {
     global class QueryBindingCheck implements forcefw.DependencyV1.BindingCheck {
         public forcefw.DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
             if (forType == QueryClasses.QueryInterface.class) {
-                if (forcefw.TypesV1.newInstance(withImpl) instanceof QueryClasses.QueryInterface) {
-                    return new forcefw.DependencyV1.ValidationResult(true, null);
-                } else {
-                    return new forcefw.DependencyV1.ValidationResult(
-                            false,
-                            'Class "' + withImpl.getName() + '" does not implement "' + forType.getName() + '"'
-                    );
-                }
-            } else if (forType == QueryClasses.AbstractQuery.class) {
-                if (forcefw.TypesV1.newInstance(withImpl) instanceof QueryClasses.AbstractQuery) {
-                    return new forcefw.DependencyV1.ValidationResult(true, null);
-                } else {
-                    return new forcefw.DependencyV1.ValidationResult(
-                            false,
-                            'Class "' + withImpl.getName() + '" does not extend "' + forType.getName() + '"'
-                    );
-                }
-            } else {
-                return new forcefw.DependencyV1.ValidationResult(
-                        false,
-                        'Type "' + forType.getName() + '" is not supported for validation'
+                return forcefw.DependencyV1.validationResult(
+                        forcefw.TypesV1.newInstance(withImpl) instanceof QueryClasses.QueryInterface,
+                        true,
+                        forType,
+                        withImpl
+
                 );
+            } else if (forType == QueryClasses.AbstractQuery.class) {
+                return forcefw.DependencyV1.validationResult(
+                        forcefw.TypesV1.newInstance(withImpl) instanceof QueryClasses.AbstractQuery,
+                        false,
+                        forType,
+                        withImpl
+                );
+            } else {
+                return forcefw.DependencyV1.invalid('Type "' + forType.getName() + '" is not supported for validation');
             }
         }
     }
@@ -54,21 +48,15 @@ global with sharing class BindingChecks {
             switch on forType.getName() {
                 when 'Map<String,Integer>' {
                     if (impl instanceof Map<String, Integer>) {
-                        return new forcefw.DependencyV1.ValidationResult(true, null);
+                        return forcefw.DependencyV1.valid();
                     }
                 }
                 when else {
-                    return new forcefw.DependencyV1.ValidationResult(
-                            false,
-                            'Type "' + withImpl + '" can not be validated'
-                    );
+                    return forcefw.DependencyV1.invalid('Type "' + withImpl + '" can not be validated');
                 }
             }
 
-            return new forcefw.DependencyV1.ValidationResult(
-                    false,
-                    'Implementation "' + withImpl.getName() + '" is not an instance of "' + forType.getName() + '"'
-            );
+            return forcefw.DependencyV1.invalid('Implementation "' + withImpl.getName() + '" is not an instance of "' + forType.getName() + '"');
         }
     }
 
@@ -80,14 +68,12 @@ global with sharing class BindingChecks {
     */
     global with sharing class AccountManagerBindingCheck implements forcefw.DependencyV1.BindingCheck {
         public forcefw.DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
-            if (forcefw.TypesV1.newInstance(withImpl) instanceof AccountClasses.AccountManager) {
-                return new forcefw.DependencyV1.ValidationResult(true, null);
-            } else {
-                return new forcefw.DependencyV1.ValidationResult(
-                        false,
-                        'Implementation "' + withImpl.getName() + '" is not an instance of "' + forType.getName() + '"'
-                );
-            }
+            return forcefw.DependencyV1.validationResult(
+                    forcefw.TypesV1.newInstance(withImpl) instanceof AccountClasses.AccountManager,
+                    true,
+                    forType,
+                    withImpl
+            );
         }
     }
 }

@@ -5,6 +5,7 @@
  * @author Mark Brennand
  */
 @IsTest
+@SuppressWarnings('PMD')
 public with sharing class MockerAPITests {
 
     /**
@@ -20,10 +21,10 @@ public with sharing class MockerAPITests {
                 .whenNoArguments()
                     .forMethod('getCurrentTime')
                         .called(1)
-                        .returns(Datetime.now())
+                        .returns(CommonHelperCopy.now())
                 .mock();
 
-        Assert.isTrue(Datetime.now() >= mockedAPI.getCurrentTime());
+        Assert.isTrue(CommonHelperCopy.now() == mockedAPI.getCurrentTime());
 
         // Check that the mocked method has been called the correct number of times.
         forcefw.MockerV1.validate();
@@ -70,14 +71,14 @@ public with sharing class MockerAPITests {
                 .whenNoArguments()
                     .forMethod('getCurrentTime')
                         .called(1)
-                        .returns(Datetime.now())
+                        .returns(CommonHelperCopy.now())
                     .forMethod('getOrganizationId')
                         .called(1)
                         .returns(forcefw.MockerV1.fakeId(Organization.SObjectType))
                 .mock();
 
 
-        Assert.isTrue(Datetime.now() >= mockedAPI.getCurrentTime());
+        Assert.isTrue(CommonHelperCopy.now() == mockedAPI.getCurrentTime());
         Assert.isTrue(mockedAPI.getOrganizationId().endsWith('01'));
 
         // Check that the mocked method has been called the correct number of times.
@@ -97,14 +98,14 @@ public with sharing class MockerAPITests {
         // A Datetime comparator is registered for the argument which checks that only the Type of the arguments match.
         // The method must be called once.
         MockerTestAPI mockedAPI = (MockerTestAPI) forcefw.MockerV1.of(new MockerFactory())
-                .whenArgument(Datetime.now())
+                .whenArgument(CommonHelperCopy.now())
                     .withComparators(new List<Comparator<Object>> { new DatetimeComparator() })
                         .forMethod('setCurrentTime')
                             .called(1)
                 .mock();
 
         // Pass a date which cannot match that of the argument set for the mocked method.
-        mockedAPI.setCurrentTime(Datetime.now().addDays(1));
+        mockedAPI.setCurrentTime(CommonHelperCopy.now().addDays(1));
 
         // Check that the mocked method has been called the correct number of times.
         forcefw.MockerV1.validate();
@@ -126,7 +127,7 @@ public with sharing class MockerAPITests {
                 .mock();
 
         // Pass a date which cannot match that of the argument set for the mocked method.
-        mockedAPI.setCurrentTime(Datetime.now().addDays(1));
+        mockedAPI.setCurrentTime(CommonHelperCopy.now().addDays(1));
 
         // We can pass null in as the argument.
         mockedAPI.setCurrentTime(null);
@@ -141,13 +142,13 @@ public with sharing class MockerAPITests {
                 .mock();
 
         // Pass a date which cannot match that of the argument set for the mocked method.
-        mockedAPI.setCurrentTime(Datetime.now().addDays(1));
+        mockedAPI.setCurrentTime(CommonHelperCopy.now().addDays(1));
 
         // Passing a null date should not match the parameter type.
         try {
             mockedAPI.setCurrentTime(null);
             Assert.fail();
-        } catch(forcefw.Assertion.AssertionException ae) {}
+        } catch(forcefw.AssertionV1.AssertionException ae) {}
 
         forcefw.MockerV1.validate();
     }
@@ -259,7 +260,7 @@ public with sharing class MockerAPITests {
                 .whenNoArguments()
                     .forMethod('getCurrentTime')
                         .called(5)
-                        .returns(Datetime.now())
+                        .returns(CommonHelperCopy.now())
                 .mock();
 
         ExampleService service = new ExampleService(mockedAPI);

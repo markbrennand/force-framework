@@ -13,18 +13,12 @@ public with sharing class ContactSubscriber {
     private ContactSubscriber() {}
 
     private with sharing class Implementation implements forcefw.TriggerV1.Subscriber {
-
         public void onEvent(forcefw.TriggerV1.Event event) {
             if (event.isAfter()) {
-                AccountContactTotals.startCalculationJob(event.getRecords(), event);
+                // UNCOMMENT TO RUN ASYNCHRONOUSLY AccountContactTotals.startCalculationJob(event.getRecords(), event);
             }
         }
-
-        public Set<forcefw.TriggerV1.Operation> forOperations() {
-            return forcefw.TriggerV1.ALL_OPERATIONS;
-        }
     }
-
 
     /**
      * @description

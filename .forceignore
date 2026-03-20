@@ -1,1 +1,10 @@
 **/README.md
+
+# Added by Illuminated Cloud
+/.illuminatedCloud/
+**/*.ts
+**/tsconfig*.json
+**/*.tsbuildinfo
+**/eslint.config.mjs
+
+**/graphql.config.yml
