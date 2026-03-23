@@ -517,4 +517,21 @@ global with sharing class QueryV1 {
     global static QueryV1.AggregatedField aggregatedField(final String function, final SObjectField joinField, final SObjectField field, final String alias) {
         return QueryAPI.aggregatedField(OptionalV1.of(function), OptionalV1.of(joinField), field, alias);
     }
+
+    /**
+     * @description
+     * <p>
+     * Factory for producing a concrete implementation of the QueryV1.API at runtime.
+     * <p>
+     * This class is wired into a dependency injection mechanism via TypesV1.Factory.
+     * The DI container invokes newInstance() to obtain the active Query API implementation.
+     * <p>
+     * Returned instance is expected to implement all QueryV1.API behaviors (query building,
+     * security mode, returning fields, ordering, grouping, bindings, and execution).
+     */
+    public with sharing class APIFactory implements TypesV1.Factory {
+        public Object newInstance() {
+            return new QueryImpl.Factory().newInstance();
+        }
+    }
 }

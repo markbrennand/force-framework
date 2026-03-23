@@ -126,8 +126,19 @@ public with sharing virtual class TriggerAPI extends TriggerAPIMockable {
     @SuppressWarnings('PMD.EmptyStatementBlock')
     protected TriggerAPI() {}
 
-    // Set the default implementation of API. This can be overridden using a Dependency Injection Binding.
-    static {
-        DependencyV1.bind(API.class, TriggerImpl.Factory.class);
+    /**
+    * @description
+    * <p>
+    * Dependency injection factory for the Trigger API implementation.
+    * <p>
+    * This factory is registered with the dependency container (TypesV1/DependencyV1) and is responsible for
+    * producing the concrete implementation of the Trigger API. When DependencyV1.inject(TriggerAPI.API.class)
+    * is invoked, the container will use this factory to create and return an instance produced by
+    * TriggerImpl.Factory.
+    */
+    public with sharing class APIFactory implements TypesV1.Factory {
+        public Object newInstance() {
+            return new TriggerImpl.Factory().newInstance();
+        }
     }
 }

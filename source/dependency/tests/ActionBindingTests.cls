@@ -37,7 +37,23 @@ public with sharing class ActionBindingTests {
                         'Unexpected exception: ' + de
                 );
             }
+        }
+    }
 
+    @IsTest
+    private static void testFactoryInstantiation() {
+        TestHelper.setNOW();
+        System.runAs(TestHelper.getManager(TESTING)) {
+            try {
+                DependencyV1.inject(BindingTestHelper.SubTestInterface1.class, 'Test');
+            } catch(DependencyV1.APIException ae) {
+                Assert.isTrue(testHelper.textContains(
+                        'Default implementation for BindingTestHelper.SubTestInterface1 must be a TypesV1.Factory',
+                        ae.getMessage()
+                ));
+            }
+
+            DependencyV1.inject(BindingTestHelper.SubTestInterface2.class, 'Test');
         }
     }
 
@@ -80,6 +96,7 @@ public with sharing class ActionBindingTests {
                 DependencyV1.inject(BindingTestHelper.TestInterface.class, 'NotTest');
                 Assert.fail();
             } catch (DependencyV1.APIException ae) {
+                System.debug(ae);
                 Assert.isTrue(
                         TestHelper.exceptionContains('Binding for BindingTestHelper.TestInterface with action NotTest not found in registry', ae),
                         'Unexpected exception: ' + ae

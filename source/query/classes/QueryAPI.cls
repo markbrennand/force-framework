@@ -166,9 +166,4 @@ public with sharing virtual class QueryAPI extends QueryAPIMockable {
             }
         }
     }
-
-    // Set the default implementation of API. This can be overridden using a Dependency Injection Binding.
-    static {
-        DependencyV1.bind(QueryV1.API.class, QueryImpl.Factory.class);
-    }
 }

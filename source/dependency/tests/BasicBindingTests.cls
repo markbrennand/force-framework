@@ -31,6 +31,23 @@ public with sharing class BasicBindingTests {
     }
 
     @IsTest
+    private static void testFactoryInstantiation() {
+        TestHelper.setNOW();
+        System.runAs(TestHelper.getManager(TESTING)) {
+            try {
+                DependencyV1.inject(BindingTestHelper.SubTestInterface1.class);
+            } catch(DependencyV1.APIException ae) {
+                Assert.isTrue(testHelper.textContains(
+                        'Default implementation for BindingTestHelper.SubTestInterface1 must be a TypesV1.Factory',
+                        ae.getMessage()
+                ));
+            }
+
+            DependencyV1.inject(BindingTestHelper.SubTestInterface2.class);
+        }
+    }
+
+    @IsTest
     private static void testValidation() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getManager(TESTING)) {

@@ -60,6 +60,12 @@ public with sharing class BindingTestHelper {
     public abstract with sharing class AbstractTest implements TestInterface {}
 
     @SuppressWarnings('PMD.ApexDoc')
+    public interface SubTestInterface1 extends TestInterface {}
+
+    @SuppressWarnings('PMD.ApexDoc')
+    public interface SubTestInterface2 extends TestInterface {}
+
+    @SuppressWarnings('PMD.ApexDoc')
     public with sharing class SingletonTest extends AbstractTest {
         private final String value;
 
@@ -152,6 +158,15 @@ public with sharing class BindingTestHelper {
     public with sharing class MapFactory implements TypesV1.Factory {
         public Object newInstance() {
             return new Map<String, Integer> { 'a' => 456, 'b' => 789 };
+        }
+    }
+
+    public with sharing class SubTestInterface1Factory {
+    }
+
+    public with sharing class SubTestInterface2Factory implements TypesV1.Factory {
+        public Object newInstance() {
+            return new PrototypeCustomTest();
         }
     }
 }

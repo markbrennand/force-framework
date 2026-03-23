@@ -21,14 +21,14 @@ public with sharing class ExampleRunnable extends AsynchronousV1.Runnable {
         Assert.isNotNull(job.getRetryNumber(), 'Job has no retry number');
         Assert.isNotNull(apexJobId, 'No Apex Job id');
 
+        if (job.getRetryNumber() == configuration.get('succeedOnRetryNumber')) {
+            return;
+        }
+
         String delay = job.getState().get('delay');
         if (!String.isEmpty(delay)) {
             Long endTime = System.currentTimeMillis() + Long.valueOf(delay);
             for (Long now = System.currentTimeMillis(); now < endTime; now = System.currentTimeMillis()) {}
-        }
-
-        if (job.getRetryNumber() == configuration.get('succeedOnRetryNumber')) {
-            return;
         }
 
         if (job.getState().get('action') == 'soql-201') {

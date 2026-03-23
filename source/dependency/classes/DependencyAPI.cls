@@ -14,10 +14,14 @@
  * a new implementation for each use an application, the implementing class should implement the Prototype
  * interface.
  * <p>
+ * If no binding is found and a class named by the interface or class to be injected with Factory appended to it
+ * exists, then this class is injected into the registry. The Factory class must implement the TypesV1.Factory
+ * interface. If not, an exception is thrown.
+ * <p>
  * The implementation of the API is hidden in the private Implementation class. The class is hidden so an application
  * cannot access the class to mis-use it.
  * <p>
- * All application access is restricted to the API instance variable INSTANCE. This ensures the application can only
+ * All application access is restricted to the API instance variable impl. This ensures the application can only
  * ever call the methods of the API interface.
  * <p>
  * The outer class implements the API only to allow it to be mocked. Any calls to the API method implementations

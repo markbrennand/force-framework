@@ -59,7 +59,12 @@ public with sharing class DependencyImpl {
 
             final Key key = new Key(forType);
             if (!registry.containsKey(key)) {
-                throw DependencyHelper.createException('Binding for', forType.getName(), OptionalV1.empty(), 'not found in registry');
+                final Type impl = getImplementation(forType);
+                if (impl == null) {
+                    throw DependencyHelper.createException('Binding for', forType.getName(), OptionalV1.empty(), 'not found in registry');
+                } else {
+                    bind(forType, impl);
+                }
             }
 
             return registry.get(key).newInstance();
@@ -82,7 +87,12 @@ public with sharing class DependencyImpl {
 
             final Key key = new ActionKey(forType, action);
             if (!registry.containsKey(key)) {
-                throw DependencyHelper.createException('Binding for', forType.getName(), OptionalV1.of(action), 'not found in registry');
+                final Type impl = getImplementation(forType);
+                if (impl == null) {
+                    throw DependencyHelper.createException('Binding for', forType.getName(), OptionalV1.of(action), 'not found in registry');
+                } else {
+                    bind(forType, action, impl);
+                }
             }
 
             return registry.get(key).newInstance();
@@ -237,6 +247,32 @@ public with sharing class DependencyImpl {
                 TypesV1.newInstance(withImpl);
             } catch(Exception e) {
                 throw DependencyHelper.createException('Implementation', withImpl.getName(), OptionalV1.empty(), 'must be instantiable');
+            }
+        }
+
+        /**
+         * @description
+         * <p>
+         * Resolves a default implementation Type for a given abstract/interface Type using a naming convention.
+         * <p>
+         * The convention appends the suffix 'Impl' to the fully qualified name of the requested Type.
+         * For example, for a requested type 'com.acme.services.FooService', this method looks for
+         * 'com.acme.services.FooServiceImpl' and returns its Type if it exists; otherwise returns null.
+         *
+         * @param forType The interface or abstract class Type to resolve an implementation for.
+         *
+         * @return The resolved implementation Type if found; null if no matching class exists.
+         */
+        private Type getImplementation(final Type forType) {
+            final Type factory = Type.forName(forType.getName() + 'Factory');
+            if (factory == null) {
+                return factory;
+            }
+
+            if (! (factory.newInstance() instanceof TypesV1.Factory)) {
+                throw new DependencyV1.APIException('Default implementation for ' + forType.getName() + ' must be a TypesV1.Factory');
+            } else {
+                return factory;
             }
         }
     }

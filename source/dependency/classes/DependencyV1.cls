@@ -14,6 +14,10 @@
  * a new implementation for each use an application, the implementing class should implement the Prototype
  * interface.
  * <p>
+ * If no binding is found and a class named by the interface or class to be injected with Factory appended to it
+ * exists, then this class is injected into the registry. The Factory class must implement the TypesV1.Factory
+ * interface. If not, an exception is thrown.
+ * <p>
  * All bound Types are stored in a registry. Each bound Type must have a BindingCheck implementation associated with it.
  * To associate the Type with the BindingCheck, create and deploy a BindingCheck__mdt metadata record. Any attempt
  * to add a binding to the registry for a Type with no associated BindingCheck will throw an Exception.

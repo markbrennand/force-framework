@@ -148,8 +148,26 @@ public with sharing virtual class AsynchronousDAO extends AsynchronousDAOMockabl
     @SuppressWarnings('PMD.EmptyStatementBlock')
     protected AsynchronousDAO() {}
 
-    // Set the default implementation of the API. This can be overridden using a Dependency Binding.
-    static {
-        DependencyV1.bind(API.class, AsynchronousDAOImpl.Factory.class);
+    /**
+     * @description
+     * <p>
+     * Factory for providing the concrete implementation of AsynchronousDAO.API via the platform
+     * dependency injection framework.
+     * <p>
+     * This class is registered with the DI registry (DependencyV1) as the provider for
+     * AsynchronousDAO.API and is responsible for returning an instance of the internal
+     * AsynchronousDAOImpl through its own factory. This indirection keeps the implementation
+     * hidden while allowing consumers to resolve the API interface.
+     * <p>
+     * Usage:
+     * <ul>
+     *   <li>DependencyV1.inject(AsynchronousDAO.API.class) returns the active implementation.</li>
+     *   <li>Tests can override AsynchronousDAO.impl to inject mocks.</li>
+     * </ul>
+     */
+    public with sharing class APIFactory implements TypesV1.Factory {
+        public Object newInstance() {
+            return new AsynchronousDAOImpl.Factory().newInstance();
+        }
     }
 }

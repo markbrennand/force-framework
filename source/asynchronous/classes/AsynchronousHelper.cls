@@ -111,8 +111,20 @@ public with sharing virtual class AsynchronousHelper extends AsynchronousHelperM
     @SuppressWarnings('PMD.EmptyStatementBlock')
     protected AsynchronousHelper() {}
 
-    // Set the default implementation of the API. This can be overridden using a Dependency Injection Binding.
-    static {
-        DependencyV1.bind(API.class, AsynchronousHelperImpl.Factory.class);
+    /**
+     * @description
+     * <p>
+     * Factory responsible for providing instances of the AsynchronousHelper API implementation.
+     * <p>
+     * This class integrates with the DependencyV1/Typesv1 DI framework. When DependencyV1 requests
+     * an instance for AsynchronousHelper.API, this factory delegates creation to the concrete
+     * implementation factory (AsynchronousHelperImpl.Factory). This indirection keeps the concrete
+     * implementation hidden while exposing only the API interface to consumers and allows tests to
+     * override bindings via DI.
+     */
+    public with sharing class APIFactory implements Typesv1.Factory {
+        public Object newInstance() {
+            return new AsynchronousHelperImpl.Factory().newInstance();
+        }
     }
 }

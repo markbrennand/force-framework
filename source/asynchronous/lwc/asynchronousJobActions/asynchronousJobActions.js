@@ -8,7 +8,6 @@ import deleteJobs from '@salesforce/apex/AsynchronousV1.deleteJobs';
 import runJobs from '@salesforce/apex/AsynchronousV1.runJobs';
 
 export default class AsynchronousJobActions extends LightningElement {
-    viewNotAllowed = true;
     deleteNotAllowed = true;
     runNotAllowed = true;
     _selectedRows = [];
@@ -18,15 +17,12 @@ export default class AsynchronousJobActions extends LightningElement {
         this._selectedRows = selected;
 
         if (selected.length === 0) {
-            this.viewNotAllowed = true;
             this.deleteNotAllowed = true;
             this.runNotAllowed = true;
         } else if (selected.length === 1) {
-            this.viewNotAllowed = false;
             this.deleteNotAllowed = false;
             this.runNotAllowed = !this._canRowBeRun(selected[0]);
         } else {
-            this.viewNotAllowed = true;
             this.deleteNotAllowed = false;
             this.runNotAllowed = false;
             selected.forEach(row => {
@@ -91,7 +87,6 @@ export default class AsynchronousJobActions extends LightningElement {
 
     _reset() {
         this._selectedRows = [];
-        this.viewNotAllowed = true;
         this.deleteNotAllowed = true;
         this.runNotAllowed = true;
         this.dispatchEvent(new CustomEvent('action'));

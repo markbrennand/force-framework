@@ -99,8 +99,9 @@ public with sharing virtual class AsynchronousLWC extends AsynchronousLWCMockabl
     @SuppressWarnings('PMD.EmptyStatementBlock')
     protected AsynchronousLWC() {}
 
-    // Set the default implementations of API and LWC. This can be overridden using a Dependency Injection Binding.
-    static {
-        DependencyV1.bind(API.class, AsynchronousLWCImpl.Factory.class);
+    public with sharing class APIFactory implements TypesV1.Factory {
+        public Object newInstance() {
+            return new AsynchronousLWCImpl.Factory().newInstance();
+        }
     }
 }
