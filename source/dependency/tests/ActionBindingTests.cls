@@ -46,6 +46,7 @@ public with sharing class ActionBindingTests {
         System.runAs(TestHelper.getManager(TESTING)) {
             try {
                 DependencyV1.inject(BindingTestHelper.SubTestInterface1.class, 'Test');
+                Assert.fail();
             } catch(DependencyV1.APIException ae) {
                 Assert.isTrue(testHelper.textContains(
                         'Default implementation for BindingTestHelper.SubTestInterface1 must be a TypesV1.Factory',
@@ -155,9 +156,19 @@ public with sharing class ActionBindingTests {
         System.runAs(TestHelper.getUser(TESTING)) {
             Assert.isTrue(DependencyV1.isBound(BindingTestHelper.TestInterface.class, 'Test'));
             Assert.isTrue(DependencyV1.isBound(BindingTestHelper.AbstractTest.class, 'Test'));
+            Assert.isTrue(DependencyV1.isBound(BindingTestHelper.SubTestInterface2.class, 'Test'));
             Assert.isFalse(DependencyV1.isBound(BindingTestHelper.TestInterface.class, 'NotTest'));
             Assert.isFalse(DependencyV1.isBound(BindingTestHelper.TestInterface.class));
             Assert.isFalse(DependencyV1.isBound(User.class, 'Test'));
+
+            try {
+                DependencyV1.isBound(BindingTestHelper.SubTestInterface1.class, 'Test');
+            } catch(DependencyV1.APIException ae) {
+                Assert.isTrue(testHelper.textContains(
+                        'Default implementation for BindingTestHelper.SubTestInterface1 must be a TypesV1.Factory',
+                        ae.getMessage()
+                ));
+            }
         }
     }
 

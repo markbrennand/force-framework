@@ -109,7 +109,11 @@ public with sharing class DependencyImpl {
          */
         public Boolean isBound(final Type forType) {
             addCustomBindings();
-            return registry.containsKey(new Key(forType));
+            if (registry.containsKey(new Key(forType))) {
+                return true;
+            } else {
+                return getImplementation(forType) != null;
+            }
         }
 
         /**
@@ -124,7 +128,11 @@ public with sharing class DependencyImpl {
          */
         public Boolean isBound(final Type forType, final String action) {
             addCustomBindings();
-            return registry.containsKey(new ActionKey(forType, action));
+            if (registry.containsKey(new ActionKey(forType, action))) {
+                return true;
+            } else {
+                return getImplementation(forType) != null;
+            }
         }
 
         /**
