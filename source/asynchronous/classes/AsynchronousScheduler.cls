@@ -334,7 +334,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
         @SuppressWarnings('PMD.ApexDoc')
         public Object newInstance() {
             return new Map<String, Integer> {
-                    NO_JOBS_TO_RUN_DELAY_PROPERTY => 2000,
+                    NO_JOBS_TO_RUN_DELAY_PROPERTY => 10000,
                     MAXIMUM_JOBS_TO_START_PROPERTY => 1
             };
         }
