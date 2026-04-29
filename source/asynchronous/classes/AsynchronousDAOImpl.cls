@@ -131,11 +131,14 @@ public with sharing class AsynchronousDAOImpl {
 
             return (Integer) QueryV1.count(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.USER_MODE)
-                    .matching('OwnerId = :ownerId AND Runnable__c = :runnableClass AND Status__c = :runningStatus')
+                    .matching('OwnerId = :ownerId AND Runnable__c = :runnableClass AND Status__c IN :runningStatuses')
                     .bindings(new Map<String, Object> {
                             'ownerId' => UserInfo.getUserId(),
                             'runnableClass' => asyncObject.Runnable__c,
-                            'runningStatus' => AsynchronousV1.Status.RUNNING.name()
+                            'runningStatuses' => new Set<String> {
+                                    AsynchronousV1.Status.RUNNING.name(),
+                                    AsynchronousV1.Status.FINALIZING.name()
+                            }
                     })
                     .execute()
                     .orElse(0);

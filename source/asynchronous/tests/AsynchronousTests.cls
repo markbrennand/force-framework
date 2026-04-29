@@ -633,45 +633,50 @@ public with sharing class AsynchronousTests {
             insert new List<AsynchronousJob__c> { job1, job2, job3, job4, job5, job6 };
 
             Map<String, Integer> counts = AsynchronousLWC.impl.getTotals();
-            Assert.areEqual(6, counts.size());
+            Assert.areEqual(7, counts.size());
             Assert.areEqual(0, counts.get('PENDING'));
             Assert.areEqual(2, counts.get('QUEUED'));
             Assert.areEqual(1, counts.get('RUNNING'));
             Assert.areEqual(1, counts.get('SUCCEEDED'));
             Assert.areEqual(1, counts.get('FAILED'));
             Assert.areEqual(1, counts.get('CANCELLED'));
+            Assert.areEqual(0, counts.get('FINALIZING'));
 
             counts = AsynchronousV1.getTotals();
-            Assert.areEqual(6, counts.size());
+            Assert.areEqual(7, counts.size());
             Assert.areEqual(0, counts.get('PENDING'));
             Assert.areEqual(2, counts.get('QUEUED'));
             Assert.areEqual(1, counts.get('RUNNING'));
             Assert.areEqual(1, counts.get('SUCCEEDED'));
             Assert.areEqual(1, counts.get('FAILED'));
             Assert.areEqual(1, counts.get('CANCELLED'));
+            Assert.areEqual(0, counts.get('FINALIZING'));
 
+            job3.Status__c = AsynchronousV1.Status.FINALIZING.name();
             job4.Status__c = AsynchronousV1.Status.CANCELLED.name();
             job5.Status__c = AsynchronousV1.Status.RUNNING.name();
             job6.Status__c = AsynchronousV1.Status.CANCELLED.name();
-            upsert new List<AsynchronousJob__c> { job4, job5, job6 };
+            upsert new List<AsynchronousJob__c> { job3, job4, job5, job6 };
 
             counts = AsynchronousLWC.impl.getTotals();
-            Assert.areEqual(6, counts.size());
+            Assert.areEqual(7, counts.size());
             Assert.areEqual(0, counts.get('PENDING'));
             Assert.areEqual(1, counts.get('QUEUED'));
             Assert.areEqual(2, counts.get('RUNNING'));
-            Assert.areEqual(1, counts.get('SUCCEEDED'));
+            Assert.areEqual(0, counts.get('SUCCEEDED'));
             Assert.areEqual(2, counts.get('CANCELLED'));
             Assert.areEqual(0, counts.get('FAILED'));
+            Assert.areEqual(1, counts.get('FINALIZING'));
 
             counts = AsynchronousV1.getTotals();
-            Assert.areEqual(6, counts.size());
+            Assert.areEqual(7, counts.size());
             Assert.areEqual(0, counts.get('PENDING'));
             Assert.areEqual(1, counts.get('QUEUED'));
             Assert.areEqual(2, counts.get('RUNNING'));
-            Assert.areEqual(1, counts.get('SUCCEEDED'));
+            Assert.areEqual(0, counts.get('SUCCEEDED'));
             Assert.areEqual(2, counts.get('CANCELLED'));
             Assert.areEqual(0, counts.get('FAILED'));
+            Assert.areEqual(1, counts.get('FINALIZING'));
         }
     }
 

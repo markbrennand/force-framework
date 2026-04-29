@@ -42,6 +42,8 @@ global with sharing virtual class AsynchronousV1 {
      * FAILED - The last job failed to run and the maximum number of retries has been exceeded.
      * <p>
      * CANCELLED - The job has been cancelled.
+     * * <p>
+     * FINALIZING - The job was run without error and is awaiting finalization.
      */
     global enum Status {
         PENDING,
@@ -49,7 +51,8 @@ global with sharing virtual class AsynchronousV1 {
         RUNNING,
         SUCCEEDED,
         FAILED,
-        CANCELLED
+        CANCELLED,
+        FINALIZING
     }
 
     /**

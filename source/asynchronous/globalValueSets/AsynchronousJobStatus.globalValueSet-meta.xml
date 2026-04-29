@@ -30,6 +30,11 @@
         <default>false</default>
         <label>CANCELLED</label>
     </customValue>
+    <customValue>
+        <fullName>FINALIZING</fullName>
+        <default>false</default>
+        <label>FINALIZING</label>
+    </customValue>
     <description>A job managed by the Asynchronous framework will be in one of these states. See the Asynchronous framework documentation for information about the meaning of each status.</description>
     <masterLabel>Asynchronous Job Status</masterLabel>
     <sorted>false</sorted>

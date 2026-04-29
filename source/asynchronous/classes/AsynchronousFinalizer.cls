@@ -92,29 +92,57 @@ public with sharing class AsynchronousFinalizer {
          * @param context Information about job result.
          */
         public void execute(final FinalizerContext context) {
-            final AsynchronousJob__c asyncObject = AsynchronousDAO.impl.getObject(asyncObjectId);
-
             try {
-                if (context.getResult() == ParentJobResult.SUCCESS) {
-                    onSuccess(asyncObject);
-                } else {
-                    onFailure(asyncObject, context.getException());
+                final AsynchronousJob__c asyncObject = AsynchronousDAO.impl.getObject(asyncObjectId);
+
+                try {
+                    if (context.getResult() == ParentJobResult.SUCCESS) {
+                        onSuccess(asyncObject);
+                    } else {
+                        onFailure(asyncObject, context.getException());
+                    }
+                } catch (Exception exc) {
+                    AsynchronousHelper.impl.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
                 }
-            } catch(Exception exc) {
-                AsynchronousHelper.impl.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
-            }
 
-            try {
-                final AsynchronousV1.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
-                if (asyncJob.getRunnable() instanceof AsynchronousScheduler) {
-                    AsynchronousScheduler.queue(
-                            (Set<String>) JSON.deserialize(
-                                    asyncJob.getState().get(JOBS_TO_START), Set<String>.class)
+                try {
+                    final AsynchronousV1.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
+                    if (asyncJob.getRunnable() instanceof AsynchronousScheduler) {
+                        AsynchronousScheduler.queue(
+                                (Set<String>) JSON.deserialize(
+                                        asyncJob.getState().get(JOBS_TO_START), Set<String>.class)
+                        );
+                    }
+
+                } catch (Exception exc) {
+                    AsynchronousHelper.impl.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
+                }
+
+            } catch (Exception exc) {
+                final AsynchronousJob__c errorObject = new AsynchronousJob__c(
+                        Id = asyncObjectId,
+                        Status__c = AsynchronousV1.Status.FAILED.name(),
+                        RetryNumber__c = 0,
+                        ApexJobId__c = ''
+                );
+
+                try {
+                    AsynchronousHelper.impl.recordInternalException(errorObject, new AsynchronousV1.APIException('Wrapper', exc));
+                } catch(Exception exc1) {
+                    System.debug(
+                            LoggingLevel.ERROR,
+                            'Record: ' + asyncObjectId + ', Main Exception: ' + exc.getMessage() + ', Record Error Exception::' + exc1.getMessage()
                     );
                 }
 
-            } catch(Exception exc) {
-                AsynchronousHelper.impl.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
+                try {
+                    AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { errorObject });
+                } catch(Exception exc1) {
+                    System.debug(
+                            LoggingLevel.ERROR,
+                            'Record: ' + asyncObjectId + ', Main Exception: ' + exc.getMessage() + ', Persist State Change Exception::' + exc1.getMessage()
+                    );
+                }
             }
         }
 

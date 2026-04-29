@@ -13,6 +13,10 @@ public with sharing class AsynchronousLWCImpl {
 
     private final static String STATUS_ALIAS = 'Status__c';
     private final static String COUNT_ALIAS = 'Count__c';
+    private final static Set<String> ACTIVE_STATUSES = new Set<String> {
+            AsynchronousV1.Status.RUNNING.name(),
+            AsynchronousV1.Status.FINALIZING.name()
+    };
 
     /**
      * @description
@@ -256,7 +260,7 @@ public with sharing class AsynchronousLWCImpl {
             }
             returnObject.put('Owner', match.Owner.Name);
 
-            if (match.Status__c == AsynchronousV1.Status.RUNNING.name()) {
+            if (ACTIVE_STATUSES.contains(match.Status__c)) {
                 returnObject.put('RunTime__c', now.getTime() - match.LastRunTime__c.getTime());
             }
 

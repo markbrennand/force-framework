@@ -152,6 +152,7 @@ public with sharing class AsynchronousImpl {
 
             System.attachFinalizer(AsynchronousFinalizer.createFinalizer(asynchronousJob.Id));
             run(asyncJob, context.getJobId());
+            asynchronousJob.Status__c = AsynchronousV1.Status.FINALIZING.name();
 
             AsynchronousDAO.impl.persistObjects(
                     new List<AsynchronousJob__c>{

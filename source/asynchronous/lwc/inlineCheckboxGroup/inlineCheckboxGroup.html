@@ -9,7 +9,7 @@
     <fieldset class="slds-form-element slds-size_7-of-8">
 	<div class="slds-form-element__control">
 	    <div class="slds-grid slds-wrap">
-		<div class="slds-checkbox slds-col slds-size_1-of-5" for:each={_options} for:item="option" key={option.value}>
+		<div class="slds-checkbox slds-col slds-size_1-of-6" for:each={_options} for:item="option" key={option.value}>
 		    <input if:true={option.checked} type="checkbox" name={name} id={option.value} value={option.value} checked onchange={updateSelected}/>
 		    <input if:false={option.checked} type="checkbox" name={name} id={option.value} value={option.value} onchange={updateSelected}/>
 		    <label class="slds-checkbox__label" for={option.value}>

@@ -8,11 +8,12 @@ export default class AsynchronousJobFilters extends LightningElement {
     @api refreshRate;
 
     statusOptions = [
-        { value: 'RUNNING', label: 'Running', checked: true },
         { value: 'QUEUED', label: 'Queued', checked: true },
+        { value: 'RUNNING', label: 'Running', checked: true },
+        { value: 'FINALIZING', label: 'Finalizing' },
         { value: 'SUCCEEDED', label: 'Succeeded' },
         { value: 'FAILED', label: 'Failed' },
-        { value: 'CANCELLED', label: 'Cancelled' }
+        { value: 'CANCELLED', label: 'Cancelled' },
     ];
 
     setRunnableSearchTerm(event) {

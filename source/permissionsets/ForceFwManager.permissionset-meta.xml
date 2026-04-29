@@ -4,6 +4,10 @@
         <application>ForceFramework</application>
         <visible>true</visible>
     </applicationVisibilities>
+    <classAccesses>
+        <apexClass>AsynchronousV1</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
     <description>Permission set required to manage Force Framework.</description>
     <fieldPermissions>
         <editable>true</editable>
