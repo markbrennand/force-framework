@@ -13,6 +13,7 @@ export default class AsynchronousJobTotals extends LightningElement {
     succeeded = 0;
     failed = 0;
     cancelled = 0;
+    finalizing = 0;
     _timerId;
 
     async connectedCallback() {
@@ -40,6 +41,7 @@ export default class AsynchronousJobTotals extends LightningElement {
             this.succeeded = totals.SUCCEEDED;
             this.failed = totals.FAILED;
             this.cancelled = totals.CANCELLED;
+            this.finalizing = totals.FINALIZING;
         } catch (error) {
             this.dispatchEvent(
                 new ShowToastEvent(

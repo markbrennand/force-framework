@@ -297,7 +297,8 @@ public with sharing class AsynchronousDAOTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST1',
-                    ScheduledRunTime__c = CommonHelper.now()
+                    ScheduledRunTime__c = CommonHelper.now(),
+                    LastRunTime__c = CommonHelper.now()
             );
 
             AsynchronousJob__c job2 = new AsynchronousJob__c(
@@ -308,7 +309,8 @@ public with sharing class AsynchronousDAOTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST2',
-                    ScheduledRunTime__c = CommonHelper.now()
+                    ScheduledRunTime__c = CommonHelper.now(),
+                    LastRunTime__c = CommonHelper.now()
             );
 
             AsynchronousJob__c job3 = new AsynchronousJob__c(
@@ -319,7 +321,8 @@ public with sharing class AsynchronousDAOTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST3',
-                    ScheduledRunTime__c = CommonHelper.now()
+                    ScheduledRunTime__c = CommonHelper.now(),
+                    LastRunTime__c = CommonHelper.now()
             );
 
             AsynchronousJob__c job4 = new AsynchronousJob__c(
@@ -330,7 +333,8 @@ public with sharing class AsynchronousDAOTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST4',
-                    ScheduledRunTime__c = CommonHelper.now()
+                    ScheduledRunTime__c = CommonHelper.now(),
+                    LastRunTime__c = CommonHelper.now()
             );
 
             AsynchronousJob__c job5 = new AsynchronousJob__c(
@@ -341,7 +345,8 @@ public with sharing class AsynchronousDAOTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST5',
-                    ScheduledRunTime__c = CommonHelper.now()
+                    ScheduledRunTime__c = CommonHelper.now(),
+                    LastRunTime__c = CommonHelper.now()
             );
 
             AsynchronousJob__c job6 = new AsynchronousJob__c(
@@ -352,7 +357,8 @@ public with sharing class AsynchronousDAOTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST6',
-                    ScheduledRunTime__c = CommonHelper.now()
+                    ScheduledRunTime__c = CommonHelper.now(),
+                    LastRunTime__c = CommonHelper.now()
             );
 
             insert new List<AsynchronousJob__c> { job1, job2, job3, job4, job5, job6 };
@@ -385,6 +391,15 @@ public with sharing class AsynchronousDAOTests {
     @IsTest
     private static void testGetScheduledObjects() {
         TestHelper.setNOW();
+
+        System.runAs(TestHelper.getManager(TESTING)) {
+            insert new Binding__c(
+                    Type__c = 'Map<String, Integer>',
+                    Action__c = 'AsynchronousScheduler',
+                    Implementation__c = Configuration.class.getName()
+            );
+        }
+
         System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousJob__c job1 = new AsynchronousJob__c(
                     OwnerId = UserInfo.getUserId(),
@@ -539,4 +554,19 @@ public with sharing class AsynchronousDAOTests {
     }
 
     private with sharing class ExtendedClass extends AsynchronousDAO {}
+
+    /**
+     * @description
+     * <p>
+     * Unit test Scheduler configuration to be injected.
+     */
+    public with sharing class Configuration implements TypesV1.Factory {
+        @SuppressWarnings('PMD.ApexDoc')
+        public Object newInstance() {
+            return new Map<String, Integer> {
+                    AsynchronousScheduler.NO_JOBS_TO_RUN_DELAY_PROPERTY => 0,
+                    AsynchronousScheduler.MAXIMUM_JOBS_TO_START_PROPERTY => 0
+            };
+        }
+    }
 }

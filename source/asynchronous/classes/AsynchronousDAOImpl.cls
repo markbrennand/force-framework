@@ -11,6 +11,10 @@
  */
 public with sharing class AsynchronousDAOImpl {
 
+    // The number of seconds over which the active job total should be determined.
+    // Any jobs left in RUNNING or FINALIZING state outside this window will not contribute to the jobs's concurrency.
+    private static Integer ACTIVE_JOBS_WINDOW = 600;
+
     /**
      * @description
      * <p>
@@ -97,17 +101,21 @@ public with sharing class AsynchronousDAOImpl {
          * @return The number of objects that are scheduled or are running.
          */
         public Integer countSchedulableObjects(final Integer maximumToCount) {
-            final Set<String> schedulableStatuses = new Set<String> {
-                    AsynchronousV1.Status.QUEUED.name(),
-                    AsynchronousV1.Status.RUNNING.name()
-            };
-
             return (Integer) QueryV1.count(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.USER_MODE)
-                    .matching('OwnerId = :ownerId AND Status__c IN :schedulableStatuses AND Runnable__c != :schedulerClass')
+                    .matching(
+                            'OwnerId = :ownerId AND Runnable__c != :schedulerClass' +
+                                    + ' AND (Status__c = :queuedStatus '
+                                    + '      OR (LastRunTime__c >= :windowStart AND Status__c IN :activeStatuses)' +
+                                    ')')
                     .bindings(new Map<String, Object> {
                             'ownerId' => UserInfo.getUserId(),
-                            'schedulableStatuses' => schedulableStatuses,
+                            'queuedStatus' => AsynchronousV1.Status.QUEUED.name(),
+                            'activeStatuses' => new Set<String> {
+                                    AsynchronousV1.Status.RUNNING.name(),
+                                    AsynchronousV1.Status.FINALIZING.name()
+                            },
+                            'windowStart' => CommonHelper.now().addSeconds(-ACTIVE_JOBS_WINDOW),
                             'schedulerClass' => AsynchronousScheduler.RunNextAvailable.class.getName()
                     })
                     .max(maximumToCount)
@@ -131,14 +139,15 @@ public with sharing class AsynchronousDAOImpl {
 
             return (Integer) QueryV1.count(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.USER_MODE)
-                    .matching('OwnerId = :ownerId AND Runnable__c = :runnableClass AND Status__c IN :runningStatuses')
+                    .matching('OwnerId = :ownerId AND LastRunTime__c >= :windowStart AND Runnable__c = :runnableClass AND Status__c IN :runningStatuses')
                     .bindings(new Map<String, Object> {
                             'ownerId' => UserInfo.getUserId(),
                             'runnableClass' => asyncObject.Runnable__c,
                             'runningStatuses' => new Set<String> {
                                     AsynchronousV1.Status.RUNNING.name(),
                                     AsynchronousV1.Status.FINALIZING.name()
-                            }
+                            },
+                            'windowStart' => CommonHelper.now().addSeconds(-ACTIVE_JOBS_WINDOW)
                     })
                     .execute()
                     .orElse(0);

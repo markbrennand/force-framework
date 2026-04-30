@@ -151,17 +151,23 @@ public with sharing class AsynchronousImpl {
             asynchronousJob.LastRunTime__c = CommonHelper.now();
 
             System.attachFinalizer(AsynchronousFinalizer.createFinalizer(asynchronousJob.Id));
+
+            final Map<String, String> initialState = asyncJob.getState();
             run(asyncJob, context.getJobId());
             asynchronousJob.Status__c = AsynchronousV1.Status.FINALIZING.name();
 
-            AsynchronousDAO.impl.persistObjects(
-                    new List<AsynchronousJob__c>{
-                            asynchronousJob
-                    },
-                    new List<Map<String, String>>{
-                            asyncJob.getState()
-                    }
-            );
+            if (asyncJob.getState() != initialState) {
+                AsynchronousDAO.impl.persistObjects(
+                        new List<AsynchronousJob__c>{
+                                asynchronousJob
+                        },
+                        new List<Map<String, String>>{
+                                asyncJob.getState()
+                        }
+                );
+            } else {
+                AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asynchronousJob });
+            }
         }
 
         /**
