@@ -1,7 +1,7 @@
 /**
  * @description
  * <p>
- * Class providing the Trigger logic for the AsynchronousJob__c object.
+ * Unit tests for AsynchronousJobSubscriber class.
  * <p>
  * A Trigger API Subscriber is used to consume the Event published by the Trigger API.
  * <p>
@@ -221,7 +221,13 @@ public with sharing class AsynchronousJobSubscriber {
 
                 } else if (asyncObject.Status__c == AsynchronousV1.Status.PENDING.name()) {
                     asyncObject.Status__c = AsynchronousV1.Status.QUEUED.name();
-                    asyncObject.ScheduledRunTime__c = CommonHelper.now();
+
+                    // Would like to think of a better way to do this. Sweeper always needs to be run first.
+                    if (asyncObject.Runnable__c == AsynchronousScheduler.RunSweeper.class.getName()) {
+                        asyncObject.ScheduledRunTime__c = DateTime.newInstance(1900, 1, 1);
+                    } else {
+                        asyncObject.ScheduledRunTime__c = CommonHelper.now();
+                    }
                     asyncObject.RetryNumber__c = 0;
                 }
             } catch (Exception e) {

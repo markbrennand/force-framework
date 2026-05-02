@@ -126,8 +126,10 @@ public with sharing class AsynchronousFinalizer {
                         ApexJobId__c = ''
                 );
 
+                Boolean persisted = false;
                 try {
                     AsynchronousHelper.impl.recordInternalException(errorObject, new AsynchronousV1.APIException('Wrapper', exc));
+                    persisted = true;
                 } catch(Exception exc1) {
                     System.debug(
                             LoggingLevel.ERROR,
@@ -135,13 +137,17 @@ public with sharing class AsynchronousFinalizer {
                     );
                 }
 
-                try {
-                    AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { errorObject });
-                } catch(Exception exc1) {
-                    System.debug(
-                            LoggingLevel.ERROR,
-                            'Record: ' + asyncObjectId + ', Main Exception: ' + exc.getMessage() + ', Persist State Change Exception::' + exc1.getMessage()
-                    );
+                if (!persisted) {
+                    try {
+                        AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c>{
+                                errorObject
+                        });
+                    } catch (Exception exc1) {
+                        System.debug(
+                                LoggingLevel.ERROR,
+                                'Record: ' + asyncObjectId + ', Main Exception: ' + exc.getMessage() + ', Persist State Change Exception::' + exc1.getMessage()
+                        );
+                    }
                 }
             }
         }

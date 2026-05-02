@@ -73,16 +73,36 @@ public with sharing virtual class AsynchronousDAO extends AsynchronousDAOMockabl
         /**
          * @description
          * <p>
+         * Builds a List of the objects that can be swept.
+         * <p>
+         * A sweepable object is one that has been running or finalizing for more than the given number of seconds.
+         * This situation occurs occasionally when the Finalizer for the Apex Job is not run by Salesforce.
+         * <p>
+         * The List returned must be ordered chronologically, with the first entry being the job that has been
+         * waiting the longest to run.
+         *
+         * @param windowSize The number of seconds in the past before which the sweepable job must have been run.
+         * @param maxJobsToReturn The maximum number of objects to return.
+         *
+         * @return The objects.
+         */
+        List<AsynchronousJob__c> getSweepableObjects(final Integer windowSize, final Integer maxJobsToReturn);
+
+        /**
+         * @description
+         * <p>
          * Determines the number os objects that remain to be run.
          * <p>
          * The remaining objects must includes all those that are in QUEUED or RUNNING state. The RUNNING must
          * be included as their job may fail and they will be scheduled to re-run if they have re-tries left.
          *
          * @param maximumToCount The maximum number of jobs to include in the count.
+         * @param activeWindowSize The number of seconds in the past before which a running or finalizing job should
+         * not be included in the count.
          *
          * @return The number of objects that are scheduled or are running bounded by the maximum number argument.
          */
-        Integer countSchedulableObjects(final Integer maximumToCount);
+        Integer countSchedulableObjects(final Integer maximumToCount, final Integer activeWindowSize);
 
         /**
          * @description
@@ -92,10 +112,12 @@ public with sharing virtual class AsynchronousDAO extends AsynchronousDAOMockabl
          * The Runnable in for the object determines the number of active instances.
          *
          * @param asyncObject The object to have its concurrency determined.
+         * @param activeWindowSize The number of seconds in the past before which a running or finalizing job should
+         * not be included in the count.
          *
          * @return The concurrency for the object.
          */
-        Integer countActiveObjects(final AsynchronousJob__c asyncObject);
+        Integer countActiveObjects(final AsynchronousJob__c asyncObject, final Integer activeWindowSize);
 
         /**
          * @description

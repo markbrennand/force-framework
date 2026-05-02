@@ -277,7 +277,10 @@ public with sharing class AsynchronousSchedulerTests {
                     .mock();
 
             AsynchronousDAO.impl = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
-                    .whenArgument(new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName()))
+                    .whenArguments(
+                            new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName()),
+                            MockerV1.any(Integer.class)
+                    )
                         .forMethod('countActiveObjects')
                             .called(1)
                             .returns(1)
@@ -340,7 +343,7 @@ public with sharing class AsynchronousSchedulerTests {
         }
 
         MockerV1.Method mocked = MockerV1.of(AsynchronousDAO.class)
-                .whenArgument(1)
+                .whenArguments(1, MockerV1.any(Integer.class))
                     .forMethod('countSchedulableObjects')
                         .called(jobsThatShouldBeStarted.isEmpty() ? 1 : 0)
                         .returns(1)
@@ -348,7 +351,10 @@ public with sharing class AsynchronousSchedulerTests {
                     .forMethod('getScheduledObjects')
                         .called(1)
                         .returns(scheduledObjects)
-                .whenArgument(new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName()))
+                .whenArguments(
+                        new AsynchronousJob__c(Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName()),
+                        MockerV1.any(Integer.class)
+                )
                     .forMethod('countActiveObjects')
                         .called(1)
                         .returns(0)
@@ -370,7 +376,10 @@ public with sharing class AsynchronousSchedulerTests {
 
         for (String runnable : maxCount.keySet()) {
             mocked
-                    .whenArgument(new AsynchronousJob__c(Runnable__c = runnable))
+                    .whenArguments(
+                            new AsynchronousJob__c(Runnable__c = runnable),
+                            MockerV1.any(Integer.class)
+                    )
                         .forMethod('countActiveObjects')
                             .called(1)
                             .returns(0);

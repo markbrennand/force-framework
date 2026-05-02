@@ -208,7 +208,7 @@ global with sharing virtual class AsynchronousV1 {
          * The class can either be a Runnable or Types.Factory implementation. In the case of the latter,
          * the class returned by the newInstance method must implement Runnable.
          *
-         * @return The Apex class of the RunnableJob implementation.
+         * @return The Apx class of the RunnableJob implementation.
          */
         Type getType();
 
@@ -462,6 +462,17 @@ global with sharing virtual class AsynchronousV1 {
      */
     global static List<AsynchronousV1.Job> queueJobs(final List<AsynchronousV1.Job> asyncJobs) {
         return AsynchronousAPI.impl.queueJobs(asyncJobs);
+    }
+
+    global static void startSweeper() {
+        final OptionalV1 sweeperJob = AsynchronousScheduler.getSweeper();
+        if (sweeperJob.isPresent()) {
+            AsynchronousV1.queueJobs(
+                    new List<AsynchronousV1.Job>{
+                            (AsynchronousV1.Job) sweeperJob.get()
+                    }
+            );
+        }
     }
 
     /**

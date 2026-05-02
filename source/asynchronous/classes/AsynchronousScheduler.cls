@@ -48,7 +48,8 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * <p>
      * Reference to assign to async. jab running Scheduler.
      */
-    private final Static String SCHEDULER_JOB_REFERENCE = 'Scheduler({0})';
+    @TestVisible
+    private final static String SCHEDULER_JOB_REFERENCE = 'Scheduler({0})';
 
     /**
      * @description
@@ -57,6 +58,20 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      */
     @TestVisible
     private final static String MAXIMUM_JOBS_TO_START_PROPERTY = 'maximumJobsToStart';
+
+    /**
+     * @description
+     * <p>
+     * The number of seconds for the time window in which a job must be in active state to be considered when
+     * determining concurrency. The time window is the current time to the given number of seconds in the past.
+     */
+    @TestVisible
+    private final static String ACTIVE_JOBS_WINDOW = 'activeJobsWindow';
+
+    /**
+     * The minimum number of seconds for the active window size..
+     */
+    private final static Integer MIN_ACTIVE_JOB_WINDOW_SIZE = 300;
 
     /*
      * Initialise the registry.
@@ -252,7 +267,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
         } else {
             final Integer maximumJobs = (Integer) configuration.get(MAXIMUM_JOBS_TO_START_PROPERTY);
             final Set<String> newJobsToStart = getJobIdsToStart(maximumJobs);
-            if (newJobsToStart.isEmpty() && (AsynchronousDAO.impl.countSchedulableObjects(maximumJobs) == 0)) {
+            if (newJobsToStart.isEmpty() && (AsynchronousDAO.impl.countSchedulableObjects(maximumJobs, getActiveWindowSize()) == 0)) {
                 return;
             }
 
@@ -266,7 +281,10 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
         }
 
         // More than one running Scheduler would cause the synchronisation to fail.
-        if (AsynchronousDAO.impl.countActiveObjects(new AsynchronousJob__c(Runnable__c = RunNextAvailable.class.getName())) < 1) {
+        if (AsynchronousDAO.impl.countActiveObjects(
+                new AsynchronousJob__c(Runnable__c = RunNextAvailable.class.getName()),
+                getActiveWindowSize()
+        ) < 1) {
             AsynchronousJob__c asyncObject = AsynchronousJob.toSObject(asyncJob);
             AsynchronousDAO.impl.persistObjects(
                     new List<AsynchronousJob__c> { asyncObject},
@@ -312,7 +330,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
                 active = activeCache.get(runnable);
 
             } else {
-                active = AsynchronousDAO.impl.countActiveObjects(asyncObject);
+                active = AsynchronousDAO.impl.countActiveObjects(asyncObject, getActiveWindowSize());
                 activeCache.put(runnable, active);
             }
 
@@ -328,6 +346,18 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
     /**
      * @description
      * <p>
+     * Determines the active window size.
+     *
+     * @return The active window size in seconds.
+     */
+    private static Integer getActiveWindowSize() {
+        final Integer windowSize = (Integer) configuration.get(ACTIVE_JOBS_WINDOW);
+        return windowSize == null ? MIN_ACTIVE_JOB_WINDOW_SIZE : Math.max(windowSize, MIN_ACTIVE_JOB_WINDOW_SIZE);
+    }
+
+    /**
+     * @description
+     * <p>
      * Default Scheduler configuration to be injected.
      */
     public with sharing class Configuration implements TypesV1.Factory {
@@ -335,7 +365,8 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
         public Object newInstance() {
             return new Map<String, Integer> {
                     NO_JOBS_TO_RUN_DELAY_PROPERTY => 10000,
-                    MAXIMUM_JOBS_TO_START_PROPERTY => 1
+                    MAXIMUM_JOBS_TO_START_PROPERTY => 1,
+                    ACTIVE_JOBS_WINDOW => MIN_ACTIVE_JOB_WINDOW_SIZE
             };
         }
     }
@@ -351,6 +382,155 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
         @SuppressWarnings('PMD.ApexDoc')
         public Object newInstance() {
             return new AsynchronousScheduler();
+        }
+    }
+
+    /**
+     * @description
+     * <p>
+     * Load the Sweeper from a factory.
+     * <p>
+     * This allows the Sweeper class to be inaccessible from outside this class.
+     */
+    public with sharing class RunSweeper implements TypesV1.Factory {
+        @SuppressWarnings('PMD.ApexDoc')
+        public Object newInstance() {
+            return new Sweeper();
+        }
+    }
+
+    /**
+     * @description
+     * <p>
+     * Builds an optional Sweeper job that cleans up stale AsynchronousJob__c records.
+     * <p>
+     * A job is considered stale if:
+     * <ul>
+     *   <li>It is owned by the current user,</li>
+     *   <li>Its Status__c is RUNNING or FINALIZING, and</li>
+     *   <li>Its LastRunTime__c is older than the configured active window.</li>
+     * </ul>
+     * If no stale jobs are found, returns OptionalV1.empty(). Otherwise, returns an OptionalV1 containing
+     * an AsynchronousV1.Job configured to execute the Sweeper (RunSweeper) with the stale jobs passed
+     * in the job state as JSON (key: "staleJobs").
+     *
+     * @return Optional containing the Sweeper job if stale jobs exist; otherwise OptionalV1.empty().
+     */
+    public static OptionalV1 getSweeper() {
+        if (AsynchronousDAO.impl.getSweepableObjects(100, getActiveWindowSize()).size() == 0) {
+            return OptionalV1.empty();
+        }
+
+        return OptionalV1.of(
+                AsynchronousV1.createJob(
+                        RunSweeper.class,
+                        'Sweeper',
+                        0,
+                        0,
+                        new Map<String, String>()
+                )
+        );
+    }
+
+    /**
+     * @description
+     * Executes the Sweeper job that remediates stale AsynchronousJob__c records.
+     * <p>
+     * Stale jobs are those owned by the current user that have remained in an active state
+     * (RUNNING or FINALIZING) beyond the configured active window. The Sweeper:
+     * - Deserializes the list of stale jobs from the job state (key: "staleJobs").
+     * - For Scheduler jobs: marks them FAILED and records an internal APIException.
+     * - For non-Scheduler jobs: normalizes their Status__c to either QUEUED (if was RUNNING)
+     *   or SUCCEEDED (if was FINALIZING), and stages them for update.
+     * - Persists the updated AsynchronousJob__c records.
+     * <p>
+     * The class is constructed via the RunSweeper factory and should not be instantiated directly.
+     */
+    private with sharing class Sweeper extends AsynchronousV1.Runnable {
+
+        public Sweeper() {
+            super(RunSweeper.class);
+        }
+
+        public override void run(AsynchronousV1.Job asyncJob, String apexJobId) {
+            final List<StaleJob> staleJobs = (List<StaleJob>)
+                    ImmutableV1.of(AsynchronousDAO.impl.getSweepableObjects(100, getActiveWindowSize()))
+                        .transform(new ToStaleJob(), new List<StaleJob>());
+
+            final List<AsynchronousJob__c> updates = new List<AsynchronousJob__c>();
+            for (StaleJob staleJob : staleJobs) {
+                final OptionalV1 error = staleJob.getError();
+                if (error.isPresent()) {
+                    AsynchronousHelper.impl.recordInternalException(
+                            staleJob.job,
+                            (AsynchronousV1.APIException) error.get()
+                    );
+                } else {
+                    updates.add(staleJob.job);
+                }
+            }
+
+            AsynchronousDAO.impl.persistObjects(updates);
+        }
+    }
+
+    /**
+     * @description
+     * <p>
+     * Callback implementation that transforms each queried AsynchronousJob__c into a StaleJob wrapper.
+     */
+    private with sharing class ToStaleJob extends ArrayV1.Callback {
+        public override OptionalV1 function(Object element, OptionalV1 currentValue, Integer index) {
+            final AsynchronousJob__c job = ((AsynchronousJob__c) element).clone(true);
+            return OptionalV1.of(new StaleJob(job));
+        }
+    }
+
+    /**
+    * @description
+    * <p>
+    * Lightweight value object representing a “stale” AsynchronousJob__c detected by the Sweeper.
+    * <p>
+    * A job is considered stale when it remains in an active state (RUNNING or FINALIZING) beyond the
+    * configured active window. The Sweeper converts the raw AsynchronousJob__c record into this wrapper
+    * to:
+    * <ul>
+    *   <li>Normalize its next Status__c based on whether it is a Scheduler or a non-Scheduler job.</li>
+    *   <li>Provide an OptionalV1 error describing why a Scheduler job is being failed.</li>
+    * </ul>
+    * <p>
+    * Use getError() to retrieve the error to record for stale Scheduler jobs. Non-Scheduler jobs return empty.
+    */
+    private with sharing class StaleJob {
+        public final AsynchronousJob__c job {
+            public get;
+            private set;
+        }
+
+        public StaleJob(final AsynchronousJob__c job) {
+            this.job = job;
+            if (isScheduler()) {
+                job.Status__c = AsynchronousV1.Status.FAILED.name();
+            } else {
+                job.Status__c = job.Status__c == AsynchronousV1.Status.FINALIZING.name()
+                        ? AsynchronousV1.Status.SUCCEEDED.name()
+                        : AsynchronousV1.Status.QUEUED.name();
+            }
+        }
+
+        public OptionalV1 getError() {
+            return isScheduler()
+                    ? OptionalV1.of(
+                            new AsynchronousV1.APIException(
+                                    'Wrapper',
+                                    new AsynchronousV1.APIException('Stale Scheduler found by Sweeper')
+                            )
+                    )
+                    : OptionalV1.empty();
+        }
+
+        private Boolean isScheduler() {
+            return job.Runnable__c == RunNextAvailable.class.getName();
         }
     }
 }

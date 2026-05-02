@@ -11,10 +11,6 @@
  */
 public with sharing class AsynchronousDAOImpl {
 
-    // The number of seconds over which the active job total should be determined.
-    // Any jobs left in RUNNING or FINALIZING state outside this window will not contribute to the jobs's concurrency.
-    private static Integer ACTIVE_JOBS_WINDOW = 600;
-
     /**
      * @description
      * <p>
@@ -66,6 +62,8 @@ public with sharing class AsynchronousDAOImpl {
          * <p>
          * The AsynchronousJob__c objects are ordered by ScheduledRunTime__c. This ensures that the list returned
          * is in chronological order, with the first entry being the job that has been waiting the longest to run.
+         * <p>
+         * Any queued Sweeper job(s) must take priority over others.
          *
          * @param maxJobsToReturn The maximum number of objects to return.
          *
@@ -92,15 +90,58 @@ public with sharing class AsynchronousDAOImpl {
         /**
          * @description
          * <p>
+         * Builds a List of the objects that can be swept.
+         * <p>
+         * A sweepable object is one that has been running or finalizing for more than the given number of seconds.
+         * This situation occurs occasionally when the Finalizer for the Apex Job is not run by Salesforce.
+         * <p>
+         * The List returned must be ordered chronologically, with the first entry being the job that has been
+         * waiting the longest to run.
+         *
+         * @param windowSize The number of seconds in the past before which the sweepable job must have been run.
+         * @param maxJobsToReturn The maximum number of objects to return.
+         *
+         * @return The objects.
+         */
+        public List<AsynchronousJob__c> getSweepableObjects(final Integer windowSize, final Integer maxJobsToReturn) {
+            return (List<AsynchronousJob__c>) QueryV1.of(AsynchronousJob__c.SObjectType)
+                    .security(AccessLevel.SYSTEM_MODE)
+                    .returning(new Set<SObjectField>{
+                            AsynchronousJob__c.Id,
+                            AsynchronousJob__c.Runnable__c,
+                            AsynchronousJob__c.ApexJobId__c,
+                            AsynchronousJob__c.Status__c,
+                            AsynchronousJob__c.RetryNumber__c
+                    })
+                    .matching('OwnerId = :ownerId AND Status__c IN :activeStatuses AND LastRunTime__c < :windowStart')
+                    .bindings(new Map<String, Object>{
+                            'ownerId' => UserInfo.getUserId(),
+                            'activeStatuses' => new Set<String>{
+                                    AsynchronousV1.Status.RUNNING.name(),
+                                    AsynchronousV1.Status.FINALIZING.name()
+                            },
+                            'windowStart' => CommonHelper.now().addSeconds(-windowSize)
+                    })
+                    .max(maxJobsToReturn)
+                    .execute()
+                    .collection(new List<AsynchronousJob__c>())
+                    .toList();
+        }
+
+        /**
+         * @description
+         * <p>
          * Determines the number os AsynchronousJob__c objects that remain to be run.
          * <p>
          * The AsynchronousJob__c objects are queried by QUEUED and RUNNING status.
          *
          * @param maximumToCount The maximum number of jobs to include in the count.
+         * @param activeWindowSize The number of seconds in the past before which a running or finalizing job should
+         * not be included in the count.
          *
          * @return The number of objects that are scheduled or are running.
          */
-        public Integer countSchedulableObjects(final Integer maximumToCount) {
+        public Integer countSchedulableObjects(final Integer maximumToCount, final Integer activeWindowSize) {
             return (Integer) QueryV1.count(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.USER_MODE)
                     .matching(
@@ -115,7 +156,7 @@ public with sharing class AsynchronousDAOImpl {
                                     AsynchronousV1.Status.RUNNING.name(),
                                     AsynchronousV1.Status.FINALIZING.name()
                             },
-                            'windowStart' => CommonHelper.now().addSeconds(-ACTIVE_JOBS_WINDOW),
+                            'windowStart' => CommonHelper.now().addSeconds(-activeWindowSize),
                             'schedulerClass' => AsynchronousScheduler.RunNextAvailable.class.getName()
                     })
                     .max(maximumToCount)
@@ -131,10 +172,12 @@ public with sharing class AsynchronousDAOImpl {
          * A count of the RUNNING jobs are queried which have a Runnable__c that matches that of the given object.
          *
          * @param asyncObject The object to have its concurrency determined.
+         * @param activeWindowSize The number of seconds in the past before which a running or finalizing job should
+         * not be included in the count.
          *
          * @return The concurrency for the object.
          */
-        public Integer countActiveObjects(final AsynchronousJob__c asyncObject) {
+        public Integer countActiveObjects(final AsynchronousJob__c asyncObject, final Integer activeWindowSize) {
             AssertionV1.isNotNull(asyncObject, 'argument: AsynchronousDAO.apiCountActiveObjects.asyncObject');
 
             return (Integer) QueryV1.count(AsynchronousJob__c.SObjectType)
@@ -147,7 +190,7 @@ public with sharing class AsynchronousDAOImpl {
                                     AsynchronousV1.Status.RUNNING.name(),
                                     AsynchronousV1.Status.FINALIZING.name()
                             },
-                            'windowStart' => CommonHelper.now().addSeconds(-ACTIVE_JOBS_WINDOW)
+                            'windowStart' => CommonHelper.now().addSeconds(-activeWindowSize)
                     })
                     .execute()
                     .orElse(0);
