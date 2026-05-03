@@ -30,6 +30,59 @@ public with sharing class AsynchronousSchedulerTests {
     }
 
     @IsTest
+    private static void itShouldSetStaleJobCorrectlyFromJob() {
+        AsynchronousScheduler.StaleJob staleJob = new AsynchronousScheduler.StaleJob(new AsynchronousJob__c(
+                Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
+                Status__c = AsynchronousV1.Status.RUNNING.name()
+        ));
+
+        Assert.areEqual(AsynchronousV1.Status.FAILED.name(), staleJob.job.Status__c);
+        Assert.isTrue(staleJob.getError().get() instanceof AsynchronousV1.APIException);
+
+        staleJob = new AsynchronousScheduler.StaleJob(new AsynchronousJob__c(
+                Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
+                Status__c = AsynchronousV1.Status.FINALIZING.name()
+        ));
+
+        Assert.areEqual(AsynchronousV1.Status.FAILED.name(), staleJob.job.Status__c);
+        Assert.isTrue(staleJob.getError().get() instanceof AsynchronousV1.APIException);
+
+        staleJob = new AsynchronousScheduler.StaleJob(new AsynchronousJob__c(
+                Runnable__c = AsynchronousScheduler.RunSweeper.class.getName(),
+                Status__c = AsynchronousV1.Status.RUNNING.name()
+        ));
+
+        Assert.areEqual(AsynchronousV1.Status.QUEUED.name(), staleJob.job.Status__c);
+        Assert.isFalse(staleJob.getError().isPresent());
+
+        staleJob = new AsynchronousScheduler.StaleJob(new AsynchronousJob__c(
+                Runnable__c = AsynchronousScheduler.RunSweeper.class.getName(),
+                Status__c = AsynchronousV1.Status.FINALIZING.name()
+        ));
+
+        Assert.areEqual(AsynchronousV1.Status.SUCCEEDED.name(), staleJob.job.Status__c);
+        Assert.isFalse(staleJob.getError().isPresent());
+    }
+
+    @IsTest
+    private static void itShouldReturnEmptyOptionalWhenNoJobsToSweep() {
+        Assert.isFalse(AsynchronousScheduler.getSweeper().isPresent());
+    }
+
+    @IsTest
+    private static void itShouldReturnOptionalWithJobsWhenJobsToSweep() {
+        AsynchronousDAO.impl = (AsynchronousDAO.API) MockerV1.of(AsynchronousDAOMockable.class)
+                .whenArguments(AsynchronousScheduler.MAX_JOBS_TO_SWEEP, MockerV1.any(Integer.class))
+                    .forMethod('getSweepableObjects')
+                        .called(1)
+                        .returns(new List<AsynchronousJob__c> { new AsynchronousJob__c()})
+                .mock();
+
+        Assert.isTrue(AsynchronousScheduler.getSweeper().isPresent());
+        MockerV1.validate();
+    }
+
+    @IsTest
     private static void testDelayedWhenNoJobsToRun() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {

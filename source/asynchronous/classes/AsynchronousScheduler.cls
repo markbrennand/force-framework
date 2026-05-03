@@ -69,9 +69,19 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
     private final static String ACTIVE_JOBS_WINDOW = 'activeJobsWindow';
 
     /**
+     * @description
+     * <p>
      * The minimum number of seconds for the active window size..
      */
     private final static Integer MIN_ACTIVE_JOB_WINDOW_SIZE = 300;
+
+    /**
+     * @description
+     * <p>
+     * Maximum number of jobs sweeper can process per run.
+     */
+    @TestVisible
+    private final static Integer MAX_JOBS_TO_SWEEP = 100;
 
     /*
      * Initialise the registry.
@@ -417,7 +427,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * @return Optional containing the Sweeper job if stale jobs exist; otherwise OptionalV1.empty().
      */
     public static OptionalV1 getSweeper() {
-        if (AsynchronousDAO.impl.getSweepableObjects(100, getActiveWindowSize()).size() == 0) {
+        if (AsynchronousDAO.impl.getSweepableObjects(MAX_JOBS_TO_SWEEP, getActiveWindowSize()).size() == 0) {
             return OptionalV1.empty();
         }
 
@@ -501,6 +511,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
     * <p>
     * Use getError() to retrieve the error to record for stale Scheduler jobs. Non-Scheduler jobs return empty.
     */
+    @TestVisible
     private with sharing class StaleJob {
         public final AsynchronousJob__c job {
             public get;
