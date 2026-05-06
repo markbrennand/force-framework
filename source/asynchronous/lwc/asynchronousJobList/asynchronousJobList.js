@@ -29,20 +29,22 @@ export default class AsynchronousJobList extends LightningElement {
           label: 'Name',
           fieldName: 'jobUrl',
           type: 'url',
+          initialWidth: 190,
           typeAttributes: {
             label: { fieldName: 'Name' },
             target: '_blank',
             tooltip: 'View'
           }
         },
-        { label: 'Apex Job', fieldName: 'ApexJobId__c' },
-        { label: 'Owner', fieldName: 'Owner' },
-        { label: 'Reference', fieldName: 'Reference__c' },
-        { label: 'Status', fieldName: 'Status__c', sortable: true },
-        { label: 'Active (ms)', fieldName: 'RunTime__c' },
-        { label: 'Retries Remaining', fieldName: 'RetriesRemaining__c' },
-        { label: 'Runnable', fieldName: 'Runnable__c' },
-        { label: 'Scheduled Run Time', fieldName: 'ScheduledRunTime__c', type: 'datetime', sortable: true }
+        { label: 'Reference', fieldName: 'Reference__c', initialWidth: 180 },
+        { label: 'Scheduled Run Time', fieldName: 'ScheduledRunTime__c', type: 'datetime', initialWidth: 200, sortable: true },
+        { label: 'Last Run Time', fieldName: 'LastRunTime__c', type: 'datetime', initialWidth: 200, sortable: true },
+        { label: 'Active (ms)', fieldName: 'RunTime__c', initialWidth: 120 },
+        { label: 'Status', fieldName: 'Status__c', initialWidth: 120, sortable: true },
+        { label: 'Retries', fieldName: 'RetriesRemaining__c', initialWidth: 120 },
+        { label: 'Apex Job', fieldName: 'ApexJobId__c', initialWidth: 150 },
+        { label: 'Owner', fieldName: 'Owner', initialWidth: 150 },
+        { label: 'Runnable', fieldName: 'Runnable__c', fixedWidth: 1200 }
     ];
 
     async connectedCallback() {

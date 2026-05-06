@@ -196,9 +196,12 @@ public with sharing class AsynchronousHelperTests {
                     .forMethod('persistException').called(1)
 
                 // And the status of the Asynchronous object set to FAILED.
-                .whenArgument(new List<AsynchronousJob__c> {
-                        new AsynchronousJob__c(Id = asyncObject.Id, Status__c = AsynchronousV1.Status.FAILED.name())
-                })
+                .whenArguments(
+                        new List<AsynchronousJob__c> {
+                            new AsynchronousJob__c(Id = asyncObject.Id, Status__c = AsynchronousV1.Status.FAILED.name())
+                        },
+                        false
+                )
                     .forMethod('persistObjects').called(1)
                 .mock();
     }

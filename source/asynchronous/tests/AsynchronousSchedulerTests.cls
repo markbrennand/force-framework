@@ -31,55 +31,124 @@ public with sharing class AsynchronousSchedulerTests {
 
     @IsTest
     private static void itShouldSetStaleJobCorrectlyFromJob() {
-        AsynchronousScheduler.StaleJob staleJob = new AsynchronousScheduler.StaleJob(new AsynchronousJob__c(
-                Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
-                Status__c = AsynchronousV1.Status.RUNNING.name()
-        ));
+        TestHelper.setNOW();
+        System.runAs(TestHelper.getUser(TESTING)) {
+            AsynchronousScheduler.StaleJob staleJob = new AsynchronousScheduler.StaleJob(new AsynchronousJob__c(
+                    Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name()
+            ));
 
-        Assert.areEqual(AsynchronousV1.Status.FAILED.name(), staleJob.job.Status__c);
-        Assert.isTrue(staleJob.getError().get() instanceof AsynchronousV1.APIException);
+            Assert.areEqual(AsynchronousV1.Status.FAILED.name(), staleJob.job.Status__c);
+            Assert.isTrue(staleJob.getError().get() instanceof AsynchronousV1.APIException);
 
-        staleJob = new AsynchronousScheduler.StaleJob(new AsynchronousJob__c(
-                Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
-                Status__c = AsynchronousV1.Status.FINALIZING.name()
-        ));
+            staleJob = new AsynchronousScheduler.StaleJob(new AsynchronousJob__c(
+                    Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
+                    Status__c = AsynchronousV1.Status.FINALIZING.name()
+            ));
 
-        Assert.areEqual(AsynchronousV1.Status.FAILED.name(), staleJob.job.Status__c);
-        Assert.isTrue(staleJob.getError().get() instanceof AsynchronousV1.APIException);
+            Assert.areEqual(AsynchronousV1.Status.FAILED.name(), staleJob.job.Status__c);
+            Assert.isTrue(staleJob.getError().get() instanceof AsynchronousV1.APIException);
 
-        staleJob = new AsynchronousScheduler.StaleJob(new AsynchronousJob__c(
-                Runnable__c = AsynchronousScheduler.RunSweeper.class.getName(),
-                Status__c = AsynchronousV1.Status.RUNNING.name()
-        ));
+            staleJob = new AsynchronousScheduler.StaleJob(new AsynchronousJob__c(
+                    Runnable__c = AsynchronousScheduler.RunSweeper.class.getName(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name()
+            ));
 
-        Assert.areEqual(AsynchronousV1.Status.QUEUED.name(), staleJob.job.Status__c);
-        Assert.isFalse(staleJob.getError().isPresent());
+            Assert.areEqual(AsynchronousV1.Status.PENDING.name(), staleJob.job.Status__c);
+            Assert.isFalse(staleJob.getError().isPresent());
 
-        staleJob = new AsynchronousScheduler.StaleJob(new AsynchronousJob__c(
-                Runnable__c = AsynchronousScheduler.RunSweeper.class.getName(),
-                Status__c = AsynchronousV1.Status.FINALIZING.name()
-        ));
+            staleJob = new AsynchronousScheduler.StaleJob(new AsynchronousJob__c(
+                    Runnable__c = AsynchronousScheduler.RunSweeper.class.getName(),
+                    Status__c = AsynchronousV1.Status.FINALIZING.name()
+            ));
 
-        Assert.areEqual(AsynchronousV1.Status.SUCCEEDED.name(), staleJob.job.Status__c);
-        Assert.isFalse(staleJob.getError().isPresent());
+            Assert.areEqual(AsynchronousV1.Status.SUCCEEDED.name(), staleJob.job.Status__c);
+            Assert.isFalse(staleJob.getError().isPresent());
+        }
     }
 
     @IsTest
     private static void itShouldReturnEmptyOptionalWhenNoJobsToSweep() {
-        Assert.isFalse(AsynchronousScheduler.getSweeper().isPresent());
+        TestHelper.setNOW();
+        System.runAs(TestHelper.getUser(TESTING)) {
+            AsynchronousDAO.impl = (AsynchronousDAO.API) MockerV1.of(AsynchronousDAOMockable.class)
+                    .whenArguments(1, MockerV1.any(Integer.class))
+                        .forMethod('getSweepableObjects')
+                            .called(1)
+                            .returns(new List<AsynchronousJob__c>())
+                    .mock();
+
+            AsynchronousAPI.impl = (AsynchronousAPI.API) MockerV1.of(AsynchronousAPIMockable.class)
+                    .whenArguments(
+                            AsynchronousScheduler.RunSweeper.class,
+                            'Sweeper',
+                            0,
+                            0,
+                            new Map<String, String>()
+                    )
+                        .forMethod('createJob')
+                            .called(0)
+                            .returns(
+                                    AsynchronousJob.fromSObject(
+                                            new AsynchronousJob__c(
+                                                    OwnerId = UserInfo.getUserId(),
+                                                    Runnable__c = AsynchronousScheduler.RunSweeper.class.getName(),
+                                                    RetryNumber__c = 0,
+                                                    MaximumRetries__c = 0,
+                                                    RetryInterval__c = 0,
+                                                    Status__c = AsynchronousV1.Status.PENDING.name(),
+                                                    ScheduledRunTime__c = CommonHelper.now()
+                                            )
+                                    )
+                            )
+                    .mock();
+
+            Assert.isFalse(AsynchronousScheduler.getSweeper().isPresent());
+            MockerV1.validate();
+        }
     }
 
     @IsTest
     private static void itShouldReturnOptionalWithJobsWhenJobsToSweep() {
-        AsynchronousDAO.impl = (AsynchronousDAO.API) MockerV1.of(AsynchronousDAOMockable.class)
-                .whenArguments(AsynchronousScheduler.MAX_JOBS_TO_SWEEP, MockerV1.any(Integer.class))
-                    .forMethod('getSweepableObjects')
-                        .called(1)
-                        .returns(new List<AsynchronousJob__c> { new AsynchronousJob__c()})
-                .mock();
+        TestHelper.setNOW();
+        System.runAs(TestHelper.getUser(TESTING)) {
+            AsynchronousDAO.impl = (AsynchronousDAO.API) MockerV1.of(AsynchronousDAOMockable.class)
+                    .whenArguments(1, MockerV1.any(Integer.class))
+                       .forMethod('getSweepableObjects')
+                            .called(1)
+                            .returns(new List<AsynchronousJob__c>{
+                                    new AsynchronousJob__c()
+                            })
+                    .mock();
 
-        Assert.isTrue(AsynchronousScheduler.getSweeper().isPresent());
-        MockerV1.validate();
+            AsynchronousAPI.impl = (AsynchronousAPI.API) MockerV1.of(AsynchronousAPIMockable.class)
+                    .whenArguments(
+                            AsynchronousScheduler.RunSweeper.class,
+                            'Sweeper',
+                            0,
+                            0,
+                            new Map<String, String>()
+                    )
+                        .forMethod('createJob')
+                            .called(1)
+                            .returns(
+                                    AsynchronousJob.fromSObject(
+                                            new AsynchronousJob__c(
+                                                    OwnerId = UserInfo.getUserId(),
+                                                    Runnable__c = AsynchronousScheduler.RunSweeper.class.getName(),
+                                                    RetryNumber__c = 0,
+                                                    MaximumRetries__c = 0,
+                                                    RetryInterval__c = 0,
+                                                    Status__c = AsynchronousV1.Status.PENDING.name(),
+                                                    ScheduledRunTime__c = CommonHelper.now()
+                                            )
+                                    )
+                            )
+                    .mock();
+
+            Assert.isTrue(AsynchronousScheduler.getSweeper().isPresent());
+            MockerV1.validate();
+        }
     }
 
     @IsTest
@@ -91,7 +160,7 @@ public with sharing class AsynchronousSchedulerTests {
                         .forMethod('getState')
                             .called(1)
                             .returns(new Map<String, String>{
-                                    AsynchronousFinalizer.JOBS_TO_START => JSON.serialize(new Set<String>())
+                                    AsynchronousScheduler.JOBS_TO_START => JSON.serialize(new Set<String>())
                             })
                     .mock();
 
@@ -119,7 +188,7 @@ public with sharing class AsynchronousSchedulerTests {
             AsynchronousJob__c asyncObject = new AsynchronousJob__c(Id = asyncJobId1);
 
             Map<String, String> state = new Map<String, String>{
-                    AsynchronousFinalizer.JOBS_TO_START => JSON.serialize(new Set<String>{
+                    AsynchronousScheduler.JOBS_TO_START => JSON.serialize(new Set<String>{
                             asyncJobId1, asyncJobId2
                     })
             };
@@ -145,7 +214,7 @@ public with sharing class AsynchronousSchedulerTests {
 
                     // Confirms that the job to be run has been removed from the state.
                     .whenArgument(new Map<String, String>{
-                            AsynchronousFinalizer.JOBS_TO_START => JSON.serialize(new Set<String>{
+                            AsynchronousScheduler.JOBS_TO_START => JSON.serialize(new Set<String>{
                                     asyncJobId2
                             })
                     })
@@ -165,7 +234,7 @@ public with sharing class AsynchronousSchedulerTests {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
             mockForRun(new List<AsynchronousJob__c>(), 1, new Set<Id>());
-            AsynchronousScheduler.queue(new Set<String>());
+            AsynchronousScheduler.queue(new Set<String>(), 1);
             MockerV1.validate();
         }
     }
@@ -185,7 +254,7 @@ public with sharing class AsynchronousSchedulerTests {
                     asyncObjects[0].Id
             });
 
-            AsynchronousScheduler.queue(new Set<String>());
+            AsynchronousScheduler.queue(new Set<String>(), 1);
             MockerV1.validate();
 
             asyncObjects = new List<AsynchronousJob__c>{
@@ -203,7 +272,7 @@ public with sharing class AsynchronousSchedulerTests {
                     asyncObjects[0].Id
             });
 
-            AsynchronousScheduler.queue(new Set<String>());
+            AsynchronousScheduler.queue(new Set<String>(), 1);
             MockerV1.validate();
         }
     }
@@ -223,7 +292,7 @@ public with sharing class AsynchronousSchedulerTests {
                     asyncObjects[0].Id
             });
 
-            AsynchronousScheduler.queue(new Set<String>());
+            AsynchronousScheduler.queue(new Set<String>(), 1);
             MockerV1.validate();
 
             asyncObjects = new List<AsynchronousJob__c>{
@@ -241,7 +310,7 @@ public with sharing class AsynchronousSchedulerTests {
                     asyncObjects[0].Id, asyncObjects[1].Id
             });
 
-            AsynchronousScheduler.queue(new Set<String>());
+            AsynchronousScheduler.queue(new Set<String>(), 1);
             MockerV1.validate();
 
             asyncObjects = new List<AsynchronousJob__c>{
@@ -263,7 +332,7 @@ public with sharing class AsynchronousSchedulerTests {
                     asyncObjects[0].Id, asyncObjects[1].Id
             });
 
-            AsynchronousScheduler.queue(new Set<String>());
+            AsynchronousScheduler.queue(new Set<String>(), 1);
             MockerV1.validate();
         }
     }
@@ -290,19 +359,19 @@ public with sharing class AsynchronousSchedulerTests {
             mockForRun(asyncObjects, 1, new Set<Id>{
                     asyncObjects[0].Id
             });
-            AsynchronousScheduler.queue(new Set<String>());
+            AsynchronousScheduler.queue(new Set<String>(), 1);
             MockerV1.validate();
 
             mockForRun(asyncObjects, 2, new Set<Id>{
                     asyncObjects[0].Id, asyncObjects[1].Id
             });
-            AsynchronousScheduler.queue(new Set<String>());
+            AsynchronousScheduler.queue(new Set<String>(), 1);
             MockerV1.validate();
 
             mockForRun(asyncObjects, 3, new Set<Id>{
                     asyncObjects[0].Id, asyncObjects[1].Id, asyncObjects[2].Id
             });
-            AsynchronousScheduler.queue(new Set<String>());
+            AsynchronousScheduler.queue(new Set<String>(), 1);
             MockerV1.validate();
         }
     }
@@ -322,7 +391,7 @@ public with sharing class AsynchronousSchedulerTests {
                             0,
                             0,
                             new Map<String, String>{
-                                    AsynchronousFinalizer.JOBS_TO_START => JSON.serialize(jobsToStart)
+                                    AsynchronousScheduler.JOBS_TO_START => JSON.serialize(jobsToStart)
                             }
                     )
                         .forMethod('createJob')
@@ -339,7 +408,7 @@ public with sharing class AsynchronousSchedulerTests {
                             .returns(1)
                     .mock();
 
-            AsynchronousScheduler.queue(jobsToStart);
+            AsynchronousScheduler.queue(jobsToStart, 1);
             MockerV1.validate();
         }
     }
@@ -358,9 +427,23 @@ public with sharing class AsynchronousSchedulerTests {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousScheduler scheduler = new AsynchronousScheduler();
-            Assert.isFalse(scheduler.onSuccess((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock()));
-            Assert.isTrue(scheduler.onFailure((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock(), new DmlException('Test')));
+
+            AsynchronousV1.Job asyncJob = (AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class)
+                    .whenCalling('getState').called(2).returns(
+                        new Map<String, String> { AsynchronousScheduler.JOBS_TO_START => '[]' }
+                    )
+                    .mock();
+
+            AsynchronousDAO.impl = (AsynchronousDAO.API) MockerV1.of(AsynchronousDAOMockable.class)
+                    .whenCalling('getScheduledObjects', MockerV1.any(Integer.class)).called(2).returns(new List<AsynchronousJob__c>())
+                    .whenCalling('countSchedulableObjects', MockerV1.any(Integer.class), MockerV1.any(Integer.class)).called(2).returns(0)
+                    .mock();
+
+            Assert.isFalse(scheduler.onSuccess(asyncJob));
+            Assert.isTrue(scheduler.onFailure(asyncJob, new DmlException('Test')));
             Assert.isFalse(scheduler.onCancellation((AsynchronousV1.Job) MockerV1.of(AsynchronousJob.class).mock()));
+
+            MockerV1.validate();
         }
     }
 
@@ -420,7 +503,7 @@ public with sharing class AsynchronousSchedulerTests {
                         },
                         new List<Map<String, String>>{
                                 new Map<String, String>{
-                                        AsynchronousFinalizer.JOBS_TO_START => JSON.serialize(jobsThatShouldBeStarted)
+                                        AsynchronousScheduler.JOBS_TO_START => JSON.serialize(jobsThatShouldBeStarted)
                                 }
                         }
                 )

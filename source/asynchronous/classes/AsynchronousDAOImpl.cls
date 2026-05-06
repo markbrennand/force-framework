@@ -98,12 +98,12 @@ public with sharing class AsynchronousDAOImpl {
          * The List returned must be ordered chronologically, with the first entry being the job that has been
          * waiting the longest to run.
          *
-         * @param windowSize The number of seconds in the past before which the sweepable job must have been run.
          * @param maxJobsToReturn The maximum number of objects to return.
+         * @param windowSize The number of seconds in the past before which the sweepable job must have been run.
          *
          * @return The objects.
          */
-        public List<AsynchronousJob__c> getSweepableObjects(final Integer windowSize, final Integer maxJobsToReturn) {
+        public List<AsynchronousJob__c> getSweepableObjects(final Integer maxJobsToReturn, final Integer windowSize) {
             return (List<AsynchronousJob__c>) QueryV1.of(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
                     .returning(new Set<SObjectField>{
@@ -113,7 +113,7 @@ public with sharing class AsynchronousDAOImpl {
                             AsynchronousJob__c.Status__c,
                             AsynchronousJob__c.RetryNumber__c
                     })
-                    .matching('OwnerId = :ownerId AND Status__c IN :activeStatuses AND LastRunTime__c < :windowStart')
+                    .matching('OwnerId = :ownerId AND Status__c IN :activeStatuses AND LastRunTime__c != null AND LastRunTime__c < :windowStart')
                     .bindings(new Map<String, Object>{
                             'ownerId' => UserInfo.getUserId(),
                             'activeStatuses' => new Set<String>{
@@ -202,18 +202,26 @@ public with sharing class AsynchronousDAOImpl {
          * Inserts or updates the given AsynchronousJob__c objects.
          *
          * @param asyncObjects The objects to persist.
+         * @param withTrigger Is trigger on asynchronous job object to fire.
          */
-        public void persistObjects(final List<AsynchronousJob__c> asyncObjects) {
+        public void persistObjects(final List<AsynchronousJob__c> asyncObjects, final Boolean withTrigger) {
             AssertionV1.isNotNull(asyncObjects, 'argument: AsynchronousDAO.apiPersistAsynchronous.asyncObjects');
 
             final Boolean subscriberEnabled = TriggerV1.isEnabled(AsynchronousJob__c.SObjectType);
-            TriggerV1.disable(AsynchronousJob__c.SObjectType);
+
+            if (withTrigger) {
+                TriggerV1.enable(AsynchronousJob__c.SObjectType);
+            } else {
+                TriggerV1.disable(AsynchronousJob__c.SObjectType);
+            }
 
             try {
                 Database.upsert(asyncObjects, AccessLevel.USER_MODE);
             } finally {
                 if (subscriberEnabled) {
                     TriggerV1.enable(AsynchronousJob__c.SObjectType);
+                } else {
+                    TriggerV1.disable(AsynchronousJob__c.SObjectType);
                 }
             }
         }

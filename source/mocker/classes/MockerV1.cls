@@ -138,6 +138,20 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
         /**
          * @description
          * <p>
+         * Creates a method with an argument grouping which has no values
+         *
+         * @param method The name of the method to create.
+         *
+         * @return The object instance for method chaining.
+         */
+        global MockerV1.Method whenCalling(final String method) {
+            AssertionV1.isNotNull(method, 'argument: Mocker.Chainable.whenCalling.method');
+            return whenNoArguments().forMethod(method);
+        }
+
+        /**
+         * @description
+         * <p>
          * Creates an argument grouping which has a single argument.
          * <p>
          * This would represent a mocked method which has one parameter.
@@ -148,6 +162,21 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          */
         global MockerV1.Arguments whenArgument(final Object argument) {
             return whenListOfArguments(new List<Object> { argument });
+        }
+
+        /**
+         * @description
+         * <p>
+         * Creates a method with an argument grouping which one parameter.
+         *
+         * @param method The name of the method to create.
+         * @param argument The expected parameter value.
+         *
+         * @return The object instance for method chaining.
+         */
+        global MockerV1.Method whenCalling(final String method, final Object argument) {
+            AssertionV1.isNotNull(method, 'argument: Mocker.Chainable.whenCalling.method');
+            return whenArgument(argument).forMethod(method);
         }
 
         /**
@@ -169,6 +198,22 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
         /**
          * @description
          * <p>
+         * Creates a method with an argument grouping which has two parameters.
+         *
+         * @param method The name of the method to create.
+         * @param argument1 The expected value of the first parameter.
+         * @param argument2 The expected value of the second parameter.
+         *
+         * @return The object instance for method chaining.
+         */
+        global MockerV1.Method whenCalling(final String method, final Object argument1, final Object argument2) {
+            AssertionV1.isNotNull(method, 'argument: Mocker.Chainable.whenCalling.method');
+            return whenArguments(argument1, argument2).forMethod(method);
+        }
+
+        /**
+         * @description
+         * <p>
          * Creates an argument grouping which has three arguments.
          * <p>
          * This would represent a mocked method which has three parameters.
@@ -181,6 +226,28 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          */
         global MockerV1.Arguments whenArguments(final Object argument1, final Object argument2, final Object argument3) {
             return whenListOfArguments(new List<Object> { argument1, argument2, argument3  });
+        }
+
+        /**
+         * @description
+         * <p>
+         * Creates a method with an argument grouping which has three parameters
+         *
+         * @param method The name of the method to create.
+         * @param argument1 The expected value of the first parameter.
+         * @param argument2 The expected value of the second parameter.
+         * @param argument3 The expected value of the third parameter.
+         *
+         * @return The object instance for method chaining.
+         */
+        global MockerV1.Method whenCalling(
+                final String method,
+                final Object argument1,
+                final Object argument2,
+                final Object argument3
+        ) {
+            AssertionV1.isNotNull(method, 'argument: Mocker.Chainable.whenCalling.method');
+            return whenArguments(argument1, argument2, argument3).forMethod(method);
         }
 
         /**
@@ -210,6 +277,31 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
         /**
          * @description
          * <p>
+         * Creates a method with an argument grouping which has four arguments.
+         *
+         * @param method The name of the method to create.
+         * @param argument1 The expected value of the first parameter.
+         * @param argument2 The expected value of the second parameter.
+         * @param argument3 The expected value of the third parameter.
+         * @param argument4 The expected value of the fourth parameter.
+         *
+         * @return The object instance for method chaining.
+         */
+        @SuppressWarnings('PMD.ExcessiveParameterList')
+        global MockerV1.Method whenCalling(
+                final String method,
+                final Object argument1,
+                final Object argument2,
+                final Object argument3,
+                final Object argument4
+        ) {
+            AssertionV1.isNotNull(method, 'argument: Mocker.Chainable.whenCalling.method');
+            return whenArguments(argument1, argument2, argument3, argument4).forMethod(method);
+        }
+
+        /**
+         * @description
+         * <p>
          * Creates an argument grouping which has five arguments.
          * <p>
          * This would represent a mocked method which has five parameters.
@@ -230,22 +322,63 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
                 final Object argument4,
                 final Object argument5
         ) {
-            return whenListOfArguments(new List<Object> { argument1, argument2, argument3, argument4, argument5  });
+            return whenListOfArguments(new List<Object> { argument1, argument2, argument3, argument4, argument5 });
         }
 
         /**
          * @description
          * <p>
-         * Creates an argument grouping which has the given arguments.
+         * Creates a method with an argument grouping which has five arguments.
+         *
+         * @param method The name of the method to create.
+         * @param argument1 The expected value of the first parameter.
+         * @param argument2 The expected value of the second parameter.
+         * @param argument3 The expected value of the third parameter.
+         * @param argument4 The expected value of the fourth parameter.
+         * @param argument5 The expected value of the fifth parameter.
+         *
+         * @return The object instance for method chaining.
+         */
+        @SuppressWarnings('PMD.ExcessiveParameterList')
+        global MockerV1.Method whenCalling(
+                final String method,
+                final Object argument1,
+                final Object argument2,
+                final Object argument3,
+                final Object argument4,
+                final Object argument5
+        ) {
+            AssertionV1.isNotNull(method, 'argument: Mocker.Chainable.whenCalling.method');
+            return whenArguments(argument1, argument2, argument3, argument4, argument5).forMethod(method);
+        }
+
+        /**
+         * @description
+         * <p>
+         * Creates an argument grouping which has the given parameters..
          *
          * @param expectedArguments The arguments to be matched.
          *
          * @return The object instance for method chaining.
          */
         global MockerV1.Arguments whenListOfArguments(final List<Object> expectedArguments) {
-            AssertionV1.isNotNull(expectedArguments, 'argument: Mocker.WhenArguments.whenListOfArguments.expectedArguments');
-
+            AssertionV1.isNotNull(expectedArguments, 'argument: Mocker.Chainable.whenListOfArguments.expectedArguments');
             return new Arguments(parent, expectedArguments);
+        }
+
+        /**
+         * @description
+         * <p>
+         * Creates a method with an argument grouping which has the given parameters.
+         *
+         * @param method The name of the method to create.
+         * @param expectedArguments The arguments to be matched.
+         *
+         * @return The object instance for method chaining.
+         */
+        global MockerV1.Method whenCallingWithArguments(final String method, final List<Object> expectedArguments) {
+            AssertionV1.isNotNull(method, 'argument: Mocker.Chainable.whenCallingWithArguments.method');
+            return whenListOfArguments(expectedArguments).forMethod(method);
         }
 
         /**
@@ -272,7 +405,6 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
      */
     protected MockerV1(final Object mockedObject) {
         AssertionV1.isNotNull(mockedObject, 'argument: Mocker.mockedObject');
-
         setParent(this);
         this.mockedObject = mockedObject;
     }
@@ -392,6 +524,18 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
                 },
                 ''
         );
+    }
+
+    /**
+     * @description
+     * <p>
+     * Resets the stubbed object method counts.
+     * <p>
+     * Only for unit tests use.
+     */
+    @TestVisible
+    private static void resetCounts() {
+        STUBBED_OBJECTS.clear();
     }
 
     /**
@@ -701,6 +845,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          */
         private Boolean matches(final List<Object> actualArguments, final List<Type> actualTypes) {
             AssertionV1.isNotNull(actualArguments, 'argument: Mocker.Arguments.matches.actualArguments');
+            AssertionV1.isNotNull(actualTypes, 'argument: Mocker.Arguments.matches.actualTypes');
 
             if (expectedArguments.size() != actualArguments.size()) {
                 return false;

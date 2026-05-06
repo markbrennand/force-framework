@@ -1,7 +1,7 @@
 /**
  * @description
  * <p>
- * Unit tests for MockerV1 class.
+ * Unit tests for MockerV1 class base functionality..
  * <p>
  * Copyright (c) 2025 Mark Brennand, released under <a href=../../LICENSE target="_blank">MIT License</a>.
  *
@@ -24,6 +24,19 @@ public with sharing class MockerTests {
                 MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                         .whenNoArguments()
                         .forMethod('mock')
+                        .throws(new DmlException('Test'))
+                        .mock();
+
+                mocked.mock();
+                Assert.fail();
+            } catch (DmlException de) {
+                Assert.areEqual('Test', de.getMessage());
+            }
+
+            try {
+                MockerV1.resetCounts();
+                MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
+                        .whenCalling('mock')
                         .throws(new DmlException('Test'))
                         .mock();
 
@@ -70,6 +83,35 @@ public with sharing class MockerTests {
 
             } catch (AssertionV1.AssertionException ae) {
             }
+
+            MockerV1.resetCounts();
+            mocked = (MockerV1) MockerV1.of(MockerV1.class)
+                    .whenCalling('mock')
+                    .returns(123)
+                    .mock();
+
+            Assert.areEqual(123, mocked.mock());
+            MockerV1.validate();
+
+            mocked = (MockerV1) MockerV1.of(MockerV1.class)
+                    .whenCalling('mock')
+                    .returns(new TestModifier())
+                    .mock();
+
+            Assert.areEqual(456, mocked.mock());
+            MockerV1.validate();
+
+            try {
+                MockerV1.of(MockerV1.class)
+                        .whenCalling('mock')
+                        .returns(123)
+                        .returns(new TestModifier())
+                        .mock();
+
+                Assert.fail();
+
+            } catch (AssertionV1.AssertionException ae) {
+            }
         }
     }
 
@@ -80,6 +122,17 @@ public with sharing class MockerTests {
             MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                     .whenNoArguments()
                     .forMethod('mock')
+                    .returns(123)
+                    .mock();
+
+            Assert.areEqual(123, mocked.mock());
+            Assert.areEqual(123, mocked.mock());
+            Assert.areEqual(123, mocked.mock());
+            MockerV1.validate();
+
+            MockerV1.resetCounts();
+            mocked = (MockerV1) MockerV1.of(MockerV1.class)
+                    .whenCalling('mock')
                     .returns(123)
                     .mock();
 
@@ -98,6 +151,28 @@ public with sharing class MockerTests {
             MockerV1 mocked = (MockerV1) MockerV1.of(MockerV1.class)
                     .whenNoArguments()
                     .forMethod('mock')
+                    .called(2)
+                    .returns(123)
+                    .mock();
+
+            Assert.areEqual(123, mocked.mock());
+            try {
+                MockerV1.validate();
+            } catch (AssertionV1.AssertionException ae) {
+            }
+
+            Assert.areEqual(123, mocked.mock());
+            MockerV1.validate();
+
+            Assert.areEqual(123, mocked.mock());
+            try {
+                MockerV1.validate();
+            } catch (AssertionV1.AssertionException ae) {
+            }
+
+            MockerV1.resetCounts();
+            mocked = (MockerV1) MockerV1.of(MockerV1.class)
+                    .whenCalling('mock')
                     .called(2)
                     .returns(123)
                     .mock();
@@ -162,6 +237,39 @@ public with sharing class MockerTests {
                 mocked.whenArgument(new List<Account> { a1, a3 });
                 Assert.fail();
             } catch(AssertionV1.AssertionException ae) {}
+
+            MockerV1.resetCounts();
+            mocked = (MockerV1) MockerV1.of(MockerV1.class)
+                    .whenCalling('whenArgument', a1)
+                    .mock();
+
+            mocked.whenArgument(a1);
+            mocked.whenArgument(a2);
+            try {
+                mocked.whenArgument(a3);
+                Assert.fail();
+            } catch(AssertionV1.AssertionException ae) {}
+
+            mocked = (MockerV1) MockerV1.of(MockerV1.class)
+                    .whenCalling('whenArgument', new List<Account> { a1, a3})
+                    .mock();
+
+            mocked.whenArgument(new List<Account> { a1, a3 });
+            mocked.whenArgument(new List<Account> { a2, a3 });
+            try {
+                mocked.whenArgument(new List<Account> { a1 });
+                Assert.fail();
+            } catch(AssertionV1.AssertionException ae) {}
+
+            mocked = (MockerV1) MockerV1.of(MockerV1.class)
+                    .whenCalling('whenArgument', new List<Account> { a2, a3})
+                    .mock();
+
+            mocked.whenArgument(new List<Account> { a2, a3 });
+            try {
+                mocked.whenArgument(new List<Account> { a1, a3 });
+                Assert.fail();
+            } catch(AssertionV1.AssertionException ae) {}
         }
     }
 
@@ -201,6 +309,40 @@ public with sharing class MockerTests {
             mocked = (MockerV1) MockerV1.of(MockerV1.class)
                     .whenArgument(MockerV1.anyNonNull(Object.class))
                     .forMethod('whenArgument')
+                    .mock();
+
+            mocked.whenArgument(a1);
+
+            try {
+                mocked.whenArgument(null);
+                Assert.fail();
+            } catch(AssertionV1.AssertionException ae) {}
+
+            MockerV1.resetCounts();
+            mocked = (MockerV1) MockerV1.of(MockerV1.class)
+                    .whenCalling('whenArgument', MockerV1.any(Object.class))
+                    .mock();
+
+            mocked.whenArgument(a1);
+            mocked.whenArgument(a2);
+            mocked.whenArgument(a3);
+            mocked.whenArgument(null);
+
+            mocked = (MockerV1) MockerV1.of(MockerV1.class)
+                    .whenCalling('whenArguments', MockerV1.any(Object.class), a3)
+                    .mock();
+
+            mocked.whenArguments(a1, a3);
+            mocked.whenArguments(a2, a3);
+            mocked.whenArguments(a3, a3);
+
+            try {
+                mocked.whenArgument(new List<Account> { a1, a2 });
+                Assert.fail();
+            } catch(AssertionV1.AssertionException ae) {}
+
+            mocked = (MockerV1) MockerV1.of(MockerV1.class)
+                    .whenCalling('whenArgument', MockerV1.anyNonNull(Object.class))
                     .mock();
 
             mocked.whenArgument(a1);
@@ -300,6 +442,7 @@ public with sharing class MockerTests {
                         .mock();
 
                 mocked.whenArgument(new Account(Name = 'Bill'));
+                Assert.fail();
 
             } catch(AssertionV1.AssertionException ae) {}
         }

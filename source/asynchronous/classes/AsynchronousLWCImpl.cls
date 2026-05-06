@@ -72,9 +72,9 @@ public with sharing class AsynchronousLWCImpl {
 
             final OptionalV1 matches;
             if (parts[1].toLowerCase() == 'asc') {
-                matches = query.ordered(QueryV1.ascending(orderField)).execute();
+                matches = query.ordered(QueryV1.ascending(orderField).nullsLast()).execute();
             } else {
-                matches = query.ordered(QueryV1.descending(orderField)).execute();
+                matches = query.ordered(QueryV1.descending(orderField).nullsLast()).execute();
             }
 
             return (List<Map<String, Object>>) matches.then(new JobMatchProcessor()).get();

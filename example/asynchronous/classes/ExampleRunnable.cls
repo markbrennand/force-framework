@@ -59,7 +59,7 @@ public with sharing class ExampleRunnable extends AsynchronousV1.Runnable {
 
     public class Configuration implements TypesV1.Factory {
         public Object newInstance() {
-            return new Map<String, Integer> { 'maximumActive' => 1 };
+            return new Map<String, Integer> { 'maximumActive' => 16, 'succeedOnRetryNumber' => 5 };
         }
     }
 }

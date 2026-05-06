@@ -71,7 +71,7 @@ public with sharing class AsynchronousHelperImpl {
         public void recordInternalException(final AsynchronousJob__c asyncObject, final AsynchronousV1.APIException exc) {
             recordException(asyncObject, exc);
             asyncObject.Status__c = AsynchronousV1.Status.FAILED.name();
-            AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+            AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject }, false);
         }
 
         /**
@@ -221,13 +221,13 @@ public with sharing class AsynchronousHelperImpl {
         asyncObject.Status__c = AsynchronousV1.Status.RUNNING.name();
         asyncObject.LastRunTime__c = CommonHelper.now();
 
-        AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+        AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject }, false);
 
         asyncObject.ApexJobId__c = System.enqueueJob(
                 runnable.forJob(AsynchronousJob.fromSObject(AsynchronousDAO.impl.getObject(asyncObject.Id)))
         );
 
-        AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+        AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject }, false);
     }
 
     /**

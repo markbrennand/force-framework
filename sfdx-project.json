@@ -2,7 +2,7 @@
   "packageDirectories": [
     {
       "versionName": "Release 1.2",
-      "versionNumber": "1.2.2.NEXT",
+      "versionNumber": "1.3.0.NEXT",
       "path": "source",
       "default": true,
       "package": "force-fw",
@@ -34,6 +34,18 @@
     "force-fw@1.2.2-5": "04tgL000000EeDhQAK",
     "force-fw@1.2.2-6": "04tgL000000EeFJQA0",
     "force-fw@1.2.2-7": "04tgL000000EeTpQAK",
-    "force-fw@1.2.2-8": "04tgL000000EedVQAS"
+    "force-fw@1.2.2-8": "04tgL000000EedVQAS",
+    "force-fw@1.2.2-9": "04tgL000000Ef4vQAC",
+    "force-fw@1.2.2-10": "04tgL000000Ef6XQAS",
+    "force-fw@1.2.2-11": "04tgL000000EfEbQAK",
+    "force-fw@1.2.2-12": "04tgL000000EfbBQAS",
+    "force-fw@1.2.2-13": "04tgL000000EiVpQAK",
+    "force-fw@1.2.2-14": "04tgL000000EiafQAC",
+    "force-fw@1.2.2-15": "04tgL000000Eih7QAC",
+    "force-fw@1.2.2-16": "04tgL000000EixFQAS",
+    "force-fw@1.2.2-17": "04tgL000000EjuvQAC",
+    "force-fw@1.2.2-18": "04tgL000000Em4nQAC",
+    "force-fw@1.3.0-1": "04tgL000000Eo8DQAS",
+    "force-fw@1.3.0-2": "04tgL000000Et4fQAC"
   }
 }

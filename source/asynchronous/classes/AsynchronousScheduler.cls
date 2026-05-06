@@ -48,7 +48,6 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * <p>
      * Reference to assign to async. jab running Scheduler.
      */
-    @TestVisible
     private final static String SCHEDULER_JOB_REFERENCE = 'Scheduler({0})';
 
     /**
@@ -65,23 +64,51 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * The number of seconds for the time window in which a job must be in active state to be considered when
      * determining concurrency. The time window is the current time to the given number of seconds in the past.
      */
-    @TestVisible
-    private final static String ACTIVE_JOBS_WINDOW = 'activeJobsWindow';
+    private final static String ACTIVE_JOBS_WINDOW_PROPERTY = 'activeJobsWindow';
 
     /**
      * @description
      * <p>
-     * The minimum number of seconds for the active window size..
+     * The number of seconds for the time window in which a job must be in active state to be considered when
+     * determining concurrency. The time window is the current time to the given number of seconds in the past.
+     */
+    private final static String MAXIMUM_JOBS_TO_SWEEP_PROPERTY = 'maximumJobsToSweep';
+
+    /**
+     * @description
+     * <p>
+     * The minimum number of seconds for the active window size.
      */
     private final static Integer MIN_ACTIVE_JOB_WINDOW_SIZE = 300;
 
     /**
      * @description
      * <p>
-     * Maximum number of jobs sweeper can process per run.
+     * Default value for the active window size.
+     */
+    private final static Integer DEFAULT_ACTIVE_JOB_WINDOW_SIZE = 900;
+
+    /**
+     * @description
+     * <p>
+     * Minimum value for maximum jobs to sweep.
+     */
+    private final static Integer MIN_MAX_JOBS_TO_SWEEP = 1;
+
+    /**
+     * @description
+     * <p>
+     * Default value for maximum jobs to sweep.
+     */
+    private final static Integer DEFAULT_MAX_JOBS_TO_SWEEP = 100;
+
+    /**
+     * @description
+     * <p>
+     * Set of job Ids that remain to be started.
      */
     @TestVisible
-    private final static Integer MAX_JOBS_TO_SWEEP = 100;
+    private final static String JOBS_TO_START = 'JobsToStart';
 
     /*
      * Initialise the registry.
@@ -136,7 +163,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
         AssertionV1.isNotNull(asyncJob, 'argument: AsynchronousScheduler.run.asyncJob');
 
         final Set<String> jobsToStart = (Set<String>)
-                JSON.deserialize(asyncJob.getState().get(AsynchronousFinalizer.JOBS_TO_START), Set<String>.class);
+                JSON.deserialize(asyncJob.getState().get(JOBS_TO_START), Set<String>.class);
 
         if (jobsToStart.isEmpty()) {
             delayWhenNoJobsToRun((Integer) configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY));
@@ -156,12 +183,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
             }
 
             jobsToStart.remove(jobId);
-
-            asyncJob.setState(
-                    new Map<String, String> {
-                            AsynchronousFinalizer.JOBS_TO_START => JSON.serialize(jobsToStart)
-                    }
-            );
+            asyncJob.setState(new Map<String, String> { JOBS_TO_START => JSON.serialize(jobsToStart) });
         }
     }
 
@@ -220,6 +242,10 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      */
     public override Boolean onSuccess(final AsynchronousV1.Job asyncJob) {
         AssertionV1.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onSuccess.asyncJob');
+        AsynchronousScheduler.queue(
+                (Set<String>) JSON.deserialize(asyncJob.getState().get(JOBS_TO_START), Set<String>.class),
+                1
+        );
         return false;
     }
 
@@ -235,6 +261,10 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      */
     public override Boolean onFailure(final AsynchronousV1.Job asyncJob, final Exception exc) {
         AssertionV1.isNotNull(asyncJob, 'argument: AsynchronousScheduler.onFailure.asyncJob');
+        AsynchronousScheduler.queue(
+                (Set<String>) JSON.deserialize(asyncJob.getState().get(JOBS_TO_START), Set<String>.class),
+                2   // Use 2 as Scheduler job being finalized will be in RUNNING or FINALIZING state,
+        );
         return true;
     }
 
@@ -259,10 +289,14 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * <p>
      * The processing logic for the Scheduler requires that the Asynchronous__c object for the new Scheduler job
      * is only persisted if an Apex job could be created for it.
+     * <p>
+     * The maxRunningSchedulers will be set to 2 in any calls from onSuccess or onFailure. This is because the
+     * job being processed is for the scheduler and will still be set to FINALISING.
      *
      * @param jobsLeftToStart The jobs that are left to start from the previous scheduler run.
+     * @param maxRunningSchedulers Do not start scheduler is it exceeds this value.
      */
-    public static void queue(final Set<String> jobsLeftToStart) {
+    public static void queue(final Set<String> jobsLeftToStart, final Integer maxRunningSchedulers) {
         final AsynchronousV1.Job asyncJob;
 
         if (!jobsLeftToStart.isEmpty()) {
@@ -271,7 +305,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
                     String.format(SCHEDULER_JOB_REFERENCE, new List<Object> { jobsLeftToStart.size() }),
                     0,
                     0,
-                    new Map<String, String> { AsynchronousFinalizer.JOBS_TO_START => JSON.serialize(jobsLeftToStart) }
+                    new Map<String, String> { JOBS_TO_START => JSON.serialize(jobsLeftToStart) }
             );
 
         } else {
@@ -286,7 +320,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
                     String.format(SCHEDULER_JOB_REFERENCE, new List<Object> { newJobsToStart.size() }),
                     0,
                     0,
-                    new Map<String, String> { AsynchronousFinalizer.JOBS_TO_START => JSON.serialize(newJobsToStart) }
+                    new Map<String, String> { JOBS_TO_START => JSON.serialize(newJobsToStart) }
             );
         }
 
@@ -294,7 +328,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
         if (AsynchronousDAO.impl.countActiveObjects(
                 new AsynchronousJob__c(Runnable__c = RunNextAvailable.class.getName()),
                 getActiveWindowSize()
-        ) < 1) {
+        ) < maxRunningSchedulers) {
             AsynchronousJob__c asyncObject = AsynchronousJob.toSObject(asyncJob);
             AsynchronousDAO.impl.persistObjects(
                     new List<AsynchronousJob__c> { asyncObject},
@@ -361,8 +395,20 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * @return The active window size in seconds.
      */
     private static Integer getActiveWindowSize() {
-        final Integer windowSize = (Integer) configuration.get(ACTIVE_JOBS_WINDOW);
+        final Integer windowSize = (Integer) configuration.get(ACTIVE_JOBS_WINDOW_PROPERTY);
         return windowSize == null ? MIN_ACTIVE_JOB_WINDOW_SIZE : Math.max(windowSize, MIN_ACTIVE_JOB_WINDOW_SIZE);
+    }
+
+    /**
+     * @description
+     * <p>
+     * Determines the number of jobs to be swept.
+     *
+     * @return The number of job to be swept.
+     */
+    private static Integer getMaximumJobsToSweep() {
+        final Integer jobsToSweep = (Integer) configuration.get(MAXIMUM_JOBS_TO_SWEEP_PROPERTY);
+        return jobsToSweep == null ? DEFAULT_MAX_JOBS_TO_SWEEP : Math.min(jobsToSweep, MIN_MAX_JOBS_TO_SWEEP);
     }
 
     /**
@@ -376,7 +422,8 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
             return new Map<String, Integer> {
                     NO_JOBS_TO_RUN_DELAY_PROPERTY => 10000,
                     MAXIMUM_JOBS_TO_START_PROPERTY => 1,
-                    ACTIVE_JOBS_WINDOW => MIN_ACTIVE_JOB_WINDOW_SIZE
+                    ACTIVE_JOBS_WINDOW_PROPERTY => DEFAULT_ACTIVE_JOB_WINDOW_SIZE,
+                    ACTIVE_JOBS_WINDOW_PROPERTY => DEFAULT_MAX_JOBS_TO_SWEEP
             };
         }
     }
@@ -427,7 +474,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * @return Optional containing the Sweeper job if stale jobs exist; otherwise OptionalV1.empty().
      */
     public static OptionalV1 getSweeper() {
-        if (AsynchronousDAO.impl.getSweepableObjects(MAX_JOBS_TO_SWEEP, getActiveWindowSize()).size() == 0) {
+        if (AsynchronousDAO.impl.getSweepableObjects(1, getActiveWindowSize()).size() == 0) {
             return OptionalV1.empty();
         }
 
@@ -464,7 +511,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
 
         public override void run(AsynchronousV1.Job asyncJob, String apexJobId) {
             final List<StaleJob> staleJobs = (List<StaleJob>)
-                    ImmutableV1.of(AsynchronousDAO.impl.getSweepableObjects(100, getActiveWindowSize()))
+                    ImmutableV1.of(AsynchronousDAO.impl.getSweepableObjects(getMaximumJobsToSweep(), getActiveWindowSize()))
                         .transform(new ToStaleJob(), new List<StaleJob>());
 
             final List<AsynchronousJob__c> updates = new List<AsynchronousJob__c>();
@@ -480,7 +527,8 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
                 }
             }
 
-            AsynchronousDAO.impl.persistObjects(updates);
+            // We cannot use the DAO as it disables the trigger.
+            AsynchronousDAO.impl.persistObjects(updates, true);
         }
     }
 
@@ -525,7 +573,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
             } else {
                 job.Status__c = job.Status__c == AsynchronousV1.Status.FINALIZING.name()
                         ? AsynchronousV1.Status.SUCCEEDED.name()
-                        : AsynchronousV1.Status.QUEUED.name();
+                        : AsynchronousV1.Status.PENDING.name();
             }
         }
 

@@ -81,12 +81,12 @@ public with sharing virtual class AsynchronousDAO extends AsynchronousDAOMockabl
          * The List returned must be ordered chronologically, with the first entry being the job that has been
          * waiting the longest to run.
          *
-         * @param windowSize The number of seconds in the past before which the sweepable job must have been run.
          * @param maxJobsToReturn The maximum number of objects to return.
+         * @param windowSize The number of seconds in the past before which the sweepable job must have been run.
          *
          * @return The objects.
          */
-        List<AsynchronousJob__c> getSweepableObjects(final Integer windowSize, final Integer maxJobsToReturn);
+        List<AsynchronousJob__c> getSweepableObjects(final Integer maxJobsToReturn, final Integer windowSize);
 
         /**
          * @description
@@ -125,8 +125,9 @@ public with sharing virtual class AsynchronousDAO extends AsynchronousDAOMockabl
          * Inserts or updates the given objects.
          *
          * @param asyncObjects The objects to persist.
+         * @param withTrigger Is trigger on asynchronous job object to fire.
          */
-        void persistObjects(final List<AsynchronousJob__c> asyncObjects);
+        void persistObjects(final List<AsynchronousJob__c> asyncObjects, final Boolean withTrigger);
 
         /**
          * @description

@@ -166,7 +166,7 @@ public with sharing class AsynchronousImpl {
                         }
                 );
             } else {
-                AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asynchronousJob });
+                AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asynchronousJob }, false);
             }
         }
 

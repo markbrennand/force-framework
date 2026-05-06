@@ -59,14 +59,14 @@ public with sharing class AsynchronousDAOTests {
             }
 
             try {
-                extended.persistObjects(null);
+                extended.persistObjects(null, false);
                 Assert.fail();
             } catch(AsynchronousV1.APIException ae) {
                 Assert.areEqual('Access denied', ae.getMessage());
             }
 
             try {
-                extended.persistObjects(null, null);
+                extended.persistObjects(null, (List<Map<String, String>>) null);
                 Assert.fail();
             } catch(AsynchronousV1.APIException ae) {
                 Assert.areEqual('Access denied', ae.getMessage());
@@ -122,9 +122,10 @@ public with sharing class AsynchronousDAOTests {
             TriggerV1.enable(AsynchronousJob__c.SObjectType);
             Assert.isTrue(TriggerV1.isEnabled(AsynchronousJob__c.SObjectType));
 
-            AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c>{
-                    job1, job2
-            });
+            AsynchronousDAO.impl.persistObjects(
+                    new List<AsynchronousJob__c>{ job1, job2 },
+                    false
+            );
 
             Assert.isTrue(TriggerV1.isEnabled(AsynchronousJob__c.SObjectType));
 
@@ -154,7 +155,7 @@ public with sharing class AsynchronousDAOTests {
             TriggerV1.disable(AsynchronousJob__c.SObjectType);
             Assert.isFalse(TriggerV1.isEnabled(AsynchronousJob__c.SObjectType));
 
-            AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { fetched2 });
+            AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { fetched2 }, false);
             AsynchronousJob__c updatedFetched2 = AsynchronousDAO.impl.getObject(job2.Id);
             Assert.isTrue(ComparisonHelper.compare(fetched2, updatedFetched2), 'Mis-match of data retrieved and data stored');
             Assert.isFalse(TriggerV1.isEnabled(AsynchronousJob__c.SObjectType));
@@ -245,7 +246,7 @@ public with sharing class AsynchronousDAOTests {
             fetched2.LastRunTime__c = CommonHelper.now();
             fetched2.Status__c = AsynchronousV1.Status.FAILED.name();
 
-            AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { fetched2 });
+            AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { fetched2 }, false);
             AsynchronousJob__c updatedFetched2 = AsynchronousDAO.impl.getObject(job2.Id);
             Assert.isTrue(ComparisonHelper.compare(fetched2, updatedFetched2), 'Mis-match of data retrieved and data stored');
             Assert.areEqual('{"job2.property2":"job2.value2","job2.property1":"job2.value1"}', updatedFetched2.AsynchronousJobState__r[0].Content__c, 'Unexpected JSON content for state');
@@ -507,6 +508,97 @@ public with sharing class AsynchronousDAOTests {
             Assert.isTrue(ComparisonHelper.compare(scheduled, new Set<AsynchronousJob__c> { job4, job1, job2 }));
         }
     }
+    @IsTest
+    private static void testSweepableObjects() {
+        TestHelper.setNOW();
+
+        System.runAs(TestHelper.getManager(TESTING)) {
+            insert new Binding__c(
+                    Type__c = 'Map<String, Integer>',
+                    Action__c = 'AsynchronousScheduler',
+                    Implementation__c = Configuration.class.getName()
+            );
+        }
+
+        System.runAs(TestHelper.getUser(TESTING)) {
+            AsynchronousJob__c job1 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST1',
+                    LastRunTime__c = CommonHelper.now().addMinutes(-1),
+                    ScheduledRunTime__c = CommonHelper.now().addMinutes(-1)
+            );
+
+            AsynchronousJob__c job2 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.FINALIZING.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    LastRunTime__c = CommonHelper.now().addMinutes(-1),
+                    ScheduledRunTime__c = CommonHelper.now().addMinutes(-1)
+            );
+
+            AsynchronousJob__c job3 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.SUCCEEDED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST3',
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-1)
+            );
+
+            AsynchronousJob__c job4 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST4',
+                    LastRunTime__c = CommonHelper.now().addMinutes(-2),
+                    ScheduledRunTime__c = CommonHelper.now().addMinutes(-2)
+            );
+
+            AsynchronousJob__c job5 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
+                    Status__c = AsynchronousV1.Status.FINALIZING.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST5',
+                    LastRunTime__c = CommonHelper.now().addMinutes(-2),
+                    ScheduledRunTime__c = CommonHelper.now().addMinutes(-2)
+            );
+
+            AsynchronousJob__c job6 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST6',
+                    LastRunTime__c = CommonHelper.now().addDays(-2),
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-2)
+            );
+
+            insert new List<AsynchronousJob__c> { job1, job2, job3, job4, job5, job6 };
+
+            List<AsynchronousJob__c> scheduled = AsynchronousDAO.impl.getSweepableObjects(10, 60);
+            Assert.areEqual(3, scheduled.size());
+            Assert.isTrue(ComparisonHelper.compare(scheduled, new List<AsynchronousJob__c> { job4, job5, job6 }));
+        }
+    }
+
 
     @IsTest
     private static void testPersistException() {

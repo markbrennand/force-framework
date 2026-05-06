@@ -464,6 +464,14 @@ global with sharing virtual class AsynchronousV1 {
         return AsynchronousAPI.impl.queueJobs(asyncJobs);
     }
 
+    /**
+     * @description
+     * <p>
+     * Triggers the asynchronous “sweeper” job if one is configured.
+     * <p>
+     * The sweeper is responsible for housekeeping tasks (e.g., re-queuing, cleanup, or finalization).
+     * If a sweeper job is needed, it is queued for processing.
+     */
     global static void startSweeper() {
         final OptionalV1 sweeperJob = AsynchronousScheduler.getSweeper();
         if (sweeperJob.isPresent()) {

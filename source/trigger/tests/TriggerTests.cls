@@ -90,6 +90,7 @@ public with sharing class TriggerTests {
             TriggerV1.disable(AsynchronousJobSubscriber.StartSchedulerFactory.class);
             TriggerV1.disable(AsynchronousJobSubscriber.PreProcessorFactory.class);
             TriggerV1.disable(AsynchronousJobSubscriber.CancellationsFactory.class);
+            TriggerV1.disable(AsynchronousJobSubscriber.OnSuccessFactory.class);
 
             AsynchronousJob__c job1 = new AsynchronousJob__c(
                     Runnable__c = AsynchronousScheduler.RunNextAvailable.class.getName(),
@@ -110,6 +111,20 @@ public with sharing class TriggerTests {
             );
 
             insert new List<AsynchronousJob__c> { job1, job2 };
+
+            AsynchronousJobState__c state1 = new AsynchronousJobState__c(
+                    AsynchronousJob__c = job1.Id,
+                    ChunkNumber__c = 1,
+                    Content__c = JSON.serialize(new Map<String, String> { AsynchronousScheduler.JOBS_TO_START => '[]'})
+            );
+
+            AsynchronousJobState__c state2 = new AsynchronousJobState__c(
+                    AsynchronousJob__c = job2.Id,
+                    ChunkNumber__c = 1,
+                    Content__c = JSON.serialize(new Map<String, String> { AsynchronousScheduler.JOBS_TO_START => '[]'})
+            );
+
+            insert new List<AsynchronousJobState__c> { state1, state2 };
 
             INCREMENT = 1;
             job1.RetryInterval__c = job1.RetryInterval__c + INCREMENT;

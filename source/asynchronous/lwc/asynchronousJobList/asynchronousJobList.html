@@ -9,28 +9,28 @@
 	<lightning-spinner size="small"></lightning-spinner>
     </div>
     <div class="full-width">
-	<lightning-card>
-	    <c-asynchronous-job-filters
-		onchange={filterChanged}
-		onclearselected={clearSelectedRows}
-		onstartspinner={startSpinner}
-		onstopspinner={stopSpinner}
-		refresh-rate={refreshRate}
-	    ></c-asynchronous-job-filters>
-	</lightning-card>
+        <lightning-card>
+            <c-asynchronous-job-filters
+            onchange={filterChanged}
+            onclearselected={clearSelectedRows}
+            onstartspinner={startSpinner}
+            onstopspinner={stopSpinner}
+            refresh-rate={refreshRate}
+            ></c-asynchronous-job-filters>
+        </lightning-card>
     </div>
     <div class="datatable">
-	<lightning-datatable
-	    key-field="id"
-	    data={data}
-	    columns={columns}
-	    sorted-by={sortedBy}
-	    sorted-direction={sortedDirection}
-	    onsort={sortData}
-	    onrowselection={rowsSelected}
-	    min-column-width={minColumnWidth}
-	    max-column-width={maxColumnWidth}
-	    column-widths-mode="auto">
-	</lightning-datatable>
+        <lightning-datatable
+            key-field="id"
+            data={data}
+            columns={columns}
+            sorted-by={sortedBy}
+            sorted-direction={sortedDirection}
+            onsort={sortData}
+            onrowselection={rowsSelected}
+            min-column-width={minColumnWidth}
+            max-column-width={maxColumnWidth}
+            column-widths-mode="auto">
+        </lightning-datatable>
     </div>
 </template>

@@ -27,13 +27,6 @@ public with sharing class AsynchronousFinalizer {
     /**
      * @description
      * <p>
-     * Set of job Ids that remain to be started.
-     */
-    public final static String JOBS_TO_START = 'JobsToStart';
-
-    /**
-     * @description
-     * <p>
      * Factory method to create a new Finalizer.
      * <p>
      * The implementation is hidden to prevent re-use outside the framework.
@@ -105,19 +98,6 @@ public with sharing class AsynchronousFinalizer {
                     AsynchronousHelper.impl.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
                 }
 
-                try {
-                    final AsynchronousV1.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
-                    if (asyncJob.getRunnable() instanceof AsynchronousScheduler) {
-                        AsynchronousScheduler.queue(
-                                (Set<String>) JSON.deserialize(
-                                        asyncJob.getState().get(JOBS_TO_START), Set<String>.class)
-                        );
-                    }
-
-                } catch (Exception exc) {
-                    AsynchronousHelper.impl.recordInternalException(asyncObject, new AsynchronousV1.APIException('Wrapper', exc));
-                }
-
             } catch (Exception exc) {
                 final AsynchronousJob__c errorObject = new AsynchronousJob__c(
                         Id = asyncObjectId,
@@ -139,9 +119,10 @@ public with sharing class AsynchronousFinalizer {
 
                 if (!persisted) {
                     try {
-                        AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c>{
-                                errorObject
-                        });
+                        AsynchronousDAO.impl.persistObjects(
+                                new List<AsynchronousJob__c>{ errorObject },
+                                false
+                        );
                     } catch (Exception exc1) {
                         System.debug(
                                 LoggingLevel.ERROR,
@@ -160,14 +141,9 @@ public with sharing class AsynchronousFinalizer {
          * @param asyncObject The AsynchronousJob__c object for the job.
          */
         private void onSuccess(final AsynchronousJob__c asyncObject) {
-            final AsynchronousV1.Job asyncJob = AsynchronousJob.fromSObject(asyncObject);
-
-            if (asyncJob.getRunnable().onSuccess(asyncJob)) {
-                asyncObject.Status__c = AsynchronousV1.Status.SUCCEEDED.name();
-                AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject });
-            } else {
-                AsynchronousDAO.impl.removeObjects(new List<AsynchronousJob__c> { asyncObject });
-            }
+            // The trigger will handle a successful job.
+            asyncObject.Status__c = AsynchronousV1.Status.SUCCEEDED.name();
+            AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject }, true);
         }
 
         /**
@@ -192,7 +168,7 @@ public with sharing class AsynchronousFinalizer {
             if (retryNumber == maximumRetries) {
                 if (asyncJob.getRunnable().onFailure(asyncJob, exc)) {
                     asyncObject.Status__c = AsynchronousV1.Status.FAILED.name();
-                    AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+                    AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject }, false);
                 } else {
                     AsynchronousDAO.impl.removeObjects(new List<AsynchronousJob__c> { asyncObject });
                 }
@@ -204,7 +180,7 @@ public with sharing class AsynchronousFinalizer {
                             Datetime.newInstance(System.currentTimeMillis() + asyncJob.getRetryInterval());
                 }
 
-                AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject });
+                AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject }, false);
             }
         }
     }

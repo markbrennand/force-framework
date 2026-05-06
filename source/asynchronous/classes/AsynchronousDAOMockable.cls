@@ -18,7 +18,7 @@ public with sharing virtual class AsynchronousDAOMockable implements Asynchronou
         throw new AsynchronousV1.APIException('Access denied');
     }
 
-    public List<AsynchronousJob__c> getSweepableObjects(Integer windowSize, Integer maxJobsToReturn) {
+    public List<AsynchronousJob__c> getSweepableObjects(final Integer maxJobsToReturn, final Integer windowSize) {
         throw new AsynchronousV1.APIException('Access denied');
     }
 
@@ -30,7 +30,7 @@ public with sharing virtual class AsynchronousDAOMockable implements Asynchronou
         throw new AsynchronousV1.APIException('Access denied');
     }
 
-    public void persistObjects(final List<AsynchronousJob__c> asyncObjects) {
+    public void persistObjects(final List<AsynchronousJob__c> asyncObjects, final Boolean withTrigger) {
         throw new AsynchronousV1.APIException('Access denied');
     }
 
