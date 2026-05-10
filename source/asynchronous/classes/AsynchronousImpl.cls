@@ -150,11 +150,11 @@ public with sharing class AsynchronousImpl {
             asynchronousJob.ApexJobId__c = context.getJobId();
             asynchronousJob.LastRunTime__c = CommonHelper.now();
 
-            System.attachFinalizer(AsynchronousFinalizer.createFinalizer(asynchronousJob.Id));
+            final AsynchronousFinalizer.Finalizer finalizer = AsynchronousFinalizer.createFinalizer(asynchronousJob.Id);
+            System.attachFinalizer(finalizer);
 
             final Map<String, String> initialState = asyncJob.getState();
             run(asyncJob, context.getJobId());
-            asynchronousJob.Status__c = AsynchronousV1.Status.FINALIZING.name();
 
             if (asyncJob.getState() != initialState) {
                 AsynchronousDAO.impl.persistObjects(
@@ -165,8 +165,17 @@ public with sharing class AsynchronousImpl {
                                 asyncJob.getState()
                         }
                 );
-            } else {
-                AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asynchronousJob }, false);
+            }
+
+            final Boolean isScheduler = asyncJob.getRunnable().getType() == AsynchronousScheduler.RunNextAvailable.class;
+            asynchronousJob.Status__c = isScheduler
+                    ? AsynchronousV1.Status.FINALIZING.name()
+                    : AsynchronousV1.Status.SUCCEEDED.name();
+
+            AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asynchronousJob }, true);
+
+            if (!isScheduler) {
+                finalizer.succeeded();
             }
         }
 
@@ -249,5 +258,4 @@ public with sharing class AsynchronousImpl {
             return new API();
         }
     }
-
 }

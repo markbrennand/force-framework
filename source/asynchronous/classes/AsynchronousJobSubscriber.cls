@@ -257,6 +257,7 @@ public with sharing class AsynchronousJobSubscriber {
      * The class is private to prevent re-use outside this class.
      */
     private with sharing class StartSchedulerSubscriber implements TriggerV1.Subscriber {
+        private Boolean schedulerQueued = false;
 
         /**
          * @description
@@ -266,7 +267,10 @@ public with sharing class AsynchronousJobSubscriber {
          * @param event The trigger API event.
          */
         public void onEvent(final TriggerV1.Event event) {
-            AsynchronousScheduler.queue(new Set<String>(), 1);
+            if (!schedulerQueued) {
+                AsynchronousScheduler.queue(new Set<String>(), 1);
+            }
+            schedulerQueued = true;
         }
     }
 

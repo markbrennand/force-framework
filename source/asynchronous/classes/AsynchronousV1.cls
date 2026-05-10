@@ -467,10 +467,12 @@ global with sharing virtual class AsynchronousV1 {
     /**
      * @description
      * <p>
-     * Triggers the asynchronous “sweeper” job if one is configured.
+     * Triggers the asynchronous “sweeper” job if one is needed.
      * <p>
      * The sweeper is responsible for housekeeping tasks (e.g., re-queuing, cleanup, or finalization).
      * If a sweeper job is needed, it is queued for processing.
+     * <p>
+     * If the sweeper is not needed, the scheduler is run to kick start the queue.
      */
     global static void startSweeper() {
         final OptionalV1 sweeperJob = AsynchronousScheduler.getSweeper();
@@ -480,6 +482,8 @@ global with sharing virtual class AsynchronousV1 {
                             (AsynchronousV1.Job) sweeperJob.get()
                     }
             );
+        } else {
+            AsynchronousScheduler.queue(new Set<String>(), 1);
         }
     }
 

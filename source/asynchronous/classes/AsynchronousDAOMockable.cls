@@ -30,6 +30,10 @@ public with sharing virtual class AsynchronousDAOMockable implements Asynchronou
         throw new AsynchronousV1.APIException('Access denied');
     }
 
+    public Datetime getWhenNextRequired(Integer activeWindowSize) {
+        throw new AsynchronousV1.APIException('Access denied');
+    }
+
     public void persistObjects(final List<AsynchronousJob__c> asyncObjects, final Boolean withTrigger) {
         throw new AsynchronousV1.APIException('Access denied');
     }

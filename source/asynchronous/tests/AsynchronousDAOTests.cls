@@ -89,6 +89,106 @@ public with sharing class AsynchronousDAOTests {
     }
 
     @IsTest
+    private static void itShouldReturnRequiredTimeOfLongestRunningJob() {
+        TestHelper.setNOW();
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TriggerV1.disable(AsynchronousJob__c.SObjectType);
+
+            AsynchronousJob__c job1 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
+                    MaximumRetries__c = 0,
+                    RetryInterval__c = 1000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST1',
+                    ScheduledRunTime__c = CommonHelper.now(),
+                    LastRunTime__c = CommonHelper.now().addSeconds(-1)
+            );
+
+            AsynchronousJob__c job2 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.RUNNING.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = CommonHelper.now(),
+                    LastRunTime__c = CommonHelper.now().addSeconds(-3)
+            );
+
+            AsynchronousJob__c job3 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = CommonHelper.now().addHours(-3)
+            );
+
+            insert new List<AsynchronousJob__c> { job1, job2, job3 };
+            Assert.areEqual(CommonHelper.now().addSeconds(-3), AsynchronousDAO.impl.getWhenNextRequired(300));
+
+            job3.Status__c = AsynchronousV1.Status.RUNNING.name();
+            job3.LastRunTime__c = CommonHelper.now().addSeconds(-301);
+            upsert job3;
+            Assert.areEqual(CommonHelper.now().addSeconds(-3), AsynchronousDAO.impl.getWhenNextRequired(300));
+            Assert.areEqual(CommonHelper.now().addSeconds(-301), AsynchronousDAO.impl.getWhenNextRequired(301));
+        }
+    }
+
+    @IsTest
+    private static void itShouldReturnTimeOfEarliestQueuedJob() {
+        TestHelper.setNOW();
+        System.runAs(TestHelper.getUser(TESTING)) {
+            TriggerV1.disable(AsynchronousJob__c.SObjectType);
+
+            AsynchronousJob__c job1 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
+                    MaximumRetries__c = 0,
+                    RetryInterval__c = 1000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST1',
+                    ScheduledRunTime__c = CommonHelper.now().addSeconds(-10)
+            );
+
+            AsynchronousJob__c job2 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = CommonHelper.now().addSeconds(-11)
+            );
+
+            AsynchronousJob__c job3 = new AsynchronousJob__c(
+                    OwnerId = UserInfo.getUserId(),
+                    Runnable__c = AsynchronousTestHelper.TestRunnable.class.getName(),
+                    Status__c = AsynchronousV1.Status.QUEUED.name(),
+                    MaximumRetries__c = 1,
+                    RetryInterval__c = 2000,
+                    RetryNumber__c = 1,
+                    Reference__c = 'TEST2',
+                    ScheduledRunTime__c = CommonHelper.now().addSeconds(-1)
+            );
+
+            insert new List<AsynchronousJob__c> { job1, job2, job3 };
+            Assert.areEqual(CommonHelper.now().addSeconds(-11), AsynchronousDAO.impl.getWhenNextRequired(300));
+
+            job3.ScheduledRunTime__c = CommonHelper.now().addSeconds(-301);
+            upsert job3;
+            Assert.areEqual(CommonHelper.now().addSeconds(-301), AsynchronousDAO.impl.getWhenNextRequired(300));
+        }
+    }
+
+    @IsTest
     private static void testJobCRUD() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
@@ -170,13 +270,13 @@ public with sharing class AsynchronousDAOTests {
         System.runAs(TestHelper.getUser(TESTING)) {
             AsynchronousHelper.impl = (AsynchronousHelper) MockerV1.of(AsynchronousHelper.class)
                     .whenArgument(new AsynchronousJob__c(Status__c = AsynchronousV1.Status.PENDING.name()))
-                        .forMethod('queueJob').called(2)
+                        .forMethod('queueJob').called(1)
                     .whenArguments(
                             new AsynchronousJob__c(),
                             MockerV1.anyNonNull(Map<String, String>.class)
                     )
                         .forMethod('encodeState')
-                        .called(5)
+                        .called(4)
                         .returns(new AsynchronousStateModifier())
             .mock();
 
@@ -530,7 +630,8 @@ public with sharing class AsynchronousDAOTests {
                     RetryNumber__c = 1,
                     Reference__c = 'TEST1',
                     LastRunTime__c = CommonHelper.now().addMinutes(-1),
-                    ScheduledRunTime__c = CommonHelper.now().addMinutes(-1)
+                    ScheduledRunTime__c = CommonHelper.now().addMinutes(-1),
+                    ApexJobId__c = 'TEST1'
             );
 
             AsynchronousJob__c job2 = new AsynchronousJob__c(
@@ -541,7 +642,8 @@ public with sharing class AsynchronousDAOTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     LastRunTime__c = CommonHelper.now().addMinutes(-1),
-                    ScheduledRunTime__c = CommonHelper.now().addMinutes(-1)
+                    ScheduledRunTime__c = CommonHelper.now().addMinutes(-1),
+                    ApexJobId__c = 'TEST2'
             );
 
             AsynchronousJob__c job3 = new AsynchronousJob__c(
@@ -552,7 +654,8 @@ public with sharing class AsynchronousDAOTests {
                     RetryInterval__c = 2000,
                     RetryNumber__c = 1,
                     Reference__c = 'TEST3',
-                    ScheduledRunTime__c = CommonHelper.now().addDays(-1)
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-1),
+                    ApexJobId__c = 'TEST3'
             );
 
             AsynchronousJob__c job4 = new AsynchronousJob__c(
@@ -564,7 +667,8 @@ public with sharing class AsynchronousDAOTests {
                     RetryNumber__c = 1,
                     Reference__c = 'TEST4',
                     LastRunTime__c = CommonHelper.now().addMinutes(-2),
-                    ScheduledRunTime__c = CommonHelper.now().addMinutes(-2)
+                    ScheduledRunTime__c = CommonHelper.now().addMinutes(-2),
+                    ApexJobId__c = 'TEST4'
             );
 
             AsynchronousJob__c job5 = new AsynchronousJob__c(
@@ -576,7 +680,8 @@ public with sharing class AsynchronousDAOTests {
                     RetryNumber__c = 1,
                     Reference__c = 'TEST5',
                     LastRunTime__c = CommonHelper.now().addMinutes(-2),
-                    ScheduledRunTime__c = CommonHelper.now().addMinutes(-2)
+                    ScheduledRunTime__c = CommonHelper.now().addMinutes(-2),
+                    ApexJobId__c = 'TEST5'
             );
 
             AsynchronousJob__c job6 = new AsynchronousJob__c(
@@ -588,7 +693,8 @@ public with sharing class AsynchronousDAOTests {
                     RetryNumber__c = 1,
                     Reference__c = 'TEST6',
                     LastRunTime__c = CommonHelper.now().addDays(-2),
-                    ScheduledRunTime__c = CommonHelper.now().addDays(-2)
+                    ScheduledRunTime__c = CommonHelper.now().addDays(-2),
+                    ApexJobId__c = 'TEST6'
             );
 
             insert new List<AsynchronousJob__c> { job1, job2, job3, job4, job5, job6 };
@@ -598,7 +704,6 @@ public with sharing class AsynchronousDAOTests {
             Assert.isTrue(ComparisonHelper.compare(scheduled, new List<AsynchronousJob__c> { job4, job5, job6 }));
         }
     }
-
 
     @IsTest
     private static void testPersistException() {

@@ -30,7 +30,7 @@ public with sharing class AsynchronousJobSubscriberTests {
                     ScheduledRunTime__c = CommonHelper.now()
             );
 
-            mock(asyncJob, 1, 1, 1, 1, 1, 1);
+            mock(asyncJob, 1, 1, 1, 1, 1, 1, 1);
 
             Test.startTest();
             insert asyncJob;
@@ -54,7 +54,7 @@ public with sharing class AsynchronousJobSubscriberTests {
                     ScheduledRunTime__c = CommonHelper.now()
             );
 
-            mock(asyncJob, 1, 1, 1, 1, 1, 1);
+            mock(asyncJob, 1, 1, 1, 1, 1, 1, 1);
 
             Test.startTest();
             insert asyncJob;
@@ -86,7 +86,7 @@ public with sharing class AsynchronousJobSubscriberTests {
                     LastRunTime__c = CommonHelper.now() // Must be reset,
             );
 
-            mock(asyncJob, 0, 0, 0, 0, 0, 0);
+            mock(asyncJob, 0, 0, 0, 0, 0, 0, 0);
 
             Test.startTest();
             insert asyncJob;
@@ -115,7 +115,8 @@ public with sharing class AsynchronousJobSubscriberTests {
             Integer countSchedulableObjectsCalls,
             Integer countActiveObjectsCalls,
             Integer persistObjectsCalls,
-            Integer queueJobCalls
+            Integer queueJobCalls,
+            Integer whenNextRequiredCalls
     ) {
         AsynchronousAPI.impl = (AsynchronousAPI.API) MockerV1.of(AsynchronousAPIMockable.class)
                 .whenCalling(
@@ -150,6 +151,7 @@ public with sharing class AsynchronousJobSubscriberTests {
                         MockerV1.any(List<Map<String, String>>.class)
                 )
                     .called(persistObjectsCalls)
+                .whenCalling('getWhenNextRequired', MockerV1.any(Integer.class)).called(whenNextRequiredCalls).returns(CommonHelper.now())
                 .mock();
 
         AsynchronousHelper.impl = (AsynchronousHelper.API) MockerV1.of(AsynchronousHelperMockable.class)

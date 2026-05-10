@@ -107,9 +107,23 @@ public with sharing virtual class AsynchronousDAO extends AsynchronousDAOMockabl
         /**
          * @description
          * <p>
-         * Determines the number of active instances of the given object.
+         * Determines the time at which the Scheduler is next due to be active.
          * <p>
-         * The Runnable in for the object determines the number of active instances.
+         * If there are running or finalizing jobs, this will be the time at which the first job was started.
+         *
+         * @param activeWindowSize The number of seconds in the past before which a running or finalizing job should
+         * not be included in the count.
+         *
+         * @return The concurrency for the object.
+         */
+        Datetime getWhenNextRequired(final Integer activeWindowSize);
+
+        /**
+         * @description
+         * <p>
+         * Yields the time at which
+         * <p>
+         * The number returned must not include the Scheduler.
          *
          * @param asyncObject The object to have its concurrency determined.
          * @param activeWindowSize The number of seconds in the past before which a running or finalizing job should

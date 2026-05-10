@@ -104,10 +104,11 @@ public with sharing class AsynchronousDAOImpl {
          * @return The objects.
          */
         public List<AsynchronousJob__c> getSweepableObjects(final Integer maxJobsToReturn, final Integer windowSize) {
-            return (List<AsynchronousJob__c>) QueryV1.of(AsynchronousJob__c.SObjectType)
+            final Map<String, AsynchronousJob__c> jobMap = (Map<String, AsynchronousJob__c>) QueryV1.of(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.SYSTEM_MODE)
                     .returning(new Set<SObjectField>{
                             AsynchronousJob__c.Id,
+                            AsynchronousJob__c.ApexJobId__c,
                             AsynchronousJob__c.Runnable__c,
                             AsynchronousJob__c.ApexJobId__c,
                             AsynchronousJob__c.Status__c,
@@ -125,7 +126,21 @@ public with sharing class AsynchronousDAOImpl {
                     .max(maxJobsToReturn)
                     .execute()
                     .collection(new List<AsynchronousJob__c>())
-                    .toList();
+                    .reduce(new MapAsynchronousJobToApexJob(), new Map<String, AsynchronousJob__c>());
+
+            final ImmutableV1.Collection apexJobs = QueryV1.of(AsyncApexJob.SObjectType)
+                    .security(AccessLevel.SYSTEM_MODE)
+                    .returning(AsyncApexJob.Id)
+                    .matching('Id IN :jobIds AND Status IN :activeStatuses')
+                    .bindings(new Map<String, Object> {
+                            'jobIds' => jobMap.keySet(),
+                            'activeStatuses' => new Set<String> { 'Queued', 'Processing'}
+                    })
+                    .execute()
+                    .collection(new List<AsyncApexJob>());
+
+            return (List<AsynchronousJob__c>)
+                    ((Map<String, AsynchronousJob__c>) apexJobs.reduce(new RemoveActiveApexJobs(), jobMap)).values();
         }
 
         /**
@@ -194,6 +209,54 @@ public with sharing class AsynchronousDAOImpl {
                     })
                     .execute()
                     .orElse(0);
+        }
+
+        /**
+         * @description
+         * <p>
+         * Determines the time at which the Scheduler is next due to be active.
+         * <p>
+         * If there are running or finalizing jobs, this will be the time at which the first job was started.
+         *
+         * @param activeWindowSize The number of seconds in the past before which a running or finalizing job should
+         * not be included in the count.
+         *
+         * @return The concurrency for the object.
+         */
+        public Datetime getWhenNextRequired(final Integer activeWindowSize) {
+            final OptionalV1 firstRunningJob = QueryV1.of(AsynchronousJob__c.SObjectType)
+                    .returning(QueryV1.aggregatedField('MIN', AsynchronousJob__c.LastRunTime__c, 'lastRunTime'))
+                    .matching('Status__c IN :activeStatuses AND LastRuntime__c >= :activeWindow AND Runnable__c != :schedulerClass')
+                    .bindings(new Map<String, Object> {
+                            'activeStatuses' => new Set<String> {
+                                    AsynchronousV1.Status.RUNNING.name(),
+                                    AsynchronousV1.Status.FINALIZING.name()
+                            },
+                            'activeWindow' => CommonHelper.now().addSeconds(-activeWindowSize),
+                            'schedulerClass' => AsynchronousScheduler.RunNextAvailable.class.getName()
+                    })
+                    .execute();
+
+            final Datetime lastRunTime = (Datetime)
+                    ((AggregateResult) ((ImmutableV1.Collection) firstRunningJob.get()).get(0)).get('lastRunTime');
+
+            if (lastRunTime != null) {
+                return lastRunTime;
+            }
+
+            final OptionalV1 nextScheduledJob = QueryV1.of(AsynchronousJob__c.SObjectType)
+                    .returning(QueryV1.aggregatedField('MIN', AsynchronousJob__c.ScheduledRunTime__c, 'scheduledRunTime'))
+                    .matching('Status__c = :queuedStatus AND Runnable__c != :schedulerClass')
+                    .bindings(new Map<String, Object> {
+                            'queuedStatus' => AsynchronousV1.Status.QUEUED.name(),
+                            'schedulerClass' => AsynchronousScheduler.RunNextAvailable.class.getName()
+                    })
+                    .execute();
+
+            final Datetime scheduledRunTime = (Datetime)
+                    ((AggregateResult) ((ImmutableV1.Collection) nextScheduledJob.get()).get(0)).get('scheduledRunTime');
+
+            return scheduledRunTime != null ? scheduledRunTime : CommonHelper.now().addDays(1);
         }
 
         /**
@@ -311,6 +374,48 @@ public with sharing class AsynchronousDAOImpl {
         @SuppressWarnings('PMD.ApexDoc')
         public Object newInstance() {
             return new API();
+        }
+    }
+
+    /**
+     * @description
+     * <p>
+     *
+     * Maps each AsynchronousJob__c record to its AsyncApexJob Id key.
+     * <p>
+     * This callback is used during a reduction over a collection of AsynchronousJob__c
+     * records to build a Map<String, AsynchronousJob__c> where the key is the
+     * AsynchronousJob__c.ApexJobId__c and the value is the corresponding job record.
+     * <p>
+     * This facilitates subsequent filtering by removing entries that still have an
+     * active AsyncApexJob, leaving only orphaned/runnable jobs for sweeping.
+     */
+    private with sharing class MapAsynchronousJobToApexJob extends ArrayV1.Callback {
+        public override OptionalV1 function(Object element, OptionalV1 currentValue, Integer index) {
+            final AsynchronousJob__c job = (AsynchronousJob__c) element;
+            final Map<String, AsynchronousJob__c> jobMap = (Map<String, AsynchronousJob__c>) currentValue.get();
+            jobMap.put(job.ApexJobId__c, job);
+            return OptionalV1.of(jobMap);
+        }
+    }
+
+    /**
+     * @description
+     * <p>
+     * Removes entries from a Map<String, AsynchronousJob__c> for which an active AsyncApexJob
+     * record is still present. This callback is intended to be used in a reduction over a
+     * collection of AsyncApexJob records to filter out AsynchronousJob__c entries that are
+     * still actively queued or processing in the platform.
+     * <p>
+     * After reduction, the map contains only AsynchronousJob__c records that do not have a
+     * corresponding active AsyncApexJob, i.e., candidates for sweeping.
+     */
+    private with sharing class RemoveActiveApexJobs extends ArrayV1.Callback {
+        public override OptionalV1 function(Object element, OptionalV1 currentValue, Integer index) {
+            final AsyncApexJob apexJob = (AsyncApexJob) element;
+            final Map<String, AsynchronousJob__c> jobMap = (Map<String, AsynchronousJob__c>) currentValue.get();
+            jobMap.remove(apexJob.Id);
+            return OptionalV1.of(jobMap);
         }
     }
 }

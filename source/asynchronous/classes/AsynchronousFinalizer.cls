@@ -27,6 +27,24 @@ public with sharing class AsynchronousFinalizer {
     /**
      * @description
      * <p>
+     * A job must be in one of these states to be finalized.
+     * <p>
+     * The Sweeper may set the status to QUEUED or FAILED of job that has been finalizing for a long time. Ignoring
+     * a job in a non expected state will prevent the job being finalized. Finalizing a swept job may result in
+     * unexpected behaviour, such as a job being re-queued whilst running.
+     */
+    private final static Set<String> FINALIZING_STATUSES = new Set<String> {
+            AsynchronousV1.Status.FINALIZING.name(),
+            AsynchronousV1.Status.RUNNING.name()
+    };
+
+    public interface Finalizer extends System.Finalizer {
+        void succeeded();
+    }
+
+    /**
+     * @description
+     * <p>
      * Factory method to create a new Finalizer.
      * <p>
      * The implementation is hidden to prevent re-use outside the framework.
@@ -36,7 +54,7 @@ public with sharing class AsynchronousFinalizer {
      * @return A new finalizer.
      */
     public static Finalizer createFinalizer(final Id asyncObjectId) {
-        return new ApexFinalizer(asyncObjectId);
+        return new FinalizerImpl(asyncObjectId);
     }
 
     /**
@@ -44,7 +62,7 @@ public with sharing class AsynchronousFinalizer {
      * <p>
      * Finalizer for the Asynchronous framework.
      */
-    private with sharing class ApexFinalizer implements Finalizer {
+    private with sharing class FinalizerImpl implements Finalizer {
 
         /**
          * @description
@@ -56,11 +74,18 @@ public with sharing class AsynchronousFinalizer {
         /**
          * @description
          * <p>
+         * Flag used to indicate job has succeeded and no finalization is required.
+         */
+        private Boolean isSuccess = false;
+
+        /**
+         * @description
+         * <p>
          * Constructs a new Finalizer for the given AsynchronousJob__c object Id.
          *
          * @param asyncObjectId The Asynchronous_c object Id.
          */
-        public ApexFinalizer(final Id asyncObjectId) {
+        public FinalizerImpl(final Id asyncObjectId) {
             this.asyncObjectId = asyncObjectId;
         }
 
@@ -85,8 +110,15 @@ public with sharing class AsynchronousFinalizer {
          * @param context Information about job result.
          */
         public void execute(final FinalizerContext context) {
+            if (isSuccess == true) {
+                return;
+            }
+
             try {
                 final AsynchronousJob__c asyncObject = AsynchronousDAO.impl.getObject(asyncObjectId);
+                if (!FINALIZING_STATUSES.contains(asyncObject.Status__c)) {
+                    return;
+                }
 
                 try {
                     if (context.getResult() == ParentJobResult.SUCCESS) {
@@ -182,6 +214,10 @@ public with sharing class AsynchronousFinalizer {
 
                 AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject }, false);
             }
+        }
+
+        public void succeeded() {
+            isSuccess = true;
         }
     }
 }

@@ -86,7 +86,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * <p>
      * Default value for the active window size.
      */
-    private final static Integer DEFAULT_ACTIVE_JOB_WINDOW_SIZE = 900;
+    private final static Integer DEFAULT_ACTIVE_JOB_WINDOW_SIZE = 300;
 
     /**
      * @description
@@ -109,6 +109,14 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      */
     @TestVisible
     private final static String JOBS_TO_START = 'JobsToStart';
+
+    /**
+     * @description
+     * <p>
+     * The delay in milliseconds for the Scheduler when run.
+     */
+    @TestVisible
+    private final static String SCHEDULER_DELAY = 'schedulerDelay';
 
     /*
      * Initialise the registry.
@@ -162,29 +170,33 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
     public override void run(final AsynchronousV1.Job asyncJob, final String apexJobId) {
         AssertionV1.isNotNull(asyncJob, 'argument: AsynchronousScheduler.run.asyncJob');
 
-        final Set<String> jobsToStart = (Set<String>)
-                JSON.deserialize(asyncJob.getState().get(JOBS_TO_START), Set<String>.class);
+        final Map<String, String> state = asyncJob.getState();
+        final Set<String> jobsToStart = (Set<String>) JSON.deserialize(state.get(JOBS_TO_START), Set<String>.class);
+        final Integer delay = Integer.valueOf(state.get(SCHEDULER_DELAY));
+
+        if (delay > 0) {
+            delay(delay);
+        }
 
         if (jobsToStart.isEmpty()) {
-            delayWhenNoJobsToRun((Integer) configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY));
-
-        } else {
-            final String jobId = jobsToStart.iterator().next();
-
-            try {
-                final AsynchronousJob__c asyncObject = AsynchronousDAO.impl.getObject(jobId);
-                asyncObject.ApexJobId__c = apexJobId;
-                AsynchronousHelper.impl.queueJob(asyncObject);
-
-            } catch(AssertionV1.AssertionException ae) {
-                // An assertion exception indicates a problem with the job, so just ignore it.
-                // The most likely cause is that the job has been deleted but was identified to start and so
-                // still in the list of jobs to start.
-            }
-
-            jobsToStart.remove(jobId);
-            asyncJob.setState(new Map<String, String> { JOBS_TO_START => JSON.serialize(jobsToStart) });
+            return;
         }
+
+        final String jobId = jobsToStart.iterator().next();
+
+        try {
+            final AsynchronousJob__c asyncObject = AsynchronousDAO.impl.getObject(jobId);
+            asyncObject.ApexJobId__c = apexJobId;
+            AsynchronousHelper.impl.queueJob(asyncObject);
+
+        } catch(AssertionV1.AssertionException ae) {
+            // An assertion exception indicates a problem with the job, so just ignore it.
+            // The most likely cause is that the job has been deleted but was identified to start and so
+            // still in the list of jobs to start.
+        }
+
+        jobsToStart.remove(jobId);
+        asyncJob.setState(new Map<String, String> { JOBS_TO_START => JSON.serialize(jobsToStart) });
     }
 
     /**
@@ -198,7 +210,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * @param delay The number of milliseconds to delay processing for.
      */
     @SuppressWarnings('PMD.ApexCRUDViolation,PMD.UnusedLocalVariable,PMD.OperationWithLimitsInLoop')
-    private static void delayWhenNoJobsToRun(final Integer delay) {
+    private static void delay(final Integer delay) {
         final Long startTime = System.currentTimeMillis();
         final Long endTime = startTime + delay;
 
@@ -290,8 +302,8 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * The processing logic for the Scheduler requires that the Asynchronous__c object for the new Scheduler job
      * is only persisted if an Apex job could be created for it.
      * <p>
-     * The maxRunningSchedulers will be set to 2 in any calls from onSuccess or onFailure. This is because the
-     * job being processed is for the scheduler and will still be set to FINALISING.
+     * The maxRunningSchedulers will be set to 2 in any calls from onFailure. This is because the
+     * job being processed is for the scheduler and will still be set to FINALIZING.
      *
      * @param jobsLeftToStart The jobs that are left to start from the previous scheduler run.
      * @param maxRunningSchedulers Do not start scheduler is it exceeds this value.
@@ -305,22 +317,37 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
                     String.format(SCHEDULER_JOB_REFERENCE, new List<Object> { jobsLeftToStart.size() }),
                     0,
                     0,
-                    new Map<String, String> { JOBS_TO_START => JSON.serialize(jobsLeftToStart) }
+                    new Map<String, String> {
+                            JOBS_TO_START => JSON.serialize(jobsLeftToStart),
+                            SCHEDULER_DELAY => '0'
+                    }
             );
 
         } else {
+            final Integer activeWindowSize = getActiveWindowSize();
             final Integer maximumJobs = (Integer) configuration.get(MAXIMUM_JOBS_TO_START_PROPERTY);
             final Set<String> newJobsToStart = getJobIdsToStart(maximumJobs);
-            if (newJobsToStart.isEmpty() && (AsynchronousDAO.impl.countSchedulableObjects(maximumJobs, getActiveWindowSize()) == 0)) {
+            final Integer schedulableCount = AsynchronousDAO.impl.countSchedulableObjects(maximumJobs, activeWindowSize);
+
+            if (newJobsToStart.isEmpty() && schedulableCount == 0) {
                 return;
             }
+
+            final Datetime nextDue = AsynchronousDAO.impl.getWhenNextRequired(activeWindowSize);
+            final Long timeDiff = nextDue.getTime() - CommonHelper.now().getTime();
+            final Integer delay = timeDiff < 0
+                    ? 0
+                    : (Integer) Math.min(timeDiff, (Long) configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY));
 
             asyncJob = AsynchronousAPI.impl.createJob(
                     RunNextAvailable.class,
                     String.format(SCHEDULER_JOB_REFERENCE, new List<Object> { newJobsToStart.size() }),
                     0,
                     0,
-                    new Map<String, String> { JOBS_TO_START => JSON.serialize(newJobsToStart) }
+                    new Map<String, String> {
+                            JOBS_TO_START => JSON.serialize(newJobsToStart),
+                            SCHEDULER_DELAY => String.valueOf(delay)
+                    }
             );
         }
 
@@ -528,6 +555,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
             }
 
             // We cannot use the DAO as it disables the trigger.
+            AsynchronousDAO.impl.persistObjects(updates, true);
             AsynchronousDAO.impl.persistObjects(updates, true);
         }
     }

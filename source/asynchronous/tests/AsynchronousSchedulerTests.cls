@@ -160,15 +160,12 @@ public with sharing class AsynchronousSchedulerTests {
                         .forMethod('getState')
                             .called(1)
                             .returns(new Map<String, String>{
-                                    AsynchronousScheduler.JOBS_TO_START => JSON.serialize(new Set<String>())
+                                    AsynchronousScheduler.JOBS_TO_START => JSON.serialize(new Set<String>()),
+                                    AsynchronousScheduler.SCHEDULER_DELAY => '5000'
                             })
                     .mock();
 
-
             AsynchronousScheduler scheduler = new AsynchronousScheduler();
-            AsynchronousScheduler.configuration = ImmutableV1.of(new Map<String, Integer>{
-                    AsynchronousScheduler.NO_JOBS_TO_RUN_DELAY_PROPERTY => 5000
-            });
 
             Long started = System.currentTimeMillis();
             scheduler.run(asyncJob, 'ApexJobId');
@@ -190,7 +187,8 @@ public with sharing class AsynchronousSchedulerTests {
             Map<String, String> state = new Map<String, String>{
                     AsynchronousScheduler.JOBS_TO_START => JSON.serialize(new Set<String>{
                             asyncJobId1, asyncJobId2
-                    })
+                    }),
+                    AsynchronousScheduler.SCHEDULER_DELAY => '0'
             };
 
             AsynchronousDAO.impl = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
@@ -233,7 +231,14 @@ public with sharing class AsynchronousSchedulerTests {
     private static void testSchedulerQueuedWhenJobsToStart() {
         TestHelper.setNOW();
         System.runAs(TestHelper.getUser(TESTING)) {
-            mockForRun(new List<AsynchronousJob__c>(), 1, new Set<Id>());
+            AsynchronousJob__c job = new AsynchronousJob__c(
+                    Id = MockerV1.fakeId(AsynchronousJob__c.SObjectType),
+                    Runnable__c = SingleConcurrencyTestRunnable.class.getName()
+            );
+
+            Set<Id> jobsThatShouldBeStarted = new Set<Id>{ job.Id };
+
+            mockForRun(new List<AsynchronousJob__c> { job }, 1, jobsThatShouldBeStarted);
             AsynchronousScheduler.queue(new Set<String>(), 1);
             MockerV1.validate();
         }
@@ -391,7 +396,8 @@ public with sharing class AsynchronousSchedulerTests {
                             0,
                             0,
                             new Map<String, String>{
-                                    AsynchronousScheduler.JOBS_TO_START => JSON.serialize(jobsToStart)
+                                    AsynchronousScheduler.JOBS_TO_START => JSON.serialize(jobsToStart),
+                                    AsynchronousScheduler.SCHEDULER_DELAY => '0'
                             }
                     )
                         .forMethod('createJob')
@@ -479,10 +485,9 @@ public with sharing class AsynchronousSchedulerTests {
         }
 
         MockerV1.Method mocked = MockerV1.of(AsynchronousDAO.class)
-                .whenArguments(1, MockerV1.any(Integer.class))
-                    .forMethod('countSchedulableObjects')
-                        .called(jobsThatShouldBeStarted.isEmpty() ? 1 : 0)
-                        .returns(1)
+                .whenCalling('countSchedulableObjects', MockerV1.any(Integer.class), MockerV1.any(Integer.class))
+                    .called(jobsThatShouldBeStarted.isEmpty() ? 0 : 1)
+                    .returns(jobsThatShouldBeStarted.isEmpty() ? 0 : 1)
                 .whenArgument(maxJobsToStart)
                     .forMethod('getScheduledObjects')
                         .called(1)
@@ -503,12 +508,14 @@ public with sharing class AsynchronousSchedulerTests {
                         },
                         new List<Map<String, String>>{
                                 new Map<String, String>{
-                                        AsynchronousScheduler.JOBS_TO_START => JSON.serialize(jobsThatShouldBeStarted)
+                                        AsynchronousScheduler.JOBS_TO_START => JSON.serialize(jobsThatShouldBeStarted),
+                                        AsynchronousScheduler.SCHEDULER_DELAY => '0'
                                 }
                         }
                 )
                     .forMethod('persistObjects')
-                        .called(1);
+                        .called(1)
+                .whenCalling('getWhenNextRequired', MockerV1.any(Integer.class)).called(1).returns(CommonHelper.now());
 
         for (String runnable : maxCount.keySet()) {
             mocked
