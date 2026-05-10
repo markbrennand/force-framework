@@ -21,7 +21,7 @@
  *
  * @author Mark Brennand
  */
-@SuppressWarnings('PMD.AvoidGlobalModifier')
+@SuppressWarnings('PMD.AvoidGlobalModifier, PMD.CognitiveComplexity')
 global with sharing virtual class MockerV1 extends MockerV1.Chainable {
 
     /**
@@ -240,6 +240,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
          *
          * @return The object instance for method chaining.
          */
+        @SuppressWarnings('PMD.ExcessiveParameterList')
         global MockerV1.Method whenCalling(
                 final String method,
                 final Object argument1,

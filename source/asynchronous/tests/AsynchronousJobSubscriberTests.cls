@@ -108,15 +108,16 @@ public with sharing class AsynchronousJobSubscriberTests {
         }
     }
 
+    @SuppressWarnings('PMD.ExcessiveParameterList')
     private static void mock(
-            AsynchronousJob__c asyncJob,
-            Integer createJobCalls,
-            Integer getScheduledObjectsCalls,
-            Integer countSchedulableObjectsCalls,
-            Integer countActiveObjectsCalls,
-            Integer persistObjectsCalls,
-            Integer queueJobCalls,
-            Integer whenNextRequiredCalls
+            final AsynchronousJob__c asyncJob,
+            final Integer createJobCalls,
+            final Integer getScheduledObjectsCalls,
+            final Integer countSchedulableObjectsCalls,
+            final Integer countActiveObjectsCalls,
+            final Integer persistObjectsCalls,
+            final Integer queueJobCalls,
+            final Integer whenNextRequiredCalls
     ) {
         AsynchronousAPI.impl = (AsynchronousAPI.API) MockerV1.of(AsynchronousAPIMockable.class)
                 .whenCalling(

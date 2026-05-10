@@ -37,6 +37,7 @@ public with sharing class AsynchronousLWCImpl {
          *
          * @return A list of the matching objects.
          */
+        @SuppressWarnings('PMD.ExcessiveParameterList')
         public List<Map<String, Object>> getJobs(
                 final Map<String, Object> filters,
                 final String ordering,

@@ -418,6 +418,7 @@ global with sharing virtual class AsynchronousV1 {
      *
      * @return The job.
      */
+    @SuppressWarnings('PMD.ExcessiveParameterList')
     global static Job createJob(
             final Type type,
             final String reference,
@@ -589,6 +590,7 @@ global with sharing virtual class AsynchronousV1 {
      * @return A list of the matching objects.
      */
     @AuraEnabled(Cacheable=false)
+    @SuppressWarnings('PMD.ExcessiveParameterList')
     public static List<Map<String, Object>> getJobs(
             final Map<String, Object> filters,
             final String ordering,

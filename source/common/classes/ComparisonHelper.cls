@@ -11,6 +11,7 @@
  *
  * @author Mark Brennand
  */
+@SuppressWarnings('PMD.CognitiveComplexity')
 public with sharing class ComparisonHelper {
 
     /**

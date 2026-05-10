@@ -391,7 +391,7 @@ public with sharing class AsynchronousDAOImpl {
      * active AsyncApexJob, leaving only orphaned/runnable jobs for sweeping.
      */
     private with sharing class MapAsynchronousJobToApexJob extends ArrayV1.Callback {
-        public override OptionalV1 function(Object element, OptionalV1 currentValue, Integer index) {
+        public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final AsynchronousJob__c job = (AsynchronousJob__c) element;
             final Map<String, AsynchronousJob__c> jobMap = (Map<String, AsynchronousJob__c>) currentValue.get();
             jobMap.put(job.ApexJobId__c, job);
@@ -411,7 +411,7 @@ public with sharing class AsynchronousDAOImpl {
      * corresponding active AsyncApexJob, i.e., candidates for sweeping.
      */
     private with sharing class RemoveActiveApexJobs extends ArrayV1.Callback {
-        public override OptionalV1 function(Object element, OptionalV1 currentValue, Integer index) {
+        public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final AsyncApexJob apexJob = (AsyncApexJob) element;
             final Map<String, AsynchronousJob__c> jobMap = (Map<String, AsynchronousJob__c>) currentValue.get();
             jobMap.remove(apexJob.Id);

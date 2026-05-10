@@ -136,6 +136,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * Test visible to it can be overridden from unit tests.
      */
     @TestVisible
+    @SuppressWarnings('PMD.FieldDeclarationsShouldBeAtStart')
     private static ImmutableV1.ReadOnlyMap configuration =
             ImmutableV1.of((Map<String, Integer>) DependencyV1.inject(Map<String, Integer>.class, CONFIG_ACTION));
 
@@ -532,11 +533,33 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      */
     private with sharing class Sweeper extends AsynchronousV1.Runnable {
 
+        /**
+         * @description
+         * <p>
+         * Constructs the Sweeper runnable.
+         * <p>
+         * Delegates to the parent AsynchronousV1.Runnable, passing the RunSweeper factory type
+         * to correctly associate this runnable with its factory.
+         */
         public Sweeper() {
             super(RunSweeper.class);
         }
 
-        public override void run(AsynchronousV1.Job asyncJob, String apexJobId) {
+        /**
+         * @description
+         * <p>
+         * Main execution entry point for the Sweeper.
+         * <p>
+         * Steps:
+         * - Queries sweepable AsynchronousJob__c records (beyond the active window and still active).
+         * - Transforms them into StaleJob wrappers (normalizing their next state and optional error).
+         * - Records internal API exceptions for stale Scheduler jobs.
+         * - Collects non-Scheduler jobs for status normalization updates and persists them.
+         *
+         * @param asyncJob The running Sweeper job metadata (unused for decisioning but required by the interface).
+         * @param apexJobId The current Apex job Id executing this Sweeper (for traceability; not directly used).
+         */
+        public override void run(final AsynchronousV1.Job asyncJob, final String apexJobId) {
             final List<StaleJob> staleJobs = (List<StaleJob>)
                     ImmutableV1.of(AsynchronousDAO.impl.getSweepableObjects(getMaximumJobsToSweep(), getActiveWindowSize()))
                         .transform(new ToStaleJob(), new List<StaleJob>());
@@ -566,7 +589,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * Callback implementation that transforms each queried AsynchronousJob__c into a StaleJob wrapper.
      */
     private with sharing class ToStaleJob extends ArrayV1.Callback {
-        public override OptionalV1 function(Object element, OptionalV1 currentValue, Integer index) {
+        public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final AsynchronousJob__c job = ((AsynchronousJob__c) element).clone(true);
             return OptionalV1.of(new StaleJob(job));
         }
@@ -589,11 +612,40 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
     */
     @TestVisible
     private with sharing class StaleJob {
+
+        /**
+         * @description
+         * <p>
+         * The cloned AsynchronousJob__c record being remediated by the Sweeper.
+         * <p>
+         * - For Scheduler jobs, Status__c is normalized to FAILED and an internal APIException is recorded.
+         * - For non-Scheduler jobs, Status__c is normalized to SUCCEEDED when originally FINALIZING,
+         *   otherwise to PENDING.
+         * <p>
+         * Exposed as a read-only property to allow callers (e.g., the Sweeper) to persist the
+         * normalized record while preventing external mutation of the reference.
+         */
         public final AsynchronousJob__c job {
             public get;
             private set;
         }
 
+        /**
+         * @description
+         * <p>
+         * Constructs a StaleJob wrapper and normalizes the Status__c on the provided AsynchronousJob__c clone:
+         * <ul>
+         *   <li>Scheduler jobs (Runnable__c == RunNextAvailable) -> Status__c set to FAILED.</li>
+         *   <li>Non-Scheduler jobs:
+         *       <ul>
+         *          <li>If current status is FINALIZING -> set to SUCCEEDED.</li>
+         *          <li>Otherwise -> set to PENDING.</li>
+         *       </ul>
+         *   </li>
+         * </ul>
+         *
+         * @param job The AsynchronousJob__c record to wrap and normalize.
+         */
         public StaleJob(final AsynchronousJob__c job) {
             this.job = job;
             if (isScheduler()) {
@@ -605,6 +657,15 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
             }
         }
 
+        /**
+         * @description
+         * <p>
+         * Returns an OptionalV1 containing an APIException only for stale Scheduler jobs. The exception
+         * documents that a Scheduler remained active beyond the window and is being failed by the Sweeper.
+         * For non-Scheduler jobs, returns OptionalV1.empty().
+         *
+         * @return OptionalV1 with APIException for Scheduler jobs; OptionalV1.empty() otherwise.
+         */
         public OptionalV1 getError() {
             return isScheduler()
                     ? OptionalV1.of(
@@ -616,6 +677,14 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
                     : OptionalV1.empty();
         }
 
+        /**
+         * @description
+         * <p>
+         * Determines whether this stale job is a Scheduler instance by comparing Runnable__c
+         * to the RunNextAvailable factory class name.
+         *
+         * @return True if job is a Scheduler; otherwise false.
+         */
         private Boolean isScheduler() {
             return job.Runnable__c == RunNextAvailable.class.getName();
         }

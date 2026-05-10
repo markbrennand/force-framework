@@ -9,7 +9,7 @@
  *
  * @author Mark Brennand
  */
-@SuppressWarnings('PMD.ApexDoc')
+@SuppressWarnings('PMD.ApexDoc, PMD.CyclomaticComplexity')
 public with sharing virtual class QueryAPIMockable implements QueryV1.API {
 
     public QueryV1.API type(final SObjectType type) {

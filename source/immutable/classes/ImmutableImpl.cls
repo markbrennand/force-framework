@@ -9,6 +9,7 @@
  * 
  * @author Mark Brennand
  */
+@SuppressWarnings('PMD.CognitiveComplexity')
 public with sharing class ImmutableImpl {
 
     /**
@@ -18,6 +19,7 @@ public with sharing class ImmutableImpl {
      * <p>
      * Class is hidden to prevent re-use.
      */
+    @SuppressWarnings('PMD.CognitiveComplexity')
     private with sharing class CollectionImpl implements ImmutableV1.Collection {
 
         private final List<Object> wrapped;

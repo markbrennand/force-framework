@@ -203,6 +203,18 @@ public with sharing virtual class AsynchronousDAO extends AsynchronousDAOMockabl
      * </ul>
      */
     public with sharing class APIFactory implements TypesV1.Factory {
+
+        /**
+         * @description
+         * <p>
+         * Creates and returns a new instance of the concrete implementation of AsynchronousDAO.API.
+         * <p>
+         * This delegates instantiation to the internal AsynchronousDAOImpl.Factory to keep the implementation
+         * hidden while exposing only the API interface via DependencyV1. Consumers should resolve the API using:
+         * DependencyV1.inject(AsynchronousDAO.API.class).
+         *
+         * @return A concrete instance implementing AsynchronousDAO.API.
+         */
         public Object newInstance() {
             return new AsynchronousDAOImpl.Factory().newInstance();
         }

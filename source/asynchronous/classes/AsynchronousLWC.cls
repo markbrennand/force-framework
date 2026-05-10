@@ -45,6 +45,7 @@ public with sharing virtual class AsynchronousLWC extends AsynchronousLWCMockabl
      * <p>
      * Interface defining the calls that may be made from the Asynchronous Job LWC.
      */
+    @SuppressWarnings('PMD.ExcessiveParameterList')
     public interface API {
 
         /**
@@ -99,7 +100,25 @@ public with sharing virtual class AsynchronousLWC extends AsynchronousLWCMockabl
     @SuppressWarnings('PMD.EmptyStatementBlock')
     protected AsynchronousLWC() {}
 
+    /**
+     * @description
+     * <p>
+     * Factory for producing concrete instances of the Asynchronous LWC API implementation.
+     * <p>
+     * This class integrates with the dependency injection container by implementing TypesV1.Factory.
+     * Calls to newInstance return a concrete implementation of AsynchronousLWC.API suitable for runtime use.
+     */
     public with sharing class APIFactory implements TypesV1.Factory {
+
+        /**
+         * @description
+         * <p>
+         * Creates a new instance of the concrete Asynchronous LWC API implementation.
+         * <p>
+         * Delegates construction to AsynchronousLWCImpl.Factory to keep the implementation encapsulated.
+         *
+         * @return A newly constructed implementation of AsynchronousLWC.API.
+         */
         public Object newInstance() {
             return new AsynchronousLWCImpl.Factory().newInstance();
         }

@@ -199,6 +199,7 @@ global with sharing class DependencyV1 {
      *
      * @return The validation result.
      */
+    @SuppressWarnings('PMD.ExcessiveParameterList')
     global static ValidationResult validationResult(
             final Boolean isOfType,
             final Boolean isForTypeAnInterface,

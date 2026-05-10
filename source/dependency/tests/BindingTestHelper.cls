@@ -7,6 +7,7 @@
  *
  * @author Mark Brennand
  */
+@SuppressWarnings('PMD.ApexDoc')
 @IsTest
 public with sharing class BindingTestHelper {
 

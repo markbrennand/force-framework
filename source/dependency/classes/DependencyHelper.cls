@@ -22,6 +22,7 @@ public with sharing class DependencyHelper {
      *
      * @return A new APIException with a formatted message.
      */
+    @SuppressWarnings('PMD.ExcessiveParameterList')
     public static DependencyV1.APIException createException(
             final String prefix,
             final String typeName,
@@ -68,6 +69,7 @@ public with sharing class DependencyHelper {
      *
      * @return The validation result.
      */
+    @SuppressWarnings('PMD.ExcessiveParameterList')
     public static DependencyV1.ValidationResult buildValidationResult(
             final Boolean isOfType,
             final Boolean isForTypeAnInterface,

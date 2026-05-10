@@ -38,7 +38,38 @@ public with sharing class AsynchronousFinalizer {
             AsynchronousV1.Status.RUNNING.name()
     };
 
+    /**
+     * @description
+     * <p>
+     * Finalizer contract for the Asynchronous framework.
+     * <p>
+     * Implementations are invoked by the Apex runtime when a queued job completes
+     * (success or failure). This interface extends System.Finalizer so that the
+     * framework can participate in Apex finalizer execution, and adds a succeeded()
+     * hook that allows the running job to indicate it completed successfully before
+     * the finalizer executes. When succeeded() is called by the job, the finalizer
+     * will no-op in its execute(FinalizerContext) to avoid duplicate state changes.
+     * <p>
+     * Usage:
+     * - The framework creates instances via AsynchronousFinalizer.createFinalizer(Id).
+     * - A running job should call finalizer.succeeded() once it has definitively
+     *   completed successfully so that execute(...) can short-circuit.
+     */
     public interface Finalizer extends System.Finalizer {
+
+        /**
+         * @description
+         * <p>
+         * Indicates that the running job has definitively completed successfully,
+         * allowing the finalizer to short-circuit its processing.
+         * <p>
+         * When a job calls this method before the platform invokes execute(FinalizerContext),
+         * the finalizer treats the job as already handled and returns immediately from execute(...),
+         * avoiding duplicate state transitions or error handling.
+         * <p>
+         * Typical usage is at the end of a successful run method, after all work and commits
+         * have completed without error.
+         */
         void succeeded();
     }
 
@@ -216,6 +247,19 @@ public with sharing class AsynchronousFinalizer {
             }
         }
 
+        /**
+         * @description
+         * <p>
+         * Indicates that the running job has definitively completed successfully,
+         * allowing the finalizer to short-circuit its processing.
+         * <p>
+         * When a job calls this method before the platform invokes execute(FinalizerContext),
+         * the finalizer treats the job as already handled and returns immediately from execute(...),
+         * avoiding duplicate state transitions or error handling.
+         * <p>
+         * Typical usage is at the end of a successful run method, after all work and commits
+         * have completed without error.
+         */
         public void succeeded() {
             isSuccess = true;
         }

@@ -514,6 +514,7 @@ global with sharing class QueryV1 {
      *
      * @return An aggregate field which can be used in the query.
      */
+    @SuppressWarnings('PMD.ExcessiveParameterList')
     global static QueryV1.AggregatedField aggregatedField(final String function, final SObjectField joinField, final SObjectField field, final String alias) {
         return QueryAPI.aggregatedField(OptionalV1.of(function), OptionalV1.of(joinField), field, alias);
     }
@@ -530,6 +531,19 @@ global with sharing class QueryV1 {
      * security mode, returning fields, ordering, grouping, bindings, and execution).
      */
     public with sharing class APIFactory implements TypesV1.Factory {
+
+        /**
+         * @description
+         * <p>
+         * Creates and returns a new concrete implementation of the QueryV1.API at runtime.
+         * <p>
+         * This method is invoked by the dependency injection container (via TypesV1.Factory) to provide
+         * the active Query API implementation. The returned instance must support all QueryV1.API
+         * behaviors including query construction, security mode handling, field selection, ordering,
+         * grouping, variable bindings, and execution.
+         *
+         * @return A new instance implementing QueryV1.API.
+         */
         public Object newInstance() {
             return new QueryImpl.Factory().newInstance();
         }

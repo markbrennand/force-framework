@@ -9,6 +9,7 @@
  *
  * @author Mark Brennand
  */
+@SuppressWarnings('PMD.CognitiveComplexity')
 public with sharing class ArrayImpl {
 
     /**
@@ -16,6 +17,7 @@ public with sharing class ArrayImpl {
      * <p>
      * Provides implementation of the methods that may be called to iterate over an array of objects.
      */
+    @SuppressWarnings('PMD.CognitiveComplexity, PMD.CyclomaticComplexity')
     private with sharing class Implementation implements ArrayV1.Methods {
         private Object shared;
         private final List<Object> objects;

@@ -127,16 +127,26 @@ public with sharing virtual class TriggerAPI extends TriggerAPIMockable {
     protected TriggerAPI() {}
 
     /**
-    * @description
-    * <p>
-    * Dependency injection factory for the Trigger API implementation.
-    * <p>
-    * This factory is registered with the dependency container (TypesV1/DependencyV1) and is responsible for
-    * producing the concrete implementation of the Trigger API. When DependencyV1.inject(TriggerAPI.API.class)
-    * is invoked, the container will use this factory to create and return an instance produced by
-    * TriggerImpl.Factory.
-    */
+     * @description
+     * <p>
+     * Dependency injection factory for the Trigger API implementation.
+     * <p>
+     * This factory is registered with the dependency container (TypesV1/DependencyV1) and is responsible for
+     * producing the concrete implementation of the Trigger API. When DependencyV1.inject(TriggerAPI.API.class)
+     * is invoked, the container will use this factory to create and return an instance produced by
+     * TriggerImpl.Factory.
+     */
     public with sharing class APIFactory implements TypesV1.Factory {
+
+        /**
+         * @description
+         * <p>
+         * Creates and returns a concrete implementation of TriggerAPI.API.
+         * The dependency injection container (DependencyV1) calls this method when resolving TriggerAPI.API,
+         * delegating to TriggerImpl.Factory to construct the actual instance.
+         *
+         * @return Object A new instance of the TriggerAPI.API implementation produced by TriggerImpl.Factory.
+         */
         public Object newInstance() {
             return new TriggerImpl.Factory().newInstance();
         }

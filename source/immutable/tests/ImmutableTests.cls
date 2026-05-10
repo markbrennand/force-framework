@@ -71,27 +71,32 @@ public with sharing class ImmutableTests {
 
     @IsTest
     private static void testMap() {
-        ImmutableV1.ReadOnlyMap stringMap = ImmutableV1.of(new Map<String, Integer>{
-                'A' => 1,
-                'B' => 2
-        });
+        TestHelper.setNOW();
+        System.runAs(TestHelper.getUser(TESTING)) {
 
-        Assert.isTrue(stringMap.containsKey('A'));
-        Assert.isTrue(stringMap.containsKey('B'));
-        Assert.isFalse(stringMap.containsKey('C'));
-        Assert.areEquaL(1, stringMap.get('A'));
-        Assert.areEquaL(2, stringMap.get('B'));
-        Assert.isNull(stringMap.get('C'));
-        Assert.areEqual(2, stringMap.size());
-        Assert.areEqual(new List<Integer> { 1, 2 }, stringMap.values());
+            ImmutableV1.ReadOnlyMap stringMap = ImmutableV1.of(new Map<String, Integer>{
+                    'A' => 1,
+                    'B' => 2
+            });
 
-        Set<String> keys = new Set<String>();
-        for (Object key : stringMap.keySet()) {
-            keys.add((String) key);
+            Assert.isTrue(stringMap.containsKey('A'));
+            Assert.isTrue(stringMap.containsKey('B'));
+            Assert.isFalse(stringMap.containsKey('C'));
+            Assert.areEquaL(1, stringMap.get('A'));
+            Assert.areEquaL(2, stringMap.get('B'));
+            Assert.isNull(stringMap.get('C'));
+            Assert.areEqual(2, stringMap.size());
+            Assert.areEqual(new List<Integer> { 1, 2}, stringMap.values());
+
+            Set<String> keys = new Set<String>();
+            for (Object key : stringMap.keySet()) {
+                keys.add((String) key);
+            }
+            Assert.areEqual(new Set<String> { 'A', 'B' }, keys);
         }
-        Assert.areEqual(new Set<String> { 'A', 'B' }, keys);
     }
 
+    @SuppressWarnings('PMD.NcssMethodCount')
     private static void testCollection(final ImmutableV1.Collection collection, final ImmutableV1.Collection emptyCollection) {
         Assert.isFalse(collection.isEmpty());
         Assert.areEqual(3, collection.size());

@@ -19,6 +19,7 @@
  *
  * @author Mark Brennand
  */
+@SuppressWarnings('PMD.AvoidGlobalModifier')
 global with sharing class AsynchronousSweeper implements Schedulable {
 
     /**
@@ -29,7 +30,7 @@ global with sharing class AsynchronousSweeper implements Schedulable {
      *
      * @param context System-provided schedulable context
      */
-    global void execute(SchedulableContext context) {
+    global void execute(final SchedulableContext context) {
         AsynchronousV1.startSweeper();
     }
 }

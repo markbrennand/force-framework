@@ -37,6 +37,7 @@ public with sharing class AsynchronousImpl {
          *
          * @return The job.
          */
+        @SuppressWarnings('PMD.ExcessiveParameterList')
         public AsynchronousV1.Job createJob(
                 final Type type,
                 final String reference,

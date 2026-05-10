@@ -10,6 +10,7 @@
 @SuppressWarnings('PMD.ApexDoc')
 public with sharing virtual class AsynchronousAPIMockable implements AsynchronousAPI.API {
 
+    @SuppressWarnings('PMD.ExcessiveParameterList')
     public AsynchronousV1.Job createJob(
             final Type type,
             final String reference,

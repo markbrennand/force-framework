@@ -9,6 +9,7 @@
  * 
  * @author Mark Brennand
  */
+@SuppressWarnings('PMD.CognitiveComplexity')
 public with sharing class QueryImpl {
 
     /**
@@ -23,6 +24,7 @@ public with sharing class QueryImpl {
      * <p>
      * See QueryV1.API for method signatures.
      */
+    @SuppressWarnings('PMD.CognitiveComplexity, PMD.CyclomaticComplexity')
     private with sharing class API implements QueryV1.API, DependencyV1.Prototype {
         private SObjectType type;
         private AccessLevel security = AccessLevel.USER_MODE;

@@ -55,6 +55,7 @@ public with sharing virtual class AsynchronousAPI extends AsynchronousAPIMockabl
      * <p>
      * Any new implementations must also use their own implementation of the Job interface.
      */
+    @SuppressWarnings('PMD.ExcessiveParameterList')
     public interface API {
 
         /**
@@ -120,6 +121,19 @@ public with sharing virtual class AsynchronousAPI extends AsynchronousAPIMockabl
      * override bindings via DI.
      */
     public with sharing class APIFactory implements TypesV1.Factory {
+
+        /**
+         * @description
+         * <p>
+         * Creates and returns a new instance of the concrete Asynchronous API implementation.
+         * <p>
+         * This method is invoked by the DependencyV1/TypesV1 DI container when an instance of
+         * AsynchronousAPI.API is requested. It delegates construction to the hidden implementation
+         * factory (AsynchronousImpl.Factory) to keep the concrete implementation encapsulated while
+         * exposing only the API surface to consumers.
+         *
+         * @return A new implementation instance of AsynchronousAPI.API, produced by AsynchronousImpl.Factory.
+         */
         public Object newInstance() {
             return new AsynchronousImpl.Factory().newInstance();
         }

@@ -35,6 +35,7 @@ public with sharing class TriggerEvent {
          * @param operation The DML operation being performed.
          * @param recursiveDepth The number of times the trigger has been invoked as a result of the top level DML.
          */
+        @SuppressWarnings('PMD.ExcessiveParameterList')
         public Event(
                 final List<SObject> records,
                 final OptionalV1 oldRecords,
@@ -159,6 +160,7 @@ public with sharing class TriggerEvent {
      *
      * @return The new Event.
      */
+    @SuppressWarnings('PMD.ExcessiveParameterList')
     public static TriggerV1.Event newEvent(
             final List<SObject> records,
             final OptionalV1 oldRecords,

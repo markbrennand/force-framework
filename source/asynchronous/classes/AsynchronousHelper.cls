@@ -123,6 +123,16 @@ public with sharing virtual class AsynchronousHelper extends AsynchronousHelperM
      * override bindings via DI.
      */
     public with sharing class APIFactory implements Typesv1.Factory {
+
+        /**
+         * @description
+         * <p>
+         * Creates and returns a new instance of the concrete AsynchronousHelper API implementation.
+         * This method delegates instantiation to AsynchronousHelperImpl.Factory to keep the concrete
+         * implementation encapsulated while exposing only the API interface for DI consumers.
+         *
+         * @return Object An instance implementing AsynchronousHelper.API produced by the hidden implementation factory.
+         */
         public Object newInstance() {
             return new AsynchronousHelperImpl.Factory().newInstance();
         }
