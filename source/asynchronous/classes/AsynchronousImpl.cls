@@ -103,7 +103,7 @@ public with sharing class AsynchronousImpl {
      * <p>
      * Override the run method from a super-class to code the logic of the job.
      */
-    public with sharing abstract class ApexJobRunnable implements AsynchronousV1.RunnableJob, Queueable {
+    public with sharing abstract class ApexJobRunnable implements AsynchronousV1.RunnableJob, Queueable, Database.AllowsCallouts {
 
         /**
          * @description

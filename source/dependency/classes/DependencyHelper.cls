@@ -164,7 +164,6 @@ public with sharing class DependencyHelper {
         public override OptionalV1 function(final Object element, final OptionalV1 currentValue, final Integer index) {
             final Binding__c binding = (Binding__c) element;
             try {
-
                 final DependencyAPI.API parent = (DependencyAPI.API) shared().get();
                 final Type type = TypesV1.load(binding.Type__c);
                 final Type implementation = TypesV1.load(binding.Implementation__c);

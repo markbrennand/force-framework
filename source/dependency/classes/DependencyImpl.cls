@@ -225,15 +225,24 @@ public with sharing class DependencyImpl {
         private void validateTypes(final Type forType, final OptionalV1 action, final Type withImpl) {
             checkInstantiation(forType, action, withImpl);
 
-            if (CHECKS.containsKey(forType)) {
-                for (DependencyV1.BindingCheck check : CHECKS.get(forType)) {
-                    DependencyV1.ValidationResult result = check.validate(forType, withImpl);
-                    if (!result.isValid()) {
-                        throw new DependencyV1.APIException(result.getErrorMessage());
-                    }
+
+            if (!CHECKS.containsKey(forType)) {
+                final Type bindingCheck = getBindingCheck(forType);
+                if (bindingCheck != null) {
+                    CHECKS.put(
+                            forType,
+                            new List<DependencyV1.BindingCheck> { (DependencyV1.BindingCheck) bindingCheck.newInstance() }
+                    );
+                } else {
+                    throw DependencyHelper.createException('Class', forType.getName(), OptionalV1.empty(), 'has no registered bind checker');
                 }
-            } else {
-                throw DependencyHelper.createException('Class', forType.getName(), OptionalV1.empty(), 'has no registered bind checker');
+            }
+
+            for (DependencyV1.BindingCheck check : CHECKS.get(forType)) {
+                DependencyV1.ValidationResult result = check.validate(forType, withImpl);
+                if (!result.isValid()) {
+                    throw new DependencyV1.APIException(result.getErrorMessage());
+                }
             }
         }
 
@@ -264,22 +273,85 @@ public with sharing class DependencyImpl {
          * <p>
          * Resolves a default implementation Type for a given abstract/interface Type using a naming convention.
          * <p>
-         * The convention appends the suffix 'Impl' to the fully qualified name of the requested Type.
+         * The convention appends the suffix 'Factory' to the fully qualified name of the requested Type.
          * For example, for a requested type 'com.acme.services.FooService', this method looks for
          * 'com.acme.services.FooServiceImpl' and returns its Type if it exists; otherwise returns null.
+         * <p>
+         * To allow for a different default implementation to be used for unit test, 'TestFactory' is appended
+         * to the fully qualified name of the requested type. If not found, the 'Factory' class is used.
          *
          * @param forType The interface or abstract class Type to resolve an implementation for.
          *
          * @return The resolved implementation Type if found; null if no matching class exists.
          */
         private Type getImplementation(final Type forType) {
-            final Type factory = Type.forName(forType.getName() + 'Factory');
+            final String typeName = forType.getName();
+
+            // We cannot handle any generic types. Appending 'Factory' loads the original class not the factory.
+            if (typeName.contains('<')) {
+                return null;
+            }
+
+            Type factory = null;
+            if (Test.isRunningTest()) {
+                factory = Type.forName(typeName + 'TestFactory');
+
+            }
+
+            if (factory == null) {
+                factory = Type.forName(typeName + 'Factory');
+            }
+
             if (factory == null) {
                 return factory;
             }
 
             if (! (factory.newInstance() instanceof TypesV1.Factory)) {
                 throw new DependencyV1.APIException('Default implementation for ' + forType.getName() + ' must be a TypesV1.Factory');
+            } else {
+                return factory;
+            }
+        }
+
+        /**
+         * @description
+         * <p>
+         * Resolves the binding check implementation Type for a given abstract/interface Type using a naming convention.
+         * <p>
+         * The convention appends the suffix 'BindingCheck' to the fully qualified name of the requested Type.
+         * For example, for a requested type 'com.acme.services.FooService', this method looks for
+         * 'com.acme.services.FooServiceBindingCheck' and returns its Type if it exists; otherwise returns null.
+         * <p>
+         * To allow for a different default implementation to be used for unit test, 'TestBindingCheck' is appended
+         * to the fully qualified name of the requested type. If not found, the 'BindingChcek' class is used.
+         *
+         * @param forType The interface or abstract class Type to resolve a binding check for.
+         *
+         * @return The resolved binding check Type if found; null if no matching class exists.
+         */
+        private Type getBindingCheck(final Type forType) {
+            final String typeName = forType.getName();
+
+            // We cannot handle any generic types. Appending 'BindingCheck' loads the original class not the checker.
+            if (typeName.contains('<')) {
+                return null;
+            }
+
+            Type factory = null;
+            if (Test.isRunningTest()) {
+                factory = Type.forName(typeName + 'TestBindingCheck');
+            }
+
+            if (factory == null) {
+                factory = Type.forName(typeName + 'BindingCheck');
+            }
+
+            if (factory == null) {
+                return factory;
+            }
+
+            if (! (factory.newInstance() instanceof DependencyV1.BindingCheck)) {
+                throw new DependencyV1.APIException('Default binding check for ' + forType.getName() + ' must be a DependencyV1.BindingCheck');
             } else {
                 return factory;
             }

@@ -67,6 +67,15 @@ public with sharing class BindingTestHelper {
     public interface SubTestInterface2 extends TestInterface {}
 
     @SuppressWarnings('PMD.ApexDoc')
+    public interface SubTestInterface3 extends TestInterface {}
+
+    @SuppressWarnings('PMD.ApexDoc')
+    public interface SubTestInterface4 extends TestInterface {}
+
+    @SuppressWarnings('PMD.ApexDoc')
+    public interface SubTestInterface5 extends TestInterface {}
+
+    @SuppressWarnings('PMD.ApexDoc')
     public with sharing class SingletonTest extends AbstractTest {
         private final String value;
 
@@ -168,6 +177,39 @@ public with sharing class BindingTestHelper {
     public with sharing class SubTestInterface2Factory implements TypesV1.Factory {
         public Object newInstance() {
             return new PrototypeCustomTest();
+        }
+    }
+
+    public with sharing class SubTestInterface3Factory implements TypesV1.Factory {
+        public Object newInstance() {
+            return new PrototypeCustomTest();
+        }
+    }
+
+    public with sharing class SubTestInterface3BindingCheck {
+    }
+
+    public with sharing class SubTestInterface4Factory implements TypesV1.Factory {
+        public Object newInstance() {
+            return new PrototypeCustomTest();
+        }
+    }
+
+    public with sharing class SubTestInterface4TestBindingCheck implements DependencyV1.BindingCheck {
+        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
+            return DependencyV1.validationResult(true, true, forType, withImpl);
+        }
+    }
+
+    public with sharing class SubTestInterface5Factory implements TypesV1.Factory {
+        public Object newInstance() {
+            return new PrototypeCustomTest();
+        }
+    }
+
+    public with sharing class SubTestInterface5TestBindingCheck implements DependencyV1.BindingCheck {
+        public DependencyV1.ValidationResult validate(Type forType, Type withImpl) {
+            return DependencyV1.validationResult(false, true, forType, withImpl);
         }
     }
 }

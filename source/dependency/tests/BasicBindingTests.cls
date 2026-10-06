@@ -187,6 +187,35 @@ public with sharing class BasicBindingTests {
         }
     }
 
+    @IsTest
+    private static void testDefaultBindingChecks() {
+        TestHelper.setNOW();
+        setup(true);
+        System.runAs(TestHelper.getUser(TESTING)) {
+            try {
+                DependencyV1.inject(BindingTestHelper.SubTestInterface3.class);
+                Assert.fail();
+            } catch(DependencyV1.APIException ae) {
+                Assert.isTrue(testHelper.textContains(
+                        'Default binding check for BindingTestHelper.SubTestInterface3 must be a DependencyV1.BindingCheck',
+                        ae.getMessage()
+                ));
+            }
+
+            DependencyV1.inject(BindingTestHelper.SubTestInterface4.class);
+
+            try {
+                DependencyV1.inject(BindingTestHelper.SubTestInterface5.class);
+                Assert.fail();
+            } catch(DependencyV1.APIException ae) {
+                Assert.isTrue(testHelper.textContains(
+                        'Class BindingTestHelper.SubTestInterface5Factory does not implement BindingTestHelper.SubTestInterface5',
+                        ae.getMessage()
+                ));
+            }
+        }
+    }
+
     private static void setup(Boolean singleton) {
         System.runAs(TestHelper.getManager(TESTING)) {
             if (singleton) {

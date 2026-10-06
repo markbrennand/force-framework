@@ -193,7 +193,7 @@ public with sharing class AsynchronousHelperImpl {
      *
      * @param asyncObjectId The id of the AsynchronousJob__c to be started.
      */
-    @Future
+    @Future(Callout = true)
     private static void startAsynchronousJob(final String asyncObjectId) {
         AssertionV1.isNotNull(asyncObjectId, 'argument: AsynchronousHelper.startAsynchronousJob.asyncObjectId');
         final AsynchronousJob__c asyncObject = AsynchronousDAO.impl.getObject(asyncObjectId);

@@ -226,6 +226,35 @@ public with sharing class ActionBindingTests {
         }
     }
 
+    @IsTest
+    private static void testDefaultBindingChecks() {
+        TestHelper.setNOW();
+        setup(true);
+        System.runAs(TestHelper.getUser(TESTING)) {
+            try {
+                DependencyV1.inject(BindingTestHelper.SubTestInterface3.class, 'TEST');
+                Assert.fail();
+            } catch(DependencyV1.APIException ae) {
+                Assert.isTrue(testHelper.textContains(
+                        'Default binding check for BindingTestHelper.SubTestInterface3 must be a DependencyV1.BindingCheck',
+                        ae.getMessage()
+                ));
+            }
+
+            DependencyV1.inject(BindingTestHelper.SubTestInterface4.class, 'TEST');
+
+            try {
+                DependencyV1.inject(BindingTestHelper.SubTestInterface5.class, 'TEST');
+                Assert.fail();
+            } catch(DependencyV1.APIException ae) {
+                Assert.isTrue(testHelper.textContains(
+                        'Class BindingTestHelper.SubTestInterface5Factory does not implement BindingTestHelper.SubTestInterface5',
+                        ae.getMessage()
+                ));
+            }
+        }
+    }
+
     private static void setup(Boolean singleton) {
         if (singleton) {
             DependencyV1.bind(BindingTestHelper.TestInterface.class, 'Test', BindingTestHelper.SingletonTest.class);
