@@ -19,8 +19,12 @@ public with sharing class ArrayImpl {
      */
     @SuppressWarnings('PMD.CognitiveComplexity, PMD.CyclomaticComplexity')
     private with sharing class Implementation implements ArrayV1.Methods {
-        private Object shared;
         private final List<Object> objects;
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
+        private Object shared;
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private Integer length;
 
         /**

@@ -257,6 +257,7 @@ public with sharing class AsynchronousJobSubscriber {
      * The class is private to prevent re-use outside this class.
      */
     private with sharing class StartSchedulerSubscriber implements TriggerV1.Subscriber {
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private Boolean schedulerQueued = false;
 
         /**

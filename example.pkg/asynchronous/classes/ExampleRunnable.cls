@@ -4,7 +4,6 @@
  */
 
 global with sharing class ExampleRunnable extends forcefw.AsynchronousV1.Runnable {
-
     static {
         forcefw.DependencyV1.bind(Map<String, Integer>.class, 'ExampleRunnable', Configuration.class);
         forcefw.DependencyV1.reload();

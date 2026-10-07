@@ -497,9 +497,17 @@ global with sharing virtual class AsynchronousV1 {
      */
     global with sharing class Builder {
         private final Type type;
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private String reference;
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private Integer maximumRetries = 0;
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private Integer retryInterval = 0;
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private Map<String, String> state = new Map<String, String>();
 
         private Builder(final Type type) {

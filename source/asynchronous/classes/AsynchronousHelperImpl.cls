@@ -19,6 +19,7 @@ public with sharing class AsynchronousHelperImpl {
      * The variable is not declared as final so it can be overridden by a unit test.
      */
     @TestVisible
+    @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
     private static Integer maxChunkSize = 131072;
 
     /**

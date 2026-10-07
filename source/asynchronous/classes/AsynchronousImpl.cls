@@ -118,6 +118,7 @@ public with sharing class AsynchronousImpl {
          * On execution, this field holds the Id of the Asynchronous__c object of the job being run.
          */
         @TestVisible
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private AsynchronousV1.Job asyncJob;
 
         /**

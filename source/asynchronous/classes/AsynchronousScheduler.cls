@@ -136,7 +136,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
      * Test visible to it can be overridden from unit tests.
      */
     @TestVisible
-    @SuppressWarnings('PMD.FieldDeclarationsShouldBeAtStart')
+    @SuppressWarnings('PMD.FieldDeclarationsShouldBeAtStart, PMD.ClassMemberVariablesShouldBeFinal')
     private static ImmutableV1.ReadOnlyMap configuration =
             ImmutableV1.of((Map<String, Integer>) DependencyV1.inject(Map<String, Integer>.class, CONFIG_ACTION));
 

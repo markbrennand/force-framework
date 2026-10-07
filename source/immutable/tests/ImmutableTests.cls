@@ -82,8 +82,8 @@ public with sharing class ImmutableTests {
             Assert.isTrue(stringMap.containsKey('A'));
             Assert.isTrue(stringMap.containsKey('B'));
             Assert.isFalse(stringMap.containsKey('C'));
-            Assert.areEquaL(1, stringMap.get('A'));
-            Assert.areEquaL(2, stringMap.get('B'));
+            Assert.areEqual(1, stringMap.get('A'));
+            Assert.areEqual(2, stringMap.get('B'));
             Assert.isNull(stringMap.get('C'));
             Assert.areEqual(2, stringMap.size());
             Assert.areEqual(new List<Integer> { 1, 2}, stringMap.values());

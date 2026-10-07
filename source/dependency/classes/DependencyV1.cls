@@ -33,6 +33,25 @@ global with sharing class DependencyV1 {
 
     /**
      * @description
+     * <p>`
+     * The mode in which the bindings are queried.
+     * <p>
+     * By default, it is system mode. Switch to user mode to increase security.
+     */
+    @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
+    private static AccessLevel queryMode = AccessLevel.SYSTEM_MODE;
+
+    /**
+     * @description
+     * <p>
+     * Flag indicating to class being constructed whether it is being checked for the correct binding type or
+     * whether it is being bound.
+     */
+    @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
+    private static Boolean isBindingCheck = false;
+
+    /**
+     * @description
      * <p>
      * Exception thrown when a dependency injection operation fails.
      */
@@ -240,5 +259,54 @@ global with sharing class DependencyV1 {
      */
     global static DependencyV1.ValidationResult invalid(final String errorMessage) {
         return DependencyAPI.newValidationResult(false, errorMessage);
+    }
+
+    /**
+     * @description
+     * <p>
+     * Yields the mode ih which the bindings will be queried.
+     *
+     * @return The mode the bindings will be queried in.
+     */
+    global static AccessLevel getQueryMode() {
+        return queryMode;
+    }
+
+    /**
+     * @description
+     * <p>
+     * Sets the mode to query the bindings in.
+     * <p>
+     * This method must be called before the first injection from the registry.
+     *
+     * @param queryMode The mode to query the bindings in.
+     */
+    global static void setQueryMode(final AccessLevel queryMode) {
+        DependencyV1.queryMode = queryMode;
+    }
+
+    /**
+     * @description
+     * <p>
+     * Called to determine whether code is being executed as a result of a binding type check.
+     * <p>
+     * A use case would be when a trigger handler constructor is being called. The constructor will not have any
+     * of the Trigger.* variables available, so can prevent them being accessed by calling this method.
+     *
+     * @return True if a binding type check is taking place or false if not.
+     */
+    global static Boolean isBindingCheck() {
+        return isBindingCheck;
+    }
+
+    /**
+     * @description
+     * <p>
+     * Sets flag indicating a binding type check is taking place.
+     *
+     * @param isBindingCheck True if binding type check is taking place.
+     */
+    public static void bindingCheck(final Boolean isBindingCheck) {
+        DependencyV1.isBindingCheck = isBindingCheck;
     }
 }

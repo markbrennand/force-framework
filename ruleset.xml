@@ -4,6 +4,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd"
 >
+    <!-- exclude-pattern>.*/.*Test.*.cls</exclude-pattern -->
     <description>Salesforce Rules</description>
     <rule ref="category/apex/design.xml/ExcessiveParameterList" message="Avoid long parameter lists" />
     <rule ref="category/apex/errorprone.xml/EmptyStatementBlock" />
@@ -36,4 +37,22 @@
 	    </property>
 	</properties>
     </rule>
+    <rule name="ClassMemberVariablesShouldBeFinal"
+      language="apex"
+      message=""
+      class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+       <description>
+	    To prevent re-assignment of a member variavble causing a side effect, all member variables should be final, if possible.
+       </description>
+       <priority>2</priority>
+       <properties>
+          <property name="xpath">
+            <value>
+<![CDATA[
+//UserClass/Field/ModifierNode[@Final=false() and ../../ModifierNode/@Test=false()]
+]]>
+           </value>
+         </property>
+       </properties>
+   </rule>
 </ruleset>

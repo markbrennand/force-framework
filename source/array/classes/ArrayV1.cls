@@ -33,6 +33,7 @@ global with sharing class ArrayV1 {
          * @description
          * Data shared on Iterator initiation.
          */
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private OptionalV1 shared = OptionalV1.empty();
 
         /**

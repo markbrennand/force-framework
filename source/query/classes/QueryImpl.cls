@@ -26,17 +26,40 @@ public with sharing class QueryImpl {
      */
     @SuppressWarnings('PMD.CognitiveComplexity, PMD.CyclomaticComplexity')
     private with sharing class API implements QueryV1.API, DependencyV1.Prototype {
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private SObjectType type;
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private AccessLevel security = AccessLevel.USER_MODE;
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private OptionalV1 returning = OptionalV1.empty();
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private OptionalV1 has = OptionalV1.empty();
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private OptionalV1 aggregates = OptionalV1.empty();
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private OptionalV1 groupBy = OptionalV1.empty();
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private OptionalV1 matching = OptionalV1.empty();
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private OptionalV1 ordering = OptionalV1.empty();
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private OptionalV1 max = OptionalV1.empty();
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private OptionalV1 offset = OptionalV1.empty();
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private OptionalV1 bindings = OptionalV1.empty();
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private Boolean isCount = false;
 
         @SuppressWarnings('PMD.ApexDoc')

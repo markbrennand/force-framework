@@ -42,6 +42,7 @@ public with sharing class DependencyImpl {
          */
         private final Map<Key, InstanceFactory> registry = new Map<Key, InstanceFactory>();
 
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private Boolean customBindingsAdded = false;
 
         /**
@@ -197,7 +198,7 @@ public with sharing class DependencyImpl {
                 build((List<Binding__c>)
                         ((QueryV1.API) new QueryImpl.Factory().newInstance())
                                 .type(Binding__c.SObjectType)
-                                .security(AccessLevel.USER_MODE)
+                                .security(DependencyV1.getQueryMode())
                                 .returning(Binding__c.Type__c)
                                 .returning(Binding__c.Action__c)
                                 .returning(Binding__c.Implementation__c)
@@ -482,7 +483,9 @@ public with sharing class DependencyImpl {
      * If the class  implements the Prototype interface then a new instance is created for each wiring of the binding.
      */
     private with sharing class InstanceFactory {
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private OptionalV1 instance = OptionalV1.empty();
+
         private final Type type;
 
         /**

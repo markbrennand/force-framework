@@ -18,6 +18,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
      * The Id of the AsynchronousJob__c object in the data store for the job.
      */
     @TestVisible
+    @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
     private String asyncObjectId;
 
     /**
@@ -25,6 +26,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
      * <p>
      * Current status of the job.
      */
+    @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
     private AsynchronousV1.Status status;
 
     /**
@@ -32,6 +34,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
      * <p>
      * The Id of the user the Asynchronous framework is managing the job for.
      */
+    @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
     private String ownerId;
 
     /**
@@ -39,6 +42,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
      * <p>
      * The runnable class providing the logic to be run asynchronously.
      */
+    @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
     private AsynchronousV1.Runnable runnable;
 
     /**
@@ -52,6 +56,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
      * State can be updated by the Runnable. Any changes will be preserved on return of control to the Asynchronous
      * framework. The state will not be preserved if the Runnable throws an Exception.
      */
+    @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
     private Map<String, String> state;
 
     /**
@@ -59,6 +64,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
      * <p>
      * The user assigned reference for the job.
      */
+    @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
     private String reference;
 
     /**
@@ -66,6 +72,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
      * <p>
      * The maximum number of retries that will be made to re-run the job after initial failure.
      */
+    @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
     private Integer maximumRetries;
 
     /**
@@ -73,6 +80,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
      * <p>
      * The number of milliseconds to wait between retries.
      */
+    @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
     private Integer retryInterval;
 
     /**
@@ -80,6 +88,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
      * <p>
      * The number of retries made or that will be made when the job is next run.
      */
+    @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
     private Integer retryNumber;
 
     /**
@@ -87,6 +96,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
      * <p>
      * The date and time at which the job is next scheduled to run.
      */
+    @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
     private Datetime scheduledRunTime;
 
     /**
@@ -98,6 +108,7 @@ public with sharing virtual class AsynchronousJob implements AsynchronousV1.Job 
      * Runnable called by the job does not throw an Exception, the value will be updated to the timestamp at
      * which the Runnable run method was called.
      */
+    @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
     private Datetime lastRunTime;
 
     /**

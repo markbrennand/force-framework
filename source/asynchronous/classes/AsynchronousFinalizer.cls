@@ -107,6 +107,7 @@ public with sharing class AsynchronousFinalizer {
          * <p>
          * Flag used to indicate job has succeeded and no finalization is required.
          */
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private Boolean isSuccess = false;
 
         /**

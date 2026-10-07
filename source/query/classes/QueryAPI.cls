@@ -197,6 +197,8 @@ public with sharing virtual class QueryAPI extends QueryAPIMockable {
     private with sharing class OrderImpl implements QueryV1.Order {
         private final String field;
         private final SortOrder order;
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private OptionalV1 nullsFirst = OptionalV1.empty();
 
         /**

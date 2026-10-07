@@ -108,6 +108,7 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
      * perform chaining of calls.
      */
     global with sharing virtual class Chainable {
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         protected MockerV1 parent;
 
         /**
@@ -611,9 +612,17 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
     global with sharing class Method extends MockerV1.Chainable {
         private final MockerV1.Arguments arguments;
         private final String methodName;
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private OptionalV1 expectedCount = OptionalV1.empty();
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private Integer actualCount = 0;
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private OptionalV1 returnValue = OptionalV1.empty();
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private OptionalV1 throws = OptionalV1.empty();
 
         /**
@@ -775,6 +784,8 @@ global with sharing virtual class MockerV1 extends MockerV1.Chainable {
     global with sharing class Arguments extends MockerV1.Chainable {
         private final List<Object> expectedArguments;
         private final List<MockerV1.Method> methods = new List<MockerV1.Method>();
+
+        @SuppressWarnings('PMD.ClassMemberVariablesShouldBeFinal')
         private List<Comparator<Object>> comparators = new List<Comparator<Object>>();
 
         /**

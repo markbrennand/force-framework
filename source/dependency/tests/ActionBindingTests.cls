@@ -200,6 +200,64 @@ public with sharing class ActionBindingTests {
     }
 
     @IsTest
+    private static void testFailsInUserQueryMode() {
+        DependencyV1.setQueryMode(AccessLevel.USER_MODE);
+
+        System.runAs([SELECT Id FROM User WHERE Id = :UserInfo.getUserId()][0]) {
+            Id userId = TestHelper.getUser(TESTING).Id;
+            List<PermissionSetAssignment> assignments = [
+                    SELECT Id FROM PermissionSetAssignment
+                    WHERE AssigneeId = :userId
+                    AND PermissionSet.Name = 'ForceFwDependencyInjectionPermissions'
+            ];
+            delete assignments;
+        }
+
+        try {
+            testCustomSingletonBindings();
+            Assert.fail();
+        } catch(System.QueryException qe) {
+            Assert.isTrue(qe.getMessage().contains('Binding__c\' is not supported'));
+        }
+    }
+
+    @IsTest
+    private static void testPassesInDefaultQueryMode() {
+        System.runAs([SELECT Id FROM User WHERE Id = :UserInfo.getUserId()][0]) {
+            Id userId = TestHelper.getUser(TESTING).Id;
+            List<PermissionSetAssignment> assignments = [
+                    SELECT Id FROM PermissionSetAssignment
+                    WHERE AssigneeId = :userId
+                    AND PermissionSet.Name = 'ForceFwDependencyInjectionPermissions'
+            ];
+            delete assignments;
+        }
+
+        testCustomSingletonBindings();
+    }
+
+    @IsTest
+    private static void testPassesInSystemQueryMode() {
+        DependencyV1.setQueryMode(AccessLevel.SYSTEM_MODE);
+
+        System.runAs([SELECT Id FROM User WHERE Id = :UserInfo.getUserId()][0]) {
+            Id userId = TestHelper.getUser(TESTING).Id;
+            List<PermissionSetAssignment> assignments = [
+                    SELECT Id FROM PermissionSetAssignment
+                    WHERE AssigneeId = :userId
+                    AND PermissionSet.Name = 'ForceFwDependencyInjectionPermissions'
+            ];
+            delete assignments;
+        }
+
+        try {
+            testCustomSingletonBindings();
+        } catch(System.QueryException qe) {
+            Assert.isTrue(qe.getMessage().startsWith('System.QueryException: sObject type \'Binding__c\' is not supported'));
+        }
+    }
+
+    @IsTest
     private static void testCustomPrototypeBindings() {
         TestHelper.setNOW();
         setup(true);
