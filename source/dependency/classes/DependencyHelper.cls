@@ -176,8 +176,6 @@ public with sharing class DependencyHelper {
                     parent.bind(type, binding.Action__c, implementation);
                 }
 
-                DependencyV1.bindingCheck(false);
-
             } catch (Exception e) {
                 binding.addError(e.getMessage());
             } finally {

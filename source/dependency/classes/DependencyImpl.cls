@@ -226,7 +226,6 @@ public with sharing class DependencyImpl {
         private void validateTypes(final Type forType, final OptionalV1 action, final Type withImpl) {
             checkInstantiation(forType, action, withImpl);
 
-
             if (!CHECKS.containsKey(forType)) {
                 final Type bindingCheck = getBindingCheck(forType);
                 if (bindingCheck != null) {
@@ -240,32 +239,42 @@ public with sharing class DependencyImpl {
             }
 
             for (DependencyV1.BindingCheck check : CHECKS.get(forType)) {
-                DependencyV1.ValidationResult result = check.validate(forType, withImpl);
-                if (!result.isValid()) {
-                    throw new DependencyV1.APIException(result.getErrorMessage());
+                DependencyV1.bindingCheck(true);
+                try {
+                    DependencyV1.ValidationResult result = check.validate(forType, withImpl);
+                    if (!result.isValid()) {
+                        throw new DependencyV1.APIException(result.getErrorMessage());
+                    }
+                } finally {
+                    DependencyV1.bindingCheck(false);
                 }
             }
         }
 
         @SuppressWarnings('PMD.EmptyCatchBlock')
         private void checkInstantiation(final Type forType, final OptionalV1 action, final Type withImpl) {
-            if (!action.isPresent()) {
-                Boolean instantiable = false;
-                try {
-                    TypesV1.newInstance(forType);
-                    instantiable = true;
-                } catch (Exception e) {
-                }
-
-                if (instantiable) {
-                    throw DependencyHelper.createException('Class', forType.getName(), OptionalV1.empty(),  'must not be instantiable');
-                }
-            }
-
+            DependencyV1.bindingCheck(true);
             try {
-                TypesV1.newInstance(withImpl);
-            } catch(Exception e) {
-                throw DependencyHelper.createException('Implementation', withImpl.getName(), OptionalV1.empty(), 'must be instantiable');
+                if (!action.isPresent()) {
+                    Boolean instantiable = false;
+                    try {
+                        TypesV1.newInstance(forType);
+                        instantiable = true;
+                    } catch (Exception e) {
+                    }
+
+                    if (instantiable) {
+                        throw DependencyHelper.createException('Class', forType.getName(), OptionalV1.empty(), 'must not be instantiable');
+                    }
+                }
+
+                try {
+                    TypesV1.newInstance(withImpl);
+                } catch (Exception e) {
+                    throw DependencyHelper.createException('Implementation', withImpl.getName(), OptionalV1.empty(), 'must be instantiable');
+                }
+            } finally {
+                DependencyV1.bindingCheck(false);
             }
         }
 
@@ -296,7 +305,6 @@ public with sharing class DependencyImpl {
             Type factory = null;
             if (Test.isRunningTest()) {
                 factory = Type.forName(typeName + 'TestFactory');
-
             }
 
             if (factory == null) {
