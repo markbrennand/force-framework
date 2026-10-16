@@ -30,6 +30,12 @@ global with sharing class TypesV1 {
 
     /**
      * @description
+     * Cache for facctories to reduce number of objects created.
+     */
+    private static final Map<Type, Factory> FACTORIES = new Map<Type, Factory>();
+
+    /**
+     * @description
      * Exception thrown when a type related operation fails.
      */
     global with sharing class APIException extends ForceFwException {}
@@ -90,8 +96,13 @@ global with sharing class TypesV1 {
      */
     global static Object newInstance(final Type type) {
         try {
-            Object instance = type.newInstance();
+            if (FACTORIES.containsKey(type)) {
+                return  FACTORIES.get(type).newInstance();
+            }
+
+            final Object instance = type.newInstance();
             if (instance instanceof Factory) {
+                FACTORIES.put(type, (Factory) instance);
                 return ((Factory) instance).newInstance();
             } else {
                 return instance;
