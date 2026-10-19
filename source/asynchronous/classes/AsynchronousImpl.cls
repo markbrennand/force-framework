@@ -174,7 +174,7 @@ public with sharing class AsynchronousImpl {
                     ? AsynchronousV1.Status.FINALIZING.name()
                     : AsynchronousV1.Status.SUCCEEDED.name();
 
-            AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asynchronousJob }, true);
+            AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asynchronousJob }, !isScheduler);
 
             if (!isScheduler) {
                 finalizer.succeeded();

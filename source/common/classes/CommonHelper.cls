@@ -125,7 +125,7 @@ public with sharing class CommonHelper {
          *
          * @param result The List to add the elements to.
          */
-        public toList(final List<Object> result) {
+        public ToList(final List<Object> result) {
             this.result = result;
         }
 

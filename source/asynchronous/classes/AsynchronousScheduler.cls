@@ -577,8 +577,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
                 }
             }
 
-            // We cannot use the DAO as it disables the trigger.
-            AsynchronousDAO.impl.persistObjects(updates, true);
+            // We cannot use the DAO injection as it disables the trigger.
             AsynchronousDAO.impl.persistObjects(updates, true);
         }
     }

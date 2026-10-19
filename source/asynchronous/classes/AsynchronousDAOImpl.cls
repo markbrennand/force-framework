@@ -380,7 +380,6 @@ public with sharing class AsynchronousDAOImpl {
     /**
      * @description
      * <p>
-     *
      * Maps each AsynchronousJob__c record to its AsyncApexJob Id key.
      * <p>
      * This callback is used during a reduction over a collection of AsynchronousJob__c
