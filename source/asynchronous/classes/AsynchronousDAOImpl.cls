@@ -75,7 +75,7 @@ public with sharing class AsynchronousDAOImpl {
                     .returning(AsynchronousJob__c.Runnable__c)
                     .ordered(QueryV1.ascending(AsynchronousJob__c.ScheduledRunTime__c))
                     .max(maxJobsToReturn)
-                    .matching('OwnerId = :ownerId AND ScheduledRunTime__c <= :now AND Runnable__c != :schedulerClass AND Status__c = :queued')
+                    .matching('OwnerId = :ownerId AND ScheduledRunTime__c <= :now AND Status__c = :queued AND Runnable__c != :schedulerClass')
                     .bindings(new Map<String, Object> {
                             'ownerId' => UserInfo.getUserId(),
                             'now' => CommonHelper.now(),
@@ -160,10 +160,10 @@ public with sharing class AsynchronousDAOImpl {
             return (Integer) QueryV1.count(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.USER_MODE)
                     .matching(
-                            'OwnerId = :ownerId AND Runnable__c != :schedulerClass' +
+                            'OwnerId = :ownerId'
                                     + ' AND (Status__c = :queuedStatus '
-                                    + '      OR (LastRunTime__c >= :windowStart AND Status__c IN :activeStatuses)' +
-                                    ')')
+                                    + '      OR (LastRunTime__c >= :windowStart AND Status__c IN :activeStatuses))'
+                                    + ' AND Runnable__c != :schedulerClass')
                     .bindings(new Map<String, Object> {
                             'ownerId' => UserInfo.getUserId(),
                             'queuedStatus' => AsynchronousV1.Status.QUEUED.name(),
@@ -197,7 +197,7 @@ public with sharing class AsynchronousDAOImpl {
 
             return (Integer) QueryV1.count(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.USER_MODE)
-                    .matching('OwnerId = :ownerId AND LastRunTime__c >= :windowStart AND Runnable__c = :runnableClass AND Status__c IN :runningStatuses')
+                    .matching('OwnerId = :ownerId AND LastRunTime__c >= :windowStart  AND Status__c IN :runningStatuses AND Runnable__c = :runnableClass')
                     .bindings(new Map<String, Object> {
                             'ownerId' => UserInfo.getUserId(),
                             'runnableClass' => asyncObject.Runnable__c,
@@ -226,7 +226,7 @@ public with sharing class AsynchronousDAOImpl {
         public Datetime getWhenNextRequired(final Integer activeWindowSize) {
             final OptionalV1 firstRunningJob = QueryV1.of(AsynchronousJob__c.SObjectType)
                     .returning(QueryV1.aggregatedField('MIN', AsynchronousJob__c.LastRunTime__c, 'lastRunTime'))
-                    .matching('Status__c IN :activeStatuses AND LastRuntime__c >= :activeWindow AND Runnable__c != :schedulerClass')
+                    .matching('LastRuntime__c >= :activeWindow AND Status__c IN :activeStatuses AND Runnable__c != :schedulerClass')
                     .bindings(new Map<String, Object> {
                             'activeStatuses' => new Set<String> {
                                     AsynchronousV1.Status.RUNNING.name(),
