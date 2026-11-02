@@ -61,6 +61,17 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
     /**
      * @description
      * <p>
+     * The maximum number of jobs to be started by calling the REST service. Calling the service allows many
+     * jobs to be started at once.
+     * <p>
+     * By default the REST service is unused which means only one job can be started by the scheduler.
+     */
+    @TestVisible
+    private final static String MAXIMUM_REST_JOBS_TO_START_PROPERTY = 'maximumRestJobsToStart';
+
+    /**
+     * @description
+     * <p>
      * The number of seconds for the time window in which a job must be in active state to be considered when
      * determining concurrency. The time window is the current time to the given number of seconds in the past.
      */
@@ -152,6 +163,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
         super(RunNextAvailable.class);
         AssertionV1.isNotNull(configuration.get(NO_JOBS_TO_RUN_DELAY_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + NO_JOBS_TO_RUN_DELAY_PROPERTY);
         AssertionV1.isNotNull(configuration.get(MAXIMUM_JOBS_TO_START_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + MAXIMUM_JOBS_TO_START_PROPERTY);
+        AssertionV1.isNotNull(configuration.get(MAXIMUM_REST_JOBS_TO_START_PROPERTY), 'property; ' + CONFIG_ACTION + '.' + MAXIMUM_REST_JOBS_TO_START_PROPERTY);
     }
 
     /**
@@ -183,20 +195,61 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
             return;
         }
 
-        final String jobId = jobsToStart.iterator().next();
+        Integer restJobsToStartCount = Math.min((Integer) configuration.get(MAXIMUM_REST_JOBS_TO_START_PROPERTY), 50);
+        if (restJobsToStartCount > 0) {
+            final Set<String> restJobsToStart = new Set<String>();
+            final Iterator<String> jobIter = jobsToStart.iterator();
 
-        try {
-            final AsynchronousJob__c asyncObject = AsynchronousDAO.impl.getObject(jobId);
-            asyncObject.ApexJobId__c = apexJobId;
-            AsynchronousHelper.impl.queueJob(asyncObject);
+            while (restJobsToStartCount > 0 && jobIter.hasNext()) {
+                restJobsToStart.add(jobIter.next());
+                restJobsToStartCount--;
+            }
 
-        } catch(AssertionV1.AssertionException ae) {
-            // An assertion exception indicates a problem with the job, so just ignore it.
-            // The most likely cause is that the job has been deleted but was identified to start and so
-            // still in the list of jobs to start.
+            final String namespace = CommonHelper.getApexNamespace();
+            final HTTP conn = new HTTP();
+            final HTTPRequest request = new HttpRequest();
+            request.setMethod('POST');
+
+            request.setEndpoint(
+                    URL.getOrgDomainUrl().toString() +
+                    '/services/apexrest/' +
+                    (String.isBlank(namespace) ? '' : (namespace + '/')) +
+                    'async/jobs/start'
+            );
+
+            request.setBody(json.serialize(new RestJobList(restJobsToStart)));
+
+            request.setHeader('Authorization', 'Bearer ' + UserInfo.getSessionId());
+            request.setHeader('Content-Type', 'application/json');
+            HttpResponse response = conn.send(request);
+
+            if (response.getStatusCode() != 200) {
+                throw new AsynchronousV1.APIException(
+                        'REST service returned ' +
+                        response.getStatus() +
+                        ', and message ' +
+                        response.getBody()
+                );
+            }
+
+            jobsToStart.removeAll(restJobsToStart);
+
+        } else {
+            final String jobId = jobsToStart.iterator().next();
+
+            try {
+                final AsynchronousJob__c asyncObject = AsynchronousDAO.impl.getObjects(new Set<Id> { jobId })[0];
+                asyncObject.ApexJobId__c = apexJobId;
+                AsynchronousHelper.impl.queueJob(asyncObject);
+
+            } catch(AssertionV1.AssertionException ae) {
+                // An assertion exception indicates a problem with the job, so just ignore it.
+                // The most likely cause is that the job has been deleted but was identified to start and so
+                // still in the list of jobs to start.
+            }
+            jobsToStart.remove(jobId);
         }
 
-        jobsToStart.remove(jobId);
         asyncJob.setState(new Map<String, String> { JOBS_TO_START => JSON.serialize(jobsToStart) });
     }
 
@@ -450,6 +503,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
             return new Map<String, Integer> {
                     NO_JOBS_TO_RUN_DELAY_PROPERTY => 10000,
                     MAXIMUM_JOBS_TO_START_PROPERTY => 1,
+                    MAXIMUM_REST_JOBS_TO_START_PROPERTY => 0,
                     ACTIVE_JOBS_WINDOW_PROPERTY => DEFAULT_ACTIVE_JOB_WINDOW_SIZE,
                     ACTIVE_JOBS_WINDOW_PROPERTY => DEFAULT_MAX_JOBS_TO_SWEEP
             };
@@ -686,6 +740,18 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
          */
         private Boolean isScheduler() {
             return job.Runnable__c == RunNextAvailable.class.getName();
+        }
+    }
+
+    /**
+     * @description
+     * Class used as a DTO to pass ids of asynchronoous jobs to start to REST service.
+     */
+    private with sharing class RestJobList{
+        private final String ids;
+
+        public RestJobList(final Set<String> ids) {
+            this.ids = JSON.serialize(ids);
         }
     }
 }

@@ -208,7 +208,7 @@ public with sharing class AsynchronousFinalizerTests {
             );
             insert state;
 
-            AsynchronousV1.Job job = AsynchronousJob.fromSObject(AsynchronousDAO.impl.getObject(asyncObject.Id));
+            AsynchronousV1.Job job = AsynchronousJob.fromSObject(AsynchronousDAO.impl.getObjects(new Set<Id> { asyncObject.Id })[0]);
 
             AsynchronousAPI.impl = (AsynchronousAPI.API) MockerV1.of(AsynchronousAPIMockable.class)
                     .whenCalling(
@@ -275,8 +275,9 @@ public with sharing class AsynchronousFinalizerTests {
     ) {
         MockerV1 mocked = MockerV1.of(AsynchronousDAO.class);
         mocked
-                .whenArgument(asyncObject.Id)
-                    .forMethod('getObject').called(1).returns(asyncObject);
+                .whenArgument(new Set<Id> { asyncObject.Id })
+                    .forMethod('getObjects').called(1)
+                        .returns(new List<AsynchronousJob__c> { asyncObject });
 
         if (jobToBeDeleted) {
             mocked
@@ -319,8 +320,9 @@ public with sharing class AsynchronousFinalizerTests {
         MockerV1 mocked = MockerV1.of(AsynchronousDAO.class);
         mocked
                 // Finalizer must get the job once.
-                .whenArgument(asyncObject.Id)
-                    .forMethod('getObject').called(1).returns(asyncObject)
+                .whenArgument(new Set<Id> { asyncObject.Id })
+                    .forMethod('getObjects').called(1)
+                        .returns(new List<AsynchronousJob__c> { asyncObject })
 
                 // An Exception should be recorded.
                 .whenArgument(new AsynchronousJobException__c(
@@ -375,8 +377,9 @@ public with sharing class AsynchronousFinalizerTests {
 
         mocked
                 // Finalizer must get the job once.
-                .whenArgument(asyncObject.Id)
-                    .forMethod('getObject').called(1).returns(asyncObject)
+                .whenArgument(New Set<Id> { asyncObject.Id })
+                    .forMethod('getObjects').called(1)
+                        .returns(new List<AsynchronousJob__c> { asyncObject })
 
                 // And the error from the on method must be persisted.
                 .whenArgument(new AsynchronousJobException__c(

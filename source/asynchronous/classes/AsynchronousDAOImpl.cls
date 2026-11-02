@@ -21,14 +21,14 @@ public with sharing class AsynchronousDAOImpl {
         /**
          * @description
          * <p>
-         * Given the Id of the AsynchronousJob__c object, the object is retrieved.
+         * Given the Ids of the AsynchronousJob__c objects, the objects are retrieved.
          *
-         * @param asyncObjectId The Id of the object to retrieve.
+         * @param asyncObjectIds The Ids of the objects to retrieve.
          *
          * @return The object.
          */
-        public AsynchronousJob__c getObject(final Id asyncObjectId) {
-            AssertionV1.isNotNull(asyncObjectId, 'argument: AsynchronousDAO.apiGetObject.asyncObjectId');
+        public List<AsynchronousJob__c> getObjects(final Set<Id> asyncObjectIds) {
+            AssertionV1.isNotNull(asyncObjectIds, 'argument: AsynchronousDAO.apiGetObject.asyncObjectIds');
 
             final OptionalV1 matches = QueryV1.of(AsynchronousJob__c.SObjectType)
                     .security(AccessLevel.USER_MODE)
@@ -46,13 +46,22 @@ public with sharing class AsynchronousDAOImpl {
                             .returning(AsynchronousJobState__c.Content__c)
                             .ordered(QueryV1.ascending(AsynchronousJobState__c.ChunkNumber__c))
                     )
-                    .max(1)
-                    .matching('Id = :asyncObjectId')
-                    .bindings(new Map<String, Object> { 'asyncObjectId' => asyncObjectId })
+                    .matching('Id IN :asyncObjectIds')
+                    .bindings(new Map<String, Object> { 'asyncObjectIds' => asyncObjectIds })
                     .execute();
 
-            AssertionV1.isTrue(matches.isPresent(), 'Asynchronous object with Id ' + asyncObjectId + ' not found');
-            return ((AsynchronousJob__c) ((ImmutableV1.Collection) matches.get()).get(0));
+            AssertionV1.isTrue(matches.isPresent(), 'Asynchronous objects with Ids ' + asyncObjectIds + ' not all found');
+
+            final List<AsynchronousJob__c> jobs = (List<AsynchronousJob__c>)
+                    ((ImmutableV1.Collection) matches.get()).toList(new List<AsynchronousJob__c>());
+
+            AssertionV1.areEqual(
+                    asyncObjectIds.size(),
+                    jobs.size(),
+                    'Asynchronous objects with Ids ' + asyncObjectIds + ' not all found'
+            );
+
+            return jobs;
         }
 
         /**

@@ -48,13 +48,15 @@ public with sharing virtual class AsynchronousDAO extends AsynchronousDAOMockabl
         /**
          * @description
          * <p>
-         * Given the Id of an object, the object is retrieved.
+         * Given the Ids of objects, the objects are retrieved.
+         * <p>
+         * An exception must be throw if all the objects are not in the data storew.
          *
-         * @param asyncObjectId The Id of the object to retrieve.
+         * @param asyncObjectIds The Ids of the objects to retrieve.
          *
-         * @return The object.
+         * @return The objects.
          */
-        AsynchronousJob__c getObject(final Id asyncObjectId);
+        List<AsynchronousJob__c> getObjects(final Set<Id> asyncObjectIds);
 
         /**
          * @description

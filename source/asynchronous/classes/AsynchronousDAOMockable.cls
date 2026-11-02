@@ -10,7 +10,7 @@
 @SuppressWarnings('PMD.ApexDoc')
 public with sharing virtual class AsynchronousDAOMockable implements AsynchronousDAO.API {
 
-    public AsynchronousJob__c getObject(final Id asyncObjectId) {
+    public List<AsynchronousJob__c> getObjects(final Set<Id> asyncObjectIds) {
         throw new AsynchronousV1.APIException('Access denied');
     }
 

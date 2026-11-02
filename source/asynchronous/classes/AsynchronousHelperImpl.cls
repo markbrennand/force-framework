@@ -191,13 +191,14 @@ public with sharing class AsynchronousHelperImpl {
      * Called if an Apex job could not be started in the request it was queued in.
      * <p>
      * The most likely reason the job could not be started is exceeding the Apex job chaining limit.
+     * The most likely reason the job could not be started is exceeding the Apex job chaining limit.
      *
      * @param asyncObjectId The id of the AsynchronousJob__c to be started.
      */
     @Future(Callout = true)
     private static void startAsynchronousJob(final String asyncObjectId) {
         AssertionV1.isNotNull(asyncObjectId, 'argument: AsynchronousHelper.startAsynchronousJob.asyncObjectId');
-        final AsynchronousJob__c asyncObject = AsynchronousDAO.impl.getObject(asyncObjectId);
+        final AsynchronousJob__c asyncObject = AsynchronousDAO.impl.getObjects(new Set<Id> { asyncObjectId })[0];
 
         try {
             enqueueApexJob(asyncObject);
@@ -225,7 +226,8 @@ public with sharing class AsynchronousHelperImpl {
         AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject }, false);
 
         asyncObject.ApexJobId__c = System.enqueueJob(
-                runnable.forJob(AsynchronousJob.fromSObject(AsynchronousDAO.impl.getObject(asyncObject.Id)))
+                runnable.forJob(AsynchronousJob.fromSObject(
+                        AsynchronousDAO.impl.getObjects(new Set<Id> { asyncObject.Id })[0]))
         );
 
         AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject }, false);

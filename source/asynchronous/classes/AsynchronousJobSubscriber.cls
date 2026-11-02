@@ -226,7 +226,7 @@ public with sharing class AsynchronousJobSubscriber {
         public void onEvent(final TriggerV1.Event event) {
             for (Object record : event.getRecords()) {
                 final AsynchronousJob__c asyncObject =
-                        AsynchronousDAO.impl.getObject(((AsynchronousJob__c) record).Id);
+                        AsynchronousDAO.impl.getObjects(new Set<Id> { ((AsynchronousJob__c) record).Id })[0];
                 onSuccess(asyncObject);
             }
         }

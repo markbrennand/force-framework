@@ -147,7 +147,7 @@ public with sharing class AsynchronousFinalizer {
             }
 
             try {
-                final AsynchronousJob__c asyncObject = AsynchronousDAO.impl.getObject(asyncObjectId);
+                final AsynchronousJob__c asyncObject = AsynchronousDAO.impl.getObjects(new Set<Id> { asyncObjectId })[0];
                 if (!FINALIZING_STATUSES.contains(asyncObject.Status__c)) {
                     return;
                 }
@@ -241,7 +241,7 @@ public with sharing class AsynchronousFinalizer {
                 if (asyncObject.Status__c == AsynchronousV1.Status.QUEUED.name()) {
                     asyncObject.RetryNumber__c = retryNumber + 1;
                     asyncObject.ScheduledRunTime__c =
-                            Datetime.newInstance(System.currentTimeMillis() + asyncJob.getRetryInterval());
+                            Datetime.newInstance(CommonHelper.now().getTime() + asyncJob.getRetryInterval());
                 }
 
                 AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { asyncObject }, false);

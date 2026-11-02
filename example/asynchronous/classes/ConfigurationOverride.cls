@@ -14,6 +14,7 @@ public with sharing class ConfigurationOverride implements TypesV1.Factory {
     public Object newInstance() {
         return new Map<String, Integer> {
                 'maximumJobsToStart' => 4,   // Configures AsynchronousScheduler.
+                'maximumRestJobsToStart' => 0,   // Configures AsynchronousScheduler.
                 'noJobsToRunDelay' => 7500,  // Configures AsynchronousScheduler.
                 'maximumActive' => 8,        // Configures AccountContactTotals and ExampleRunnable
                 'succeedOnRetryNumber' => 2  // Configures AccountContactTotals and ExampleRunnable

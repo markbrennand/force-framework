@@ -24,7 +24,7 @@ public with sharing class AsynchronousDAOTests {
             ExtendedClass extended = new ExtendedClass();
 
             try {
-                extended.getObject(null);
+                extended.getObjects(null);
                 Assert.fail();
             } catch(AsynchronousV1.APIException ae) {
                 Assert.areEqual('Access denied', ae.getMessage());
@@ -229,8 +229,8 @@ public with sharing class AsynchronousDAOTests {
 
             Assert.isTrue(TriggerV1.isEnabled(AsynchronousJob__c.SObjectType));
 
-            AsynchronousJob__c fetched1 = AsynchronousDAO.impl.getObject(job1.Id);
-            AsynchronousJob__c fetched2 = AsynchronousDAO.impl.getObject(job2.Id);
+            AsynchronousJob__c fetched1 = AsynchronousDAO.impl.getObjects(new Set<Id> { job1.Id })[0];
+            AsynchronousJob__c fetched2 = AsynchronousDAO.impl.getObjects(new Set<Id> { job2.Id })[0];
 
             job1.ScheduledRunTime__c = fetched1.ScheduledRunTime__c > job1.ScheduledRunTime__c
                     ? fetched1.ScheduledRunTime__c : job1.ScheduledRunTime__c;
@@ -243,10 +243,10 @@ public with sharing class AsynchronousDAOTests {
 
             AsynchronousDAO.impl.removeObjects(new List<AsynchronousJob__c> { fetched1 });
             try {
-                AsynchronousDAO.impl.getObject(fetched1.Id);
+                AsynchronousDAO.impl.getObjects(new Set<Id> { fetched1.Id });
                 Assert.fail();
             } catch(AssertionV1.AssertionException ae) {
-                Assert.isTrue(ae.getMessage().contains('not found'));
+                Assert.isTrue(ae.getMessage().contains('not all found'), 'Exception: ' + ae.getMessage());
             }
 
             fetched2.LastRunTime__c = CommonHelper.now();
@@ -256,7 +256,7 @@ public with sharing class AsynchronousDAOTests {
             Assert.isFalse(TriggerV1.isEnabled(AsynchronousJob__c.SObjectType));
 
             AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { fetched2 }, false);
-            AsynchronousJob__c updatedFetched2 = AsynchronousDAO.impl.getObject(job2.Id);
+            AsynchronousJob__c updatedFetched2 = AsynchronousDAO.impl.getObjects(new Set<Id> { job2.Id })[0];
             Assert.isTrue(ComparisonHelper.compare(fetched2, updatedFetched2), 'Mis-match of data retrieved and data stored');
             Assert.isFalse(TriggerV1.isEnabled(AsynchronousJob__c.SObjectType));
 
@@ -316,8 +316,8 @@ public with sharing class AsynchronousDAOTests {
 
             Assert.isTrue(TriggerV1.isEnabled(AsynchronousJob__c.SObjectType));
 
-            AsynchronousJob__c fetched1 = AsynchronousDAO.impl.getObject(job1.Id);
-            AsynchronousJob__c fetched2 = AsynchronousDAO.impl.getObject(job2.Id);
+            AsynchronousJob__c fetched1 = AsynchronousDAO.impl.getObjects(new Set<Id> { job1.Id })[0];
+            AsynchronousJob__c fetched2 = AsynchronousDAO.impl.getObjects(new Set<Id> { job2.Id })[0];
 
             job1.Status__c = AsynchronousV1.Status.QUEUED.name();
             job1.RetryNumber__c = 0;
@@ -337,17 +337,17 @@ public with sharing class AsynchronousDAOTests {
 
             AsynchronousDAO.impl.removeObjects(new List<AsynchronousJob__c> { fetched1 });
             try {
-                AsynchronousDAO.impl.getObject(fetched1.Id);
+                AsynchronousDAO.impl.getObjects(new Set<Id> { fetched1.Id });
                 Assert.fail();
             } catch(AssertionV1.AssertionException ae) {
-                Assert.isTrue(ae.getMessage().contains('not found'));
+                Assert.isTrue(ae.getMessage().contains('not all found'));
             }
 
             fetched2.LastRunTime__c = CommonHelper.now();
             fetched2.Status__c = AsynchronousV1.Status.FAILED.name();
 
             AsynchronousDAO.impl.persistObjects(new List<AsynchronousJob__c> { fetched2 }, false);
-            AsynchronousJob__c updatedFetched2 = AsynchronousDAO.impl.getObject(job2.Id);
+            AsynchronousJob__c updatedFetched2 = AsynchronousDAO.impl.getObjects(new Set<Id> { job2.Id })[0];
             Assert.isTrue(ComparisonHelper.compare(fetched2, updatedFetched2), 'Mis-match of data retrieved and data stored');
             Assert.areEqual('{"job2.property2":"job2.value2","job2.property1":"job2.value1"}', updatedFetched2.AsynchronousJobState__r[0].Content__c, 'Unexpected JSON content for state');
 
@@ -362,7 +362,7 @@ public with sharing class AsynchronousDAOTests {
             );
 
             Assert.isFalse(TriggerV1.isEnabled(AsynchronousJob__c.SObjectType));
-            updatedFetched2 = AsynchronousDAO.impl.getObject(job2.Id);
+            updatedFetched2 = AsynchronousDAO.impl.getObjects(new Set<Id> { job2.Id })[0];
 
             Assert.isTrue(ComparisonHelper.compare(job2, updatedFetched2), 'Mis-match of data retrieved and data stored');
             Assert.areEqual('{"job2.newproperty2":"job2.newvalue2","job2.newproperty1":"job2.newvalue1"}', updatedFetched2.AsynchronousJobState__r[0].Content__c, 'Unexpected JSON content for state');
@@ -769,7 +769,8 @@ public with sharing class AsynchronousDAOTests {
         public Object newInstance() {
             return new Map<String, Integer> {
                     AsynchronousScheduler.NO_JOBS_TO_RUN_DELAY_PROPERTY => 0,
-                    AsynchronousScheduler.MAXIMUM_JOBS_TO_START_PROPERTY => 0
+                    AsynchronousScheduler.MAXIMUM_JOBS_TO_START_PROPERTY => 0,
+                    AsynchronousScheduler.MAXIMUM_REST_JOBS_TO_START_PROPERTY => 0
             };
         }
     }

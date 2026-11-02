@@ -14,6 +14,7 @@ global with sharing class ConfigurationOverride implements forcefw.TypesV1.Facto
     public Object newInstance() {
         return new Map<String, Integer> {
                 'maximumJobsToStart' => 1,  // Configures AsynchronousScheduler.
+                'maximumRestJobsToStart' => 0,   // Configures AsynchronousScheduler.
                 'noJobsToRunDelay' => 1000, // Configures AsynchronousScheduler.
                 'maximumActive' => 4,      // Configures AccountContactTotals and ExampleRunnable
                 'succeedOnRetryNumber' => 4 // Configures AccountContactTotals and ExampleRunnable

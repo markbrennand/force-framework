@@ -192,10 +192,10 @@ public with sharing class AsynchronousSchedulerTests {
             };
 
             AsynchronousDAO.impl = (AsynchronousDAO) MockerV1.of(AsynchronousDAO.class)
-                    .whenArgument(asyncJobId1)
-                        .forMethod('getObject')
+                    .whenArgument(new Set<Id> { asyncJobId1 })
+                        .forMethod('getObjects')
                             .called(1)
-                            .returns(asyncObject)
+                            .returns(new List<AsynchronousJob__c> { asyncObject })
                     .mock();
 
             AsynchronousHelper.impl = (AsynchronousHelper.API) MockerV1.of(AsynchronousHelper.class)
@@ -532,7 +532,8 @@ public with sharing class AsynchronousSchedulerTests {
 
         AsynchronousScheduler.configuration = ImmutableV1.of(new Map<String, Integer> {
                 AsynchronousScheduler.MAXIMUM_JOBS_TO_START_PROPERTY => maxJobsToStart,
-                AsynchronousScheduler.NO_JOBS_TO_RUN_DELAY_PROPERTY => 1000
+                AsynchronousScheduler.NO_JOBS_TO_RUN_DELAY_PROPERTY => 1000,
+                AsynchronousScheduler.MAXIMUM_REST_JOBS_TO_START_PROPERTY => 0
         });
     }
 
