@@ -205,7 +205,7 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
                 restJobsToStartCount--;
             }
 
-            final String namespace = CommonHelper.getApexNamespace();
+            final String namespace = CommonHelper.getSObjectNamespace().replace('__', '');
             final HTTP conn = new HTTP();
             final HTTPRequest request = new HttpRequest();
             request.setMethod('POST');
@@ -218,11 +218,10 @@ public with sharing class AsynchronousScheduler extends AsynchronousV1.Runnable 
             );
 
             request.setBody(json.serialize(new RestJobList(restJobsToStart)));
-
             request.setHeader('Authorization', 'Bearer ' + UserInfo.getSessionId());
             request.setHeader('Content-Type', 'application/json');
-            HttpResponse response = conn.send(request);
 
+            final HttpResponse response = conn.send(request);
             if (response.getStatusCode() != 200) {
                 throw new AsynchronousV1.APIException(
                         'REST service returned ' +
